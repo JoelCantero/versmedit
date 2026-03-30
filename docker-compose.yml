@@ -4,6 +4,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     command: npm run dev -- --host 0.0.0.0 --port 5173
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "120"
     depends_on:
       - backend
     ports:

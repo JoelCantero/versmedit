@@ -14,11 +14,17 @@ const navigation = [
   { name: 'Company', href: '#' },
 ]
 
-export default function HeaderNavigation() {
+type HeaderNavigationProps = {
+  onNavigateHome: () => void
+  onNavigateToMyAccount: () => void
+}
+
+export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount }: HeaderNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [isAccountMenuHovering, setIsAccountMenuHovering] = useState(false)
 
   useEffect(() => {
     const root = document.documentElement
@@ -61,18 +67,50 @@ export default function HeaderNavigation() {
     setIsDark(nextIsDark)
   }
 
+  const handleNavigateHome = () => {
+    setMobileMenuOpen(false)
+    onNavigateHome()
+  }
+
+  const handleNavigateToMyAccount = () => {
+    setMobileMenuOpen(false)
+    onNavigateToMyAccount()
+  }
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/sign-out', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      if (!response.ok) {
+        throw new Error('Logout failed')
+      }
+
+      setIsAuthenticated(false)
+      setMobileMenuOpen(false)
+      onNavigateHome()
+    } catch {
+      // Keep current session state if logout fails.
+    }
+  }
+
   return (
     <header className="absolute inset-x-0 top-0 z-50">
       <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
-          <a href="#" className="-m-1.5 p-1.5">
+          <button type="button" onClick={handleNavigateHome} className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
             <img
               alt=""
               src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
               className="h-8 w-auto"
             />
-          </a>
+          </button>
         </div>
         <div className="flex lg:hidden">
           <button
@@ -100,24 +138,50 @@ export default function HeaderNavigation() {
             <span className="sr-only">Toggle theme</span>
             {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
           </button>
-          <button type="button" onClick={openLoginModal} className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">
-            {isAuthenticated ? 'My Account' : 'Log in'}
-            {!isAuthenticated ? <span aria-hidden="true"> &rarr;</span> : null}
-          </button>
+          {isAuthenticated ? (
+            <div
+              className="relative"
+              onMouseEnter={() => setIsAccountMenuHovering(true)}
+              onMouseLeave={() => setIsAccountMenuHovering(false)}
+            >
+              <button
+                type="button"
+                onClick={handleNavigateToMyAccount}
+                className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100"
+              >
+                My Account
+              </button>
+              <div
+                className={`${isAccountMenuHovering ? 'block' : 'hidden'} absolute top-full right-0 z-20 w-40 origin-top-right rounded-md bg-white p-1 shadow-lg ring-1 ring-gray-900/10 dark:bg-gray-900 dark:ring-white/10`}
+              >
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={openLoginModal} className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">
+              Log in <span aria-hidden="true"> &rarr;</span>
+            </button>
+          )}
         </div>
       </nav>
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
         <div className="fixed inset-0 z-50" />
         <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 dark:bg-gray-900 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10">
           <div className="flex items-center justify-between">
-            <a href="#" className="-m-1.5 p-1.5">
+            <button type="button" onClick={handleNavigateHome} className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <img
                 alt=""
                 src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
                 className="h-8 w-auto"
               />
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
@@ -151,11 +215,20 @@ export default function HeaderNavigation() {
                 </button>
                 <button
                   type="button"
-                  onClick={openLoginModal}
+                  onClick={isAuthenticated ? handleNavigateToMyAccount : openLoginModal}
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
                 >
                   {isAuthenticated ? 'My Account' : 'Log in'}
                 </button>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                  >
+                    Logout
+                  </button>
+                ) : null}
               </div>
             </div>
           </div>

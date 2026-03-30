@@ -33,6 +33,55 @@ export type Account = $Result.DefaultSelection<Prisma.$AccountPayload>
  * 
  */
 export type Verification = $Result.DefaultSelection<Prisma.$VerificationPayload>
+/**
+ * Model Category
+ * 
+ */
+export type Category = $Result.DefaultSelection<Prisma.$CategoryPayload>
+/**
+ * Model Verse
+ * 
+ */
+export type Verse = $Result.DefaultSelection<Prisma.$VersePayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const CategoryColor: {
+  GRAY: 'GRAY',
+  BRAND: 'BRAND',
+  ERROR: 'ERROR',
+  WARNING: 'WARNING',
+  SUCCESS: 'SUCCESS',
+  GRAY_BLUE: 'GRAY_BLUE',
+  BLUE_LIGHT: 'BLUE_LIGHT',
+  BLUE: 'BLUE',
+  INDIGO: 'INDIGO',
+  PURPLE: 'PURPLE',
+  PINK: 'PINK',
+  ORANGE: 'ORANGE'
+};
+
+export type CategoryColor = (typeof CategoryColor)[keyof typeof CategoryColor]
+
+
+export const VerseLearningState: {
+  LEARNING: 'LEARNING',
+  MASTERED: 'MASTERED'
+};
+
+export type VerseLearningState = (typeof VerseLearningState)[keyof typeof VerseLearningState]
+
+}
+
+export type CategoryColor = $Enums.CategoryColor
+
+export const CategoryColor: typeof $Enums.CategoryColor
+
+export type VerseLearningState = $Enums.VerseLearningState
+
+export const VerseLearningState: typeof $Enums.VerseLearningState
 
 /**
  * ##  Prisma Client ʲˢ
@@ -194,6 +243,26 @@ export class PrismaClient<
     * ```
     */
   get verification(): Prisma.VerificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.category`: Exposes CRUD operations for the **Category** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Categories
+    * const categories = await prisma.category.findMany()
+    * ```
+    */
+  get category(): Prisma.CategoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.verse`: Exposes CRUD operations for the **Verse** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Verses
+    * const verses = await prisma.verse.findMany()
+    * ```
+    */
+  get verse(): Prisma.VerseDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -631,7 +700,9 @@ export namespace Prisma {
     User: 'User',
     Session: 'Session',
     Account: 'Account',
-    Verification: 'Verification'
+    Verification: 'Verification',
+    Category: 'Category',
+    Verse: 'Verse'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -647,7 +718,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "session" | "account" | "verification"
+      modelProps: "user" | "session" | "account" | "verification" | "category" | "verse"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -947,6 +1018,154 @@ export namespace Prisma {
           }
         }
       }
+      Category: {
+        payload: Prisma.$CategoryPayload<ExtArgs>
+        fields: Prisma.CategoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CategoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CategoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          findFirst: {
+            args: Prisma.CategoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CategoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          findMany: {
+            args: Prisma.CategoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>[]
+          }
+          create: {
+            args: Prisma.CategoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          createMany: {
+            args: Prisma.CategoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CategoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>[]
+          }
+          delete: {
+            args: Prisma.CategoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          update: {
+            args: Prisma.CategoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.CategoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CategoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.CategoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CategoryPayload>
+          }
+          aggregate: {
+            args: Prisma.CategoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCategory>
+          }
+          groupBy: {
+            args: Prisma.CategoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CategoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CategoryCountArgs<ExtArgs>
+            result: $Utils.Optional<CategoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      Verse: {
+        payload: Prisma.$VersePayload<ExtArgs>
+        fields: Prisma.VerseFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VerseFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VerseFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          findFirst: {
+            args: Prisma.VerseFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VerseFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          findMany: {
+            args: Prisma.VerseFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>[]
+          }
+          create: {
+            args: Prisma.VerseCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          createMany: {
+            args: Prisma.VerseCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VerseCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>[]
+          }
+          delete: {
+            args: Prisma.VerseDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          update: {
+            args: Prisma.VerseUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          deleteMany: {
+            args: Prisma.VerseDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VerseUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VerseUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>[]
+          }
+          upsert: {
+            args: Prisma.VerseUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VersePayload>
+          }
+          aggregate: {
+            args: Prisma.VerseAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVerse>
+          }
+          groupBy: {
+            args: Prisma.VerseGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VerseGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VerseCountArgs<ExtArgs>
+            result: $Utils.Optional<VerseCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1059,6 +1278,8 @@ export namespace Prisma {
     session?: SessionOmit
     account?: AccountOmit
     verification?: VerificationOmit
+    category?: CategoryOmit
+    verse?: VerseOmit
   }
 
   /* Types for Logging */
@@ -1141,11 +1362,15 @@ export namespace Prisma {
   export type UserCountOutputType = {
     accounts: number
     sessions: number
+    verses: number
+    categories: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+    verses?: boolean | UserCountOutputTypeCountVersesArgs
+    categories?: boolean | UserCountOutputTypeCountCategoriesArgs
   }
 
   // Custom InputTypes
@@ -1171,6 +1396,51 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SessionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountVersesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VerseWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountCategoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CategoryWhereInput
+  }
+
+
+  /**
+   * Count Type CategoryCountOutputType
+   */
+
+  export type CategoryCountOutputType = {
+    verses: number
+  }
+
+  export type CategoryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    verses?: boolean | CategoryCountOutputTypeCountVersesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CategoryCountOutputType without action
+   */
+  export type CategoryCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CategoryCountOutputType
+     */
+    select?: CategoryCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CategoryCountOutputType without action
+   */
+  export type CategoryCountOutputTypeCountVersesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VerseWhereInput
   }
 
 
@@ -1360,6 +1630,8 @@ export namespace Prisma {
     updatedAt?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
+    verses?: boolean | User$versesArgs<ExtArgs>
+    categories?: boolean | User$categoriesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1397,6 +1669,8 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
+    verses?: boolean | User$versesArgs<ExtArgs>
+    categories?: boolean | User$categoriesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1407,6 +1681,8 @@ export namespace Prisma {
     objects: {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
+      verses: Prisma.$VersePayload<ExtArgs>[]
+      categories: Prisma.$CategoryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1812,6 +2088,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    verses<T extends User$versesArgs<ExtArgs> = {}>(args?: Subset<T, User$versesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    categories<T extends User$categoriesArgs<ExtArgs> = {}>(args?: Subset<T, User$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2286,6 +2564,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * User.verses
+   */
+  export type User$versesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    where?: VerseWhereInput
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    cursor?: VerseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VerseScalarFieldEnum | VerseScalarFieldEnum[]
+  }
+
+  /**
+   * User.categories
+   */
+  export type User$categoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    where?: CategoryWhereInput
+    orderBy?: CategoryOrderByWithRelationInput | CategoryOrderByWithRelationInput[]
+    cursor?: CategoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CategoryScalarFieldEnum | CategoryScalarFieldEnum[]
   }
 
   /**
@@ -5590,6 +5916,2408 @@ export namespace Prisma {
 
 
   /**
+   * Model Category
+   */
+
+  export type AggregateCategory = {
+    _count: CategoryCountAggregateOutputType | null
+    _min: CategoryMinAggregateOutputType | null
+    _max: CategoryMaxAggregateOutputType | null
+  }
+
+  export type CategoryMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    color: $Enums.CategoryColor | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CategoryMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    color: $Enums.CategoryColor | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CategoryCountAggregateOutputType = {
+    id: number
+    name: number
+    color: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CategoryMinAggregateInputType = {
+    id?: true
+    name?: true
+    color?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CategoryMaxAggregateInputType = {
+    id?: true
+    name?: true
+    color?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CategoryCountAggregateInputType = {
+    id?: true
+    name?: true
+    color?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CategoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Category to aggregate.
+     */
+    where?: CategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Categories to fetch.
+     */
+    orderBy?: CategoryOrderByWithRelationInput | CategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Categories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Categories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Categories
+    **/
+    _count?: true | CategoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CategoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CategoryMaxAggregateInputType
+  }
+
+  export type GetCategoryAggregateType<T extends CategoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateCategory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCategory[P]>
+      : GetScalarType<T[P], AggregateCategory[P]>
+  }
+
+
+
+
+  export type CategoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CategoryWhereInput
+    orderBy?: CategoryOrderByWithAggregationInput | CategoryOrderByWithAggregationInput[]
+    by: CategoryScalarFieldEnum[] | CategoryScalarFieldEnum
+    having?: CategoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CategoryCountAggregateInputType | true
+    _min?: CategoryMinAggregateInputType
+    _max?: CategoryMaxAggregateInputType
+  }
+
+  export type CategoryGroupByOutputType = {
+    id: string
+    name: string
+    color: $Enums.CategoryColor | null
+    userId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: CategoryCountAggregateOutputType | null
+    _min: CategoryMinAggregateOutputType | null
+    _max: CategoryMaxAggregateOutputType | null
+  }
+
+  type GetCategoryGroupByPayload<T extends CategoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CategoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CategoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CategoryGroupByOutputType[P]>
+            : GetScalarType<T[P], CategoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CategorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    color?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    verses?: boolean | Category$versesArgs<ExtArgs>
+    _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["category"]>
+
+  export type CategorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    color?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["category"]>
+
+  export type CategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    color?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["category"]>
+
+  export type CategorySelectScalar = {
+    id?: boolean
+    name?: boolean
+    color?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "color" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+  export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    verses?: boolean | Category$versesArgs<ExtArgs>
+    _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type CategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $CategoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Category"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      verses: Prisma.$VersePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      color: $Enums.CategoryColor | null
+      userId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["category"]>
+    composites: {}
+  }
+
+  type CategoryGetPayload<S extends boolean | null | undefined | CategoryDefaultArgs> = $Result.GetResult<Prisma.$CategoryPayload, S>
+
+  type CategoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CategoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CategoryCountAggregateInputType | true
+    }
+
+  export interface CategoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Category'], meta: { name: 'Category' } }
+    /**
+     * Find zero or one Category that matches the filter.
+     * @param {CategoryFindUniqueArgs} args - Arguments to find a Category
+     * @example
+     * // Get one Category
+     * const category = await prisma.category.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CategoryFindUniqueArgs>(args: SelectSubset<T, CategoryFindUniqueArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Category that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CategoryFindUniqueOrThrowArgs} args - Arguments to find a Category
+     * @example
+     * // Get one Category
+     * const category = await prisma.category.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CategoryFindUniqueOrThrowArgs>(args: SelectSubset<T, CategoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Category that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryFindFirstArgs} args - Arguments to find a Category
+     * @example
+     * // Get one Category
+     * const category = await prisma.category.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CategoryFindFirstArgs>(args?: SelectSubset<T, CategoryFindFirstArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Category that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryFindFirstOrThrowArgs} args - Arguments to find a Category
+     * @example
+     * // Get one Category
+     * const category = await prisma.category.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CategoryFindFirstOrThrowArgs>(args?: SelectSubset<T, CategoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Categories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Categories
+     * const categories = await prisma.category.findMany()
+     * 
+     * // Get first 10 Categories
+     * const categories = await prisma.category.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const categoryWithIdOnly = await prisma.category.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CategoryFindManyArgs>(args?: SelectSubset<T, CategoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Category.
+     * @param {CategoryCreateArgs} args - Arguments to create a Category.
+     * @example
+     * // Create one Category
+     * const Category = await prisma.category.create({
+     *   data: {
+     *     // ... data to create a Category
+     *   }
+     * })
+     * 
+     */
+    create<T extends CategoryCreateArgs>(args: SelectSubset<T, CategoryCreateArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Categories.
+     * @param {CategoryCreateManyArgs} args - Arguments to create many Categories.
+     * @example
+     * // Create many Categories
+     * const category = await prisma.category.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CategoryCreateManyArgs>(args?: SelectSubset<T, CategoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Categories and returns the data saved in the database.
+     * @param {CategoryCreateManyAndReturnArgs} args - Arguments to create many Categories.
+     * @example
+     * // Create many Categories
+     * const category = await prisma.category.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Categories and only return the `id`
+     * const categoryWithIdOnly = await prisma.category.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CategoryCreateManyAndReturnArgs>(args?: SelectSubset<T, CategoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Category.
+     * @param {CategoryDeleteArgs} args - Arguments to delete one Category.
+     * @example
+     * // Delete one Category
+     * const Category = await prisma.category.delete({
+     *   where: {
+     *     // ... filter to delete one Category
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CategoryDeleteArgs>(args: SelectSubset<T, CategoryDeleteArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Category.
+     * @param {CategoryUpdateArgs} args - Arguments to update one Category.
+     * @example
+     * // Update one Category
+     * const category = await prisma.category.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CategoryUpdateArgs>(args: SelectSubset<T, CategoryUpdateArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Categories.
+     * @param {CategoryDeleteManyArgs} args - Arguments to filter Categories to delete.
+     * @example
+     * // Delete a few Categories
+     * const { count } = await prisma.category.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CategoryDeleteManyArgs>(args?: SelectSubset<T, CategoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Categories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Categories
+     * const category = await prisma.category.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CategoryUpdateManyArgs>(args: SelectSubset<T, CategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Categories and returns the data updated in the database.
+     * @param {CategoryUpdateManyAndReturnArgs} args - Arguments to update many Categories.
+     * @example
+     * // Update many Categories
+     * const category = await prisma.category.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Categories and only return the `id`
+     * const categoryWithIdOnly = await prisma.category.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, CategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Category.
+     * @param {CategoryUpsertArgs} args - Arguments to update or create a Category.
+     * @example
+     * // Update or create a Category
+     * const category = await prisma.category.upsert({
+     *   create: {
+     *     // ... data to create a Category
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Category we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CategoryUpsertArgs>(args: SelectSubset<T, CategoryUpsertArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Categories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryCountArgs} args - Arguments to filter Categories to count.
+     * @example
+     * // Count the number of Categories
+     * const count = await prisma.category.count({
+     *   where: {
+     *     // ... the filter for the Categories we want to count
+     *   }
+     * })
+    **/
+    count<T extends CategoryCountArgs>(
+      args?: Subset<T, CategoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CategoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Category.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CategoryAggregateArgs>(args: Subset<T, CategoryAggregateArgs>): Prisma.PrismaPromise<GetCategoryAggregateType<T>>
+
+    /**
+     * Group by Category.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CategoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CategoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CategoryGroupByArgs['orderBy'] }
+        : { orderBy?: CategoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CategoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCategoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Category model
+   */
+  readonly fields: CategoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Category.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    verses<T extends Category$versesArgs<ExtArgs> = {}>(args?: Subset<T, Category$versesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Category model
+   */
+  interface CategoryFieldRefs {
+    readonly id: FieldRef<"Category", 'String'>
+    readonly name: FieldRef<"Category", 'String'>
+    readonly color: FieldRef<"Category", 'CategoryColor'>
+    readonly userId: FieldRef<"Category", 'String'>
+    readonly createdAt: FieldRef<"Category", 'DateTime'>
+    readonly updatedAt: FieldRef<"Category", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Category findUnique
+   */
+  export type CategoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which Category to fetch.
+     */
+    where: CategoryWhereUniqueInput
+  }
+
+  /**
+   * Category findUniqueOrThrow
+   */
+  export type CategoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which Category to fetch.
+     */
+    where: CategoryWhereUniqueInput
+  }
+
+  /**
+   * Category findFirst
+   */
+  export type CategoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which Category to fetch.
+     */
+    where?: CategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Categories to fetch.
+     */
+    orderBy?: CategoryOrderByWithRelationInput | CategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Categories.
+     */
+    cursor?: CategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Categories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Categories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Categories.
+     */
+    distinct?: CategoryScalarFieldEnum | CategoryScalarFieldEnum[]
+  }
+
+  /**
+   * Category findFirstOrThrow
+   */
+  export type CategoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which Category to fetch.
+     */
+    where?: CategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Categories to fetch.
+     */
+    orderBy?: CategoryOrderByWithRelationInput | CategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Categories.
+     */
+    cursor?: CategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Categories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Categories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Categories.
+     */
+    distinct?: CategoryScalarFieldEnum | CategoryScalarFieldEnum[]
+  }
+
+  /**
+   * Category findMany
+   */
+  export type CategoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter, which Categories to fetch.
+     */
+    where?: CategoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Categories to fetch.
+     */
+    orderBy?: CategoryOrderByWithRelationInput | CategoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Categories.
+     */
+    cursor?: CategoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Categories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Categories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Categories.
+     */
+    distinct?: CategoryScalarFieldEnum | CategoryScalarFieldEnum[]
+  }
+
+  /**
+   * Category create
+   */
+  export type CategoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Category.
+     */
+    data: XOR<CategoryCreateInput, CategoryUncheckedCreateInput>
+  }
+
+  /**
+   * Category createMany
+   */
+  export type CategoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Categories.
+     */
+    data: CategoryCreateManyInput | CategoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Category createManyAndReturn
+   */
+  export type CategoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many Categories.
+     */
+    data: CategoryCreateManyInput | CategoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Category update
+   */
+  export type CategoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Category.
+     */
+    data: XOR<CategoryUpdateInput, CategoryUncheckedUpdateInput>
+    /**
+     * Choose, which Category to update.
+     */
+    where: CategoryWhereUniqueInput
+  }
+
+  /**
+   * Category updateMany
+   */
+  export type CategoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Categories.
+     */
+    data: XOR<CategoryUpdateManyMutationInput, CategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which Categories to update
+     */
+    where?: CategoryWhereInput
+    /**
+     * Limit how many Categories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Category updateManyAndReturn
+   */
+  export type CategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update Categories.
+     */
+    data: XOR<CategoryUpdateManyMutationInput, CategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which Categories to update
+     */
+    where?: CategoryWhereInput
+    /**
+     * Limit how many Categories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Category upsert
+   */
+  export type CategoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Category to update in case it exists.
+     */
+    where: CategoryWhereUniqueInput
+    /**
+     * In case the Category found by the `where` argument doesn't exist, create a new Category with this data.
+     */
+    create: XOR<CategoryCreateInput, CategoryUncheckedCreateInput>
+    /**
+     * In case the Category was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CategoryUpdateInput, CategoryUncheckedUpdateInput>
+  }
+
+  /**
+   * Category delete
+   */
+  export type CategoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    /**
+     * Filter which Category to delete.
+     */
+    where: CategoryWhereUniqueInput
+  }
+
+  /**
+   * Category deleteMany
+   */
+  export type CategoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Categories to delete
+     */
+    where?: CategoryWhereInput
+    /**
+     * Limit how many Categories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Category.verses
+   */
+  export type Category$versesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    where?: VerseWhereInput
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    cursor?: VerseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VerseScalarFieldEnum | VerseScalarFieldEnum[]
+  }
+
+  /**
+   * Category without action
+   */
+  export type CategoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Verse
+   */
+
+  export type AggregateVerse = {
+    _count: VerseCountAggregateOutputType | null
+    _avg: VerseAvgAggregateOutputType | null
+    _sum: VerseSumAggregateOutputType | null
+    _min: VerseMinAggregateOutputType | null
+    _max: VerseMaxAggregateOutputType | null
+  }
+
+  export type VerseAvgAggregateOutputType = {
+    leitnerLevel: number | null
+    totalReviews: number | null
+    successfulReviews: number | null
+    failedReviews: number | null
+    resetCount: number | null
+  }
+
+  export type VerseSumAggregateOutputType = {
+    leitnerLevel: number | null
+    totalReviews: number | null
+    successfulReviews: number | null
+    failedReviews: number | null
+    resetCount: number | null
+  }
+
+  export type VerseMinAggregateOutputType = {
+    id: string | null
+    verse: string | null
+    reference: string | null
+    category: string | null
+    categoryId: string | null
+    userId: string | null
+    leitnerLevel: number | null
+    learningState: $Enums.VerseLearningState | null
+    dueAt: Date | null
+    lastReviewedAt: Date | null
+    masteredAt: Date | null
+    totalReviews: number | null
+    successfulReviews: number | null
+    failedReviews: number | null
+    resetCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VerseMaxAggregateOutputType = {
+    id: string | null
+    verse: string | null
+    reference: string | null
+    category: string | null
+    categoryId: string | null
+    userId: string | null
+    leitnerLevel: number | null
+    learningState: $Enums.VerseLearningState | null
+    dueAt: Date | null
+    lastReviewedAt: Date | null
+    masteredAt: Date | null
+    totalReviews: number | null
+    successfulReviews: number | null
+    failedReviews: number | null
+    resetCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VerseCountAggregateOutputType = {
+    id: number
+    verse: number
+    reference: number
+    category: number
+    categoryId: number
+    userId: number
+    leitnerLevel: number
+    learningState: number
+    dueAt: number
+    lastReviewedAt: number
+    masteredAt: number
+    totalReviews: number
+    successfulReviews: number
+    failedReviews: number
+    resetCount: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VerseAvgAggregateInputType = {
+    leitnerLevel?: true
+    totalReviews?: true
+    successfulReviews?: true
+    failedReviews?: true
+    resetCount?: true
+  }
+
+  export type VerseSumAggregateInputType = {
+    leitnerLevel?: true
+    totalReviews?: true
+    successfulReviews?: true
+    failedReviews?: true
+    resetCount?: true
+  }
+
+  export type VerseMinAggregateInputType = {
+    id?: true
+    verse?: true
+    reference?: true
+    category?: true
+    categoryId?: true
+    userId?: true
+    leitnerLevel?: true
+    learningState?: true
+    dueAt?: true
+    lastReviewedAt?: true
+    masteredAt?: true
+    totalReviews?: true
+    successfulReviews?: true
+    failedReviews?: true
+    resetCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VerseMaxAggregateInputType = {
+    id?: true
+    verse?: true
+    reference?: true
+    category?: true
+    categoryId?: true
+    userId?: true
+    leitnerLevel?: true
+    learningState?: true
+    dueAt?: true
+    lastReviewedAt?: true
+    masteredAt?: true
+    totalReviews?: true
+    successfulReviews?: true
+    failedReviews?: true
+    resetCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VerseCountAggregateInputType = {
+    id?: true
+    verse?: true
+    reference?: true
+    category?: true
+    categoryId?: true
+    userId?: true
+    leitnerLevel?: true
+    learningState?: true
+    dueAt?: true
+    lastReviewedAt?: true
+    masteredAt?: true
+    totalReviews?: true
+    successfulReviews?: true
+    failedReviews?: true
+    resetCount?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VerseAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Verse to aggregate.
+     */
+    where?: VerseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Verses to fetch.
+     */
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VerseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Verses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Verses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Verses
+    **/
+    _count?: true | VerseCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: VerseAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: VerseSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VerseMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VerseMaxAggregateInputType
+  }
+
+  export type GetVerseAggregateType<T extends VerseAggregateArgs> = {
+        [P in keyof T & keyof AggregateVerse]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVerse[P]>
+      : GetScalarType<T[P], AggregateVerse[P]>
+  }
+
+
+
+
+  export type VerseGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VerseWhereInput
+    orderBy?: VerseOrderByWithAggregationInput | VerseOrderByWithAggregationInput[]
+    by: VerseScalarFieldEnum[] | VerseScalarFieldEnum
+    having?: VerseScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VerseCountAggregateInputType | true
+    _avg?: VerseAvgAggregateInputType
+    _sum?: VerseSumAggregateInputType
+    _min?: VerseMinAggregateInputType
+    _max?: VerseMaxAggregateInputType
+  }
+
+  export type VerseGroupByOutputType = {
+    id: string
+    verse: string
+    reference: string
+    category: string
+    categoryId: string | null
+    userId: string
+    leitnerLevel: number
+    learningState: $Enums.VerseLearningState
+    dueAt: Date
+    lastReviewedAt: Date | null
+    masteredAt: Date | null
+    totalReviews: number
+    successfulReviews: number
+    failedReviews: number
+    resetCount: number
+    createdAt: Date
+    updatedAt: Date
+    _count: VerseCountAggregateOutputType | null
+    _avg: VerseAvgAggregateOutputType | null
+    _sum: VerseSumAggregateOutputType | null
+    _min: VerseMinAggregateOutputType | null
+    _max: VerseMaxAggregateOutputType | null
+  }
+
+  type GetVerseGroupByPayload<T extends VerseGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VerseGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VerseGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VerseGroupByOutputType[P]>
+            : GetScalarType<T[P], VerseGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VerseSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    verse?: boolean
+    reference?: boolean
+    category?: boolean
+    categoryId?: boolean
+    userId?: boolean
+    leitnerLevel?: boolean
+    learningState?: boolean
+    dueAt?: boolean
+    lastReviewedAt?: boolean
+    masteredAt?: boolean
+    totalReviews?: boolean
+    successfulReviews?: boolean
+    failedReviews?: boolean
+    resetCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }, ExtArgs["result"]["verse"]>
+
+  export type VerseSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    verse?: boolean
+    reference?: boolean
+    category?: boolean
+    categoryId?: boolean
+    userId?: boolean
+    leitnerLevel?: boolean
+    learningState?: boolean
+    dueAt?: boolean
+    lastReviewedAt?: boolean
+    masteredAt?: boolean
+    totalReviews?: boolean
+    successfulReviews?: boolean
+    failedReviews?: boolean
+    resetCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }, ExtArgs["result"]["verse"]>
+
+  export type VerseSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    verse?: boolean
+    reference?: boolean
+    category?: boolean
+    categoryId?: boolean
+    userId?: boolean
+    leitnerLevel?: boolean
+    learningState?: boolean
+    dueAt?: boolean
+    lastReviewedAt?: boolean
+    masteredAt?: boolean
+    totalReviews?: boolean
+    successfulReviews?: boolean
+    failedReviews?: boolean
+    resetCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }, ExtArgs["result"]["verse"]>
+
+  export type VerseSelectScalar = {
+    id?: boolean
+    verse?: boolean
+    reference?: boolean
+    category?: boolean
+    categoryId?: boolean
+    userId?: boolean
+    leitnerLevel?: boolean
+    learningState?: boolean
+    dueAt?: boolean
+    lastReviewedAt?: boolean
+    masteredAt?: boolean
+    totalReviews?: boolean
+    successfulReviews?: boolean
+    failedReviews?: boolean
+    resetCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VerseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "verse" | "reference" | "category" | "categoryId" | "userId" | "leitnerLevel" | "learningState" | "dueAt" | "lastReviewedAt" | "masteredAt" | "totalReviews" | "successfulReviews" | "failedReviews" | "resetCount" | "createdAt" | "updatedAt", ExtArgs["result"]["verse"]>
+  export type VerseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }
+  export type VerseIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }
+  export type VerseIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    categoryRel?: boolean | Verse$categoryRelArgs<ExtArgs>
+  }
+
+  export type $VersePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Verse"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      categoryRel: Prisma.$CategoryPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      verse: string
+      reference: string
+      category: string
+      categoryId: string | null
+      userId: string
+      leitnerLevel: number
+      learningState: $Enums.VerseLearningState
+      dueAt: Date
+      lastReviewedAt: Date | null
+      masteredAt: Date | null
+      totalReviews: number
+      successfulReviews: number
+      failedReviews: number
+      resetCount: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["verse"]>
+    composites: {}
+  }
+
+  type VerseGetPayload<S extends boolean | null | undefined | VerseDefaultArgs> = $Result.GetResult<Prisma.$VersePayload, S>
+
+  type VerseCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VerseFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VerseCountAggregateInputType | true
+    }
+
+  export interface VerseDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Verse'], meta: { name: 'Verse' } }
+    /**
+     * Find zero or one Verse that matches the filter.
+     * @param {VerseFindUniqueArgs} args - Arguments to find a Verse
+     * @example
+     * // Get one Verse
+     * const verse = await prisma.verse.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VerseFindUniqueArgs>(args: SelectSubset<T, VerseFindUniqueArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Verse that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VerseFindUniqueOrThrowArgs} args - Arguments to find a Verse
+     * @example
+     * // Get one Verse
+     * const verse = await prisma.verse.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VerseFindUniqueOrThrowArgs>(args: SelectSubset<T, VerseFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Verse that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseFindFirstArgs} args - Arguments to find a Verse
+     * @example
+     * // Get one Verse
+     * const verse = await prisma.verse.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VerseFindFirstArgs>(args?: SelectSubset<T, VerseFindFirstArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Verse that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseFindFirstOrThrowArgs} args - Arguments to find a Verse
+     * @example
+     * // Get one Verse
+     * const verse = await prisma.verse.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VerseFindFirstOrThrowArgs>(args?: SelectSubset<T, VerseFindFirstOrThrowArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Verses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Verses
+     * const verses = await prisma.verse.findMany()
+     * 
+     * // Get first 10 Verses
+     * const verses = await prisma.verse.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const verseWithIdOnly = await prisma.verse.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VerseFindManyArgs>(args?: SelectSubset<T, VerseFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Verse.
+     * @param {VerseCreateArgs} args - Arguments to create a Verse.
+     * @example
+     * // Create one Verse
+     * const Verse = await prisma.verse.create({
+     *   data: {
+     *     // ... data to create a Verse
+     *   }
+     * })
+     * 
+     */
+    create<T extends VerseCreateArgs>(args: SelectSubset<T, VerseCreateArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Verses.
+     * @param {VerseCreateManyArgs} args - Arguments to create many Verses.
+     * @example
+     * // Create many Verses
+     * const verse = await prisma.verse.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VerseCreateManyArgs>(args?: SelectSubset<T, VerseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Verses and returns the data saved in the database.
+     * @param {VerseCreateManyAndReturnArgs} args - Arguments to create many Verses.
+     * @example
+     * // Create many Verses
+     * const verse = await prisma.verse.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Verses and only return the `id`
+     * const verseWithIdOnly = await prisma.verse.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VerseCreateManyAndReturnArgs>(args?: SelectSubset<T, VerseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Verse.
+     * @param {VerseDeleteArgs} args - Arguments to delete one Verse.
+     * @example
+     * // Delete one Verse
+     * const Verse = await prisma.verse.delete({
+     *   where: {
+     *     // ... filter to delete one Verse
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VerseDeleteArgs>(args: SelectSubset<T, VerseDeleteArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Verse.
+     * @param {VerseUpdateArgs} args - Arguments to update one Verse.
+     * @example
+     * // Update one Verse
+     * const verse = await prisma.verse.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VerseUpdateArgs>(args: SelectSubset<T, VerseUpdateArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Verses.
+     * @param {VerseDeleteManyArgs} args - Arguments to filter Verses to delete.
+     * @example
+     * // Delete a few Verses
+     * const { count } = await prisma.verse.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VerseDeleteManyArgs>(args?: SelectSubset<T, VerseDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Verses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Verses
+     * const verse = await prisma.verse.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VerseUpdateManyArgs>(args: SelectSubset<T, VerseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Verses and returns the data updated in the database.
+     * @param {VerseUpdateManyAndReturnArgs} args - Arguments to update many Verses.
+     * @example
+     * // Update many Verses
+     * const verse = await prisma.verse.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Verses and only return the `id`
+     * const verseWithIdOnly = await prisma.verse.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VerseUpdateManyAndReturnArgs>(args: SelectSubset<T, VerseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Verse.
+     * @param {VerseUpsertArgs} args - Arguments to update or create a Verse.
+     * @example
+     * // Update or create a Verse
+     * const verse = await prisma.verse.upsert({
+     *   create: {
+     *     // ... data to create a Verse
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Verse we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VerseUpsertArgs>(args: SelectSubset<T, VerseUpsertArgs<ExtArgs>>): Prisma__VerseClient<$Result.GetResult<Prisma.$VersePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Verses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseCountArgs} args - Arguments to filter Verses to count.
+     * @example
+     * // Count the number of Verses
+     * const count = await prisma.verse.count({
+     *   where: {
+     *     // ... the filter for the Verses we want to count
+     *   }
+     * })
+    **/
+    count<T extends VerseCountArgs>(
+      args?: Subset<T, VerseCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VerseCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Verse.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VerseAggregateArgs>(args: Subset<T, VerseAggregateArgs>): Prisma.PrismaPromise<GetVerseAggregateType<T>>
+
+    /**
+     * Group by Verse.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VerseGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VerseGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VerseGroupByArgs['orderBy'] }
+        : { orderBy?: VerseGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VerseGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVerseGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Verse model
+   */
+  readonly fields: VerseFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Verse.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VerseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    categoryRel<T extends Verse$categoryRelArgs<ExtArgs> = {}>(args?: Subset<T, Verse$categoryRelArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Verse model
+   */
+  interface VerseFieldRefs {
+    readonly id: FieldRef<"Verse", 'String'>
+    readonly verse: FieldRef<"Verse", 'String'>
+    readonly reference: FieldRef<"Verse", 'String'>
+    readonly category: FieldRef<"Verse", 'String'>
+    readonly categoryId: FieldRef<"Verse", 'String'>
+    readonly userId: FieldRef<"Verse", 'String'>
+    readonly leitnerLevel: FieldRef<"Verse", 'Int'>
+    readonly learningState: FieldRef<"Verse", 'VerseLearningState'>
+    readonly dueAt: FieldRef<"Verse", 'DateTime'>
+    readonly lastReviewedAt: FieldRef<"Verse", 'DateTime'>
+    readonly masteredAt: FieldRef<"Verse", 'DateTime'>
+    readonly totalReviews: FieldRef<"Verse", 'Int'>
+    readonly successfulReviews: FieldRef<"Verse", 'Int'>
+    readonly failedReviews: FieldRef<"Verse", 'Int'>
+    readonly resetCount: FieldRef<"Verse", 'Int'>
+    readonly createdAt: FieldRef<"Verse", 'DateTime'>
+    readonly updatedAt: FieldRef<"Verse", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Verse findUnique
+   */
+  export type VerseFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter, which Verse to fetch.
+     */
+    where: VerseWhereUniqueInput
+  }
+
+  /**
+   * Verse findUniqueOrThrow
+   */
+  export type VerseFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter, which Verse to fetch.
+     */
+    where: VerseWhereUniqueInput
+  }
+
+  /**
+   * Verse findFirst
+   */
+  export type VerseFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter, which Verse to fetch.
+     */
+    where?: VerseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Verses to fetch.
+     */
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Verses.
+     */
+    cursor?: VerseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Verses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Verses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Verses.
+     */
+    distinct?: VerseScalarFieldEnum | VerseScalarFieldEnum[]
+  }
+
+  /**
+   * Verse findFirstOrThrow
+   */
+  export type VerseFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter, which Verse to fetch.
+     */
+    where?: VerseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Verses to fetch.
+     */
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Verses.
+     */
+    cursor?: VerseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Verses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Verses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Verses.
+     */
+    distinct?: VerseScalarFieldEnum | VerseScalarFieldEnum[]
+  }
+
+  /**
+   * Verse findMany
+   */
+  export type VerseFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter, which Verses to fetch.
+     */
+    where?: VerseWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Verses to fetch.
+     */
+    orderBy?: VerseOrderByWithRelationInput | VerseOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Verses.
+     */
+    cursor?: VerseWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Verses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Verses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Verses.
+     */
+    distinct?: VerseScalarFieldEnum | VerseScalarFieldEnum[]
+  }
+
+  /**
+   * Verse create
+   */
+  export type VerseCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Verse.
+     */
+    data: XOR<VerseCreateInput, VerseUncheckedCreateInput>
+  }
+
+  /**
+   * Verse createMany
+   */
+  export type VerseCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Verses.
+     */
+    data: VerseCreateManyInput | VerseCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Verse createManyAndReturn
+   */
+  export type VerseCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * The data used to create many Verses.
+     */
+    data: VerseCreateManyInput | VerseCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Verse update
+   */
+  export type VerseUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Verse.
+     */
+    data: XOR<VerseUpdateInput, VerseUncheckedUpdateInput>
+    /**
+     * Choose, which Verse to update.
+     */
+    where: VerseWhereUniqueInput
+  }
+
+  /**
+   * Verse updateMany
+   */
+  export type VerseUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Verses.
+     */
+    data: XOR<VerseUpdateManyMutationInput, VerseUncheckedUpdateManyInput>
+    /**
+     * Filter which Verses to update
+     */
+    where?: VerseWhereInput
+    /**
+     * Limit how many Verses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Verse updateManyAndReturn
+   */
+  export type VerseUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * The data used to update Verses.
+     */
+    data: XOR<VerseUpdateManyMutationInput, VerseUncheckedUpdateManyInput>
+    /**
+     * Filter which Verses to update
+     */
+    where?: VerseWhereInput
+    /**
+     * Limit how many Verses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Verse upsert
+   */
+  export type VerseUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Verse to update in case it exists.
+     */
+    where: VerseWhereUniqueInput
+    /**
+     * In case the Verse found by the `where` argument doesn't exist, create a new Verse with this data.
+     */
+    create: XOR<VerseCreateInput, VerseUncheckedCreateInput>
+    /**
+     * In case the Verse was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VerseUpdateInput, VerseUncheckedUpdateInput>
+  }
+
+  /**
+   * Verse delete
+   */
+  export type VerseDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+    /**
+     * Filter which Verse to delete.
+     */
+    where: VerseWhereUniqueInput
+  }
+
+  /**
+   * Verse deleteMany
+   */
+  export type VerseDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Verses to delete
+     */
+    where?: VerseWhereInput
+    /**
+     * Limit how many Verses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Verse.categoryRel
+   */
+  export type Verse$categoryRelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    where?: CategoryWhereInput
+  }
+
+  /**
+   * Verse without action
+   */
+  export type VerseDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Verse
+     */
+    select?: VerseSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Verse
+     */
+    omit?: VerseOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VerseInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5661,6 +8389,41 @@ export namespace Prisma {
   export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
 
 
+  export const CategoryScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    color: 'color',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+  export const VerseScalarFieldEnum: {
+    id: 'id',
+    verse: 'verse',
+    reference: 'reference',
+    category: 'category',
+    categoryId: 'categoryId',
+    userId: 'userId',
+    leitnerLevel: 'leitnerLevel',
+    learningState: 'learningState',
+    dueAt: 'dueAt',
+    lastReviewedAt: 'lastReviewedAt',
+    masteredAt: 'masteredAt',
+    totalReviews: 'totalReviews',
+    successfulReviews: 'successfulReviews',
+    failedReviews: 'failedReviews',
+    resetCount: 'resetCount',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VerseScalarFieldEnum = (typeof VerseScalarFieldEnum)[keyof typeof VerseScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -5726,6 +8489,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'CategoryColor'
+   */
+  export type EnumCategoryColorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoryColor'>
+    
+
+
+  /**
+   * Reference to a field of type 'CategoryColor[]'
+   */
+  export type ListEnumCategoryColorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoryColor[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -5736,6 +8513,34 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'VerseLearningState'
+   */
+  export type EnumVerseLearningStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerseLearningState'>
+    
+
+
+  /**
+   * Reference to a field of type 'VerseLearningState[]'
+   */
+  export type ListEnumVerseLearningStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerseLearningState[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -5755,6 +8560,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
+    verses?: VerseListRelationFilter
+    categories?: CategoryListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -5767,6 +8574,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
+    verses?: VerseOrderByRelationAggregateInput
+    categories?: CategoryOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -5782,6 +8591,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
+    verses?: VerseListRelationFilter
+    categories?: CategoryListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -6033,6 +8844,189 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Verification"> | Date | string
   }
 
+  export type CategoryWhereInput = {
+    AND?: CategoryWhereInput | CategoryWhereInput[]
+    OR?: CategoryWhereInput[]
+    NOT?: CategoryWhereInput | CategoryWhereInput[]
+    id?: StringFilter<"Category"> | string
+    name?: StringFilter<"Category"> | string
+    color?: EnumCategoryColorNullableFilter<"Category"> | $Enums.CategoryColor | null
+    userId?: StringFilter<"Category"> | string
+    createdAt?: DateTimeFilter<"Category"> | Date | string
+    updatedAt?: DateTimeFilter<"Category"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    verses?: VerseListRelationFilter
+  }
+
+  export type CategoryOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    color?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    verses?: VerseOrderByRelationAggregateInput
+  }
+
+  export type CategoryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CategoryWhereInput | CategoryWhereInput[]
+    OR?: CategoryWhereInput[]
+    NOT?: CategoryWhereInput | CategoryWhereInput[]
+    name?: StringFilter<"Category"> | string
+    color?: EnumCategoryColorNullableFilter<"Category"> | $Enums.CategoryColor | null
+    userId?: StringFilter<"Category"> | string
+    createdAt?: DateTimeFilter<"Category"> | Date | string
+    updatedAt?: DateTimeFilter<"Category"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    verses?: VerseListRelationFilter
+  }, "id">
+
+  export type CategoryOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    color?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CategoryCountOrderByAggregateInput
+    _max?: CategoryMaxOrderByAggregateInput
+    _min?: CategoryMinOrderByAggregateInput
+  }
+
+  export type CategoryScalarWhereWithAggregatesInput = {
+    AND?: CategoryScalarWhereWithAggregatesInput | CategoryScalarWhereWithAggregatesInput[]
+    OR?: CategoryScalarWhereWithAggregatesInput[]
+    NOT?: CategoryScalarWhereWithAggregatesInput | CategoryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Category"> | string
+    name?: StringWithAggregatesFilter<"Category"> | string
+    color?: EnumCategoryColorNullableWithAggregatesFilter<"Category"> | $Enums.CategoryColor | null
+    userId?: StringWithAggregatesFilter<"Category"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
+  }
+
+  export type VerseWhereInput = {
+    AND?: VerseWhereInput | VerseWhereInput[]
+    OR?: VerseWhereInput[]
+    NOT?: VerseWhereInput | VerseWhereInput[]
+    id?: StringFilter<"Verse"> | string
+    verse?: StringFilter<"Verse"> | string
+    reference?: StringFilter<"Verse"> | string
+    category?: StringFilter<"Verse"> | string
+    categoryId?: StringNullableFilter<"Verse"> | string | null
+    userId?: StringFilter<"Verse"> | string
+    leitnerLevel?: IntFilter<"Verse"> | number
+    learningState?: EnumVerseLearningStateFilter<"Verse"> | $Enums.VerseLearningState
+    dueAt?: DateTimeFilter<"Verse"> | Date | string
+    lastReviewedAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    masteredAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    totalReviews?: IntFilter<"Verse"> | number
+    successfulReviews?: IntFilter<"Verse"> | number
+    failedReviews?: IntFilter<"Verse"> | number
+    resetCount?: IntFilter<"Verse"> | number
+    createdAt?: DateTimeFilter<"Verse"> | Date | string
+    updatedAt?: DateTimeFilter<"Verse"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    categoryRel?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
+  }
+
+  export type VerseOrderByWithRelationInput = {
+    id?: SortOrder
+    verse?: SortOrder
+    reference?: SortOrder
+    category?: SortOrder
+    categoryId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    leitnerLevel?: SortOrder
+    learningState?: SortOrder
+    dueAt?: SortOrder
+    lastReviewedAt?: SortOrderInput | SortOrder
+    masteredAt?: SortOrderInput | SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    categoryRel?: CategoryOrderByWithRelationInput
+  }
+
+  export type VerseWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: VerseWhereInput | VerseWhereInput[]
+    OR?: VerseWhereInput[]
+    NOT?: VerseWhereInput | VerseWhereInput[]
+    verse?: StringFilter<"Verse"> | string
+    reference?: StringFilter<"Verse"> | string
+    category?: StringFilter<"Verse"> | string
+    categoryId?: StringNullableFilter<"Verse"> | string | null
+    userId?: StringFilter<"Verse"> | string
+    leitnerLevel?: IntFilter<"Verse"> | number
+    learningState?: EnumVerseLearningStateFilter<"Verse"> | $Enums.VerseLearningState
+    dueAt?: DateTimeFilter<"Verse"> | Date | string
+    lastReviewedAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    masteredAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    totalReviews?: IntFilter<"Verse"> | number
+    successfulReviews?: IntFilter<"Verse"> | number
+    failedReviews?: IntFilter<"Verse"> | number
+    resetCount?: IntFilter<"Verse"> | number
+    createdAt?: DateTimeFilter<"Verse"> | Date | string
+    updatedAt?: DateTimeFilter<"Verse"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    categoryRel?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
+  }, "id">
+
+  export type VerseOrderByWithAggregationInput = {
+    id?: SortOrder
+    verse?: SortOrder
+    reference?: SortOrder
+    category?: SortOrder
+    categoryId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    leitnerLevel?: SortOrder
+    learningState?: SortOrder
+    dueAt?: SortOrder
+    lastReviewedAt?: SortOrderInput | SortOrder
+    masteredAt?: SortOrderInput | SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VerseCountOrderByAggregateInput
+    _avg?: VerseAvgOrderByAggregateInput
+    _max?: VerseMaxOrderByAggregateInput
+    _min?: VerseMinOrderByAggregateInput
+    _sum?: VerseSumOrderByAggregateInput
+  }
+
+  export type VerseScalarWhereWithAggregatesInput = {
+    AND?: VerseScalarWhereWithAggregatesInput | VerseScalarWhereWithAggregatesInput[]
+    OR?: VerseScalarWhereWithAggregatesInput[]
+    NOT?: VerseScalarWhereWithAggregatesInput | VerseScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Verse"> | string
+    verse?: StringWithAggregatesFilter<"Verse"> | string
+    reference?: StringWithAggregatesFilter<"Verse"> | string
+    category?: StringWithAggregatesFilter<"Verse"> | string
+    categoryId?: StringNullableWithAggregatesFilter<"Verse"> | string | null
+    userId?: StringWithAggregatesFilter<"Verse"> | string
+    leitnerLevel?: IntWithAggregatesFilter<"Verse"> | number
+    learningState?: EnumVerseLearningStateWithAggregatesFilter<"Verse"> | $Enums.VerseLearningState
+    dueAt?: DateTimeWithAggregatesFilter<"Verse"> | Date | string
+    lastReviewedAt?: DateTimeNullableWithAggregatesFilter<"Verse"> | Date | string | null
+    masteredAt?: DateTimeNullableWithAggregatesFilter<"Verse"> | Date | string | null
+    totalReviews?: IntWithAggregatesFilter<"Verse"> | number
+    successfulReviews?: IntWithAggregatesFilter<"Verse"> | number
+    failedReviews?: IntWithAggregatesFilter<"Verse"> | number
+    resetCount?: IntWithAggregatesFilter<"Verse"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Verse"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Verse"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -6043,6 +9037,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
+    verses?: VerseCreateNestedManyWithoutUserInput
+    categories?: CategoryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -6055,6 +9051,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    verses?: VerseUncheckedCreateNestedManyWithoutUserInput
+    categories?: CategoryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -6067,6 +9065,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    verses?: VerseUpdateManyWithoutUserNestedInput
+    categories?: CategoryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -6079,6 +9079,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    verses?: VerseUncheckedUpdateManyWithoutUserNestedInput
+    categories?: CategoryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -6361,6 +9363,210 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CategoryCreateInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutCategoriesInput
+    verses?: VerseCreateNestedManyWithoutCategoryRelInput
+  }
+
+  export type CategoryUncheckedCreateInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verses?: VerseUncheckedCreateNestedManyWithoutCategoryRelInput
+  }
+
+  export type CategoryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutCategoriesNestedInput
+    verses?: VerseUpdateManyWithoutCategoryRelNestedInput
+  }
+
+  export type CategoryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verses?: VerseUncheckedUpdateManyWithoutCategoryRelNestedInput
+  }
+
+  export type CategoryCreateManyInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CategoryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CategoryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseCreateInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutVersesInput
+    categoryRel?: CategoryCreateNestedOneWithoutVersesInput
+  }
+
+  export type VerseUncheckedCreateInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    categoryId?: string | null
+    userId: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutVersesNestedInput
+    categoryRel?: CategoryUpdateOneWithoutVersesNestedInput
+  }
+
+  export type VerseUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseCreateManyInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    categoryId?: string | null
+    userId: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -6419,6 +9625,18 @@ export namespace Prisma {
     none?: SessionWhereInput
   }
 
+  export type VerseListRelationFilter = {
+    every?: VerseWhereInput
+    some?: VerseWhereInput
+    none?: VerseWhereInput
+  }
+
+  export type CategoryListRelationFilter = {
+    every?: CategoryWhereInput
+    some?: CategoryWhereInput
+    none?: CategoryWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -6429,6 +9647,14 @@ export namespace Prisma {
   }
 
   export type SessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type VerseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CategoryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6663,6 +9889,175 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type EnumCategoryColorNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoryColor | EnumCategoryColorFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCategoryColorNullableFilter<$PrismaModel> | $Enums.CategoryColor | null
+  }
+
+  export type CategoryCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CategoryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CategoryMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumCategoryColorNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoryColor | EnumCategoryColorFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCategoryColorNullableWithAggregatesFilter<$PrismaModel> | $Enums.CategoryColor | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCategoryColorNullableFilter<$PrismaModel>
+    _max?: NestedEnumCategoryColorNullableFilter<$PrismaModel>
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type EnumVerseLearningStateFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerseLearningState | EnumVerseLearningStateFieldRefInput<$PrismaModel>
+    in?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerseLearningStateFilter<$PrismaModel> | $Enums.VerseLearningState
+  }
+
+  export type CategoryNullableScalarRelationFilter = {
+    is?: CategoryWhereInput | null
+    isNot?: CategoryWhereInput | null
+  }
+
+  export type VerseCountOrderByAggregateInput = {
+    id?: SortOrder
+    verse?: SortOrder
+    reference?: SortOrder
+    category?: SortOrder
+    categoryId?: SortOrder
+    userId?: SortOrder
+    leitnerLevel?: SortOrder
+    learningState?: SortOrder
+    dueAt?: SortOrder
+    lastReviewedAt?: SortOrder
+    masteredAt?: SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VerseAvgOrderByAggregateInput = {
+    leitnerLevel?: SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+  }
+
+  export type VerseMaxOrderByAggregateInput = {
+    id?: SortOrder
+    verse?: SortOrder
+    reference?: SortOrder
+    category?: SortOrder
+    categoryId?: SortOrder
+    userId?: SortOrder
+    leitnerLevel?: SortOrder
+    learningState?: SortOrder
+    dueAt?: SortOrder
+    lastReviewedAt?: SortOrder
+    masteredAt?: SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VerseMinOrderByAggregateInput = {
+    id?: SortOrder
+    verse?: SortOrder
+    reference?: SortOrder
+    category?: SortOrder
+    categoryId?: SortOrder
+    userId?: SortOrder
+    leitnerLevel?: SortOrder
+    learningState?: SortOrder
+    dueAt?: SortOrder
+    lastReviewedAt?: SortOrder
+    masteredAt?: SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VerseSumOrderByAggregateInput = {
+    leitnerLevel?: SortOrder
+    totalReviews?: SortOrder
+    successfulReviews?: SortOrder
+    failedReviews?: SortOrder
+    resetCount?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type EnumVerseLearningStateWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerseLearningState | EnumVerseLearningStateFieldRefInput<$PrismaModel>
+    in?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerseLearningStateWithAggregatesFilter<$PrismaModel> | $Enums.VerseLearningState
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerseLearningStateFilter<$PrismaModel>
+    _max?: NestedEnumVerseLearningStateFilter<$PrismaModel>
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -6677,6 +10072,20 @@ export namespace Prisma {
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
   }
 
+  export type VerseCreateNestedManyWithoutUserInput = {
+    create?: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput> | VerseCreateWithoutUserInput[] | VerseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutUserInput | VerseCreateOrConnectWithoutUserInput[]
+    createMany?: VerseCreateManyUserInputEnvelope
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+  }
+
+  export type CategoryCreateNestedManyWithoutUserInput = {
+    create?: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput> | CategoryCreateWithoutUserInput[] | CategoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CategoryCreateOrConnectWithoutUserInput | CategoryCreateOrConnectWithoutUserInput[]
+    createMany?: CategoryCreateManyUserInputEnvelope
+    connect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+  }
+
   export type AccountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -6689,6 +10098,20 @@ export namespace Prisma {
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
     createMany?: SessionCreateManyUserInputEnvelope
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type VerseUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput> | VerseCreateWithoutUserInput[] | VerseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutUserInput | VerseCreateOrConnectWithoutUserInput[]
+    createMany?: VerseCreateManyUserInputEnvelope
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+  }
+
+  export type CategoryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput> | CategoryCreateWithoutUserInput[] | CategoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CategoryCreateOrConnectWithoutUserInput | CategoryCreateOrConnectWithoutUserInput[]
+    createMany?: CategoryCreateManyUserInputEnvelope
+    connect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6735,6 +10158,34 @@ export namespace Prisma {
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
   }
 
+  export type VerseUpdateManyWithoutUserNestedInput = {
+    create?: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput> | VerseCreateWithoutUserInput[] | VerseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutUserInput | VerseCreateOrConnectWithoutUserInput[]
+    upsert?: VerseUpsertWithWhereUniqueWithoutUserInput | VerseUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: VerseCreateManyUserInputEnvelope
+    set?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    disconnect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    delete?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    update?: VerseUpdateWithWhereUniqueWithoutUserInput | VerseUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: VerseUpdateManyWithWhereWithoutUserInput | VerseUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: VerseScalarWhereInput | VerseScalarWhereInput[]
+  }
+
+  export type CategoryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput> | CategoryCreateWithoutUserInput[] | CategoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CategoryCreateOrConnectWithoutUserInput | CategoryCreateOrConnectWithoutUserInput[]
+    upsert?: CategoryUpsertWithWhereUniqueWithoutUserInput | CategoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CategoryCreateManyUserInputEnvelope
+    set?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    disconnect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    delete?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    connect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    update?: CategoryUpdateWithWhereUniqueWithoutUserInput | CategoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CategoryUpdateManyWithWhereWithoutUserInput | CategoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CategoryScalarWhereInput | CategoryScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -6761,6 +10212,34 @@ export namespace Prisma {
     update?: SessionUpdateWithWhereUniqueWithoutUserInput | SessionUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: SessionUpdateManyWithWhereWithoutUserInput | SessionUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type VerseUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput> | VerseCreateWithoutUserInput[] | VerseUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutUserInput | VerseCreateOrConnectWithoutUserInput[]
+    upsert?: VerseUpsertWithWhereUniqueWithoutUserInput | VerseUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: VerseCreateManyUserInputEnvelope
+    set?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    disconnect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    delete?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    update?: VerseUpdateWithWhereUniqueWithoutUserInput | VerseUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: VerseUpdateManyWithWhereWithoutUserInput | VerseUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: VerseScalarWhereInput | VerseScalarWhereInput[]
+  }
+
+  export type CategoryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput> | CategoryCreateWithoutUserInput[] | CategoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: CategoryCreateOrConnectWithoutUserInput | CategoryCreateOrConnectWithoutUserInput[]
+    upsert?: CategoryUpsertWithWhereUniqueWithoutUserInput | CategoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: CategoryCreateManyUserInputEnvelope
+    set?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    disconnect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    delete?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    connect?: CategoryWhereUniqueInput | CategoryWhereUniqueInput[]
+    update?: CategoryUpdateWithWhereUniqueWithoutUserInput | CategoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: CategoryUpdateManyWithWhereWithoutUserInput | CategoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: CategoryScalarWhereInput | CategoryScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutSessionsInput = {
@@ -6793,6 +10272,108 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutAccountsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
+  }
+
+  export type UserCreateNestedOneWithoutCategoriesInput = {
+    create?: XOR<UserCreateWithoutCategoriesInput, UserUncheckedCreateWithoutCategoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCategoriesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type VerseCreateNestedManyWithoutCategoryRelInput = {
+    create?: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput> | VerseCreateWithoutCategoryRelInput[] | VerseUncheckedCreateWithoutCategoryRelInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutCategoryRelInput | VerseCreateOrConnectWithoutCategoryRelInput[]
+    createMany?: VerseCreateManyCategoryRelInputEnvelope
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+  }
+
+  export type VerseUncheckedCreateNestedManyWithoutCategoryRelInput = {
+    create?: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput> | VerseCreateWithoutCategoryRelInput[] | VerseUncheckedCreateWithoutCategoryRelInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutCategoryRelInput | VerseCreateOrConnectWithoutCategoryRelInput[]
+    createMany?: VerseCreateManyCategoryRelInputEnvelope
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+  }
+
+  export type NullableEnumCategoryColorFieldUpdateOperationsInput = {
+    set?: $Enums.CategoryColor | null
+  }
+
+  export type UserUpdateOneRequiredWithoutCategoriesNestedInput = {
+    create?: XOR<UserCreateWithoutCategoriesInput, UserUncheckedCreateWithoutCategoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCategoriesInput
+    upsert?: UserUpsertWithoutCategoriesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCategoriesInput, UserUpdateWithoutCategoriesInput>, UserUncheckedUpdateWithoutCategoriesInput>
+  }
+
+  export type VerseUpdateManyWithoutCategoryRelNestedInput = {
+    create?: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput> | VerseCreateWithoutCategoryRelInput[] | VerseUncheckedCreateWithoutCategoryRelInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutCategoryRelInput | VerseCreateOrConnectWithoutCategoryRelInput[]
+    upsert?: VerseUpsertWithWhereUniqueWithoutCategoryRelInput | VerseUpsertWithWhereUniqueWithoutCategoryRelInput[]
+    createMany?: VerseCreateManyCategoryRelInputEnvelope
+    set?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    disconnect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    delete?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    update?: VerseUpdateWithWhereUniqueWithoutCategoryRelInput | VerseUpdateWithWhereUniqueWithoutCategoryRelInput[]
+    updateMany?: VerseUpdateManyWithWhereWithoutCategoryRelInput | VerseUpdateManyWithWhereWithoutCategoryRelInput[]
+    deleteMany?: VerseScalarWhereInput | VerseScalarWhereInput[]
+  }
+
+  export type VerseUncheckedUpdateManyWithoutCategoryRelNestedInput = {
+    create?: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput> | VerseCreateWithoutCategoryRelInput[] | VerseUncheckedCreateWithoutCategoryRelInput[]
+    connectOrCreate?: VerseCreateOrConnectWithoutCategoryRelInput | VerseCreateOrConnectWithoutCategoryRelInput[]
+    upsert?: VerseUpsertWithWhereUniqueWithoutCategoryRelInput | VerseUpsertWithWhereUniqueWithoutCategoryRelInput[]
+    createMany?: VerseCreateManyCategoryRelInputEnvelope
+    set?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    disconnect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    delete?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    connect?: VerseWhereUniqueInput | VerseWhereUniqueInput[]
+    update?: VerseUpdateWithWhereUniqueWithoutCategoryRelInput | VerseUpdateWithWhereUniqueWithoutCategoryRelInput[]
+    updateMany?: VerseUpdateManyWithWhereWithoutCategoryRelInput | VerseUpdateManyWithWhereWithoutCategoryRelInput[]
+    deleteMany?: VerseScalarWhereInput | VerseScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutVersesInput = {
+    create?: XOR<UserCreateWithoutVersesInput, UserUncheckedCreateWithoutVersesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutVersesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type CategoryCreateNestedOneWithoutVersesInput = {
+    create?: XOR<CategoryCreateWithoutVersesInput, CategoryUncheckedCreateWithoutVersesInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutVersesInput
+    connect?: CategoryWhereUniqueInput
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type EnumVerseLearningStateFieldUpdateOperationsInput = {
+    set?: $Enums.VerseLearningState
+  }
+
+  export type UserUpdateOneRequiredWithoutVersesNestedInput = {
+    create?: XOR<UserCreateWithoutVersesInput, UserUncheckedCreateWithoutVersesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutVersesInput
+    upsert?: UserUpsertWithoutVersesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutVersesInput, UserUpdateWithoutVersesInput>, UserUncheckedUpdateWithoutVersesInput>
+  }
+
+  export type CategoryUpdateOneWithoutVersesNestedInput = {
+    create?: XOR<CategoryCreateWithoutVersesInput, CategoryUncheckedCreateWithoutVersesInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutVersesInput
+    upsert?: CategoryUpsertWithoutVersesInput
+    disconnect?: CategoryWhereInput | boolean
+    delete?: CategoryWhereInput | boolean
+    connect?: CategoryWhereUniqueInput
+    update?: XOR<XOR<CategoryUpdateToOneWithWhereWithoutVersesInput, CategoryUpdateWithoutVersesInput>, CategoryUncheckedUpdateWithoutVersesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -6942,6 +10523,67 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumCategoryColorNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoryColor | EnumCategoryColorFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCategoryColorNullableFilter<$PrismaModel> | $Enums.CategoryColor | null
+  }
+
+  export type NestedEnumCategoryColorNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoryColor | EnumCategoryColorFieldRefInput<$PrismaModel> | null
+    in?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.CategoryColor[] | ListEnumCategoryColorFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumCategoryColorNullableWithAggregatesFilter<$PrismaModel> | $Enums.CategoryColor | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumCategoryColorNullableFilter<$PrismaModel>
+    _max?: NestedEnumCategoryColorNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumVerseLearningStateFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerseLearningState | EnumVerseLearningStateFieldRefInput<$PrismaModel>
+    in?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerseLearningStateFilter<$PrismaModel> | $Enums.VerseLearningState
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumVerseLearningStateWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerseLearningState | EnumVerseLearningStateFieldRefInput<$PrismaModel>
+    in?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerseLearningState[] | ListEnumVerseLearningStateFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerseLearningStateWithAggregatesFilter<$PrismaModel> | $Enums.VerseLearningState
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerseLearningStateFilter<$PrismaModel>
+    _max?: NestedEnumVerseLearningStateFilter<$PrismaModel>
+  }
+
   export type AccountCreateWithoutUserInput = {
     id?: string
     accountId: string
@@ -7012,6 +10654,82 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type VerseCreateWithoutUserInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    categoryRel?: CategoryCreateNestedOneWithoutVersesInput
+  }
+
+  export type VerseUncheckedCreateWithoutUserInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    categoryId?: string | null
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseCreateOrConnectWithoutUserInput = {
+    where: VerseWhereUniqueInput
+    create: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput>
+  }
+
+  export type VerseCreateManyUserInputEnvelope = {
+    data: VerseCreateManyUserInput | VerseCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CategoryCreateWithoutUserInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verses?: VerseCreateNestedManyWithoutCategoryRelInput
+  }
+
+  export type CategoryUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verses?: VerseUncheckedCreateNestedManyWithoutCategoryRelInput
+  }
+
+  export type CategoryCreateOrConnectWithoutUserInput = {
+    where: CategoryWhereUniqueInput
+    create: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type CategoryCreateManyUserInputEnvelope = {
+    data: CategoryCreateManyUserInput | CategoryCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AccountUpsertWithWhereUniqueWithoutUserInput = {
     where: AccountWhereUniqueInput
     update: XOR<AccountUpdateWithoutUserInput, AccountUncheckedUpdateWithoutUserInput>
@@ -7077,6 +10795,73 @@ export namespace Prisma {
     userId?: StringFilter<"Session"> | string
   }
 
+  export type VerseUpsertWithWhereUniqueWithoutUserInput = {
+    where: VerseWhereUniqueInput
+    update: XOR<VerseUpdateWithoutUserInput, VerseUncheckedUpdateWithoutUserInput>
+    create: XOR<VerseCreateWithoutUserInput, VerseUncheckedCreateWithoutUserInput>
+  }
+
+  export type VerseUpdateWithWhereUniqueWithoutUserInput = {
+    where: VerseWhereUniqueInput
+    data: XOR<VerseUpdateWithoutUserInput, VerseUncheckedUpdateWithoutUserInput>
+  }
+
+  export type VerseUpdateManyWithWhereWithoutUserInput = {
+    where: VerseScalarWhereInput
+    data: XOR<VerseUpdateManyMutationInput, VerseUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type VerseScalarWhereInput = {
+    AND?: VerseScalarWhereInput | VerseScalarWhereInput[]
+    OR?: VerseScalarWhereInput[]
+    NOT?: VerseScalarWhereInput | VerseScalarWhereInput[]
+    id?: StringFilter<"Verse"> | string
+    verse?: StringFilter<"Verse"> | string
+    reference?: StringFilter<"Verse"> | string
+    category?: StringFilter<"Verse"> | string
+    categoryId?: StringNullableFilter<"Verse"> | string | null
+    userId?: StringFilter<"Verse"> | string
+    leitnerLevel?: IntFilter<"Verse"> | number
+    learningState?: EnumVerseLearningStateFilter<"Verse"> | $Enums.VerseLearningState
+    dueAt?: DateTimeFilter<"Verse"> | Date | string
+    lastReviewedAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    masteredAt?: DateTimeNullableFilter<"Verse"> | Date | string | null
+    totalReviews?: IntFilter<"Verse"> | number
+    successfulReviews?: IntFilter<"Verse"> | number
+    failedReviews?: IntFilter<"Verse"> | number
+    resetCount?: IntFilter<"Verse"> | number
+    createdAt?: DateTimeFilter<"Verse"> | Date | string
+    updatedAt?: DateTimeFilter<"Verse"> | Date | string
+  }
+
+  export type CategoryUpsertWithWhereUniqueWithoutUserInput = {
+    where: CategoryWhereUniqueInput
+    update: XOR<CategoryUpdateWithoutUserInput, CategoryUncheckedUpdateWithoutUserInput>
+    create: XOR<CategoryCreateWithoutUserInput, CategoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type CategoryUpdateWithWhereUniqueWithoutUserInput = {
+    where: CategoryWhereUniqueInput
+    data: XOR<CategoryUpdateWithoutUserInput, CategoryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CategoryUpdateManyWithWhereWithoutUserInput = {
+    where: CategoryScalarWhereInput
+    data: XOR<CategoryUpdateManyMutationInput, CategoryUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type CategoryScalarWhereInput = {
+    AND?: CategoryScalarWhereInput | CategoryScalarWhereInput[]
+    OR?: CategoryScalarWhereInput[]
+    NOT?: CategoryScalarWhereInput | CategoryScalarWhereInput[]
+    id?: StringFilter<"Category"> | string
+    name?: StringFilter<"Category"> | string
+    color?: EnumCategoryColorNullableFilter<"Category"> | $Enums.CategoryColor | null
+    userId?: StringFilter<"Category"> | string
+    createdAt?: DateTimeFilter<"Category"> | Date | string
+    updatedAt?: DateTimeFilter<"Category"> | Date | string
+  }
+
   export type UserCreateWithoutSessionsInput = {
     id?: string
     email: string
@@ -7086,6 +10871,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
+    verses?: VerseCreateNestedManyWithoutUserInput
+    categories?: CategoryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -7097,6 +10884,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    verses?: VerseUncheckedCreateNestedManyWithoutUserInput
+    categories?: CategoryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -7124,6 +10913,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
+    verses?: VerseUpdateManyWithoutUserNestedInput
+    categories?: CategoryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -7135,6 +10926,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    verses?: VerseUncheckedUpdateManyWithoutUserNestedInput
+    categories?: CategoryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -7146,6 +10939,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
+    verses?: VerseCreateNestedManyWithoutUserInput
+    categories?: CategoryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -7157,6 +10952,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    verses?: VerseUncheckedCreateNestedManyWithoutUserInput
+    categories?: CategoryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -7184,6 +10981,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    verses?: VerseUpdateManyWithoutUserNestedInput
+    categories?: CategoryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -7195,6 +10994,260 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    verses?: VerseUncheckedUpdateManyWithoutUserNestedInput
+    categories?: CategoryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutCategoriesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    verses?: VerseCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCategoriesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    verses?: VerseUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCategoriesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCategoriesInput, UserUncheckedCreateWithoutCategoriesInput>
+  }
+
+  export type VerseCreateWithoutCategoryRelInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutVersesInput
+  }
+
+  export type VerseUncheckedCreateWithoutCategoryRelInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    userId: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseCreateOrConnectWithoutCategoryRelInput = {
+    where: VerseWhereUniqueInput
+    create: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput>
+  }
+
+  export type VerseCreateManyCategoryRelInputEnvelope = {
+    data: VerseCreateManyCategoryRelInput | VerseCreateManyCategoryRelInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutCategoriesInput = {
+    update: XOR<UserUpdateWithoutCategoriesInput, UserUncheckedUpdateWithoutCategoriesInput>
+    create: XOR<UserCreateWithoutCategoriesInput, UserUncheckedCreateWithoutCategoriesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCategoriesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCategoriesInput, UserUncheckedUpdateWithoutCategoriesInput>
+  }
+
+  export type UserUpdateWithoutCategoriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    verses?: VerseUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCategoriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    verses?: VerseUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type VerseUpsertWithWhereUniqueWithoutCategoryRelInput = {
+    where: VerseWhereUniqueInput
+    update: XOR<VerseUpdateWithoutCategoryRelInput, VerseUncheckedUpdateWithoutCategoryRelInput>
+    create: XOR<VerseCreateWithoutCategoryRelInput, VerseUncheckedCreateWithoutCategoryRelInput>
+  }
+
+  export type VerseUpdateWithWhereUniqueWithoutCategoryRelInput = {
+    where: VerseWhereUniqueInput
+    data: XOR<VerseUpdateWithoutCategoryRelInput, VerseUncheckedUpdateWithoutCategoryRelInput>
+  }
+
+  export type VerseUpdateManyWithWhereWithoutCategoryRelInput = {
+    where: VerseScalarWhereInput
+    data: XOR<VerseUpdateManyMutationInput, VerseUncheckedUpdateManyWithoutCategoryRelInput>
+  }
+
+  export type UserCreateWithoutVersesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    categories?: CategoryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutVersesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    categories?: CategoryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutVersesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutVersesInput, UserUncheckedCreateWithoutVersesInput>
+  }
+
+  export type CategoryCreateWithoutVersesInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutCategoriesInput
+  }
+
+  export type CategoryUncheckedCreateWithoutVersesInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CategoryCreateOrConnectWithoutVersesInput = {
+    where: CategoryWhereUniqueInput
+    create: XOR<CategoryCreateWithoutVersesInput, CategoryUncheckedCreateWithoutVersesInput>
+  }
+
+  export type UserUpsertWithoutVersesInput = {
+    update: XOR<UserUpdateWithoutVersesInput, UserUncheckedUpdateWithoutVersesInput>
+    create: XOR<UserCreateWithoutVersesInput, UserUncheckedCreateWithoutVersesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutVersesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutVersesInput, UserUncheckedUpdateWithoutVersesInput>
+  }
+
+  export type UserUpdateWithoutVersesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    categories?: CategoryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutVersesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    categories?: CategoryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type CategoryUpsertWithoutVersesInput = {
+    update: XOR<CategoryUpdateWithoutVersesInput, CategoryUncheckedUpdateWithoutVersesInput>
+    create: XOR<CategoryCreateWithoutVersesInput, CategoryUncheckedCreateWithoutVersesInput>
+    where?: CategoryWhereInput
+  }
+
+  export type CategoryUpdateToOneWithWhereWithoutVersesInput = {
+    where?: CategoryWhereInput
+    data: XOR<CategoryUpdateWithoutVersesInput, CategoryUncheckedUpdateWithoutVersesInput>
+  }
+
+  export type CategoryUpdateWithoutVersesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutCategoriesNestedInput
+  }
+
+  export type CategoryUncheckedUpdateWithoutVersesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AccountCreateManyUserInput = {
@@ -7218,6 +11271,33 @@ export namespace Prisma {
     expiresAt: Date | string
     ipAddress?: string | null
     userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseCreateManyUserInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    categoryId?: string | null
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CategoryCreateManyUserInput = {
+    id?: string
+    name: string
+    color?: $Enums.CategoryColor | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7293,6 +11373,165 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    categoryRel?: CategoryUpdateOneWithoutVersesNestedInput
+  }
+
+  export type VerseUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CategoryUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verses?: VerseUpdateManyWithoutCategoryRelNestedInput
+  }
+
+  export type CategoryUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verses?: VerseUncheckedUpdateManyWithoutCategoryRelNestedInput
+  }
+
+  export type CategoryUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableEnumCategoryColorFieldUpdateOperationsInput | $Enums.CategoryColor | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseCreateManyCategoryRelInput = {
+    id?: string
+    verse: string
+    reference: string
+    category: string
+    userId: string
+    leitnerLevel?: number
+    learningState?: $Enums.VerseLearningState
+    dueAt?: Date | string
+    lastReviewedAt?: Date | string | null
+    masteredAt?: Date | string | null
+    totalReviews?: number
+    successfulReviews?: number
+    failedReviews?: number
+    resetCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VerseUpdateWithoutCategoryRelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutVersesNestedInput
+  }
+
+  export type VerseUncheckedUpdateWithoutCategoryRelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VerseUncheckedUpdateManyWithoutCategoryRelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    verse?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    category?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    leitnerLevel?: IntFieldUpdateOperationsInput | number
+    learningState?: EnumVerseLearningStateFieldUpdateOperationsInput | $Enums.VerseLearningState
+    dueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastReviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    masteredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    successfulReviews?: IntFieldUpdateOperationsInput | number
+    failedReviews?: IntFieldUpdateOperationsInput | number
+    resetCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

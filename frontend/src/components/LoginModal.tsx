@@ -58,12 +58,15 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
             </button>
           </div>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <form className="mt-6 space-y-4" method="post" autoComplete="on" onSubmit={handleSubmit}>
             <FormInput
               id="login-email"
               label="Email"
+              name="email"
               type="email"
-              autoComplete="email"
+              autoComplete="username"
+              inputMode="email"
+              spellCheck={false}
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -73,6 +76,7 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
             <FormInput
               id="login-password"
               label="Password"
+              name="password"
               type="password"
               autoComplete="current-password"
               required

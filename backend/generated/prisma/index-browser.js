@@ -166,6 +166,35 @@ exports.Prisma.VerificationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VerseScalarFieldEnum = {
+  id: 'id',
+  verse: 'verse',
+  reference: 'reference',
+  category: 'category',
+  categoryId: 'categoryId',
+  userId: 'userId',
+  leitnerLevel: 'leitnerLevel',
+  learningState: 'learningState',
+  dueAt: 'dueAt',
+  lastReviewedAt: 'lastReviewedAt',
+  masteredAt: 'masteredAt',
+  totalReviews: 'totalReviews',
+  successfulReviews: 'successfulReviews',
+  failedReviews: 'failedReviews',
+  resetCount: 'resetCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -180,13 +209,33 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.CategoryColor = exports.$Enums.CategoryColor = {
+  GRAY: 'GRAY',
+  BRAND: 'BRAND',
+  ERROR: 'ERROR',
+  WARNING: 'WARNING',
+  SUCCESS: 'SUCCESS',
+  GRAY_BLUE: 'GRAY_BLUE',
+  BLUE_LIGHT: 'BLUE_LIGHT',
+  BLUE: 'BLUE',
+  INDIGO: 'INDIGO',
+  PURPLE: 'PURPLE',
+  PINK: 'PINK',
+  ORANGE: 'ORANGE'
+};
 
+exports.VerseLearningState = exports.$Enums.VerseLearningState = {
+  LEARNING: 'LEARNING',
+  MASTERED: 'MASTERED'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Session: 'Session',
   Account: 'Account',
-  Verification: 'Verification'
+  Verification: 'Verification',
+  Category: 'Category',
+  Verse: 'Verse'
 };
 
 /**

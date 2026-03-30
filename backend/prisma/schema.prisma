@@ -7,6 +7,26 @@ datasource db {
   provider = "postgresql"
 }
 
+enum CategoryColor {
+  GRAY
+  BRAND
+  ERROR
+  WARNING
+  SUCCESS
+  GRAY_BLUE
+  BLUE_LIGHT
+  BLUE
+  INDIGO
+  PURPLE
+  PINK
+  ORANGE
+}
+
+enum VerseLearningState {
+  LEARNING
+  MASTERED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -17,6 +37,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  verses        Verse[]
+  categories    Category[]
 }
 
 model Session {
@@ -62,4 +84,49 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+model Category {
+  id        String         @id @default(cuid())
+  name      String         // Category name (e.g., "Hope", "Love", etc.)
+  color     CategoryColor? // Category color using enum
+  userId    String         @map("user_id")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  // Relation with user (1:n - one user can have many categories)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relation with verses (1:n - one category can have many verses)
+  verses    Verse[]
+
+  @@map("categories")
+}
+
+model Verse {
+  id                String             @id @default(cuid())
+  verse             String             // Verse text
+  reference         String             // Bible reference (e.g., "John 3:16")
+  category          String             // Legacy field - keep for compatibility
+  categoryId        String?            @map("category_id") // New relation with Category
+  userId            String             @map("user_id")
+  leitnerLevel      Int                @default(1) @map("leitner_level")
+  learningState     VerseLearningState @default(LEARNING) @map("learning_state")
+  dueAt             DateTime           @default(now()) @map("due_at")
+  lastReviewedAt    DateTime?          @map("last_reviewed_at")
+  masteredAt        DateTime?          @map("mastered_at")
+  totalReviews      Int                @default(0) @map("total_reviews")
+  successfulReviews Int                @default(0) @map("successful_reviews")
+  failedReviews     Int                @default(0) @map("failed_reviews")
+  resetCount        Int                @default(0) @map("reset_count")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  // Relation with user
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relation with category (n:1 - many verses can have the same category)
+  categoryRel Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, learningState, dueAt], map: "verses_user_state_due_idx")
+  @@index([userId, leitnerLevel], map: "verses_user_level_idx")
+  @@map("verses")
 }

@@ -8,18 +8,19 @@ import { apiFetch } from '../api/client'
 const LoginModal = lazy(() => import('./LoginModal'))
 
 const navigation = [
-  { name: 'Product', href: '#' },
-  { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
+  { name: 'About me', path: '/about-me' },
+  { name: 'FAQ', path: '/faq' },
+  { name: 'Blog', path: '/blog' },
+  { name: 'Contact', path: '/contact' },
 ]
 
 type HeaderNavigationProps = {
   onNavigateHome: () => void
   onNavigateToMyAccount: () => void
+  onNavigate: (path: string) => void
 }
 
-export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount }: HeaderNavigationProps) {
+export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount, onNavigate }: HeaderNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -144,7 +145,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
     <header className="absolute inset-x-0 top-0 z-50">
       <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
-          <button type="button" onClick={handleNavigateHome} className="-m-1.5 p-1.5">
+          <button type="button" onClick={handleNavigateHome} className="cursor-pointer -m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
             <img
               alt=""
@@ -165,16 +166,16 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
           {navigation.map((item) => (
-            <a key={item.name} href={item.href} className="text-sm/6 font-semibold text-foreground">
+            <button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }} className="cursor-pointer text-sm/6 font-semibold text-foreground">
               {item.name}
-            </a>
+            </button>
           ))}
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-6">
           <button
             type="button"
             onClick={toggleTheme}
-            className="inline-flex items-center text-foreground"
+            className="cursor-pointer inline-flex items-center text-foreground"
           >
             <span className="sr-only">Toggle theme</span>
             {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
@@ -185,7 +186,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                 <button
                   type="button"
                   onClick={handleNavigateToMyAccount}
-                  className="text-sm/6 font-semibold text-foreground"
+                  className="cursor-pointer text-sm/6 font-semibold text-foreground"
                 >
                   My Account
                 </button>
@@ -220,7 +221,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
               ) : null}
             </div>
           ) : (
-            <button type="button" onClick={openLoginModal} className="text-sm/6 font-semibold text-foreground">
+            <button type="button" onClick={openLoginModal} className="cursor-pointer text-sm/6 font-semibold text-foreground">
               Log in <span aria-hidden="true"> &rarr;</span>
             </button>
           )}
@@ -230,7 +231,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
         <div className="fixed inset-0 z-50" />
         <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-card p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10">
           <div className="flex items-center justify-between">
-            <button type="button" onClick={handleNavigateHome} className="-m-1.5 p-1.5">
+            <button type="button" onClick={handleNavigateHome} className="cursor-pointer -m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <img
                 alt=""
@@ -251,13 +252,14 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             <div className="-my-6 divide-y divide-gray-500/10 dark:divide-gray-500/30">
               <div className="space-y-2 py-6">
                 {navigation.map((item) => (
-                  <a
+                  <button
                     key={item.name}
-                    href={item.href}
+                    type="button"
+                    onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }}
                     className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
                     {item.name}
-                  </a>
+                  </button>
                 ))}
               </div>
               <div className="py-6">

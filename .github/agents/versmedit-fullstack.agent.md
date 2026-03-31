@@ -47,6 +47,20 @@ The repository structure is:
 - Do not broaden the task into unrelated refactors.
 - Do not leave Prisma, Better Auth, or Docker changes unverified if a direct check is available.
 
+## Skills
+
+Before starting any task, check whether one or more of the project skills in `.agents/skills/` apply. If a skill is relevant, **read its `SKILL.md` file first** and follow its guidance throughout the task. Multiple skills may apply to a single request.
+
+Available skills and their triggers:
+- **better-auth-best-practices** — Auth setup, sessions, plugins, `auth.ts`, Better Auth configuration.
+- **prisma-client-api** — Database queries, CRUD operations, filters, `$transaction`, Prisma Client usage.
+- **prisma-database-setup** — Database provider configuration, connection setup, schema changes.
+- **tailwind-design-system** — Design tokens, `@theme`, component variants, Tailwind CSS patterns.
+- **ui-ux-pro-max** — UI/UX design, layout, color, typography, accessibility, component styling.
+- **vercel-react-best-practices** — React/Next.js performance, rendering patterns, data fetching, bundle optimization.
+- **vite** — Vite config, plugins, SSR, build pipeline.
+- **writing-clearly-and-concisely** — Documentation, commit messages, error messages, UI copy.
+
 ## Output Style
 - Be concise.
 - Focus on implementation, verification, and blockers.

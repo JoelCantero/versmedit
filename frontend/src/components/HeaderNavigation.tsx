@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
-import { Bars3Icon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, ChevronDownIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
 
 const LoginModal = lazy(() => import('./LoginModal'))
@@ -24,7 +24,8 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isDark, setIsDark] = useState(false)
-  const [isAccountMenuHovering, setIsAccountMenuHovering] = useState(false)
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const accountMenuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const root = document.documentElement
@@ -54,6 +55,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       return
     }
 
+    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     setLoginModalOpen(true)
   }
@@ -68,14 +70,52 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
   }
 
   const handleNavigateHome = () => {
+    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     onNavigateHome()
   }
 
   const handleNavigateToMyAccount = () => {
+    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     onNavigateToMyAccount()
   }
+
+  const toggleAccountMenu = () => {
+    setIsAccountMenuOpen((prev) => !prev)
+  }
+
+  useEffect(() => {
+    if (!isAccountMenuOpen) {
+      return
+    }
+
+    const handleOutsideInteraction = (event: MouseEvent | TouchEvent) => {
+      if (!(event.target instanceof Node)) {
+        return
+      }
+
+      if (!accountMenuRef.current?.contains(event.target)) {
+        setIsAccountMenuOpen(false)
+      }
+    }
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsAccountMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideInteraction)
+    document.addEventListener('touchstart', handleOutsideInteraction)
+    document.addEventListener('keydown', handleEscapeKey)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideInteraction)
+      document.removeEventListener('touchstart', handleOutsideInteraction)
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [isAccountMenuOpen])
 
   const handleLogout = async () => {
     try {
@@ -92,6 +132,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       }
 
       setIsAuthenticated(false)
+      setIsAccountMenuOpen(false)
       setMobileMenuOpen(false)
       onNavigateHome()
     } catch {
@@ -116,7 +157,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-200"
+            className="-m-2.5 inline-flex items-center justify-center rounded-full p-2.5 text-foreground"
           >
             <span className="sr-only">Open main menu</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
@@ -124,7 +165,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
           {navigation.map((item) => (
-            <a key={item.name} href={item.href} className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">
+            <a key={item.name} href={item.href} className="text-sm/6 font-semibold text-foreground">
               {item.name}
             </a>
           ))}
@@ -133,38 +174,53 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
           <button
             type="button"
             onClick={toggleTheme}
-            className="inline-flex items-center text-gray-900 dark:text-gray-100"
+            className="inline-flex items-center text-foreground"
           >
             <span className="sr-only">Toggle theme</span>
             {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
           </button>
           {isAuthenticated ? (
-            <div
-              className="relative"
-              onMouseEnter={() => setIsAccountMenuHovering(true)}
-              onMouseLeave={() => setIsAccountMenuHovering(false)}
-            >
-              <button
-                type="button"
-                onClick={handleNavigateToMyAccount}
-                className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100"
-              >
-                My Account
-              </button>
-              <div
-                className={`${isAccountMenuHovering ? 'block' : 'hidden'} absolute top-full right-0 z-20 w-40 origin-top-right rounded-md bg-white p-1 shadow-lg ring-1 ring-gray-900/10 dark:bg-gray-900 dark:ring-white/10`}
-              >
+            <div ref={accountMenuRef} className="relative">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
+                  onClick={handleNavigateToMyAccount}
+                  className="text-sm/6 font-semibold text-foreground"
                 >
-                  Logout
+                  My Account
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleAccountMenu}
+                  aria-haspopup="menu"
+                  aria-expanded={isAccountMenuOpen}
+                  aria-controls="account-actions-menu"
+                  className="inline-flex items-center rounded-full p-1.5 text-foreground hover:bg-accent"
+                >
+                  <span className="sr-only">Toggle account menu</span>
+                  <ChevronDownIcon aria-hidden="true" className="size-4" />
                 </button>
               </div>
+              {isAccountMenuOpen ? (
+                <div
+                  id="account-actions-menu"
+                  role="menu"
+                  aria-label="Account actions"
+                  className="absolute top-full right-0 z-20 mt-1 w-40 origin-top-right rounded-xl bg-card p-1 shadow-lg ring-1 ring-gray-900/10 dark:ring-white/10"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="block w-full rounded-full px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-accent"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : (
-            <button type="button" onClick={openLoginModal} className="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">
+            <button type="button" onClick={openLoginModal} className="text-sm/6 font-semibold text-foreground">
               Log in <span aria-hidden="true"> &rarr;</span>
             </button>
           )}
@@ -172,7 +228,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       </nav>
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
         <div className="fixed inset-0 z-50" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 dark:bg-gray-900 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10">
+        <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-card p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10">
           <div className="flex items-center justify-between">
             <button type="button" onClick={handleNavigateHome} className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
@@ -185,7 +241,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
-              className="-m-2.5 rounded-md p-2.5 text-gray-700 dark:text-gray-200"
+              className="-m-2.5 rounded-full p-2.5 text-foreground"
             >
               <span className="sr-only">Close menu</span>
               <XMarkIcon aria-hidden="true" className="size-6" />
@@ -198,7 +254,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   <a
                     key={item.name}
                     href={item.href}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                    className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
                     {item.name}
                   </a>
@@ -208,7 +264,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="-mx-3 inline-flex items-center rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                  className="-mx-3 inline-flex items-center rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                 >
                   <span className="sr-only">Toggle theme</span>
                   {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
@@ -216,7 +272,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                 <button
                   type="button"
                   onClick={isAuthenticated ? handleNavigateToMyAccount : openLoginModal}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                  className="-mx-3 block rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                 >
                   {isAuthenticated ? 'My Account' : 'Log in'}
                 </button>
@@ -224,7 +280,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                    className="-mx-3 block rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
                     Logout
                   </button>

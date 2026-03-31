@@ -10,7 +10,7 @@ type LayoutProps = {
 
 export default function Layout({ children, onNavigateHome, onNavigateToMyAccount }: LayoutProps) {
   return (
-    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-white dark:bg-gray-950">
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-background">
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

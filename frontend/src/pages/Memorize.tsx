@@ -63,7 +63,7 @@ export default function Memorize() {
       <section className="mx-auto flex min-h-[60vh] max-w-5xl items-center justify-center px-6 py-28 lg:px-8">
         <div className="flex items-center gap-3 rounded-xl bg-white/60 px-4 py-3 ring-1 ring-gray-900/10 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-white/10">
           <span className="size-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-          <span className="text-sm text-gray-700 dark:text-gray-200">Loading verses...</span>
+          <span className="text-sm text-foreground">Loading verses...</span>
         </div>
       </section>
     )
@@ -73,7 +73,7 @@ export default function Memorize() {
     return (
       <section className="mx-auto flex min-h-[60vh] max-w-5xl items-center justify-center px-6 py-28 lg:px-8">
         <div className="rounded-xl bg-white/60 p-6 text-center ring-1 ring-red-300 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-red-500/40">
-          <p className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>
+          <p className="text-sm font-medium text-destructive">{error}</p>
         </div>
       </section>
     )
@@ -83,7 +83,7 @@ export default function Memorize() {
     return (
       <section className="mx-auto flex min-h-[60vh] max-w-5xl items-center justify-center px-6 py-28 lg:px-8">
         <div className="rounded-xl bg-white/60 p-6 text-center ring-1 ring-gray-900/10 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-white/10">
-          <p className="text-sm text-gray-700 dark:text-gray-200">No verses due for review right now. Keep going tomorrow or add new verses</p>
+          <p className="text-sm text-foreground">No verses due for review right now. Keep going tomorrow or add new verses</p>
         </div>
       </section>
     )

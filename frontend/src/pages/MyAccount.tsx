@@ -88,7 +88,7 @@ export default function MyAccount() {
   if (isLoading) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
-        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Loading account...</p>
+        <p className="text-sm font-medium text-muted-foreground">Loading account...</p>
       </main>
     )
   }
@@ -96,9 +96,9 @@ export default function MyAccount() {
   if (!accountData) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">My Account</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h1 className="text-2xl font-semibold text-foreground">My Account</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             You need to log in to view your account details.
           </p>
         </div>
@@ -108,46 +108,46 @@ export default function MyAccount() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">My Account</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Authenticated account information from Better Auth.</p>
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h1 className="text-2xl font-semibold text-foreground">My Account</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Authenticated account information from Better Auth.</p>
 
         <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-            <dt className="text-gray-500 dark:text-gray-400">Name</dt>
-            <dd className="mt-1 font-medium text-gray-900 dark:text-white">{accountData.user.name ?? 'Not set'}</dd>
+          <div className="rounded-lg bg-muted p-4">
+            <dt className="text-muted-foreground">Name</dt>
+            <dd className="mt-1 font-medium text-foreground">{accountData.user.name ?? 'Not set'}</dd>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-            <dt className="text-gray-500 dark:text-gray-400">Email</dt>
-            <dd className="mt-1 font-medium text-gray-900 dark:text-white">{accountData.user.email}</dd>
+          <div className="rounded-lg bg-muted p-4">
+            <dt className="text-muted-foreground">Email</dt>
+            <dd className="mt-1 font-medium text-foreground">{accountData.user.email}</dd>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-            <dt className="text-gray-500 dark:text-gray-400">Email verified</dt>
-            <dd className="mt-1 font-medium text-gray-900 dark:text-white">{accountData.user.emailVerified ? 'Yes' : 'No'}</dd>
+          <div className="rounded-lg bg-muted p-4">
+            <dt className="text-muted-foreground">Email verified</dt>
+            <dd className="mt-1 font-medium text-foreground">{accountData.user.emailVerified ? 'Yes' : 'No'}</dd>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-            <dt className="text-gray-500 dark:text-gray-400">Session expires</dt>
-            <dd className="mt-1 font-medium text-gray-900 dark:text-white">{new Date(accountData.session.expiresAt).toLocaleString()}</dd>
+          <div className="rounded-lg bg-muted p-4">
+            <dt className="text-muted-foreground">Session expires</dt>
+            <dd className="mt-1 font-medium text-foreground">{new Date(accountData.session.expiresAt).toLocaleString()}</dd>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800 sm:col-span-2">
-            <dt className="text-gray-500 dark:text-gray-400">User ID</dt>
-            <dd className="mt-1 break-all font-medium text-gray-900 dark:text-white">{accountData.user.id}</dd>
+          <div className="rounded-lg bg-muted p-4 sm:col-span-2">
+            <dt className="text-muted-foreground">User ID</dt>
+            <dd className="mt-1 break-all font-medium text-foreground">{accountData.user.id}</dd>
           </div>
         </dl>
 
         <section className="mt-8">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Categories</h2>
-            <span className="text-sm text-gray-600 dark:text-gray-300">{accountData.categories.length} total</span>
+            <h2 className="text-lg font-semibold text-foreground">Categories</h2>
+            <span className="text-sm text-muted-foreground">{accountData.categories.length} total</span>
           </div>
           {accountData.categories.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">No categories linked to this account yet.</p>
+            <p className="mt-3 text-sm text-muted-foreground">No categories linked to this account yet.</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {accountData.categories.map((category) => (
-                <li key={category.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{category.name}</p>
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                <li key={category.id} className="rounded-lg border border-border bg-muted p-3">
+                  <p className="text-sm font-medium text-foreground">{category.name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Color: {category.color ?? 'None'} · Verses: {category._count.verses}
                   </p>
                 </li>
@@ -158,14 +158,14 @@ export default function MyAccount() {
 
         <section className="mt-8">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Level summary</h2>
-            <span className="text-sm text-gray-600 dark:text-gray-300">1 to 7</span>
+            <h2 className="text-lg font-semibold text-foreground">Level summary</h2>
+            <span className="text-sm text-muted-foreground">1 to 7</span>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {levelSummary.map((item) => (
-              <div key={item.level} className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Level {item.level}</p>
-                <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">{item.count} verses</p>
+              <div key={item.level} className="rounded-lg border border-border bg-muted p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Level {item.level}</p>
+                <p className="mt-1 text-sm font-medium text-foreground">{item.count} verses</p>
               </div>
             ))}
           </div>
@@ -173,24 +173,24 @@ export default function MyAccount() {
 
         <section className="mt-8">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Verses</h2>
-            <span className="text-sm text-gray-600 dark:text-gray-300">{accountData.verses.length} total</span>
+            <h2 className="text-lg font-semibold text-foreground">Verses</h2>
+            <span className="text-sm text-muted-foreground">{accountData.verses.length} total</span>
           </div>
           {accountData.verses.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">No verses linked to this account yet.</p>
+            <p className="mt-3 text-sm text-muted-foreground">No verses linked to this account yet.</p>
           ) : (
             <ul className="mt-3 space-y-3">
               {accountData.verses.map((verse) => (
-                <li key={verse.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">
-                  <p className="text-sm text-gray-900 dark:text-white">{verse.verse}</p>
-                  <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-200">{verse.reference}</p>
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                <li key={verse.id} className="rounded-lg border border-border bg-muted p-3">
+                  <p className="text-sm text-foreground">{verse.verse}</p>
+                  <p className="mt-2 text-xs font-medium text-foreground">{verse.reference}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Category: {verse.categoryRel?.name ?? verse.category}
                   </p>
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Level: {verse.leitnerLevel} · State: {verse.learningState} · Due: {new Date(verse.dueAt).toLocaleDateString()}
                   </p>
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Reviews: {verse.totalReviews} total ({verse.successfulReviews} success / {verse.failedReviews} fail) · Resets: {verse.resetCount}
                   </p>
                 </li>

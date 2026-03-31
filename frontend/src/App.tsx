@@ -57,9 +57,13 @@ export default function Example() {
     setCurrentView(view)
   }
 
+  const navigateHome = () => navigateToView('home')
+  const navigateToMyAccount = () => navigateToView('my-account')
+  const navigateToMemorize = () => navigateToView('memorize')
+
   return (
-    <Layout onNavigateHome={() => navigateToView('home')} onNavigateToMyAccount={() => navigateToView('my-account')}>
-      {currentView === 'home' ? <MainHero /> : null}
+    <Layout onNavigateHome={navigateHome} onNavigateToMyAccount={navigateToMyAccount}>
+      {currentView === 'home' ? <MainHero onNavigateToMemorize={navigateToMemorize} onNavigateToMyAccount={navigateToMyAccount} /> : null}
       {currentView === 'memorize' ? <Memorize /> : null}
       {currentView === 'my-account' ? <MyAccount /> : null}
     </Layout>

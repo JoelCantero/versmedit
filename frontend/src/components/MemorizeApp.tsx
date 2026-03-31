@@ -7,6 +7,7 @@ import {
   EyeSlashIcon,
 } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
+import Button from './Button'
 
 export type MemorizeVerse = {
   id: string
@@ -324,18 +325,18 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
     <section className="mx-auto max-w-5xl px-6 py-28 lg:px-8">
       <div className="rounded-2xl bg-white/60 p-8 shadow-lg ring-1 ring-gray-900/10 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-white/10">
         <div className="mb-6 flex justify-center">
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-700">
+          <span className="rounded-full bg-accent px-3 py-1 text-sm font-semibold text-foreground ring-1 ring-border">
             {currentVerse.category}
           </span>
         </div>
 
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{currentVerse.reference}</h2>
+          <h2 className="text-2xl font-bold text-foreground">{currentVerse.reference}</h2>
         </div>
 
         <div className="mb-8 flex min-h-32 items-center justify-center">
           {showText ? (
-            <p className="max-w-2xl text-center text-xl leading-relaxed text-gray-900 dark:text-white">&quot;{currentVerse.verse}&quot;</p>
+            <p className="max-w-2xl text-center text-xl leading-relaxed text-foreground">&quot;{currentVerse.verse}&quot;</p>
           ) : (
             <div className="space-y-6 text-center">
               {renderWordBadges()}
@@ -346,7 +347,7 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
                     <CheckCircleIcon className="size-4" />
                     {perfectMessage}
                   </span>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{nextReviewMessage}</p>
+                  <p className="text-sm text-muted-foreground">{nextReviewMessage}</p>
                 </div>
               ) : completionStatus === 'good' ? (
                 <div className="flex flex-col items-center gap-2">
@@ -356,17 +357,17 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-sm text-muted-foreground">
                   Tip: Type the first letter of each word in order to reveal them.
                 </p>
               )}
 
               {completionStatus !== null ? (
-                <p className="text-sm text-gray-600 dark:text-gray-300">Press Enter to continue to the next verse.</p>
+                <p className="text-sm text-muted-foreground">Press Enter to continue to the next verse.</p>
               ) : null}
 
               {reviewPersistError ? (
-                <p className="text-sm font-medium text-red-700 dark:text-red-300">{reviewPersistError}</p>
+                <p className="text-sm font-medium text-destructive">{reviewPersistError}</p>
               ) : null}
             </div>
           )}
@@ -374,15 +375,14 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
 
         {completionStatus === null ? (
           <div className="flex flex-wrap justify-center gap-3">
-            <button
+            <Button
               type="button"
               onClick={toggleText}
               disabled={hasShownVerse && !showText}
-              className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-400 dark:disabled:bg-gray-700"
             >
               {showText ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
               {showText ? 'Hide verse' : hasShownVerse ? 'Already shown' : 'Show verse'}
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>
@@ -391,29 +391,25 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
         <div />
 
         <div className="flex items-center justify-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-300">
+          <span className="text-sm text-muted-foreground">
             {currentVerseIndex + 1} of {verses.length}
           </span>
           <div className="h-2 w-32 rounded-full bg-gray-200 dark:bg-gray-700">
-            <div className="h-2 rounded-full bg-indigo-600 transition-all duration-300" style={{ width: `${progress}%` }} />
+            <div className="h-2 rounded-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant={completionStatus !== null ? 'primary' : 'secondary'}
           onClick={() => {
             void handleAdvance()
           }}
           disabled={currentVerseIndex === verses.length - 1 && completionStatus === null}
-          className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition ${
-            completionStatus !== null
-              ? 'bg-indigo-600 text-white hover:bg-indigo-500'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600'
-          } disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-800 dark:disabled:text-gray-500`}
         >
           Next verse
           <ArrowRightIcon className="size-4" />
-        </button>
+        </Button>
       </div>
     </section>
   )

@@ -3,6 +3,7 @@ import { Dialog, DialogPanel } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
 import FormInput from './FormInput'
+import Button from './Button'
 
 type LoginModalProps = {
   open: boolean
@@ -32,7 +33,7 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
 
       onLoginSuccess()
     } catch {
-      setErrorMessage('Credenciales incorrectas. Intentalo de nuevo.')
+      setErrorMessage('Invalid credentials. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -42,16 +43,16 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-gray-900/50" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-900/10 dark:bg-gray-900 dark:ring-white/10">
+        <DialogPanel className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl ring-1 ring-gray-900/10 dark:ring-white/10">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Log in</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Use your email and password to continue.</p>
+              <h2 className="text-xl font-semibold text-foreground">Log in</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Use your email and password to continue.</p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <span className="sr-only">Close login modal</span>
               <XMarkIcon aria-hidden="true" className="size-5" />
@@ -85,15 +86,11 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
               placeholder="********"
             />
 
-            {errorMessage ? <p className="text-sm font-medium text-red-600">{errorMessage}</p> : null}
+            {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
+            <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
               {isSubmitting ? 'Logging in...' : 'Log in'}
-            </button>
+            </Button>
           </form>
         </DialogPanel>
       </div>

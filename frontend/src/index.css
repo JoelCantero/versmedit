@@ -2,7 +2,55 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Minimal base styles so the scaffold is usable immediately. */
+/* ── Semantic design tokens ─────────────────────────────────── */
+@theme {
+  --color-background: #fff;
+  --color-foreground: oklch(0.21 0.006 265.754);
+
+  --color-card: #fff;
+  --color-card-foreground: oklch(0.21 0.006 265.754);
+
+  --color-muted: oklch(0.985 0.002 247.839);
+  --color-muted-foreground: oklch(0.446 0.017 264.436);
+
+  --color-accent: oklch(0.967 0.003 264.542);
+  --color-accent-foreground: oklch(0.21 0.006 265.754);
+
+  --color-primary: oklch(0.511 0.262 276.966);
+  --color-primary-foreground: #fff;
+
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: #fff;
+
+  --color-border: oklch(0.928 0.006 264.531);
+  --color-ring: oklch(0.585 0.233 277.117);
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-background: oklch(0.13 0.004 265.754);
+  --color-foreground: #fff;
+
+  --color-card: oklch(0.21 0.006 265.754);
+  --color-card-foreground: #fff;
+
+  --color-muted: oklch(0.278 0.011 264.436);
+  --color-muted-foreground: oklch(0.872 0.01 258.338);
+
+  --color-accent: oklch(0.278 0.011 264.436);
+  --color-accent-foreground: oklch(0.967 0.003 264.542);
+
+  --color-primary: oklch(0.511 0.262 276.966);
+  --color-primary-foreground: #fff;
+
+  --color-destructive: oklch(0.704 0.191 22.216);
+  --color-destructive-foreground: #fff;
+
+  --color-border: oklch(0.373 0.014 264.533);
+  --color-ring: oklch(0.673 0.182 276.935);
+}
+
+/* ── Base styles ────────────────────────────────────────────── */
 :root {
   color-scheme: light dark;
   font-family: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;

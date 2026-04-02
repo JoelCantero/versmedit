@@ -4,15 +4,18 @@ import { Suspense, lazy, useEffect, useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
+import { useTranslation } from '../i18n/LanguageContext'
+import type { TranslationKey } from '../i18n/translations/en'
 import Dropdown from './Dropdown'
+import LanguageSelector from './LanguageSelector'
 
 const LoginModal = lazy(() => import('./LoginModal'))
 
-const navigation = [
-  { name: 'About me', path: '/about-me' },
-  { name: 'FAQ', path: '/faq' },
-  { name: 'Blog', path: '/blog' },
-  { name: 'Contact', path: '/contact' },
+const navigation: { labelKey: TranslationKey; path: string }[] = [
+  { labelKey: 'nav.aboutMe', path: '/about-me' },
+  { labelKey: 'nav.faq', path: '/faq' },
+  { labelKey: 'nav.blog', path: '/blog' },
+  { labelKey: 'nav.contact', path: '/contact' },
 ]
 
 type HeaderNavigationProps = {
@@ -22,6 +25,7 @@ type HeaderNavigationProps = {
 }
 
 export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount, onNavigate }: HeaderNavigationProps) {
+  const { t } = useTranslation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -106,7 +110,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
           <button type="button" onClick={handleNavigateHome} className="cursor-pointer -m-1.5 p-1.5">
-            <span className="sr-only">Your Company</span>
+            <span className="sr-only">{t('nav.srCompanyLogo')}</span>
             <img
               alt=""
               src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
@@ -120,14 +124,14 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             onClick={() => setMobileMenuOpen(true)}
             className="-m-2.5 inline-flex items-center justify-center rounded-full p-2.5 text-foreground"
           >
-            <span className="sr-only">Open main menu</span>
+            <span className="sr-only">{t('nav.srOpenMenu')}</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
           {navigation.map((item) => (
-            <button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }} className="cursor-pointer text-sm/6 font-semibold text-foreground">
-              {item.name}
+            <button key={item.labelKey} type="button" onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+              {t(item.labelKey)}
             </button>
           ))}
         </div>
@@ -137,20 +141,21 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             onClick={toggleTheme}
             className="cursor-pointer inline-flex items-center text-foreground"
           >
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">{t('nav.srToggleTheme')}</span>
             {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
           </button>
+          <LanguageSelector />
           {isAuthenticated ? (
             <Dropdown
-              label="My Account"
+              label={t('nav.myAccount')}
               items={[
-                { label: 'View account', onClick: handleNavigateToMyAccount },
-                { label: 'Logout', onClick: handleLogout },
+                { label: t('nav.viewAccount'), onClick: handleNavigateToMyAccount },
+                { label: t('nav.logout'), onClick: handleLogout },
               ]}
             />
           ) : (
             <button type="button" onClick={openLoginModal} className="cursor-pointer text-sm/6 font-semibold text-foreground">
-              Log in <span aria-hidden="true"> &rarr;</span>
+              {t('nav.logIn')} <span aria-hidden="true"> &rarr;</span>
             </button>
           )}
         </div>
@@ -160,7 +165,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
         <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-card p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10">
           <div className="flex items-center justify-between">
             <button type="button" onClick={handleNavigateHome} className="cursor-pointer -m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
+              <span className="sr-only">{t('nav.srCompanyLogo')}</span>
               <img
                 alt=""
                 src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
@@ -172,7 +177,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
               onClick={() => setMobileMenuOpen(false)}
               className="-m-2.5 rounded-full p-2.5 text-foreground"
             >
-              <span className="sr-only">Close menu</span>
+              <span className="sr-only">{t('nav.srCloseMenu')}</span>
               <XMarkIcon aria-hidden="true" className="size-6" />
             </button>
           </div>
@@ -181,12 +186,12 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
               <div className="space-y-2 py-6">
                 {navigation.map((item) => (
                   <button
-                    key={item.name}
+                    key={item.labelKey}
                     type="button"
                     onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }}
                     className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
-                    {item.name}
+                    {t(item.labelKey)}
                   </button>
                 ))}
               </div>
@@ -196,9 +201,12 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   onClick={toggleTheme}
                   className="-mx-3 inline-flex items-center rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                 >
-                  <span className="sr-only">Toggle theme</span>
+                  <span className="sr-only">{t('nav.srToggleTheme')}</span>
                   {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
                 </button>
+                <div className="-mx-3 px-3 py-2">
+                  <LanguageSelector />
+                </div>
                 {isAuthenticated ? (
                   <div className="-mx-3">
                     <button
@@ -206,7 +214,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                       onClick={() => setIsMobileAccountOpen((prev) => !prev)}
                       className="flex w-full items-center justify-between rounded-full py-2 pr-3.5 pl-3 text-base/7 font-semibold text-foreground hover:bg-accent"
                     >
-                      My Account
+                      {t('nav.myAccount')}
                       <ChevronDownIcon
                         aria-hidden="true"
                         className={`size-5 flex-none transition-transform ${isMobileAccountOpen ? 'rotate-180' : ''}`}
@@ -219,14 +227,14 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                           onClick={handleNavigateToMyAccount}
                           className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
                         >
-                          View account
+                          {t('nav.viewAccount')}
                         </button>
                         <button
                           type="button"
                           onClick={handleLogout}
                           className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
                         >
-                          Logout
+                          {t('nav.logout')}
                         </button>
                       </div>
                     ) : null}
@@ -237,7 +245,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                     onClick={openLoginModal}
                     className="-mx-3 block rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
-                    Log in
+                    {t('nav.logIn')}
                   </button>
                 )}
               </div>

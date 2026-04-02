@@ -98,7 +98,9 @@ export default function Post({ slug, onBack }: PostProps) {
       </button>
 
       <article className="mt-10">
-        <header className="mx-auto max-w-2xl">
+        <PageHeader title={post.title} description={post.description} />
+
+        <div className="mx-auto mt-10 max-w-2xl">
           <div className="flex items-center gap-x-4 text-xs">
             <time dateTime={post.publishedAt} className="text-muted-foreground">
               {formatDate(post.publishedAt)}
@@ -107,16 +109,8 @@ export default function Post({ slug, onBack }: PostProps) {
               {post.category}
             </CategoryBadge>
           </div>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            {post.title}
-          </h1>
-          <p className="mt-6 text-xl/8 text-muted-foreground">
-            {post.description}
-          </p>
-        </header>
 
-        <div className="mx-auto mt-10 max-w-2xl">
-          <div className="mb-8 flex items-center gap-x-4">
+          <div className="mb-8 mt-8 flex items-center gap-x-4">
             <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
               {(post.author.name ?? 'A').charAt(0).toUpperCase()}
             </div>

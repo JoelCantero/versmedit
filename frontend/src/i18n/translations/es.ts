@@ -55,6 +55,9 @@ const es: Record<TranslationKey, string> = {
   // FAQ
   'faq.title': 'Preguntas frecuentes',
   'faq.description': 'Todo lo que necesitas saber sobre Versmedit.',
+  'faq.section.learningProcess': 'Proceso de aprendizaje',
+  'faq.section.leitnerSystem': 'Sistema Leitner',
+  'faq.section.practiceMode': 'Modo practicar',
   'faq.q1.title': '¿Cómo funciona el aprendizaje diario?',
   'faq.q1.content':
     'Cada día, Versmedit selecciona los versículos que te tocan repasar durante ese día según el calendario de Leitner. El objetivo es revisar los versículos en intervalos óptimos para una mejor retención.',
@@ -93,6 +96,12 @@ const es: Record<TranslationKey, string> = {
   'faq.q9.content': 'Sí, puedes repasar tus versículos dominados. Para hacerlo, selecciona los versículos dominados y pulsa el botón',
   'faq.q9.studyAgain': 'Estudiar de nuevo',
   'faq.q9.contentEnd': '. Volverán al nivel 1 y comenzarán el proceso de memorización desde el principio.',
+  'faq.q10.title': '¿Qué es el Sistema Leitner y cómo ayuda a memorizar?',
+  'faq.q10.content':
+    'El Sistema Leitner es un método de repetición espaciada que organiza tus versículos en niveles. Los versículos nuevos o difíciles se repasan con más frecuencia, mientras que los que dominas se repasan menos a menudo. Este enfoque está científicamente demostrado que mueve la información de la memoria a corto plazo a la memoria a largo plazo de forma más eficiente que la simple repetición.',
+  'faq.q11.title': '¿En qué se diferencia el modo Practicar del modo Memorizar?',
+  'faq.q11.content':
+    'En el modo Memorizar, tus versículos se repasan según un calendario y tu progreso se registra: las respuestas correctas suben el versículo de nivel y los errores lo bajan. En el modo Practicar, puedes repasar todos tus versículos libremente en orden aleatorio sin afectar su nivel ni su calendario. Es una forma relajada de refrescar tu memoria cuando quieras.',
 
   // My Account
   'myAccount.title': 'Mi cuenta',

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CategoryColor, PrismaClient } from "../generated/prisma/index.js";
+import * as bcrypt from "bcryptjs";
 
 const connectionString =
   process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/versmedit";
@@ -253,6 +254,8 @@ async function seedPosts(authorId: string) {
 async function main() {
   console.log("Seeding verses and categories for canterojoel@gmail.com...");
 
+  const hashedPassword = await bcrypt.hash("password123", 10);
+
   const user = await prisma.user.upsert({
     where: { email: "canterojoel@gmail.com" },
     update: {
@@ -261,7 +264,8 @@ async function main() {
     create: {
       email: "canterojoel@gmail.com",
       name: "Joel Cantero",
-      emailVerified: true
+      emailVerified: true,
+      password: hashedPassword
     }
   });
 

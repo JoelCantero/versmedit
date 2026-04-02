@@ -10,7 +10,7 @@ import { apiFetch } from '../api/client'
 import Button from './Button'
 import CategoryBadge, { toBadgeColor } from './CategoryBadge'
 
-export type MemorizeVerse = {
+export type VersePlayerVerse = {
   id: string
   reference: string
   verse: string
@@ -19,8 +19,9 @@ export type MemorizeVerse = {
   leitnerLevel: number
 }
 
-type MemorizeAppProps = {
-  verses: MemorizeVerse[]
+type VersePlayerProps = {
+  verses: VersePlayerVerse[]
+  mode: 'memorize' | 'practice'
 }
 
 type PersistedReview = {
@@ -56,7 +57,7 @@ const getShownVersesFromStorage = (): string[] => {
   }
 }
 
-export default function MemorizeApp({ verses }: MemorizeAppProps) {
+export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0)
   const [showText, setShowText] = useState(false)
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -375,7 +376,7 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
           )}
         </div>
 
-        {completionStatus === null ? (
+        {completionStatus === null && mode === 'practice' ? (
           <div className="flex flex-wrap justify-center gap-3">
             <Button
               type="button"

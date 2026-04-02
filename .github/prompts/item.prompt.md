@@ -2,7 +2,11 @@
 description: "Create a new item in the Versmedit GitHub project board"
 ---
 
-Create a new item in the **Versmedit** GitHub project (owner: `JoelCantero`, project number: `2`).
+Create a new item in the **Versmedit** GitHub project (project number: `2`).
+
+## Step 0 — Identify the current user
+
+Use `get_me` to fetch the authenticated GitHub user. Store the returned `login` as `<owner>` and use it for all subsequent API calls where `owner`, `item_owner`, or repo path is required.
 
 ## Priority
 
@@ -35,7 +39,7 @@ The item must have a story-point estimate. Valid values are: **1, 2, 3, 5, 8, 13
 
 The item must have one or more labels applied at issue creation time.
 
-Available labels in `JoelCantero/versmedit`:
+Available labels in `<owner>/versmedit`:
 
 **Type labels** — describe what kind of change it is:
 | Label | When to use |
@@ -64,33 +68,33 @@ Available labels in `JoelCantero/versmedit`:
 
 Follow these five steps in order:
 
-1. **Create a GitHub issue** in the `JoelCantero/versmedit` repository using `issue_write` with method `create`. Write the title and body in **English**. The body should include a brief summary and acceptance criteria. Pass the inferred labels in the `labels` parameter (array of label name strings).
+1. **Create a GitHub issue** in the `<owner>/versmedit` repository using `issue_write` with method `create`. Write the title and body in **English**. The body should include a brief summary and acceptance criteria. Pass the inferred labels in the `labels` parameter (array of label name strings).
 
 2. **Add the issue to the project** using `projects_write` with method `add_project_item` and these parameters:
-   - `owner`: `JoelCantero`
+   - `owner`: `<owner>`
    - `owner_type`: `user`
    - `project_number`: `2`
    - `item_type`: `issue`
-   - `item_owner`: `JoelCantero`
+   - `item_owner`: `<owner>`
    - `item_repo`: `versmedit`
    - `issue_number`: the number from step 1
 
 3. **Get the numeric item ID** using `projects_list` with method `list_project_items` and these parameters:
-   - `owner`: `JoelCantero`
+   - `owner`: `<owner>`
    - `owner_type`: `user`
    - `project_number`: `2`
 
    Find the item whose `content.number` matches the issue number from step 1. Use its top-level numeric `id` field (e.g. `171798881`) — **not** the `node_id` string.
 
 4. **Set the priority field** using `projects_write` with method `update_project_item` and these parameters:
-   - `owner`: `JoelCantero`
+   - `owner`: `<owner>`
    - `owner_type`: `user`
    - `project_number`: `2`
    - `item_id`: the numeric ID from step 3
    - `updated_field`: `{"id": 271528039, "value": "<option_id from priority table>"}` — e.g. `{"id": 271528039, "value": "0a877460"}` for High
 
 5. **Set the estimate field** using `projects_write` with method `update_project_item` and these parameters:
-   - `owner`: `JoelCantero`
+   - `owner`: `<owner>`
    - `owner_type`: `user`
    - `project_number`: `2`
    - `item_id`: the numeric ID from step 3

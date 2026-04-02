@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiFetch } from '../api/client'
-import MemorizeApp, { type MemorizeVerse } from '../components/MemorizeApp'
+import VersePlayer, { type VersePlayerVerse } from '../components/VersePlayer'
 
 type AccountSummaryResponse = {
   verses: Array<{
@@ -20,7 +20,7 @@ type AccountSummaryResponse = {
 }
 
 export default function Memorize() {
-  const [verses, setVerses] = useState<MemorizeVerse[]>([])
+  const [verses, setVerses] = useState<VersePlayerVerse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,7 +31,7 @@ export default function Memorize() {
         setError(null)
 
         const accountSummary = await apiFetch<AccountSummaryResponse>('/account/my-account?dueOnly=true')
-        const mappedVerses: MemorizeVerse[] = accountSummary.verses.map((item) => ({
+        const mappedVerses: VersePlayerVerse[] = accountSummary.verses.map((item) => ({
           id: item.id,
           reference: item.reference,
           verse: item.verse,
@@ -90,5 +90,5 @@ export default function Memorize() {
     )
   }
 
-  return <MemorizeApp verses={verses} />
+  return <VersePlayer verses={verses} mode="memorize" />
 }

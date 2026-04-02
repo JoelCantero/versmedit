@@ -1,0 +1,79 @@
+---
+description: "Implement a project item: branch, code, PR, and update the issue"
+---
+
+Implement a GitHub issue from the **Versmedit** project (repo: `versmedit`).
+
+The user will provide an **issue number**. Follow all steps below in order.
+
+---
+
+## Step 0 — Identify the current user
+
+Use `get_me` to fetch the authenticated GitHub user. Store the returned `login` as `<owner>` and use it for all subsequent API calls where `owner` is required.
+
+## Step 1 — Read the issue
+
+Use `issue_read` with method `get` to fetch issue `#<number>` from `<owner>/versmedit`.
+Parse the **acceptance criteria** (checkboxes) and the **summary** so you know exactly what to build.
+
+## Step 2 — Create a branch
+
+Use `create_branch` to create a new branch from `main`:
+- `owner`: `<owner>`
+- `repo`: `versmedit`
+- `branch`: use the pattern `feat/<number>-<short-slug>` (e.g. `feat/5-rename-memorize-app`)
+  - For bugs use `fix/` instead of `feat/`.
+  - For refactors use `refactor/`.
+
+Then switch to that branch locally:
+
+```sh
+git fetch origin && git checkout <branch>
+```
+
+## Step 3 — Implement the changes
+
+Follow the **acceptance criteria** from the issue one by one.
+Apply the project's coding conventions (see the agent instructions).
+After each meaningful sub-task:
+
+1. **Comment on the issue** using `add_issue_comment` with a short progress update (e.g. "Created `VersePlayer.tsx` component with `mode` prop.").
+
+Validate the implementation:
+- Frontend changes → `npx tsc --noEmit` in `frontend/`
+- Backend changes → `npx tsc --noEmit` in `backend/`, and `npx prisma generate` if schema changed
+- Both → run both checks
+
+## Step 4 — Push changes and create a Pull Request
+
+Push the branch:
+
+```sh
+git add -A && git commit -m "<conventional commit message>" && git push origin <branch>
+```
+
+Use conventional commit format: `feat(scope): description`, `fix(scope): ...`, `refactor(scope): ...`.
+
+Then use `create_pull_request`:
+- `owner`: `<owner>`
+- `repo`: `versmedit`
+- `title`: same conventional commit message
+- `body`: include a brief summary of the changes, a checklist of what was done, and `Closes #<number>` to auto-close the issue on merge
+- `head`: the branch name from step 2
+- `base`: `main`
+
+## Step 5 — Update the issue
+
+Use `add_issue_comment` to post a final summary comment on the issue:
+- List what was implemented
+- Link to the PR
+- Mention any remaining risk or follow-up items
+
+## Output
+
+After all steps, confirm:
+- Branch name
+- PR title, number, and URL
+- Number of comments added to the issue
+- Verification result (TypeScript build, Prisma generate, etc.)

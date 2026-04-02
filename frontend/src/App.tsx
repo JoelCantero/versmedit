@@ -10,7 +10,7 @@ import Practice from './pages/Practice'
 import AboutMe from './pages/AboutMe'
 import Faq from './pages/Faq'
 import Blog from './pages/Blog'
-import PostDetail from './pages/PostDetail'
+import Post from './pages/Post'
 import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
 import SignUp from './pages/SignUp'
@@ -113,7 +113,7 @@ export default function Example() {
         {view === 'about-me' ? <AboutMe /> : null}
         {view === 'faq' ? <Faq /> : null}
         {view === 'blog' ? <Blog onSelectPost={navigateToBlogPost} /> : null}
-        {view === 'blog-post' && slug ? <PostDetail slug={slug} onBack={navigateToBlogs} /> : null}
+        {view === 'blog-post' && slug ? <Post slug={slug} onBack={navigateToBlogs} /> : null}
         {view === 'contact' ? <Contact /> : null}
         {view === 'sign-up' ? <SignUp onNavigateHome={navigateHome} /> : null}
         {view === 'not-found' ? <NotFound onNavigateHome={navigateHome} onNavigateContact={() => navigateToView('contact')} /> : null}

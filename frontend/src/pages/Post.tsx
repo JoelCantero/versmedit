@@ -20,12 +20,12 @@ function formatDate(dateString: string): string {
   })
 }
 
-interface PostDetailPageProps {
+interface PostProps {
   slug: string
   onBack: () => void
 }
 
-export default function PostDetailPage({ slug, onBack }: PostDetailPageProps) {
+export default function Post({ slug, onBack }: PostProps) {
   const { t } = useTranslation()
   const [post, setPost] = useState<PostDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)

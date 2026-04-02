@@ -83,9 +83,20 @@ Use `add_issue_comment` to post a final summary comment on the issue:
 - Link to the PR
 - Mention any remaining risk or follow-up items
 
-## Step 6 — Set project item to "Done"
+## Step 6 — Wait for user validation
 
-Use `projects_write` (method `update_project_item`) with:
+**STOP HERE.** The PR is now created and open.
+
+Provide a summary:
+- PR title, number, and URL
+- Verification result (TypeScript build, Prisma generate, etc.)
+- List of changes implemented
+
+**Wait for the user to confirm** that the PR is ready to close (either by merging, reviewing, or other validation).
+
+## Step 7 — Set project item to "Done"
+
+Once the user confirms, use `projects_write` (method `update_project_item`) with:
 - `project_number`: `2`
 - `item_id`: the same item ID from Step 1.5
 - `updated_field`: `{"id": 271527944, "value": "98236657"}`

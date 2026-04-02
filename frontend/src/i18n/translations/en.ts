@@ -37,7 +37,11 @@ const en = {
 
   // Blog
   'blog.title': 'Blog',
-  'blog.description': 'No posts yet. Check back soon for updates on Versmedit.',
+  'blog.description': 'Tips, insights, and updates on Scripture memorization with Versmedit.',
+  'blog.loading': 'Loading posts...',
+  'blog.loadError': 'Unable to load posts right now. Please try again.',
+  'blog.noPosts': 'No posts yet. Check back soon for updates on Versmedit.',
+  'blog.readMore': 'Read more',
 
   // Contact
   'contact.title': 'Contact',
@@ -148,6 +152,7 @@ const en = {
   'signUp.submit': 'Sign up',
   'signUp.submitting': 'Creating account...',
   'signUp.error': 'Could not create account. Please try again.',
+  'signUp.userExists': 'An account with this email already exists. Please sign in instead.',
   'signUp.successTitle': 'Account created',
   'signUp.successDescription': 'Your account has been created successfully.',
   'signUp.goHome': 'Go back home',

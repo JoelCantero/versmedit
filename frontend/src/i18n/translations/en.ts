@@ -12,6 +12,8 @@ const en = {
   'nav.srCloseMenu': 'Close menu',
   'nav.srToggleTheme': 'Toggle theme',
   'nav.srCompanyLogo': 'Versmedit',
+  'nav.practice': 'Practice',
+  'nav.memorize': 'Memorize',
 
   // Hero
   'hero.badge': 'Versmedit daily focus.',
@@ -158,16 +160,25 @@ const en = {
   'memorize.loadError': 'Unable to load verses right now. Please try again.',
   'memorize.noVerses': 'No verses due for review right now. Keep going tomorrow or add new verses',
 
+  // Practice
+  'practice.title': 'Practice',
+  'practice.description': 'Review all your verses and strengthen your recall.',
+  'practice.loading': 'Loading verses...',
+  'practice.loginRequired': 'Please sign in to access practice mode.',
+  'practice.loadError': 'Unable to load verses right now. Please try again.',
+  'practice.noVerses': 'No verses found. Add some verses to start practicing.',
+
   // VersePlayer
   'versePlayer.tip': 'Tip: Type the first letter of each word in order to reveal them.',
   'versePlayer.perfect': 'Perfect! You move up from level {currentLevel} to {nextLevel}.',
   'versePlayer.mastered': 'Amazing! You have mastered this verse.',
   'versePlayer.tryImprove': 'Try to improve next time! Down to level {level}.',
+  'versePlayer.practicePerfect': 'Great job! You nailed it.',
+  'versePlayer.practiceGood': 'Keep practicing, you can do even better!',
   'versePlayer.pressEnter': 'Press Enter to continue to the next verse.',
   'versePlayer.persistError': 'Unable to save your progress right now. Please try again.',
   'versePlayer.showVerse': 'Show verse',
   'versePlayer.hideVerse': 'Hide verse',
-  'versePlayer.alreadyShown': 'Already shown',
   'versePlayer.of': 'of',
   'versePlayer.nextVerse': 'Next verse',
   'versePlayer.noReviewNeeded': 'No further review is needed.',

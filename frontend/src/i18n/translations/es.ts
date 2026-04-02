@@ -14,6 +14,8 @@ const es: Record<TranslationKey, string> = {
   'nav.srCloseMenu': 'Cerrar menú',
   'nav.srToggleTheme': 'Cambiar tema',
   'nav.srCompanyLogo': 'Versmedit',
+  'nav.practice': 'Practicar',
+  'nav.memorize': 'Memorizar',
 
   // Hero
   'hero.badge': 'Enfoque diario de Versmedit.',
@@ -160,16 +162,25 @@ const es: Record<TranslationKey, string> = {
   'memorize.loadError': 'No se pudieron cargar los versículos. Por favor, inténtalo de nuevo.',
   'memorize.noVerses': 'No hay versículos pendientes de repaso ahora. ¡Sigue mañana o añade nuevos versículos!',
 
+  // Practice
+  'practice.title': 'Practicar',
+  'practice.description': 'Repasa todos tus versículos y fortalece tu memoria.',
+  'practice.loading': 'Cargando versículos...',
+  'practice.loginRequired': 'Inicia sesión para acceder al modo practicar.',
+  'practice.loadError': 'No se pudieron cargar los versículos. Por favor, inténtalo de nuevo.',
+  'practice.noVerses': 'No se encontraron versículos. Añade algunos para empezar a practicar.',
+
   // VersePlayer
   'versePlayer.tip': 'Consejo: Escribe la primera letra de cada palabra en orden para revelarlas.',
   'versePlayer.perfect': '¡Perfecto! Subes del nivel {currentLevel} al {nextLevel}.',
   'versePlayer.mastered': '¡Increíble! Has dominado este versículo.',
   'versePlayer.tryImprove': '¡Intenta mejorar la próxima vez! Bajas al nivel {level}.',
+  'versePlayer.practicePerfect': '¡Muy bien! Lo has clavado.',
+  'versePlayer.practiceGood': '¡Sigue practicando, aún lo puedes hacer mejor!',
   'versePlayer.pressEnter': 'Pulsa Enter para continuar al siguiente versículo.',
   'versePlayer.persistError': 'No se pudo guardar tu progreso. Por favor, inténtalo de nuevo.',
   'versePlayer.showVerse': 'Mostrar versículo',
   'versePlayer.hideVerse': 'Ocultar versículo',
-  'versePlayer.alreadyShown': 'Ya mostrado',
   'versePlayer.of': 'de',
   'versePlayer.nextVerse': 'Siguiente versículo',
   'versePlayer.noReviewNeeded': 'No se necesitan más repasos.',

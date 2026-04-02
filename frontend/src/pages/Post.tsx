@@ -4,7 +4,6 @@ import CategoryBadge from '../components/CategoryBadge'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
-import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 const CATEGORY_COLORS: Record<string, 'gray' | 'blue' | 'indigo' | 'green' | 'purple'> = {
   'Getting Started': 'blue',
@@ -22,10 +21,9 @@ function formatDate(dateString: string): string {
 
 interface PostProps {
   slug: string
-  onBack: () => void
 }
 
-export default function Post({ slug, onBack }: PostProps) {
+export default function Post({ slug }: PostProps) {
   const { t } = useTranslation()
   const [post, setPost] = useState<PostDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -51,13 +49,6 @@ export default function Post({ slug, onBack }: PostProps) {
   if (isLoading) {
     return (
       <PageShell className="max-w-3xl">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
-          <ArrowLeftIcon className="size-4" />
-          Back to blog
-        </button>
         <div className="mt-10 flex justify-center">
           <div className="flex items-center gap-3 rounded-xl bg-white/60 px-4 py-3 ring-1 ring-gray-900/10 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-white/10">
             <span className="size-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
@@ -71,13 +62,6 @@ export default function Post({ slug, onBack }: PostProps) {
   if (error || !post) {
     return (
       <PageShell className="max-w-3xl">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
-          <ArrowLeftIcon className="size-4" />
-          Back to blog
-        </button>
         <div className="mt-10 flex justify-center">
           <div className="rounded-xl bg-white/60 p-6 text-center ring-1 ring-red-300 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-red-500/40">
             <p className="text-sm font-medium text-destructive">{error || 'Post not found'}</p>
@@ -89,14 +73,6 @@ export default function Post({ slug, onBack }: PostProps) {
 
   return (
     <PageShell className="max-w-3xl">
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-      >
-        <ArrowLeftIcon className="size-4" />
-        Back to blog
-      </button>
-
       <article className="mt-10">
         <PageHeader title={post.title} description={post.description} />
 

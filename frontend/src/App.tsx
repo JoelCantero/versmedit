@@ -94,7 +94,6 @@ export default function Example() {
   const navigateToMyAccount = () => navigateToView('my-account')
   const navigateToMemorize = () => navigateToView('memorize')
   const navigateToBlogPost = (slug: string) => navigateToView('blog-post', slug)
-  const navigateToBlogs = () => navigateToView('blog')
 
   const navigateByPath = (path: string) => {
     const state = parsePathname(path)
@@ -113,7 +112,7 @@ export default function Example() {
         {view === 'about-me' ? <AboutMe /> : null}
         {view === 'faq' ? <Faq /> : null}
         {view === 'blog' ? <Blog onSelectPost={navigateToBlogPost} /> : null}
-        {view === 'blog-post' && slug ? <Post slug={slug} onBack={navigateToBlogs} /> : null}
+        {view === 'blog-post' && slug ? <Post slug={slug} /> : null}
         {view === 'contact' ? <Contact /> : null}
         {view === 'sign-up' ? <SignUp onNavigateHome={navigateHome} /> : null}
         {view === 'not-found' ? <NotFound onNavigateHome={navigateHome} onNavigateContact={() => navigateToView('contact')} /> : null}

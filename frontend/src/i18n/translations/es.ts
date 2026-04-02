@@ -57,6 +57,11 @@ const es: Record<TranslationKey, string> = {
   'faq.q1.content':
     'Cada día, el sistema selecciona tarjetas de tu caja según el calendario de Leitner. El objetivo es revisar las tarjetas en intervalos óptimos para una mejor retención.',
   'faq.q2.title': '¿Qué pasa cuando me sé un versículo?',
+  'faq.q2.know': 'te sabes el versículo',
+  'faq.q2.knowDesc': 'y no cometes ningún error, el versículo sube al siguiente nivel.',
+  'faq.q2.dontKnow': 'no te sabes el versículo',
+  'faq.q2.dontKnowDesc': 'o cometes errores, el versículo vuelve al Nivel 1 para repasarlo con más frecuencia.',
+  'faq.q2.ifYou': 'Si',
   'faq.q3.title': '¿Qué pasa si olvido un versículo mientras estudio?',
   'faq.q3.content':
     '¡No te preocupes! Si olvidas un versículo, simplemente devuélvelo al primer nivel y empieza de nuevo. La repetición te ayuda a guardar la Palabra de Dios en tu corazón. Cuanto más practiques, más fuerte y natural se vuelve el versículo en tu memoria.',
@@ -67,6 +72,15 @@ const es: Record<TranslationKey, string> = {
   'faq.q5.content':
     'Los versículos aparecen para repaso según tu calendario de Leitner. Cuanto más alto sea el nivel de un versículo, menos frecuentemente necesita ser repasado. Si no aparecen versículos hoy, simplemente significa que vas bien: nada está pendiente aún. ¡Sigue mañana!',
   'faq.q6.title': '¿Con qué frecuencia están disponibles los versículos para estudiar?',
+  'faq.q6.intro': 'Cada versículo sigue su propio calendario individual según su nivel:',
+  'faq.q6.l1': 'mismo día (inmediatamente)',
+  'faq.q6.l2': 'después de 2 días',
+  'faq.q6.l3': 'después de 3 días',
+  'faq.q6.l4': 'después de 7 días',
+  'faq.q6.l5': 'después de 15 días',
+  'faq.q6.l6': 'después de 31 días',
+  'faq.q6.l7': 'después de 61 días',
+  'faq.q6.outro': 'Este calendario personalizado asegura que cada versículo se repase en el momento óptimo, ayudándote a retenerlo de forma más efectiva y guardarlo en tu corazón a largo plazo.',
   'faq.q7.title': '¿Qué pasa si me pierdo uno o dos días?',
   'faq.q7.content':
     'Cada versículo sigue su propio calendario individual, así que no hay una "ventana de 24 horas" estricta de la que preocuparse. Si te pierdes un día o dos de práctica, tus versículos no desaparecerán ni se reiniciarán. Simplemente permanecerán pendientes y podrás continuar tu memorización cuando regreses. De esta manera, tu progreso se mantiene intacto, incluso si te saltas un par de días.',
@@ -74,6 +88,9 @@ const es: Record<TranslationKey, string> = {
   'faq.q8.content':
     'Si recuerdas correctamente un versículo de forma consistente, progresará a través de todos los niveles en unos 120 días — aproximadamente cuatro meses — antes de alcanzar la etapa Dominado.',
   'faq.q9.title': '¿Puedo estudiar de nuevo los versículos dominados?',
+  'faq.q9.content': 'Sí, puedes repasar tus versículos dominados. Para hacerlo, selecciona los versículos dominados y pulsa el botón',
+  'faq.q9.studyAgain': 'Estudiar de nuevo',
+  'faq.q9.contentEnd': '. Volverán al Nivel 1 y comenzarán el proceso de memorización desde el principio.',
 
   // My Account
   'myAccount.title': 'Mi cuenta',

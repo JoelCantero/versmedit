@@ -17,12 +17,10 @@ const faqItems: FaqItem[] = [
     contentJsx: (t) => (
       <ul className="list-disc space-y-2 pl-5">
         <li>
-          If you <strong className="text-foreground">{t('faq.q2.title') ? 'know the verse' : ''}</strong> and do not make any mistake, the verse
-          moves to the next level.
+          {t('faq.q2.ifYou')} <strong className="text-foreground">{t('faq.q2.know')}</strong> {t('faq.q2.knowDesc')}
         </li>
         <li>
-          If you <strong className="text-foreground">don't know the verse</strong> or make mistakes, the verse returns
-          to Level 1 for more frequent review.
+          {t('faq.q2.ifYou')} <strong className="text-foreground">{t('faq.q2.dontKnow')}</strong> {t('faq.q2.dontKnowDesc')}
         </li>
       </ul>
     ),
@@ -32,22 +30,19 @@ const faqItems: FaqItem[] = [
   { titleKey: 'faq.q5.title', contentKey: 'faq.q5.content' },
   {
     titleKey: 'faq.q6.title',
-    contentJsx: () => (
+    contentJsx: (t) => (
       <div className="space-y-3">
-        <p>Each verse follows its own individual schedule based on its level:</p>
+        <p>{t('faq.q6.intro')}</p>
         <ul className="list-disc space-y-1 pl-5">
-          <li><strong className="text-foreground">Level 1 → 2</strong>: same day (immediately)</li>
-          <li><strong className="text-foreground">Level 2 → 3</strong>: after 2 days</li>
-          <li><strong className="text-foreground">Level 3 → 4</strong>: after 3 days</li>
-          <li><strong className="text-foreground">Level 4 → 5</strong>: after 7 days</li>
-          <li><strong className="text-foreground">Level 5 → 6</strong>: after 15 days</li>
-          <li><strong className="text-foreground">Level 6 → 7</strong>: after 31 days</li>
-          <li><strong className="text-foreground">Level 7 → Mastered</strong>: after 61 days</li>
+          <li><strong className="text-foreground">Level 1 → 2</strong>: {t('faq.q6.l1')}</li>
+          <li><strong className="text-foreground">Level 2 → 3</strong>: {t('faq.q6.l2')}</li>
+          <li><strong className="text-foreground">Level 3 → 4</strong>: {t('faq.q6.l3')}</li>
+          <li><strong className="text-foreground">Level 4 → 5</strong>: {t('faq.q6.l4')}</li>
+          <li><strong className="text-foreground">Level 5 → 6</strong>: {t('faq.q6.l5')}</li>
+          <li><strong className="text-foreground">Level 6 → 7</strong>: {t('faq.q6.l6')}</li>
+          <li><strong className="text-foreground">Level 7 → Mastered</strong>: {t('faq.q6.l7')}</li>
         </ul>
-        <p>
-          This personalized schedule ensures that each verse is reviewed at the optimal time, helping you retain it more
-          effectively and store it in your heart long-term.
-        </p>
+        <p>{t('faq.q6.outro')}</p>
       </div>
     ),
   },
@@ -55,11 +50,10 @@ const faqItems: FaqItem[] = [
   { titleKey: 'faq.q8.title', contentKey: 'faq.q8.content' },
   {
     titleKey: 'faq.q9.title',
-    contentJsx: () => (
+    contentJsx: (t) => (
       <p>
-        Yes, you can review your mastered verses. To do this, select the mastered verses and tap the{' '}
-        <strong className="text-foreground">Study Again</strong> button. They will return to Level 1 and begin the
-        memorization process from the beginning.
+        {t('faq.q9.content')}{' '}
+        <strong className="text-foreground">{t('faq.q9.studyAgain')}</strong> {t('faq.q9.contentEnd')}
       </p>
     ),
   },

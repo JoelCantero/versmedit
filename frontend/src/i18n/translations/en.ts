@@ -55,6 +55,11 @@ const en = {
   'faq.q1.content':
     'Every day, the system selects cards from your box based on the Leitner schedule. The goal is to review cards at optimal intervals for better retention.',
   'faq.q2.title': 'What happens when I know a verse?',
+  'faq.q2.know': 'know the verse',
+  'faq.q2.knowDesc': 'and do not make any mistake, the verse moves to the next level.',
+  'faq.q2.dontKnow': "don't know the verse",
+  'faq.q2.dontKnowDesc': 'or make mistakes, the verse returns to Level 1 for more frequent review.',
+  'faq.q2.ifYou': 'If you',
   'faq.q3.title': 'What if I forget a verse while studying?',
   'faq.q3.content':
     "No worries! If you forget a verse, just return it to the first level and start again from the beginning. Repetition helps you hide God's Word in your heart. The more you practice, the stronger and more natural the verse becomes in your memory.",
@@ -65,6 +70,15 @@ const en = {
   'faq.q5.content':
     "Verses appear for review based on your Leitner schedule. The higher a verse's level, the less often it needs to be reviewed. If no verses show up today, it simply means you're on track—nothing is due yet. Keep going tomorrow!",
   'faq.q6.title': 'How often are verses available for study?',
+  'faq.q6.intro': 'Each verse follows its own individual schedule based on its level:',
+  'faq.q6.l1': 'same day (immediately)',
+  'faq.q6.l2': 'after 2 days',
+  'faq.q6.l3': 'after 3 days',
+  'faq.q6.l4': 'after 7 days',
+  'faq.q6.l5': 'after 15 days',
+  'faq.q6.l6': 'after 31 days',
+  'faq.q6.l7': 'after 61 days',
+  'faq.q6.outro': 'This personalized schedule ensures that each verse is reviewed at the optimal time, helping you retain it more effectively and store it in your heart long-term.',
   'faq.q7.title': 'What happens if I miss one or two days?',
   'faq.q7.content':
     'Each verse follows its own individual schedule, so there\'s no strict "24-hour window" you need to worry about. If you miss a day or two of practice, your verses will not disappear or reset. They will simply remain due, and you can continue your memorization whenever you return. This way, your progress stays intact—even if you skip a couple of days.',
@@ -72,6 +86,9 @@ const en = {
   'faq.q8.content':
     'If you consistently recall a verse correctly, it will progress through all levels in about 120 days — roughly four months — before reaching the Mastered stage.',
   'faq.q9.title': 'Can I study mastered verses again?',
+  'faq.q9.content': 'Yes, you can review your mastered verses. To do this, select the mastered verses and tap the',
+  'faq.q9.studyAgain': 'Study Again',
+  'faq.q9.contentEnd': 'button. They will return to Level 1 and begin the memorization process from the beginning.',
 
   // My Account
   'myAccount.title': 'My Account',

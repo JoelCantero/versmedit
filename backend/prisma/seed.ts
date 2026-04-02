@@ -197,6 +197,59 @@ async function seedVersesForCategory(userId: string, categoryId: string, categor
   }
 }
 
+const BLOG_POSTS = [
+  {
+    title: "Getting Started with Bible Memorization",
+    slug: "getting-started-with-bible-memorization",
+    description: "Learn how to begin your Scripture memorization journey with Versmedit and the Leitner spaced-repetition system.",
+    content: "Memorizing Scripture is one of the most rewarding spiritual disciplines. With Versmedit, you can build a consistent habit of hiding God's Word in your heart.\n\nThe key to effective memorization is consistency, not intensity. Start with just one or two verses and review them daily. As you master those, add more.\n\nVersmedit uses the Leitner spaced-repetition system to schedule your reviews at optimal intervals. New verses appear daily, while well-known ones come up less often. This scientifically proven approach moves information from short-term to long-term memory efficiently.\n\nHere are some tips to get started:\n\n1. Choose verses that speak to your current season of life\n2. Read the verse in context before memorizing it\n3. Say the verse out loud as you type the first letters\n4. Review your verses at the same time each day\n5. Trust the process — consistency beats perfection",
+    category: "Getting Started",
+  },
+  {
+    title: "Understanding the Leitner System",
+    slug: "understanding-the-leitner-system",
+    description: "A deep dive into the Leitner spaced-repetition system and how it powers your memorization in Versmedit.",
+    content: "The Leitner system was developed by German science journalist Sebastian Leitner in the 1970s. It organizes items into levels based on how well you know them.\n\nIn Versmedit, each verse starts at Level 1 and progresses through 7 levels before reaching the Mastered stage. Here's how it works:\n\n- Level 1: Review the same day\n- Level 2: Review after 2 days\n- Level 3: Review after 3 days\n- Level 4: Review after 7 days\n- Level 5: Review after 15 days\n- Level 6: Review after 31 days\n- Level 7: Review after 61 days\n\nWhen you recall a verse correctly, it moves up one level. If you make a mistake, it drops down one level for more frequent review.\n\nThis approach ensures you spend more time on difficult verses and less time on ones you already know well. The total journey from Level 1 to Mastered takes about 120 days of consistent review.",
+    category: "How It Works",
+  },
+  {
+    title: "Practice Mode: Review Without Pressure",
+    slug: "practice-mode-review-without-pressure",
+    description: "Discover how Practice Mode lets you review all your verses freely without affecting your progress.",
+    content: "Sometimes you want to review your verses without the pressure of tracking progress. That's exactly what Practice Mode is for.\n\nUnlike Memorize Mode, where correct answers move verses up a level and mistakes drop them down, Practice Mode lets you freely cycle through all your verses in random order. Nothing is tracked — no level changes, no schedule updates.\n\nPractice Mode is perfect for:\n\n- Warming up before your daily memorization session\n- Reviewing verses while commuting or waiting\n- Refreshing your memory on mastered verses\n- Practicing with a friend or study group\n\nYou can access Practice Mode from the My Account dropdown in the navigation. The 'Show verse' button lets you reveal the full text whenever you need a hint, and you can use it as many times as you want.\n\nThink of Memorize Mode as your structured daily workout and Practice Mode as a casual, stress-free practice session.",
+    category: "Features",
+  },
+];
+
+async function seedPosts(authorId: string) {
+  for (const postData of BLOG_POSTS) {
+    const existing = await prisma.post.findUnique({
+      where: { slug: postData.slug },
+    });
+
+    if (existing) {
+      await prisma.post.update({
+        where: { id: existing.id },
+        data: {
+          title: postData.title,
+          description: postData.description,
+          content: postData.content,
+          category: postData.category,
+        },
+      });
+      continue;
+    }
+
+    await prisma.post.create({
+      data: {
+        ...postData,
+        authorId,
+        publishedAt: new Date(),
+      },
+    });
+  }
+}
+
 async function main() {
   console.log("Seeding verses and categories for canterojoel@gmail.com...");
 
@@ -221,6 +274,10 @@ async function main() {
   const verseCount = await prisma.verse.count({ where: { userId: user.id } });
 
   console.log(`User ${user.email} now has ${categoryCount} categories and ${verseCount} verses.`);
+
+  await seedPosts(user.id);
+  const postCount = await prisma.post.count();
+  console.log(`Seeded ${postCount} blog posts.`);
 }
 
 main()

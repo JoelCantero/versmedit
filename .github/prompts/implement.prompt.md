@@ -17,6 +17,19 @@ Use `get_me` to fetch the authenticated GitHub user. Store the returned `login` 
 Use `issue_read` with method `get` to fetch issue `#<number>` from `<owner>/versmedit`.
 Parse the **acceptance criteria** (checkboxes) and the **summary** so you know exactly what to build.
 
+## Step 1.5 — Set project item to "In progress"
+
+Find the project item for issue `#<number>` in **project #2** and set its **Status** field to **In progress**.
+
+Use `projects_list` (method `list_project_items`, project_number `2`, fields `["271527944"]`) to list items, then match the item whose `content.number` equals `<number>`.
+
+Once you have the `item_id`, use `projects_write` (method `update_project_item`) with:
+- `project_number`: `2`
+- `item_id`: the matched item ID
+- `updated_field`: `{"id": 271527944, "value": "47fc9ee4"}`
+
+This sets the status to "In progress" (`47fc9ee4`).
+
 ## Step 2 — Create a branch
 
 Use `create_branch` to create a new branch from `main`:
@@ -69,6 +82,15 @@ Use `add_issue_comment` to post a final summary comment on the issue:
 - List what was implemented
 - Link to the PR
 - Mention any remaining risk or follow-up items
+
+## Step 6 — Set project item to "Done"
+
+Use `projects_write` (method `update_project_item`) with:
+- `project_number`: `2`
+- `item_id`: the same item ID from Step 1.5
+- `updated_field`: `{"id": 271527944, "value": "98236657"}`
+
+This sets the status to "Done" (`98236657`).
 
 ## Output
 

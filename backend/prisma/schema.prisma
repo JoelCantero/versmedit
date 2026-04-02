@@ -54,7 +54,7 @@ model Session {
 
 model Account {
   id                    String    @id @default(cuid())
-  accountId             String
+  providerAccountId     String
   providerId            String
   userId                String
   accessToken           String?
@@ -69,7 +69,7 @@ model Account {
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@unique([providerId, accountId])
+  @@unique([providerId, providerAccountId])
 }
 
 model Verification {

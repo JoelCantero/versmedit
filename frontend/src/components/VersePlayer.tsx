@@ -31,8 +31,6 @@ type PersistedReview = {
   dueAt: string
 }
 
-const SHOWN_VERSES_STORAGE_KEY = 'memorize.shownVerses'
-
 const normalizeText = (text: string) =>
   text
     .toLowerCase()
@@ -45,19 +43,6 @@ const getWords = (text: string) =>
     .split(/\s+/)
     .filter(Boolean)
 
-const getShownVersesFromStorage = (): string[] => {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  try {
-    const stored = window.localStorage.getItem(SHOWN_VERSES_STORAGE_KEY)
-    return stored ? (JSON.parse(stored) as string[]) : []
-  } catch {
-    return []
-  }
-}
-
 export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   const { t } = useTranslation()
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0)
@@ -66,7 +51,6 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   const [hasError, setHasError] = useState(false)
   const [wordsWithErrors, setWordsWithErrors] = useState<Set<number>>(new Set())
   const [completionStatus, setCompletionStatus] = useState<'perfect' | 'good' | null>(null)
-  const [shownVerses, setShownVerses] = useState<string[]>(() => getShownVersesFromStorage())
   const [persistedReviewVerseIds, setPersistedReviewVerseIds] = useState<Set<string>>(new Set())
   const [persistingReviewVerseIds, setPersistingReviewVerseIds] = useState<Set<string>>(new Set())
   const [persistedReviews, setPersistedReviews] = useState<Record<string, PersistedReview>>({})
@@ -74,7 +58,6 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
 
   const currentVerse = verses[currentVerseIndex]
   const currentWords = useMemo(() => getWords(currentVerse.verse), [currentVerse.verse])
-  const hasShownVerse = shownVerses.includes(currentVerse.id)
   const currentLevel = currentVerse.leitnerLevel
   const persistedReview = persistedReviews[currentVerse.id]
   const persistedNextReviewDate = persistedReview?.dueAt ? new Date(persistedReview.dueAt) : null
@@ -110,10 +93,6 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
     nextLevelLabel === 'Mastered'
       ? t('versePlayer.mastered')
       : t('versePlayer.perfect', { currentLevel: String(currentLevel), nextLevel: nextLevelLabel })
-
-  useEffect(() => {
-    window.localStorage.setItem(SHOWN_VERSES_STORAGE_KEY, JSON.stringify(shownVerses))
-  }, [shownVerses])
 
   useEffect(() => {
     setCurrentWordIndex(0)
@@ -176,10 +155,12 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
 
   const handleAdvance = async () => {
     if (completionStatus !== null) {
-      const wasSaved = await saveCurrentReview()
+      if (mode !== 'practice') {
+        const wasSaved = await saveCurrentReview()
 
-      if (!wasSaved) {
-        return
+        if (!wasSaved) {
+          return
+        }
       }
     }
 
@@ -189,7 +170,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   }
 
   useEffect(() => {
-    if (completionStatus === null) {
+    if (completionStatus === null || mode === 'practice') {
       return
     }
 
@@ -277,14 +258,6 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   }
 
   const toggleText = () => {
-    if (!showText && hasShownVerse) {
-      return
-    }
-
-    if (!showText) {
-      setShownVerses((prev) => (prev.includes(currentVerse.id) ? prev : [...prev, currentVerse.id]))
-    }
-
     setShowText((prev) => !prev)
   }
 
@@ -350,15 +323,17 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
                 <div className="flex flex-col items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-100 dark:ring-emerald-600/40">
                     <CheckCircleIcon className="size-4" />
-                    {perfectMessage}
+                    {mode === 'practice' ? t('versePlayer.practicePerfect') : perfectMessage}
                   </span>
-                  <p className="text-sm text-muted-foreground">{nextReviewMessage}</p>
+                  {mode !== 'practice' ? (
+                    <p className="text-sm text-muted-foreground">{nextReviewMessage}</p>
+                  ) : null}
                 </div>
               ) : completionStatus === 'good' ? (
                 <div className="flex flex-col items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 dark:bg-amber-900/40 dark:text-amber-100 dark:ring-amber-600/40">
                     <ArrowPathIcon className="size-4" />
-                    {t('versePlayer.tryImprove', { level: String(Math.max(1, currentLevel - 1)) })}
+                    {mode === 'practice' ? t('versePlayer.practiceGood') : t('versePlayer.tryImprove', { level: String(Math.max(1, currentLevel - 1)) })}
                   </span>
                 </div>
               ) : (
@@ -383,10 +358,9 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
             <Button
               type="button"
               onClick={toggleText}
-              disabled={hasShownVerse && !showText}
             >
               {showText ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
-              {showText ? t('versePlayer.hideVerse') : hasShownVerse ? t('versePlayer.alreadyShown') : t('versePlayer.showVerse')}
+              {showText ? t('versePlayer.hideVerse') : t('versePlayer.showVerse')}
             </Button>
           </div>
         ) : null}

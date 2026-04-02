@@ -44,6 +44,11 @@ export default function Practice() {
           leitnerLevel: item.leitnerLevel,
         }))
 
+        for (let i = mappedVerses.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [mappedVerses[i], mappedVerses[j]] = [mappedVerses[j], mappedVerses[i]]
+        }
+
         setVerses(mappedVerses)
       } catch (loadError) {
         if (loadError instanceof Error) {

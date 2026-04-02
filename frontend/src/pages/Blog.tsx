@@ -5,6 +5,10 @@ import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
 
+interface BlogProps {
+  onSelectPost: (slug: string) => void
+}
+
 const CATEGORY_COLORS: Record<string, 'gray' | 'blue' | 'indigo' | 'green' | 'purple'> = {
   'Getting Started': 'blue',
   'How It Works': 'indigo',
@@ -19,7 +23,7 @@ function formatDate(dateString: string): string {
   })
 }
 
-export default function Blog() {
+export default function Blog({ onSelectPost }: BlogProps) {
   const { t } = useTranslation()
   const [posts, setPosts] = useState<PostSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -82,7 +86,18 @@ export default function Blog() {
       <PageHeader title={t('blog.title')} description={t('blog.description')} />
       <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         {posts.map((post) => (
-          <article key={post.id} className="flex flex-col items-start">
+          <article
+            key={post.id}
+            className="group flex cursor-pointer flex-col items-start transition-all hover:opacity-75"
+            onClick={() => onSelectPost(post.slug)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                onSelectPost(post.slug)
+              }
+            }}
+          >
             <div className="flex items-center gap-x-4 text-xs">
               <time dateTime={post.publishedAt} className="text-muted-foreground">
                 {formatDate(post.publishedAt)}
@@ -92,11 +107,14 @@ export default function Blog() {
               </CategoryBadge>
             </div>
             <div className="group relative">
-              <h3 className="mt-3 text-lg/6 font-semibold text-foreground">
+              <h3 className="mt-3 text-lg/6 font-semibold text-foreground group-hover:text-primary">
                 {post.title}
               </h3>
               <p className="mt-5 line-clamp-3 text-sm/6 text-muted-foreground">
                 {post.description}
+              </p>
+              <p className="mt-3 inline-block text-sm font-semibold text-primary group-hover:underline">
+                {t('blog.readMore')} →
               </p>
             </div>
             <div className="relative mt-6 flex items-center gap-x-4">

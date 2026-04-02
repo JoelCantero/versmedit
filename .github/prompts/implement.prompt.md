@@ -92,11 +92,29 @@ Provide a summary:
 - Verification result (TypeScript build, Prisma generate, etc.)
 - List of changes implemented
 
-**Wait for the user to confirm** that the PR is ready to close (either by merging, reviewing, or other validation).
+**Wait for the user to confirm** that the PR is ready to close.
 
-## Step 7 — Set project item to "Done"
+## Step 7 — Close the implementation
 
-Once the user confirms, use `projects_write` (method `update_project_item`) with:
+Once the user confirms that the implementation is ready to close:
+
+1. Merge the PR.
+2. Switch back to `main` locally and update it:
+
+```sh
+git checkout main && git pull origin main
+```
+
+3. Delete the feature branch locally and remotely:
+
+```sh
+git branch -d <branch>
+git push origin --delete <branch>
+```
+
+## Step 8 — Set project item to "Done"
+
+After the PR is merged and the branch is deleted, use `projects_write` (method `update_project_item`) with:
 - `project_number`: `2`
 - `item_id`: the same item ID from Step 1.5
 - `updated_field`: `{"id": 271527944, "value": "98236657"}`
@@ -108,5 +126,7 @@ This sets the status to "Done" (`98236657`).
 After all steps, confirm:
 - Branch name
 - PR title, number, and URL
+- Whether the PR was merged
+- Whether the branch was deleted locally and remotely
 - Number of comments added to the issue
 - Verification result (TypeScript build, Prisma generate, etc.)

@@ -202,6 +202,11 @@ const es: Record<TranslationKey, string> = {
   'versePlayer.reviewToday': 'Se repasará de nuevo hoy.',
   'versePlayer.reviewTomorrow': 'Se repasará de nuevo mañana.',
   'versePlayer.reviewOn': 'Se repasará de nuevo el {date}.',
+  'versePlayer.forgottenButton': 'Olvidado',
+  'versePlayer.forgottenDialogTitle': '¿Marcar versículo como olvidado?',
+  'versePlayer.forgottenDialogDescription': 'Este versículo volverá al nivel 1 y se programará para repasos más frecuentes.',
+  'versePlayer.forgottenConfirm': 'Sí, volver al nivel 1',
+  'versePlayer.forgottenCancel': 'Cancelar',
 
   // Language
   'language.en': 'English',

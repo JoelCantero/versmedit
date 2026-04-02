@@ -10,6 +10,7 @@ import { apiFetch } from '../api/client'
 import { useTranslation } from '../i18n/LanguageContext'
 import Button from './Button'
 import CategoryBadge, { toBadgeColor } from './CategoryBadge'
+import ConfirmDialog from './ConfirmDialog'
 
 export type VersePlayerVerse = {
   id: string
@@ -55,6 +56,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   const [persistingReviewVerseIds, setPersistingReviewVerseIds] = useState<Set<string>>(new Set())
   const [persistedReviews, setPersistedReviews] = useState<Record<string, PersistedReview>>({})
   const [reviewPersistError, setReviewPersistError] = useState<string | null>(null)
+  const [isForgottenDialogOpen, setIsForgottenDialogOpen] = useState(false)
 
   const currentVerse = verses[currentVerseIndex]
   const currentWords = useMemo(() => getWords(currentVerse.verse), [currentVerse.verse])
@@ -257,6 +259,57 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
     setCompletionStatus(null)
   }
 
+  const markCurrentVerseAsForgotten = async () => {
+    if (mode === 'practice') {
+      return
+    }
+
+    if (persistingReviewVerseIds.has(currentVerse.id)) {
+      return
+    }
+
+    setPersistingReviewVerseIds((prev) => new Set(prev).add(currentVerse.id))
+    setReviewPersistError(null)
+
+    try {
+      const result = await apiFetch<{
+        verse: {
+          id: string
+          leitnerLevel: number
+          learningState: 'LEARNING' | 'MASTERED'
+          dueAt: string
+        }
+      }>(`/account/verses/${currentVerse.id}/review`, {
+        method: 'POST',
+        body: JSON.stringify({ success: false }),
+      })
+
+      setPersistedReviewVerseIds((prev) => new Set(prev).add(currentVerse.id))
+      setPersistedReviews((prev) => ({
+        ...prev,
+        [currentVerse.id]: {
+          leitnerLevel: result.verse.leitnerLevel,
+          learningState: result.verse.learningState,
+          dueAt: result.verse.dueAt,
+        },
+      }))
+
+      setIsForgottenDialogOpen(false)
+      if (currentVerseIndex < verses.length - 1) {
+        nextVerse()
+      }
+    } catch {
+      setReviewPersistError(t('versePlayer.persistError'))
+      setIsForgottenDialogOpen(false)
+    } finally {
+      setPersistingReviewVerseIds((prev) => {
+        const next = new Set(prev)
+        next.delete(currentVerse.id)
+        return next
+      })
+    }
+  }
+
   const toggleText = () => {
     setShowText((prev) => !prev)
   }
@@ -364,6 +417,19 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
             </Button>
           </div>
         ) : null}
+
+        {completionStatus === null && mode === 'memorize' && !showText ? (
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsForgottenDialogOpen(true)}
+              disabled={persistingReviewVerseIds.has(currentVerse.id)}
+            >
+              {t('versePlayer.forgottenButton')}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-6 flex items-center justify-between">
@@ -390,6 +456,19 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
           <ArrowRightIcon className="size-4" />
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={isForgottenDialogOpen}
+        title={t('versePlayer.forgottenDialogTitle')}
+        description={t('versePlayer.forgottenDialogDescription')}
+        confirmLabel={t('versePlayer.forgottenConfirm')}
+        cancelLabel={t('versePlayer.forgottenCancel')}
+        onCancel={() => setIsForgottenDialogOpen(false)}
+        onConfirm={() => {
+          void markCurrentVerseAsForgotten()
+        }}
+        isConfirming={persistingReviewVerseIds.has(currentVerse.id)}
+      />
     </section>
   )
 }

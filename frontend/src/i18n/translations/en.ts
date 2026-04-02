@@ -200,6 +200,11 @@ const en = {
   'versePlayer.reviewToday': 'It will be reviewed again today.',
   'versePlayer.reviewTomorrow': 'It will be reviewed again tomorrow.',
   'versePlayer.reviewOn': 'It will be reviewed again on {date}.',
+  'versePlayer.forgottenButton': 'Forgotten',
+  'versePlayer.forgottenDialogTitle': 'Mark verse as forgotten?',
+  'versePlayer.forgottenDialogDescription': 'This verse will be moved back to level 1 and scheduled for more frequent review.',
+  'versePlayer.forgottenConfirm': 'Yes, reset to level 1',
+  'versePlayer.forgottenCancel': 'Cancel',
 
   // Language
   'language.en': 'English',

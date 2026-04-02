@@ -1,22 +1,22 @@
+import { LanguageIcon } from '@heroicons/react/24/solid'
 import { useTranslation, type Language } from '../i18n/LanguageContext'
-import Dropdown from './Dropdown'
-
-const languageOptions: { value: Language; label: string }[] = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Español' },
-]
 
 export default function LanguageSelector() {
   const { language, setLanguage } = useTranslation()
-  const currentLabel = languageOptions.find((o) => o.value === language)?.label ?? 'English'
+
+  const toggle = () => {
+    const next: Language = language === 'en' ? 'es' : 'en'
+    setLanguage(next)
+  }
 
   return (
-    <Dropdown
-      label={currentLabel}
-      items={languageOptions.map((option) => ({
-        label: option.label,
-        onClick: () => setLanguage(option.value),
-      }))}
-    />
+    <button
+      type="button"
+      onClick={toggle}
+      className="cursor-pointer inline-flex items-center gap-1 text-foreground"
+    >
+      <LanguageIcon aria-hidden="true" className="size-5" />
+      <span className="text-sm font-semibold uppercase">{language}</span>
+    </button>
   )
 }

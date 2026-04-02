@@ -37,7 +37,11 @@ const en = {
 
   // Blog
   'blog.title': 'Blog',
-  'blog.description': 'No posts yet. Check back soon for updates on Versmedit.',
+  'blog.description': 'Tips, insights, and updates on Scripture memorization with Versmedit.',
+  'blog.loading': 'Loading posts...',
+  'blog.loadError': 'Unable to load posts right now. Please try again.',
+  'blog.noPosts': 'No posts yet. Check back soon for updates on Versmedit.',
+  'blog.readMore': 'Read more',
 
   // Contact
   'contact.title': 'Contact',

@@ -39,7 +39,11 @@ const es: Record<TranslationKey, string> = {
 
   // Blog
   'blog.title': 'Blog',
-  'blog.description': 'Aún no hay publicaciones. Vuelve pronto para novedades sobre Versmedit.',
+  'blog.description': 'Consejos, reflexiones y novedades sobre la memorización de las Escrituras con Versmedit.',
+  'blog.loading': 'Cargando publicaciones...',
+  'blog.loadError': 'No se pudieron cargar las publicaciones. Por favor, inténtalo de nuevo.',
+  'blog.noPosts': 'Aún no hay publicaciones. Vuelve pronto para novedades sobre Versmedit.',
+  'blog.readMore': 'Leer más',
 
   // Contact
   'contact.title': 'Contacto',

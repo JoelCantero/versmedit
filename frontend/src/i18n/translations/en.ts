@@ -53,7 +53,7 @@ const en = {
   'faq.description': 'Everything you need to know about Versmedit.',
   'faq.q1.title': 'How does daily learning work?',
   'faq.q1.content':
-    'Every day, the system selects cards from your box based on the Leitner schedule. The goal is to review cards at optimal intervals for better retention.',
+    'Every day, Versmedit selects the verses you need to review that day based on the Leitner schedule. The goal is to review verses at optimal intervals for better retention.',
   'faq.q2.title': 'What happens when I know a verse?',
   'faq.q2.know': 'know the verse',
   'faq.q2.knowDesc': 'and do not make any mistake, the verse moves to the next level.',

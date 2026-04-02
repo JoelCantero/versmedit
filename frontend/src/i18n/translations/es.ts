@@ -55,7 +55,7 @@ const es: Record<TranslationKey, string> = {
   'faq.description': 'Todo lo que necesitas saber sobre Versmedit.',
   'faq.q1.title': '¿Cómo funciona el aprendizaje diario?',
   'faq.q1.content':
-    'Cada día, el sistema selecciona tarjetas de tu caja según el calendario de Leitner. El objetivo es revisar las tarjetas en intervalos óptimos para una mejor retención.',
+    'Cada día, Versmedit selecciona los versículos que te tocan repasar durante ese día según el calendario de Leitner. El objetivo es revisar los versículos en intervalos óptimos para una mejor retención.',
   'faq.q2.title': '¿Qué pasa cuando me sé un versículo?',
   'faq.q2.know': 'te sabes el versículo',
   'faq.q2.knowDesc': 'y no cometes ningún error, el versículo sube al siguiente nivel.',

@@ -13,6 +13,7 @@ const en = {
   'nav.srToggleTheme': 'Toggle theme',
   'nav.srCompanyLogo': 'Versmedit',
   'nav.practice': 'Practice',
+  'nav.memorize': 'Memorize',
 
   // Hero
   'hero.badge': 'Versmedit daily focus.',

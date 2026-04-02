@@ -15,6 +15,7 @@ const es: Record<TranslationKey, string> = {
   'nav.srToggleTheme': 'Cambiar tema',
   'nav.srCompanyLogo': 'Versmedit',
   'nav.practice': 'Practicar',
+  'nav.memorize': 'Memorizar',
 
   // Hero
   'hero.badge': 'Enfoque diario de Versmedit.',

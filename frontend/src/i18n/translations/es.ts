@@ -60,7 +60,7 @@ const es: Record<TranslationKey, string> = {
   'faq.q2.know': 'te sabes el versículo',
   'faq.q2.knowDesc': 'y no cometes ningún error, el versículo sube al siguiente nivel.',
   'faq.q2.dontKnow': 'no te sabes el versículo',
-  'faq.q2.dontKnowDesc': 'o cometes errores, el versículo vuelve al Nivel 1 para repasarlo con más frecuencia.',
+  'faq.q2.dontKnowDesc': 'o cometes errores, el versículo baja un nivel para repasarlo con más frecuencia. Si ya está en el Nivel 1, se queda ahí.',
   'faq.q2.ifYou': 'Si',
   'faq.q3.title': '¿Qué pasa si olvido un versículo mientras estudio?',
   'faq.q3.content':
@@ -164,7 +164,7 @@ const es: Record<TranslationKey, string> = {
   'versePlayer.tip': 'Consejo: Escribe la primera letra de cada palabra en orden para revelarlas.',
   'versePlayer.perfect': '¡Perfecto! Subes del nivel {currentLevel} al {nextLevel}.',
   'versePlayer.mastered': '¡Increíble! Has dominado este versículo.',
-  'versePlayer.tryImprove': '¡Intenta mejorar la próxima vez! Vuelves al nivel 1.',
+  'versePlayer.tryImprove': '¡Intenta mejorar la próxima vez! Bajas al nivel {level}.',
   'versePlayer.pressEnter': 'Pulsa Enter para continuar al siguiente versículo.',
   'versePlayer.persistError': 'No se pudo guardar tu progreso. Por favor, inténtalo de nuevo.',
   'versePlayer.showVerse': 'Mostrar versículo',

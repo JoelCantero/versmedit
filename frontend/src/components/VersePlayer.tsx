@@ -358,7 +358,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
                 <div className="flex flex-col items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 dark:bg-amber-900/40 dark:text-amber-100 dark:ring-amber-600/40">
                     <ArrowPathIcon className="size-4" />
-                    {t('versePlayer.tryImprove')}
+                    {t('versePlayer.tryImprove', { level: String(Math.max(1, currentLevel - 1)) })}
                   </span>
                 </div>
               ) : (

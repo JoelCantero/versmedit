@@ -58,7 +58,7 @@ const en = {
   'faq.q2.know': 'know the verse',
   'faq.q2.knowDesc': 'and do not make any mistake, the verse moves to the next level.',
   'faq.q2.dontKnow': "don't know the verse",
-  'faq.q2.dontKnowDesc': 'or make mistakes, the verse returns to Level 1 for more frequent review.',
+  'faq.q2.dontKnowDesc': 'or make mistakes, the verse drops one level for more frequent review. If it is already at Level 1, it stays there.',
   'faq.q2.ifYou': 'If you',
   'faq.q3.title': 'What if I forget a verse while studying?',
   'faq.q3.content':
@@ -162,7 +162,7 @@ const en = {
   'versePlayer.tip': 'Tip: Type the first letter of each word in order to reveal them.',
   'versePlayer.perfect': 'Perfect! You move up from level {currentLevel} to {nextLevel}.',
   'versePlayer.mastered': 'Amazing! You have mastered this verse.',
-  'versePlayer.tryImprove': 'Try to improve next time! Back to level 1.',
+  'versePlayer.tryImprove': 'Try to improve next time! Down to level {level}.',
   'versePlayer.pressEnter': 'Press Enter to continue to the next verse.',
   'versePlayer.persistError': 'Unable to save your progress right now. Please try again.',
   'versePlayer.showVerse': 'Show verse',

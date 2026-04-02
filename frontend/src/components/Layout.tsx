@@ -1,15 +1,8 @@
-import type { ReactNode } from 'react'
+import { Outlet } from 'react-router-dom'
 import Footer from './Footer'
 import HeaderNavigation from './HeaderNavigation'
 
-type LayoutProps = {
-  children: ReactNode
-  onNavigateHome: () => void
-  onNavigateToMyAccount: () => void
-  onNavigate: (path: string) => void
-}
-
-export default function Layout({ children, onNavigateHome, onNavigateToMyAccount, onNavigate }: LayoutProps) {
+export default function Layout() {
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-background">
       <div
@@ -24,8 +17,8 @@ export default function Layout({ children, onNavigateHome, onNavigateToMyAccount
           className="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"
         />
       </div>
-      <HeaderNavigation onNavigateHome={onNavigateHome} onNavigateToMyAccount={onNavigateToMyAccount} onNavigate={onNavigate} />
-      <main className="relative z-10 flex-1">{children}</main>
+      <HeaderNavigation />
+      <main className="relative z-10 flex-1"><Outlet /></main>
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -bottom-32 -z-10 transform-gpu overflow-hidden blur-3xl sm:-bottom-56"

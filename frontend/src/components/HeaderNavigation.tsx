@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, lazy, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
@@ -18,14 +19,9 @@ const navigation: { labelKey: TranslationKey; path: string }[] = [
   { labelKey: 'nav.contact', path: '/contact' },
 ]
 
-type HeaderNavigationProps = {
-  onNavigateHome: () => void
-  onNavigateToMyAccount: () => void
-  onNavigate: (path: string) => void
-}
-
-export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount, onNavigate }: HeaderNavigationProps) {
-  const { t } = useTranslation()
+export default function HeaderNavigation() {
+  const { t, localePath } = useTranslation()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -75,12 +71,12 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
 
   const handleNavigateHome = () => {
     setMobileMenuOpen(false)
-    onNavigateHome()
+    navigate(localePath('/'))
   }
 
   const handleNavigateToMyAccount = () => {
     setMobileMenuOpen(false)
-    onNavigateToMyAccount()
+    navigate(localePath('/my-account'))
   }
 
   const handleLogout = async () => {
@@ -99,7 +95,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
 
       setIsAuthenticated(false)
       setMobileMenuOpen(false)
-      onNavigateHome()
+      navigate(localePath('/'))
     } catch {
       // Keep current session state if logout fails.
     }
@@ -130,16 +126,16 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
           {navigation.map((item) => (
-            <button key={item.labelKey} type="button" onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+            <button key={item.labelKey} type="button" onClick={() => { setMobileMenuOpen(false); navigate(localePath(item.path)) }} className="cursor-pointer text-sm/6 font-semibold text-foreground">
               {t(item.labelKey)}
             </button>
           ))}
           {isAuthenticated ? (
             <>
-              <button type="button" onClick={() => onNavigate('/memorize')} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+              <button type="button" onClick={() => navigate(localePath('/memorize'))} className="cursor-pointer text-sm/6 font-semibold text-foreground">
                 {t('nav.memorize')}
               </button>
-              <button type="button" onClick={() => onNavigate('/practice')} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+              <button type="button" onClick={() => navigate(localePath('/practice'))} className="cursor-pointer text-sm/6 font-semibold text-foreground">
                 {t('nav.practice')}
               </button>
             </>
@@ -198,7 +194,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   <button
                     key={item.labelKey}
                     type="button"
-                    onClick={() => { setMobileMenuOpen(false); onNavigate(item.path) }}
+                    onClick={() => { setMobileMenuOpen(false); navigate(localePath(item.path)) }}
                     className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
                     {t(item.labelKey)}
@@ -208,14 +204,14 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   <>
                     <button
                       type="button"
-                      onClick={() => { setMobileMenuOpen(false); onNavigate('/memorize') }}
+                      onClick={() => { setMobileMenuOpen(false); navigate(localePath('/memorize')) }}
                       className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                     >
                       {t('nav.memorize')}
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setMobileMenuOpen(false); onNavigate('/practice') }}
+                      onClick={() => { setMobileMenuOpen(false); navigate(localePath('/practice')) }}
                       className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
                     >
                       {t('nav.practice')}
@@ -292,7 +288,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             }}
             onNavigateToSignUp={() => {
               setLoginModalOpen(false)
-              onNavigate('/sign-up')
+              navigate(localePath('/sign-up'))
             }}
           />
         </Suspense>

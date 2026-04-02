@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ApiError, apiFetch } from '../api/client'
 import Button from '../components/Button'
 import FormInput from '../components/FormInput'
@@ -6,12 +7,9 @@ import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
 
-type SignUpProps = {
-  onNavigateHome: () => void
-}
-
-export default function SignUp({ onNavigateHome }: SignUpProps) {
-  const { t } = useTranslation()
+export default function SignUp() {
+  const { t, localePath } = useTranslation()
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,7 +45,7 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
       <PageShell>
         <PageHeader title={t('signUp.successTitle')} description={t('signUp.successDescription')} />
         <div className="mt-10 flex justify-center">
-          <Button onClick={onNavigateHome}>{t('signUp.goHome')}</Button>
+          <Button onClick={() => navigate(localePath('/'))}>{t('signUp.goHome')}</Button>
         </div>
       </PageShell>
     )

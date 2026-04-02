@@ -1,13 +1,10 @@
+import { useNavigate } from 'react-router-dom'
 import Button from './Button'
 import { useTranslation } from '../i18n/LanguageContext'
 
-type MainHeroProps = {
-  onNavigateToMemorize: () => void
-  onNavigateToMyAccount: () => void
-}
-
-export default function MainHero({ onNavigateToMemorize, onNavigateToMyAccount }: MainHeroProps) {
-  const { t } = useTranslation()
+export default function MainHero() {
+  const { t, localePath } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <div className="px-6 pt-14 lg:px-8">
@@ -15,7 +12,7 @@ export default function MainHero({ onNavigateToMemorize, onNavigateToMyAccount }
         <div className="hidden sm:mb-8 sm:flex sm:justify-center">
           <div className="relative rounded-full px-3 py-1 text-sm/6 text-muted-foreground ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:ring-white/15 dark:hover:ring-white/30">
             {t('hero.badge')}{' '}
-            <button type="button" onClick={onNavigateToMyAccount} className="font-semibold text-indigo-600 dark:text-indigo-400">
+            <button type="button" onClick={() => navigate(localePath('/my-account'))} className="font-semibold text-indigo-600 dark:text-indigo-400">
               {t('hero.badgeLink')} <span aria-hidden="true">&rarr;</span>
             </button>
           </div>
@@ -28,10 +25,10 @@ export default function MainHero({ onNavigateToMemorize, onNavigateToMyAccount }
             {t('hero.description')}
           </p>
           <div className="rounded mt-10 flex items-center justify-center gap-x-6">
-            <Button type="button" onClick={onNavigateToMemorize} className="px-3.5 py-2.5">
+            <Button type="button" onClick={() => navigate(localePath('/memorize'))} className="px-3.5 py-2.5">
               {t('hero.cta')}
             </Button>
-            <Button type="button" variant="ghost" onClick={onNavigateToMyAccount} className="text-foreground">
+            <Button type="button" variant="ghost" onClick={() => navigate(localePath('/my-account'))} className="text-foreground">
               {t('hero.ctaSecondary')} <span aria-hidden="true">→</span>
             </Button>
           </div>

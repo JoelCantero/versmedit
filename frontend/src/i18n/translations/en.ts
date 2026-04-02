@@ -99,7 +99,7 @@ const en = {
     'The Leitner System is a spaced-repetition method that organizes your verses into levels. New or difficult verses are reviewed more frequently, while the ones you know well are reviewed less often. This approach is scientifically proven to move information from short-term to long-term memory more efficiently than simple repetition.',
   'faq.q11.title': 'How does Practice Mode differ from Memorize Mode?',
   'faq.q11.content':
-    'In Memorize Mode, your verses are reviewed on a schedule and your progress is tracked — correct answers move the verse up a level, mistakes drop it down. In Practice Mode, you can freely review all your verses in random order without affecting their level or schedule. It is a stress-free way to refresh your memory whenever you want.',,
+    'In Memorize Mode, your verses are reviewed on a schedule and your progress is tracked — correct answers move the verse up a level, mistakes drop it down. In Practice Mode, you can freely review all your verses in random order without affecting their level or schedule. It is a stress-free way to refresh your memory whenever you want.',
 
   // My Account
   'myAccount.title': 'My Account',

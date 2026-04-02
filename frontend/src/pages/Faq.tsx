@@ -37,6 +37,15 @@ const faqSections: FaqSection[] = [
       { titleKey: 'faq.q4.title', contentKey: 'faq.q4.content' },
       { titleKey: 'faq.q5.title', contentKey: 'faq.q5.content' },
       { titleKey: 'faq.q7.title', contentKey: 'faq.q7.content' },
+      {
+        titleKey: 'faq.q9.title',
+        contentJsx: (t) => (
+          <p>
+            {t('faq.q9.content')}{' '}
+            <strong className="text-foreground">{t('faq.q9.studyAgain')}</strong> {t('faq.q9.contentEnd')}
+          </p>
+        ),
+      },
     ],
   },
   {
@@ -68,15 +77,6 @@ const faqSections: FaqSection[] = [
     sectionKey: 'faq.section.practiceMode',
     items: [
       { titleKey: 'faq.q11.title', contentKey: 'faq.q11.content' },
-      {
-        titleKey: 'faq.q9.title',
-        contentJsx: (t) => (
-          <p>
-            {t('faq.q9.content')}{' '}
-            <strong className="text-foreground">{t('faq.q9.studyAgain')}</strong> {t('faq.q9.contentEnd')}
-          </p>
-        ),
-      },
     ],
   },
 ]

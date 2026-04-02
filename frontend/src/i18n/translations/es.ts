@@ -60,7 +60,7 @@ const es: Record<TranslationKey, string> = {
   'faq.q2.know': 'te sabes el versículo',
   'faq.q2.knowDesc': 'y no cometes ningún error, el versículo sube al siguiente nivel.',
   'faq.q2.dontKnow': 'no te sabes el versículo',
-  'faq.q2.dontKnowDesc': 'o cometes errores, el versículo baja un nivel para repasarlo con más frecuencia. Si ya está en el Nivel 1, se queda ahí.',
+  'faq.q2.dontKnowDesc': 'o cometes errores, el versículo baja un nivel para repasarlo con más frecuencia. Si ya está en el nivel 1, se queda ahí.',
   'faq.q2.ifYou': 'Si',
   'faq.q3.title': '¿Qué pasa si olvido un versículo mientras estudio?',
   'faq.q3.content':
@@ -84,13 +84,13 @@ const es: Record<TranslationKey, string> = {
   'faq.q7.title': '¿Qué pasa si me pierdo uno o dos días?',
   'faq.q7.content':
     'Cada versículo sigue su propio calendario individual, así que no hay una "ventana de 24 horas" estricta de la que preocuparse. Si te pierdes un día o dos de práctica, tus versículos no desaparecerán ni se reiniciarán. Simplemente permanecerán pendientes y podrás continuar tu memorización cuando regreses. De esta manera, tu progreso se mantiene intacto, incluso si te saltas un par de días.',
-  'faq.q8.title': '¿Cuánto tiempo suele tardar en memorizar un versículo del Nivel 1 al Dominado?',
+  'faq.q8.title': '¿Cuánto tiempo suele tardar en memorizar un versículo del nivel 1 al Dominado?',
   'faq.q8.content':
     'Si recuerdas correctamente un versículo de forma consistente, progresará a través de todos los niveles en unos 120 días — aproximadamente cuatro meses — antes de alcanzar la etapa Dominado.',
   'faq.q9.title': '¿Puedo estudiar de nuevo los versículos dominados?',
   'faq.q9.content': 'Sí, puedes repasar tus versículos dominados. Para hacerlo, selecciona los versículos dominados y pulsa el botón',
   'faq.q9.studyAgain': 'Estudiar de nuevo',
-  'faq.q9.contentEnd': '. Volverán al Nivel 1 y comenzarán el proceso de memorización desde el principio.',
+  'faq.q9.contentEnd': '. Volverán al nivel 1 y comenzarán el proceso de memorización desde el principio.',
 
   // My Account
   'myAccount.title': 'Mi cuenta',

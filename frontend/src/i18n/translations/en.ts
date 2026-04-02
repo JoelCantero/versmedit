@@ -12,6 +12,7 @@ const en = {
   'nav.srCloseMenu': 'Close menu',
   'nav.srToggleTheme': 'Toggle theme',
   'nav.srCompanyLogo': 'Versmedit',
+  'nav.practice': 'Practice',
 
   // Hero
   'hero.badge': 'Versmedit daily focus.',
@@ -157,6 +158,14 @@ const en = {
   'memorize.loginRequired': 'Please sign in to access memorize mode.',
   'memorize.loadError': 'Unable to load verses right now. Please try again.',
   'memorize.noVerses': 'No verses due for review right now. Keep going tomorrow or add new verses',
+
+  // Practice
+  'practice.title': 'Practice',
+  'practice.description': 'Review all your verses and strengthen your recall.',
+  'practice.loading': 'Loading verses...',
+  'practice.loginRequired': 'Please sign in to access practice mode.',
+  'practice.loadError': 'Unable to load verses right now. Please try again.',
+  'practice.noVerses': 'No verses found. Add some verses to start practicing.',
 
   // VersePlayer
   'versePlayer.tip': 'Tip: Type the first letter of each word in order to reveal them.',

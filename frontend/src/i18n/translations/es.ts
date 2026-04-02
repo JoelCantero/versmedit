@@ -14,6 +14,7 @@ const es: Record<TranslationKey, string> = {
   'nav.srCloseMenu': 'Cerrar menú',
   'nav.srToggleTheme': 'Cambiar tema',
   'nav.srCompanyLogo': 'Versmedit',
+  'nav.practice': 'Practicar',
 
   // Hero
   'hero.badge': 'Enfoque diario de Versmedit.',
@@ -159,6 +160,14 @@ const es: Record<TranslationKey, string> = {
   'memorize.loginRequired': 'Inicia sesión para acceder al modo memorizar.',
   'memorize.loadError': 'No se pudieron cargar los versículos. Por favor, inténtalo de nuevo.',
   'memorize.noVerses': 'No hay versículos pendientes de repaso ahora. ¡Sigue mañana o añade nuevos versículos!',
+
+  // Practice
+  'practice.title': 'Practicar',
+  'practice.description': 'Repasa todos tus versículos y fortalece tu memoria.',
+  'practice.loading': 'Cargando versículos...',
+  'practice.loginRequired': 'Inicia sesión para acceder al modo practicar.',
+  'practice.loadError': 'No se pudieron cargar los versículos. Por favor, inténtalo de nuevo.',
+  'practice.noVerses': 'No se encontraron versículos. Añade algunos para empezar a practicar.',
 
   // VersePlayer
   'versePlayer.tip': 'Consejo: Escribe la primera letra de cada palabra en orden para revelarlas.',

@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import MainHero from './components/MainHero'
 import Memorize from './pages/Memorize'
 import MyAccount from './pages/MyAccount'
+import Practice from './pages/Practice'
 import AboutMe from './pages/AboutMe'
 import Faq from './pages/Faq'
 import Blog from './pages/Blog'
@@ -13,11 +14,12 @@ import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
 import SignUp from './pages/SignUp'
 
-type View = 'home' | 'memorize' | 'my-account' | 'about-me' | 'faq' | 'blog' | 'contact' | 'sign-up' | 'not-found'
+type View = 'home' | 'memorize' | 'practice' | 'my-account' | 'about-me' | 'faq' | 'blog' | 'contact' | 'sign-up' | 'not-found'
 
 const viewPathMap: Record<View, string> = {
   home: '/',
   memorize: '/memorize',
+  practice: '/practice',
   'my-account': '/my-account',
   'about-me': '/about-me',
   faq: '/faq',
@@ -73,6 +75,7 @@ export default function Example() {
       <Layout onNavigateHome={navigateHome} onNavigateToMyAccount={navigateToMyAccount} onNavigate={navigateByPath}>
         {currentView === 'home' ? <MainHero onNavigateToMemorize={navigateToMemorize} onNavigateToMyAccount={navigateToMyAccount} /> : null}
         {currentView === 'memorize' ? <Memorize /> : null}
+        {currentView === 'practice' ? <Practice /> : null}
         {currentView === 'my-account' ? <MyAccount /> : null}
         {currentView === 'about-me' ? <AboutMe /> : null}
         {currentView === 'faq' ? <Faq /> : null}

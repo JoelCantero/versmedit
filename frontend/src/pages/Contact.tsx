@@ -3,13 +3,16 @@ import FormInput from '../components/FormInput'
 import FormTextArea from '../components/FormTextArea'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
+import { useTranslation } from '../i18n/LanguageContext'
 
 export default function Contact() {
+  const { t } = useTranslation()
+
   return (
     <PageShell>
       <PageHeader
-        title="Contact"
-        description="Have questions or feedback? Fill out the form below and we'll get back to you."
+        title={t('contact.title')}
+        description={t('contact.description')}
       />
       <form action="#" method="POST" className="mx-auto mt-16 max-w-xl sm:mt-20">
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
@@ -19,7 +22,7 @@ export default function Contact() {
               name="first-name"
               type="text"
               autoComplete="given-name"
-              placeholder="First name"
+              placeholder={t('contact.firstName')}
             />
           </div>
           <div>
@@ -28,7 +31,7 @@ export default function Contact() {
               name="last-name"
               type="text"
               autoComplete="family-name"
-              placeholder="Last name"
+              placeholder={t('contact.lastName')}
             />
           </div>
           <div className="sm:col-span-2">
@@ -37,7 +40,7 @@ export default function Contact() {
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="Email"
+              placeholder={t('contact.email')}
             />
           </div>
           <div className="sm:col-span-2">
@@ -45,7 +48,7 @@ export default function Contact() {
               id="message"
               name="message"
               rows={4}
-              placeholder="Message"
+              placeholder={t('contact.message')}
             />
           </div>
           <div className="flex gap-x-4 sm:col-span-2">
@@ -62,9 +65,9 @@ export default function Contact() {
               </div>
             </div>
             <label htmlFor="agree-to-policies" className="text-sm/6 text-muted-foreground">
-              By selecting this, you agree to our{' '}
+              {t('contact.agreePolicy')}{' '}
               <a href="#" className="font-semibold whitespace-nowrap text-indigo-400">
-                privacy policy
+                {t('contact.privacyPolicy')}
               </a>
               .
             </label>
@@ -72,7 +75,7 @@ export default function Contact() {
         </div>
         <div className="mt-10">
           <Button type="submit" className="w-full px-3.5 py-2.5">
-            Let's talk
+            {t('contact.submit')}
           </Button>
         </div>
       </form>

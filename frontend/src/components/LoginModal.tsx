@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
+import { useTranslation } from '../i18n/LanguageContext'
 import FormInput from './FormInput'
 import Button from './Button'
 
@@ -13,6 +14,7 @@ type LoginModalProps = {
 }
 
 export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateToSignUp }: LoginModalProps) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -34,7 +36,7 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
 
       onLoginSuccess()
     } catch {
-      setErrorMessage('Invalid credentials. Please try again.')
+      setErrorMessage(t('login.error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -47,15 +49,15 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
         <DialogPanel className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl ring-1 ring-gray-900/10 dark:ring-white/10">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-foreground">Sign in to your account</h2>
+              <h2 className="text-xl font-semibold text-foreground">{t('login.title')}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Not a member?{' '}
+                {t('login.notMember')}{' '}
                 <button
                   type="button"
                   onClick={onNavigateToSignUp}
                   className="cursor-pointer font-semibold text-primary hover:text-primary/80"
                 >
-                  Sign up!
+                  {t('login.signUpLink')}
                 </button>
               </p>
             </div>
@@ -64,7 +66,7 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
               onClick={onClose}
               className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <span className="sr-only">Close login modal</span>
+              <span className="sr-only">{t('login.srClose')}</span>
               <XMarkIcon aria-hidden="true" className="size-5" />
             </button>
           </div>
@@ -80,7 +82,7 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
+              placeholder={t('login.email')}
             />
 
             <FormInput
@@ -91,13 +93,13 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Password"
+              placeholder={t('login.password')}
             />
 
             {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
 
             <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
+              {isSubmitting ? t('login.submitting') : t('login.submit')}
             </Button>
           </form>
         </DialogPanel>

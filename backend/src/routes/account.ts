@@ -223,17 +223,17 @@ accountRouter.post("/verses/:verseId/review", async (request, response) => {
     return;
   }
 
+  const failedLevel = Math.max(1, verse.leitnerLevel - 1);
   const updated = await prisma.verse.update({
     where: { id: verse.id },
     data: {
-      leitnerLevel: 1,
+      leitnerLevel: failedLevel,
       learningState: "LEARNING",
       dueAt: getDueDateFromNow(0),
       masteredAt: null,
       lastReviewedAt: now,
       totalReviews: { increment: 1 },
-      failedReviews: { increment: 1 },
-      resetCount: { increment: 1 }
+      failedReviews: { increment: 1 }
     },
     select: {
       id: true,

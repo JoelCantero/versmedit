@@ -7,6 +7,7 @@ import {
   EyeSlashIcon,
 } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
+import { useTranslation } from '../i18n/LanguageContext'
 import Button from './Button'
 import CategoryBadge, { toBadgeColor } from './CategoryBadge'
 
@@ -58,6 +59,7 @@ const getShownVersesFromStorage = (): string[] => {
 }
 
 export default function VersePlayer({ verses, mode }: VersePlayerProps) {
+  const { t } = useTranslation()
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0)
   const [showText, setShowText] = useState(false)
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -79,11 +81,11 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
   const nextLevelLabel = currentLevel >= 7 ? 'Mastered' : `Level ${currentLevel + 1}`
   const nextReviewMessage = useMemo(() => {
     if (nextLevelLabel === 'Mastered' || persistedReview?.learningState === 'MASTERED') {
-      return 'No further review is needed.'
+      return t('versePlayer.noReviewNeeded')
     }
 
     if (!persistedReview || !persistedNextReviewDate || Number.isNaN(persistedNextReviewDate.getTime())) {
-      return 'Saving review schedule...'
+      return t('versePlayer.savingSchedule')
     }
 
     const today = new Date()
@@ -95,19 +97,19 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
     const dayDifference = Math.round((dueDay.getTime() - today.getTime()) / oneDayMs)
 
     if (dayDifference <= 0) {
-      return 'It will be reviewed again today.'
+      return t('versePlayer.reviewToday')
     }
 
     if (dayDifference === 1) {
-      return 'It will be reviewed again tomorrow.'
+      return t('versePlayer.reviewTomorrow')
     }
 
-    return `It will be reviewed again on ${persistedNextReviewDate.toLocaleDateString('en-GB')}.`
-  }, [nextLevelLabel, persistedReview, persistedNextReviewDate])
+    return t('versePlayer.reviewOn', { date: persistedNextReviewDate.toLocaleDateString('en-GB') })
+  }, [nextLevelLabel, persistedReview, persistedNextReviewDate, t])
   const perfectMessage =
     nextLevelLabel === 'Mastered'
-      ? 'Amazing! You have mastered this verse.'
-      : `Perfect! You move up from level ${currentLevel} to ${nextLevelLabel}.`
+      ? t('versePlayer.mastered')
+      : t('versePlayer.perfect', { currentLevel: String(currentLevel), nextLevel: nextLevelLabel })
 
   useEffect(() => {
     window.localStorage.setItem(SHOWN_VERSES_STORAGE_KEY, JSON.stringify(shownVerses))
@@ -161,7 +163,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
       }))
       return true
     } catch {
-      setReviewPersistError('Unable to save your progress right now. Please try again.')
+      setReviewPersistError(t('versePlayer.persistError'))
       return false
     } finally {
       setPersistingReviewVerseIds((prev) => {
@@ -356,17 +358,17 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
                 <div className="flex flex-col items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 ring-1 ring-amber-300 dark:bg-amber-900/40 dark:text-amber-100 dark:ring-amber-600/40">
                     <ArrowPathIcon className="size-4" />
-                    Try to improve next time! Back to level 1.
+                    {t('versePlayer.tryImprove', { level: String(Math.max(1, currentLevel - 1)) })}
                   </span>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Tip: Type the first letter of each word in order to reveal them.
+                  {t('versePlayer.tip')}
                 </p>
               )}
 
               {completionStatus !== null ? (
-                <p className="text-sm text-muted-foreground">Press Enter to continue to the next verse.</p>
+                <p className="text-sm text-muted-foreground">{t('versePlayer.pressEnter')}</p>
               ) : null}
 
               {reviewPersistError ? (
@@ -384,7 +386,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
               disabled={hasShownVerse && !showText}
             >
               {showText ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
-              {showText ? 'Hide verse' : hasShownVerse ? 'Already shown' : 'Show verse'}
+              {showText ? t('versePlayer.hideVerse') : hasShownVerse ? t('versePlayer.alreadyShown') : t('versePlayer.showVerse')}
             </Button>
           </div>
         ) : null}
@@ -395,7 +397,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
 
         <div className="flex items-center justify-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {currentVerseIndex + 1} of {verses.length}
+            {currentVerseIndex + 1} {t('versePlayer.of')} {verses.length}
           </span>
           <div className="h-2 w-32 rounded-full bg-gray-200 dark:bg-gray-700">
             <div className="h-2 rounded-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
@@ -410,7 +412,7 @@ export default function VersePlayer({ verses, mode }: VersePlayerProps) {
           }}
           disabled={currentVerseIndex === verses.length - 1 && completionStatus === null}
         >
-          Next verse
+          {t('versePlayer.nextVerse')}
           <ArrowRightIcon className="size-4" />
         </Button>
       </div>

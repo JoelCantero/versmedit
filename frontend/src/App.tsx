@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { LanguageProvider } from './i18n/LanguageContext'
 import Layout from './components/Layout'
 import MainHero from './components/MainHero'
 import Memorize from './pages/Memorize'
@@ -68,16 +69,18 @@ export default function Example() {
   }
 
   return (
-    <Layout onNavigateHome={navigateHome} onNavigateToMyAccount={navigateToMyAccount} onNavigate={navigateByPath}>
-      {currentView === 'home' ? <MainHero onNavigateToMemorize={navigateToMemorize} onNavigateToMyAccount={navigateToMyAccount} /> : null}
-      {currentView === 'memorize' ? <Memorize /> : null}
-      {currentView === 'my-account' ? <MyAccount /> : null}
-      {currentView === 'about-me' ? <AboutMe /> : null}
-      {currentView === 'faq' ? <Faq /> : null}
-      {currentView === 'blog' ? <Blog /> : null}
-      {currentView === 'contact' ? <Contact /> : null}
-      {currentView === 'sign-up' ? <SignUp onNavigateHome={navigateHome} /> : null}
-      {currentView === 'not-found' ? <NotFound onNavigateHome={navigateHome} onNavigateContact={() => navigateToView('contact')} /> : null}
-    </Layout>
+    <LanguageProvider>
+      <Layout onNavigateHome={navigateHome} onNavigateToMyAccount={navigateToMyAccount} onNavigate={navigateByPath}>
+        {currentView === 'home' ? <MainHero onNavigateToMemorize={navigateToMemorize} onNavigateToMyAccount={navigateToMyAccount} /> : null}
+        {currentView === 'memorize' ? <Memorize /> : null}
+        {currentView === 'my-account' ? <MyAccount /> : null}
+        {currentView === 'about-me' ? <AboutMe /> : null}
+        {currentView === 'faq' ? <Faq /> : null}
+        {currentView === 'blog' ? <Blog /> : null}
+        {currentView === 'contact' ? <Contact /> : null}
+        {currentView === 'sign-up' ? <SignUp onNavigateHome={navigateHome} /> : null}
+        {currentView === 'not-found' ? <NotFound onNavigateHome={navigateHome} onNavigateContact={() => navigateToView('contact')} /> : null}
+      </Layout>
+    </LanguageProvider>
   )
 }

@@ -4,12 +4,14 @@ import Button from '../components/Button'
 import FormInput from '../components/FormInput'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
+import { useTranslation } from '../i18n/LanguageContext'
 
 type SignUpProps = {
   onNavigateHome: () => void
 }
 
 export default function SignUp({ onNavigateHome }: SignUpProps) {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,7 +32,7 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
 
       setIsSuccess(true)
     } catch {
-      setErrorMessage('Could not create account. Please try again.')
+      setErrorMessage(t('signUp.error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -39,9 +41,9 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
   if (isSuccess) {
     return (
       <PageShell>
-        <PageHeader title="Account created" description="Your account has been created successfully." />
+        <PageHeader title={t('signUp.successTitle')} description={t('signUp.successDescription')} />
         <div className="mt-10 flex justify-center">
-          <Button onClick={onNavigateHome}>Go back home</Button>
+          <Button onClick={onNavigateHome}>{t('signUp.goHome')}</Button>
         </div>
       </PageShell>
     )
@@ -49,7 +51,7 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
 
   return (
     <PageShell>
-      <PageHeader title="Sign up" description="Create your account to start memorizing Scripture." />
+      <PageHeader title={t('signUp.title')} description={t('signUp.description')} />
       <form className="mx-auto mt-10 max-w-sm space-y-4" method="post" autoComplete="on" onSubmit={handleSubmit}>
         <FormInput
           id="signup-name"
@@ -59,7 +61,7 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
           required
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Name"
+          placeholder={t('signUp.name')}
         />
 
         <FormInput
@@ -72,7 +74,7 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email"
+          placeholder={t('signUp.email')}
         />
 
         <FormInput
@@ -83,13 +85,13 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="Password"
+          placeholder={t('signUp.password')}
         />
 
         {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
 
         <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
-          {isSubmitting ? 'Creating account...' : 'Sign up'}
+          {isSubmitting ? t('signUp.submitting') : t('signUp.submit')}
         </Button>
       </form>
     </PageShell>

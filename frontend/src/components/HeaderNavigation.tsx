@@ -134,6 +134,16 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
               {t(item.labelKey)}
             </button>
           ))}
+          {isAuthenticated ? (
+            <>
+              <button type="button" onClick={() => onNavigate('/memorize')} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+                {t('nav.memorize')}
+              </button>
+              <button type="button" onClick={() => onNavigate('/practice')} className="cursor-pointer text-sm/6 font-semibold text-foreground">
+                {t('nav.practice')}
+              </button>
+            </>
+          ) : null}
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-6">
           <button
@@ -150,8 +160,6 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
               label={t('nav.myAccount')}
               items={[
                 { label: t('nav.viewAccount'), onClick: handleNavigateToMyAccount },
-                { label: t('nav.memorize'), onClick: () => onNavigate('/memorize') },
-                { label: t('nav.practice'), onClick: () => onNavigate('/practice') },
                 { label: t('nav.logout'), onClick: handleLogout },
               ]}
             />
@@ -196,6 +204,24 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                     {t(item.labelKey)}
                   </button>
                 ))}
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => { setMobileMenuOpen(false); onNavigate('/memorize') }}
+                      className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
+                    >
+                      {t('nav.memorize')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMobileMenuOpen(false); onNavigate('/practice') }}
+                      className="-mx-3 block rounded-full px-3 py-2 text-base/7 font-semibold text-foreground hover:bg-accent"
+                    >
+                      {t('nav.practice')}
+                    </button>
+                  </>
+                ) : null}
               </div>
               <div className="py-6">
                 <button
@@ -230,20 +256,6 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                           className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
                         >
                           {t('nav.viewAccount')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setMobileMenuOpen(false); onNavigate('/memorize') }}
-                          className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
-                        >
-                          {t('nav.memorize')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setMobileMenuOpen(false); onNavigate('/practice') }}
-                          className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
-                        >
-                          {t('nav.practice')}
                         </button>
                         <button
                           type="button"

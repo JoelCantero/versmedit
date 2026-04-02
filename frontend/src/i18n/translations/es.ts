@@ -154,6 +154,7 @@ const es: Record<TranslationKey, string> = {
   'signUp.submit': 'Registrarse',
   'signUp.submitting': 'Creando cuenta...',
   'signUp.error': 'No se pudo crear la cuenta. Por favor, inténtalo de nuevo.',
+  'signUp.userExists': 'Ya existe una cuenta con este correo. Inicia sesión en su lugar.',
   'signUp.successTitle': 'Cuenta creada',
   'signUp.successDescription': 'Tu cuenta se ha creado correctamente.',
   'signUp.goHome': 'Volver al inicio',

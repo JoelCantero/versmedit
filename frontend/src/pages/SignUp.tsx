@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react'
-import { apiFetch } from '../api/client'
+import { ApiError, apiFetch } from '../api/client'
 import Button from '../components/Button'
 import FormInput from '../components/FormInput'
 import PageHeader from '../components/PageHeader'
@@ -31,8 +31,12 @@ export default function SignUp({ onNavigateHome }: SignUpProps) {
       })
 
       setIsSuccess(true)
-    } catch {
-      setErrorMessage(t('signUp.error'))
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 422 && error.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
+        setErrorMessage(t('signUp.userExists'))
+      } else {
+        setErrorMessage(t('signUp.error'))
+      }
     } finally {
       setIsSubmitting(false)
     }

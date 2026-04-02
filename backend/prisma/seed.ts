@@ -271,9 +271,9 @@ async function main() {
   
   await prisma.account.upsert({
     where: {
-      userId_providerId: {
-        userId: user.id,
-        providerId: "email"
+      providerId_accountId: {
+        providerId: "email",
+        accountId: user.email
       }
     },
     update: {
@@ -282,7 +282,7 @@ async function main() {
     create: {
       userId: user.id,
       providerId: "email",
-      providerUserId: user.email,
+      accountId: user.email,
       password: hashedPassword
     }
   });

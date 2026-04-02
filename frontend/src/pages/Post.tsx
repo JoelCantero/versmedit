@@ -73,7 +73,7 @@ export default function Post({ slug }: PostProps) {
 
   return (
     <PageShell className="max-w-3xl">
-      <article className="mt-10">
+      <article>
         <PageHeader title={post.title} description={post.description} />
 
         <div className="mx-auto mt-10 max-w-2xl">
@@ -86,6 +86,10 @@ export default function Post({ slug }: PostProps) {
             </CategoryBadge>
           </div>
 
+          <div className="prose dark:prose-invert prose-sm sm:prose max-w-none">
+            {post.content}
+          </div>
+
           <div className="mb-8 mt-8 flex items-center gap-x-4">
             <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
               {(post.author.name ?? 'A').charAt(0).toUpperCase()}
@@ -96,10 +100,6 @@ export default function Post({ slug }: PostProps) {
               </p>
               <p className="text-muted-foreground">Author</p>
             </div>
-          </div>
-
-          <div className="prose dark:prose-invert prose-sm sm:prose max-w-none">
-            {post.content}
           </div>
         </div>
       </article>

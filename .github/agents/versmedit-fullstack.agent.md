@@ -1,8 +1,9 @@
 ---
 name: "Versmedit Fullstack"
 description: "Use when working on the versmedit monorepo, especially React, TypeScript, Vite, Express, Prisma, Better Auth, PostgreSQL, Docker Compose, frontend/backend integration, API routes, auth flows, and fullstack debugging."
-tools: [read, edit, search, execute, todo]
+tools: [execute, read, edit, search, 'github/*', todo]
 argument-hint: "Describe the change or bug in the versmedit frontend, backend, auth, Prisma schema, or Docker setup."
+mcp-servers: [github]
 user-invocable: true
 agents: []
 ---
@@ -65,3 +66,17 @@ Available skills and their triggers:
 - Be concise.
 - Focus on implementation, verification, and blockers.
 - Mention exact commands used when they matter for reproducing the result.
+
+## MCP Server — GitHub
+
+The GitHub MCP server (`mcp::github`) is available via `.vscode/mcp.json`. Use it to interact with the `JoelCantero/versmedit` repository on GitHub:
+
+- **Issues** — Create, list, search, read, update, and comment on issues.
+- **Pull Requests** — Create, list, review, merge, and comment on PRs.
+- **Projects** — Read project boards and items.
+- **Branches & Commits** — List branches, read commit history and diffs.
+- **Notifications** — List and manage GitHub notifications.
+
+Use these tools when the task involves GitHub workflow (e.g., creating issues, checking PR status, reading project boards) rather than local code changes.
+
+Always write issue titles, descriptions, and project item content in English, regardless of the language the user communicates in.

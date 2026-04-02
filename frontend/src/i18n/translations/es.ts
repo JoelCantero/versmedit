@@ -16,11 +16,11 @@ const es: Record<TranslationKey, string> = {
   'nav.srCompanyLogo': 'Versmedit',
 
   // Hero
-  'hero.badge': 'Enfoque diario de VerseMedit.',
+  'hero.badge': 'Enfoque diario de Versmedit.',
   'hero.badgeLink': 'Empieza a meditar',
   'hero.title': 'Memoriza la Biblia, medita en la Palabra de Dios',
   'hero.description':
-    'Guarda las Escrituras en tu corazón a través de la repetición y reflexión diaria. VerseMedit te ayuda a crear categorías, repasar tus versículos y mantenerte arraigado en la Palabra cada día.',
+    'Guarda las Escrituras en tu corazón a través de la repetición y reflexión diaria. Versmedit te ayuda a crear categorías, repasar tus versículos y mantenerte arraigado en la Palabra cada día.',
   'hero.cta': 'Empieza a memorizar ahora',
   'hero.ctaSecondary': 'Ir a Mi cuenta',
 
@@ -33,11 +33,11 @@ const es: Record<TranslationKey, string> = {
   // About Me
   'aboutMe.title': 'Sobre mí',
   'aboutMe.description':
-    'VerseMedit es una herramienta diseñada para ayudarte a memorizar las Escrituras a través de la repetición y reflexión diaria, usando el sistema de repetición espaciada de Leitner.',
+    'Versmedit es una herramienta diseñada para ayudarte a memorizar las Escrituras a través de la repetición y reflexión diaria, usando el sistema de repetición espaciada de Leitner.',
 
   // Blog
   'blog.title': 'Blog',
-  'blog.description': 'Aún no hay publicaciones. Vuelve pronto para novedades sobre VerseMedit.',
+  'blog.description': 'Aún no hay publicaciones. Vuelve pronto para novedades sobre Versmedit.',
 
   // Contact
   'contact.title': 'Contacto',
@@ -52,7 +52,7 @@ const es: Record<TranslationKey, string> = {
 
   // FAQ
   'faq.title': 'Preguntas frecuentes',
-  'faq.description': 'Todo lo que necesitas saber sobre VerseMedit.',
+  'faq.description': 'Todo lo que necesitas saber sobre Versmedit.',
   'faq.q1.title': '¿Cómo funciona el aprendizaje diario?',
   'faq.q1.content':
     'Cada día, el sistema selecciona tarjetas de tu caja según el calendario de Leitner. El objetivo es revisar las tarjetas en intervalos óptimos para una mejor retención.',

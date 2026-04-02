@@ -14,11 +14,11 @@ const en = {
   'nav.srCompanyLogo': 'Versmedit',
 
   // Hero
-  'hero.badge': 'VerseMedit daily focus.',
+  'hero.badge': 'Versmedit daily focus.',
   'hero.badgeLink': 'Start meditating',
   'hero.title': "Memorize the Bible, meditate on God's Word",
   'hero.description':
-    "Keep Scripture in your heart through daily repetition and reflection. VerseMedit helps you build categories, review your verses, and stay rooted in the Word every day.",
+    "Keep Scripture in your heart through daily repetition and reflection. Versmedit helps you build categories, review your verses, and stay rooted in the Word every day.",
   'hero.cta': 'Start memorizing now',
   'hero.ctaSecondary': 'Go to My Account',
 
@@ -31,11 +31,11 @@ const en = {
   // About Me
   'aboutMe.title': 'About me',
   'aboutMe.description':
-    'VerseMedit is a tool designed to help you memorize Scripture through daily repetition and reflection, using the Leitner spaced-repetition system.',
+    'Versmedit is a tool designed to help you memorize Scripture through daily repetition and reflection, using the Leitner spaced-repetition system.',
 
   // Blog
   'blog.title': 'Blog',
-  'blog.description': 'No posts yet. Check back soon for updates on VerseMedit.',
+  'blog.description': 'No posts yet. Check back soon for updates on Versmedit.',
 
   // Contact
   'contact.title': 'Contact',
@@ -50,7 +50,7 @@ const en = {
 
   // FAQ
   'faq.title': 'Frequently asked questions',
-  'faq.description': 'Everything you need to know about VerseMedit.',
+  'faq.description': 'Everything you need to know about Versmedit.',
   'faq.q1.title': 'How does daily learning work?',
   'faq.q1.content':
     'Every day, the system selects cards from your box based on the Leitner schedule. The goal is to review cards at optimal intervals for better retention.',

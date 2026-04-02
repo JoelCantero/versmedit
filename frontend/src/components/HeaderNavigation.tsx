@@ -13,7 +13,7 @@ import LanguageSelector from './LanguageSelector'
 const LoginModal = lazy(() => import('./LoginModal'))
 
 const navigation: { labelKey: TranslationKey; path: string }[] = [
-  { labelKey: 'nav.aboutMe', path: '/about-me' },
+  { labelKey: 'nav.about', path: '/about' },
   { labelKey: 'nav.faq', path: '/faq' },
   { labelKey: 'nav.blog', path: '/blog' },
   { labelKey: 'nav.contact', path: '/contact' },

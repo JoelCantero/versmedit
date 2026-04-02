@@ -1,6 +1,6 @@
 const en = {
   // Navigation
-  'nav.aboutMe': 'About me',
+  'nav.about': 'About',
   'nav.faq': 'FAQ',
   'nav.blog': 'Blog',
   'nav.contact': 'Contact',

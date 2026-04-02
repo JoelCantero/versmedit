@@ -2,7 +2,7 @@ import type { TranslationKey } from './en'
 
 const es: Record<TranslationKey, string> = {
   // Navigation
-  'nav.aboutMe': 'Sobre mí',
+  'nav.about': 'Acerca',
   'nav.faq': 'Preguntas frecuentes',
   'nav.blog': 'Blog',
   'nav.contact': 'Contacto',
@@ -33,7 +33,7 @@ const es: Record<TranslationKey, string> = {
   'footer.contact': 'Contacto',
 
   // About Me
-  'aboutMe.title': 'Sobre mí',
+  'aboutMe.title': 'Acerca de',
   'aboutMe.description':
     'Versmedit es una herramienta diseñada para ayudarte a memorizar las Escrituras a través de la repetición y reflexión diaria, usando el sistema de repetición espaciada de Leitner.',
 

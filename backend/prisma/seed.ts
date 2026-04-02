@@ -254,7 +254,7 @@ async function seedPosts(authorId: string) {
 async function main() {
   console.log("Seeding verses and categories for canterojoel@gmail.com...");
 
-  const hashedPassword = await bcrypt.hash("password123", 10);
+  const hashedPassword = await bcrypt.hash("Kantero7*", 10);
 
   const user = await prisma.user.upsert({
     where: { email: "canterojoel@gmail.com" },

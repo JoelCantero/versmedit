@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CategoryColor, PrismaClient } from "../generated/prisma/index.js";
-import bcrypt from "bcryptjs";
 
 const connectionString =
   process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/versmedit";
@@ -263,27 +262,6 @@ async function main() {
       email: "canterojoel@gmail.com",
       name: "Joel Cantero",
       emailVerified: true
-    }
-  });
-
-  // Create or update account with password for email/password auth
-  const hashedPassword = await bcrypt.hash("Kantero7*", 10);
-  
-  await prisma.account.upsert({
-    where: {
-      providerId_accountId: {
-        providerId: "email",
-        accountId: user.email
-      }
-    },
-    update: {
-      password: hashedPassword
-    },
-    create: {
-      userId: user.id,
-      providerId: "email",
-      accountId: user.email,
-      password: hashedPassword
     }
   });
 

@@ -211,17 +211,13 @@ exports.Prisma.NullsOrder = {
 };
 exports.CategoryColor = exports.$Enums.CategoryColor = {
   GRAY: 'GRAY',
-  BRAND: 'BRAND',
-  ERROR: 'ERROR',
-  WARNING: 'WARNING',
-  SUCCESS: 'SUCCESS',
-  GRAY_BLUE: 'GRAY_BLUE',
-  BLUE_LIGHT: 'BLUE_LIGHT',
+  RED: 'RED',
+  YELLOW: 'YELLOW',
+  GREEN: 'GREEN',
   BLUE: 'BLUE',
   INDIGO: 'INDIGO',
   PURPLE: 'PURPLE',
-  PINK: 'PINK',
-  ORANGE: 'ORANGE'
+  PINK: 'PINK'
 };
 
 exports.VerseLearningState = exports.$Enums.VerseLearningState = {

@@ -127,12 +127,16 @@ const VERSES_BY_CATEGORY: Record<string, Array<{ verse: string; reference: strin
   ]
 };
 
-const getRandomColor = (): CategoryColor => {
-  const colors = Object.values(CategoryColor);
-  return colors[Math.floor(Math.random() * colors.length)];
+const CATEGORY_COLORS: Record<string, CategoryColor> = {
+  Comienzo: CategoryColor.INDIGO,
+  "El camino romano": CategoryColor.PURPLE,
+  Escuchar: CategoryColor.BLUE,
+  Conviccion: CategoryColor.GREEN,
 };
 
 async function findOrCreateCategory(userId: string, name: string) {
+  const color = CATEGORY_COLORS[name] ?? CategoryColor.GRAY;
+
   const existingCategory = await prisma.category.findFirst({
     where: {
       userId,
@@ -141,13 +145,19 @@ async function findOrCreateCategory(userId: string, name: string) {
   });
 
   if (existingCategory) {
+    if (existingCategory.color !== color) {
+      return prisma.category.update({
+        where: { id: existingCategory.id },
+        data: { color }
+      });
+    }
     return existingCategory;
   }
 
   return prisma.category.create({
     data: {
       name,
-      color: getRandomColor(),
+      color,
       userId
     }
   });

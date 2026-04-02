@@ -8,12 +8,14 @@ import {
 } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
 import Button from './Button'
+import CategoryBadge, { toBadgeColor } from './CategoryBadge'
 
 export type MemorizeVerse = {
   id: string
   reference: string
   verse: string
   category: string
+  categoryColor: string | null
   leitnerLevel: number
 }
 
@@ -325,9 +327,9 @@ export default function MemorizeApp({ verses }: MemorizeAppProps) {
     <section className="mx-auto max-w-5xl px-6 py-28 lg:px-8">
       <div className="rounded-2xl bg-white/60 p-8 shadow-lg ring-1 ring-gray-900/10 backdrop-blur-sm dark:bg-gray-900/40 dark:ring-white/10">
         <div className="mb-6 flex justify-center">
-          <span className="rounded-full bg-accent px-3 py-1 text-sm font-semibold text-foreground ring-1 ring-border">
+          <CategoryBadge color={toBadgeColor(currentVerse.categoryColor)}>
             {currentVerse.category}
-          </span>
+          </CategoryBadge>
         </div>
 
         <div className="mb-6 text-center">

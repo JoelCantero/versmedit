@@ -9,9 +9,10 @@ type LoginModalProps = {
   open: boolean
   onClose: () => void
   onLoginSuccess: () => void
+  onNavigateToSignUp: () => void
 }
 
-export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModalProps) {
+export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateToSignUp }: LoginModalProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,8 +47,17 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
         <DialogPanel className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl ring-1 ring-gray-900/10 dark:ring-white/10">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-foreground">Log in</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Use your email and password to continue.</p>
+              <h2 className="text-xl font-semibold text-foreground">Sign in to your account</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Not a member?{' '}
+                <button
+                  type="button"
+                  onClick={onNavigateToSignUp}
+                  className="cursor-pointer font-semibold text-primary hover:text-primary/80"
+                >
+                  Sign up!
+                </button>
+              </p>
             </div>
             <button
               type="button"
@@ -62,7 +72,6 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
           <form className="mt-6 space-y-4" method="post" autoComplete="on" onSubmit={handleSubmit}>
             <FormInput
               id="login-email"
-              label="Email"
               name="email"
               type="email"
               autoComplete="username"
@@ -71,25 +80,24 @@ export default function LoginModal({ open, onClose, onLoginSuccess }: LoginModal
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@example.com"
+              placeholder="Email"
             />
 
             <FormInput
               id="login-password"
-              label="Password"
               name="password"
               type="password"
               autoComplete="current-password"
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="********"
+              placeholder="Password"
             />
 
             {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
 
             <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
-              {isSubmitting ? 'Logging in...' : 'Log in'}
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
         </DialogPanel>

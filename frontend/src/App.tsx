@@ -9,8 +9,10 @@ import AboutMe from './pages/AboutMe'
 import Faq from './pages/Faq'
 import Blog from './pages/Blog'
 import Contact from './pages/Contact'
+import NotFound from './pages/NotFound'
+import SignUp from './pages/SignUp'
 
-type View = 'home' | 'memorize' | 'my-account' | 'about-me' | 'faq' | 'blog' | 'contact'
+type View = 'home' | 'memorize' | 'my-account' | 'about-me' | 'faq' | 'blog' | 'contact' | 'sign-up' | 'not-found'
 
 const viewPathMap: Record<View, string> = {
   home: '/',
@@ -20,13 +22,15 @@ const viewPathMap: Record<View, string> = {
   faq: '/faq',
   blog: '/blog',
   contact: '/contact',
+  'sign-up': '/sign-up',
+  'not-found': '/not-found',
 }
 
 const pathnameViewMap = Object.fromEntries(
   Object.entries(viewPathMap).map(([view, path]) => [path, view as View]),
 )
 
-const getViewFromPathname = (pathname: string): View => pathnameViewMap[pathname] ?? 'home'
+const getViewFromPathname = (pathname: string): View => pathnameViewMap[pathname] ?? 'not-found'
 const getPathFromView = (view: View): string => viewPathMap[view]
 
 export default function Example() {
@@ -72,6 +76,8 @@ export default function Example() {
       {currentView === 'faq' ? <Faq /> : null}
       {currentView === 'blog' ? <Blog /> : null}
       {currentView === 'contact' ? <Contact /> : null}
+      {currentView === 'sign-up' ? <SignUp onNavigateHome={navigateHome} /> : null}
+      {currentView === 'not-found' ? <NotFound onNavigateHome={navigateHome} onNavigateContact={() => navigateToView('contact')} /> : null}
     </Layout>
   )
 }

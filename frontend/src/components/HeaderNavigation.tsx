@@ -1,9 +1,10 @@
 'use client'
 
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
+import Dropdown from './Dropdown'
 
 const LoginModal = lazy(() => import('./LoginModal'))
 
@@ -25,8 +26,7 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isDark, setIsDark] = useState(false)
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
-  const accountMenuRef = useRef<HTMLDivElement | null>(null)
+  const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false)
 
   useEffect(() => {
     const root = document.documentElement
@@ -56,7 +56,6 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       return
     }
 
-    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     setLoginModalOpen(true)
   }
@@ -71,52 +70,14 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
   }
 
   const handleNavigateHome = () => {
-    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     onNavigateHome()
   }
 
   const handleNavigateToMyAccount = () => {
-    setIsAccountMenuOpen(false)
     setMobileMenuOpen(false)
     onNavigateToMyAccount()
   }
-
-  const toggleAccountMenu = () => {
-    setIsAccountMenuOpen((prev) => !prev)
-  }
-
-  useEffect(() => {
-    if (!isAccountMenuOpen) {
-      return
-    }
-
-    const handleOutsideInteraction = (event: MouseEvent | TouchEvent) => {
-      if (!(event.target instanceof Node)) {
-        return
-      }
-
-      if (!accountMenuRef.current?.contains(event.target)) {
-        setIsAccountMenuOpen(false)
-      }
-    }
-
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsAccountMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleOutsideInteraction)
-    document.addEventListener('touchstart', handleOutsideInteraction)
-    document.addEventListener('keydown', handleEscapeKey)
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideInteraction)
-      document.removeEventListener('touchstart', handleOutsideInteraction)
-      document.removeEventListener('keydown', handleEscapeKey)
-    }
-  }, [isAccountMenuOpen])
 
   const handleLogout = async () => {
     try {
@@ -133,7 +94,6 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
       }
 
       setIsAuthenticated(false)
-      setIsAccountMenuOpen(false)
       setMobileMenuOpen(false)
       onNavigateHome()
     } catch {
@@ -181,45 +141,13 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
           </button>
           {isAuthenticated ? (
-            <div ref={accountMenuRef} className="relative">
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handleNavigateToMyAccount}
-                  className="cursor-pointer text-sm/6 font-semibold text-foreground"
-                >
-                  My Account
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleAccountMenu}
-                  aria-haspopup="menu"
-                  aria-expanded={isAccountMenuOpen}
-                  aria-controls="account-actions-menu"
-                  className="inline-flex items-center rounded-full p-1.5 text-foreground hover:bg-accent"
-                >
-                  <span className="sr-only">Toggle account menu</span>
-                  <ChevronDownIcon aria-hidden="true" className="size-4" />
-                </button>
-              </div>
-              {isAccountMenuOpen ? (
-                <div
-                  id="account-actions-menu"
-                  role="menu"
-                  aria-label="Account actions"
-                  className="absolute top-full right-0 z-20 mt-1 w-40 origin-top-right rounded-xl bg-card p-1 shadow-lg ring-1 ring-gray-900/10 dark:ring-white/10"
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={handleLogout}
-                    className="block w-full rounded-full px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-accent"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <Dropdown
+              label="My Account"
+              items={[
+                { label: 'View account', onClick: handleNavigateToMyAccount },
+                { label: 'Logout', onClick: handleLogout },
+              ]}
+            />
           ) : (
             <button type="button" onClick={openLoginModal} className="cursor-pointer text-sm/6 font-semibold text-foreground">
               Log in <span aria-hidden="true"> &rarr;</span>
@@ -271,22 +199,47 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
                   <span className="sr-only">Toggle theme</span>
                   {isDark ? <MoonIcon aria-hidden="true" className="size-5" /> : <SunIcon aria-hidden="true" className="size-5" />}
                 </button>
-                <button
-                  type="button"
-                  onClick={isAuthenticated ? handleNavigateToMyAccount : openLoginModal}
-                  className="-mx-3 block rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
-                >
-                  {isAuthenticated ? 'My Account' : 'Log in'}
-                </button>
                 {isAuthenticated ? (
+                  <div className="-mx-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileAccountOpen((prev) => !prev)}
+                      className="flex w-full items-center justify-between rounded-full py-2 pr-3.5 pl-3 text-base/7 font-semibold text-foreground hover:bg-accent"
+                    >
+                      My Account
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className={`size-5 flex-none transition-transform ${isMobileAccountOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    {isMobileAccountOpen ? (
+                      <div className="mt-2 space-y-2">
+                        <button
+                          type="button"
+                          onClick={handleNavigateToMyAccount}
+                          className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
+                        >
+                          View account
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="block w-full rounded-full py-2 pr-3 pl-6 text-left text-sm/7 font-semibold text-foreground hover:bg-accent"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={handleLogout}
+                    onClick={openLoginModal}
                     className="-mx-3 block rounded-full px-3 py-2.5 text-base/7 font-semibold text-foreground hover:bg-accent"
                   >
-                    Logout
+                    Log in
                   </button>
-                ) : null}
+                )}
               </div>
             </div>
           </div>
@@ -300,6 +253,10 @@ export default function HeaderNavigation({ onNavigateHome, onNavigateToMyAccount
             onLoginSuccess={() => {
               setIsAuthenticated(true)
               setLoginModalOpen(false)
+            }}
+            onNavigateToSignUp={() => {
+              setLoginModalOpen(false)
+              onNavigate('/sign-up')
             }}
           />
         </Suspense>

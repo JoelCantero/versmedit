@@ -36,6 +36,7 @@ export default function Memorize() {
           reference: item.reference,
           verse: item.verse,
           category: item.categoryRel?.name ?? item.category,
+          categoryColor: item.categoryRel?.color ?? null,
           leitnerLevel: item.leitnerLevel,
         }))
 

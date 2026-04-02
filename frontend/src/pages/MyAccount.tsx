@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../api/client'
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 
 type AuthSessionResponse = {
   session: {
@@ -87,30 +89,30 @@ export default function MyAccount() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
+      <PageShell>
         <p className="text-sm font-medium text-muted-foreground">Loading account...</p>
-      </main>
+      </PageShell>
     )
   }
 
   if (!accountData) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h1 className="text-2xl font-semibold text-foreground">My Account</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            You need to log in to view your account details.
-          </p>
-        </div>
-      </main>
+      <PageShell>
+        <PageHeader
+          title="My Account"
+          description="You need to log in to view your account details."
+        />
+      </PageShell>
     )
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-28 lg:px-8">
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold text-foreground">My Account</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Authenticated account information from Better Auth.</p>
+    <PageShell>
+      <PageHeader
+        title="My Account"
+        description="Authenticated account information from Better Auth."
+      />
+      <div className="mt-10 rounded-2xl border border-border bg-card p-6">
 
         <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
           <div className="rounded-lg bg-muted p-4">
@@ -199,6 +201,6 @@ export default function MyAccount() {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   )
 }

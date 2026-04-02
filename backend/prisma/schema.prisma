@@ -9,17 +9,13 @@ datasource db {
 
 enum CategoryColor {
   GRAY
-  BRAND
-  ERROR
-  WARNING
-  SUCCESS
-  GRAY_BLUE
-  BLUE_LIGHT
+  RED
+  YELLOW
+  GREEN
   BLUE
   INDIGO
   PURPLE
   PINK
-  ORANGE
 }
 
 enum VerseLearningState {

@@ -53,6 +53,9 @@ const en = {
   // FAQ
   'faq.title': 'Frequently asked questions',
   'faq.description': 'Everything you need to know about Versmedit.',
+  'faq.section.learningProcess': 'Learning Process',
+  'faq.section.leitnerSystem': 'Leitner System',
+  'faq.section.practiceMode': 'Practice Mode',
   'faq.q1.title': 'How does daily learning work?',
   'faq.q1.content':
     'Every day, Versmedit selects the verses you need to review that day based on the Leitner schedule. The goal is to review verses at optimal intervals for better retention.',
@@ -91,6 +94,12 @@ const en = {
   'faq.q9.content': 'Yes, you can review your mastered verses. To do this, select the mastered verses and tap the',
   'faq.q9.studyAgain': 'Study Again',
   'faq.q9.contentEnd': 'button. They will return to Level 1 and begin the memorization process from the beginning.',
+  'faq.q10.title': 'What is the Leitner System and how does it help with memorization?',
+  'faq.q10.content':
+    'The Leitner System is a spaced-repetition method that organizes your verses into levels. New or difficult verses are reviewed more frequently, while the ones you know well are reviewed less often. This approach is scientifically proven to move information from short-term to long-term memory more efficiently than simple repetition.',
+  'faq.q11.title': 'How does Practice Mode differ from Memorize Mode?',
+  'faq.q11.content':
+    'In Memorize Mode, your verses are reviewed on a schedule and your progress is tracked — correct answers move the verse up a level, mistakes drop it down. In Practice Mode, you can freely review all your verses in random order without affecting their level or schedule. It is a stress-free way to refresh your memory whenever you want.',,
 
   // My Account
   'myAccount.title': 'My Account',

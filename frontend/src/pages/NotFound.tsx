@@ -1,14 +1,11 @@
+import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
 
-type NotFoundProps = {
-  onNavigateHome: () => void
-  onNavigateContact: () => void
-}
-
-export default function NotFound({ onNavigateHome, onNavigateContact }: NotFoundProps) {
-  const { t } = useTranslation()
+export default function NotFound() {
+  const { t, localePath } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <PageShell>
@@ -21,8 +18,8 @@ export default function NotFound({ onNavigateHome, onNavigateContact }: NotFound
           {t('notFound.description')}
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Button onClick={onNavigateHome}>{t('notFound.goHome')}</Button>
-          <button onClick={onNavigateContact} className="cursor-pointer text-sm font-semibold text-foreground">
+          <Button onClick={() => navigate(localePath('/'))}>{t('notFound.goHome')}</Button>
+          <button onClick={() => navigate(localePath('/contact'))} className="cursor-pointer text-sm font-semibold text-foreground">
             {t('notFound.contactSupport')} <span aria-hidden="true">&rarr;</span>
           </button>
         </div>

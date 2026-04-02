@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchPosts, type PostSummary } from '../api/client'
 import CategoryBadge from '../components/CategoryBadge'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
-
-interface BlogProps {
-  onSelectPost: (slug: string) => void
-}
 
 const CATEGORY_COLORS: Record<string, 'gray' | 'blue' | 'indigo' | 'green' | 'purple'> = {
   'Getting Started': 'blue',
@@ -23,8 +20,9 @@ function formatDate(dateString: string): string {
   })
 }
 
-export default function Blog({ onSelectPost }: BlogProps) {
-  const { t } = useTranslation()
+export default function Blog() {
+  const { t, localePath } = useTranslation()
+  const navigate = useNavigate()
   const [posts, setPosts] = useState<PostSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -89,12 +87,12 @@ export default function Blog({ onSelectPost }: BlogProps) {
           <article
             key={post.id}
             className="group flex cursor-pointer flex-col items-start transition-all hover:opacity-75"
-            onClick={() => onSelectPost(post.slug)}
+            onClick={() => navigate(localePath(`/blog/${post.slug}`))}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                onSelectPost(post.slug)
+                navigate(localePath(`/blog/${post.slug}`))
               }
             }}
           >

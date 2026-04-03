@@ -7,6 +7,7 @@ import Layout from './components/Layout'
 const MainHero = lazy(() => import('./components/MainHero'))
 const Memorize = lazy(() => import('./pages/Memorize'))
 const MyAccount = lazy(() => import('./pages/MyAccount'))
+const MyVerses = lazy(() => import('./pages/MyVerses'))
 const Practice = lazy(() => import('./pages/Practice'))
 const AboutMe = lazy(() => import('./pages/AboutMe'))
 const Faq = lazy(() => import('./pages/Faq'))
@@ -36,6 +37,7 @@ const pageRoutes = (
     <Route path="memorize" element={withLoader(<Memorize />)} />
     <Route path="practice" element={withLoader(<Practice />)} />
     <Route path="my-account" element={withLoader(<MyAccount />)} />
+    <Route path="my-verses" element={withLoader(<MyVerses />)} />
     <Route path="about" element={withLoader(<AboutMe />)} />
     <Route path="faq" element={withLoader(<Faq />)} />
     <Route path="blog" element={withLoader(<Blog />)} />

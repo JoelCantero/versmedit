@@ -4,6 +4,7 @@ import { auth } from "./auth/auth.js";
 import { accountRouter } from "./routes/account.js";
 import { healthRouter } from "./routes/health.js";
 import { postsRouter } from "./routes/posts.js";
+import { versesRouter } from "./routes/verses.js";
 
 export const app = express();
 
@@ -14,3 +15,4 @@ app.use(express.json());
 app.use("/api/health", healthRouter);
 app.use("/api/account", accountRouter);
 app.use("/api/posts", postsRouter);
+app.use("/api/verses", versesRouter);

@@ -59,10 +59,80 @@ export type PostDetail = PostSummary & {
   createdAt: string;
 };
 
+export type VerseCategory = {
+  id: string;
+  name: string;
+  color: string | null;
+};
+
+export type VerseItem = {
+  id: string;
+  verse: string;
+  reference: string;
+  category: string;
+  categoryId: string | null;
+  leitnerLevel: number;
+  learningState: "LEARNING" | "MASTERED";
+  dueAt: string;
+  totalReviews: number;
+  successfulReviews: number;
+  failedReviews: number;
+  createdAt: string;
+  categoryRel: VerseCategory | null;
+};
+
+export type VersesResponse = {
+  categories: VerseCategory[];
+  verses: VerseItem[];
+};
+
+export type CreateVersePayload = {
+  verse: string;
+  reference: string;
+  categoryId: string;
+};
+
+export type UpdateVersePayload = {
+  verse: string;
+  reference: string;
+  categoryId: string;
+};
+
 export function fetchPosts(): Promise<{ posts: PostSummary[] }> {
   return apiFetch("/posts");
 }
 
 export function fetchPostBySlug(slug: string): Promise<{ post: PostDetail }> {
   return apiFetch(`/posts/${encodeURIComponent(slug)}`);
+}
+
+export function fetchVerses(): Promise<VersesResponse> {
+  return apiFetch("/verses");
+}
+
+export function createVerse(payload: CreateVersePayload): Promise<{ verse: VerseItem }> {
+  return apiFetch("/verses", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateVerse(verseId: string, payload: UpdateVersePayload): Promise<{ verse: VerseItem }> {
+  return apiFetch(`/verses/${encodeURIComponent(verseId)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateVerseProgress(verseId: string, leitnerLevel: number): Promise<{ verse: VerseItem }> {
+  return apiFetch(`/verses/${encodeURIComponent(verseId)}/progress`, {
+    method: "PATCH",
+    body: JSON.stringify({ leitnerLevel })
+  });
+}
+
+export async function deleteVerse(verseId: string): Promise<void> {
+  await apiFetch(`/verses/${encodeURIComponent(verseId)}`, {
+    method: "DELETE"
+  });
 }

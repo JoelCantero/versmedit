@@ -14,6 +14,7 @@ const en = {
   'nav.srCompanyLogo': 'Versmedit',
   'nav.practice': 'Practice',
   'nav.memorize': 'Memorize',
+  'nav.myVerses': 'My verses',
 
   // Hero
   'hero.badge': 'Versmedit daily focus.',
@@ -135,6 +136,28 @@ const en = {
   'myAccount.success': 'success',
   'myAccount.fail': 'fail',
   'myAccount.resets': 'Resets',
+
+  // My Verses
+  'myVerses.title': 'My verses',
+  'myVerses.description': 'Add, edit, remove, and track progress for all your verses.',
+  'myVerses.loading': 'Loading verses...',
+  'myVerses.loginRequired': 'Please sign in to manage your verses.',
+  'myVerses.loadError': 'Unable to load verses right now. Please try again.',
+  'myVerses.saveError': 'Unable to save this verse right now. Please try again.',
+  'myVerses.deleteError': 'Unable to delete this verse right now. Please try again.',
+  'myVerses.progressError': 'Unable to update progress right now. Please try again.',
+  'myVerses.referencePlaceholder': 'Reference (e.g. John 3:16)',
+  'myVerses.versePlaceholder': 'Verse text',
+  'myVerses.addVerse': 'Add verse',
+  'myVerses.updateVerse': 'Update verse',
+  'myVerses.cancelEdit': 'Cancel',
+  'myVerses.empty': 'No verses yet. Add your first one above.',
+  'myVerses.category': 'Category',
+  'myVerses.level': 'Level',
+  'myVerses.edit': 'Edit',
+  'myVerses.delete': 'Delete',
+  'myVerses.changeProgress': 'Change verse progress level',
+  'myVerses.saving': 'Saving...',
 
   // Not Found
   'notFound.code': '404',

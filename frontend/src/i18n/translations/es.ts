@@ -16,6 +16,7 @@ const es: Record<TranslationKey, string> = {
   'nav.srCompanyLogo': 'Versmedit',
   'nav.practice': 'Practicar',
   'nav.memorize': 'Memorizar',
+  'nav.myVerses': 'Mis versículos',
 
   // Hero
   'hero.badge': 'Enfoque diario de Versmedit.',
@@ -137,6 +138,28 @@ const es: Record<TranslationKey, string> = {
   'myAccount.success': 'éxito',
   'myAccount.fail': 'fallo',
   'myAccount.resets': 'Reinicios',
+
+  // My Verses
+  'myVerses.title': 'Mis versículos',
+  'myVerses.description': 'Añade, edita, elimina y sigue el progreso de todos tus versículos.',
+  'myVerses.loading': 'Cargando versículos...',
+  'myVerses.loginRequired': 'Inicia sesión para gestionar tus versículos.',
+  'myVerses.loadError': 'No se pudieron cargar los versículos. Por favor, inténtalo de nuevo.',
+  'myVerses.saveError': 'No se pudo guardar este versículo. Por favor, inténtalo de nuevo.',
+  'myVerses.deleteError': 'No se pudo eliminar este versículo. Por favor, inténtalo de nuevo.',
+  'myVerses.progressError': 'No se pudo actualizar el progreso. Por favor, inténtalo de nuevo.',
+  'myVerses.referencePlaceholder': 'Referencia (p. ej. Juan 3:16)',
+  'myVerses.versePlaceholder': 'Texto del versículo',
+  'myVerses.addVerse': 'Añadir versículo',
+  'myVerses.updateVerse': 'Actualizar versículo',
+  'myVerses.cancelEdit': 'Cancelar',
+  'myVerses.empty': 'Aún no hay versículos. Añade el primero arriba.',
+  'myVerses.category': 'Categoría',
+  'myVerses.level': 'Nivel',
+  'myVerses.edit': 'Editar',
+  'myVerses.delete': 'Eliminar',
+  'myVerses.changeProgress': 'Cambiar nivel de progreso del versículo',
+  'myVerses.saving': 'Guardando...',
 
   // Not Found
   'notFound.code': '404',

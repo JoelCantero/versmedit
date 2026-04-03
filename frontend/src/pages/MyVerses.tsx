@@ -7,9 +7,13 @@ import {
   type VerseCategory,
   type VerseItem,
   updateVerse,
-  updateVerseProgress,
 } from '../api/client'
+import Button from '../components/Button'
+import CategoryColorSelect, { type CategoryColorValue } from '../components/CategoryColorSelect'
+import ConfirmDialog from '../components/ConfirmDialog'
+import FormInputSelect from '../components/FormInputSelect'
 import FormInput from '../components/FormInput'
+import Modal from '../components/Modal'
 import FormTextArea from '../components/FormTextArea'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
@@ -20,23 +24,30 @@ type VerseForm = {
   verse: string
   reference: string
   categoryId: string
+  categoryName: string
+  categoryColor: CategoryColorValue
 }
 
 const emptyForm: VerseForm = {
   verse: '',
   reference: '',
   categoryId: '',
+  categoryName: '',
+  categoryColor: 'GRAY',
 }
 
 export default function MyVerses() {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isComposerOpen, setIsComposerOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [categories, setCategories] = useState<VerseCategory[]>([])
   const [verses, setVerses] = useState<VerseItem[]>([])
   const [form, setForm] = useState<VerseForm>(emptyForm)
   const [editingVerseId, setEditingVerseId] = useState<string | null>(null)
+  const [pendingDeleteVerse, setPendingDeleteVerse] = useState<VerseItem | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const isAuthenticated = !isLoading && !error
 
@@ -44,6 +55,49 @@ export default function MyVerses() {
     if (isSaving) return t('myVerses.saving')
     return editingVerseId ? t('myVerses.updateVerse') : t('myVerses.addVerse')
   }, [editingVerseId, isSaving, t])
+
+  const syncCategoryInList = (nextCategory: VerseCategory | null) => {
+    if (!nextCategory) {
+      return
+    }
+
+    setCategories((current) => {
+      const existingIndex = current.findIndex((category) => category.id === nextCategory.id)
+
+      if (existingIndex === -1) {
+        return [...current, nextCategory].sort((a, b) => a.name.localeCompare(b.name))
+      }
+
+      const next = [...current]
+      next[existingIndex] = nextCategory
+      return next.sort((a, b) => a.name.localeCompare(b.name))
+    })
+  }
+
+  const syncCategoryAcrossVerses = (nextCategory: VerseCategory | null) => {
+    if (!nextCategory) {
+      return
+    }
+
+    setVerses((current) =>
+      current.map((verse) => {
+        if (verse.categoryId !== nextCategory.id) {
+          return verse
+        }
+
+        return {
+          ...verse,
+          category: nextCategory.name,
+          categoryRel: {
+            ...(verse.categoryRel ?? { id: nextCategory.id }),
+            id: nextCategory.id,
+            name: nextCategory.name,
+            color: nextCategory.color,
+          },
+        }
+      }),
+    )
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -54,6 +108,8 @@ export default function MyVerses() {
         setForm((prev) => ({
           ...prev,
           categoryId: prev.categoryId || data.categories[0]?.id || '',
+          categoryName: prev.categoryName || data.categories[0]?.name || '',
+          categoryColor: (prev.categoryColor || data.categories[0]?.color || 'GRAY') as CategoryColorValue,
         }))
       } catch (caught) {
         if (caught instanceof ApiError && caught.status === 401) {
@@ -73,14 +129,31 @@ export default function MyVerses() {
     setEditingVerseId(null)
     setForm({
       ...emptyForm,
-      categoryId: categories[0]?.id || '',
+      categoryId: '',
+      categoryName: '',
+      categoryColor: 'GRAY',
     })
+    setIsComposerOpen(false)
+  }
+
+  const openCreateComposer = () => {
+    setError(null)
+    setEditingVerseId(null)
+    setForm({
+      ...emptyForm,
+      categoryId: '',
+      categoryName: '',
+      categoryColor: 'GRAY',
+    })
+    setIsComposerOpen(true)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!form.verse.trim() || !form.reference.trim() || !form.categoryId) {
+    const categoryName = form.categoryName.trim()
+
+    if (!form.verse.trim() || !form.reference.trim()) {
       return
     }
 
@@ -92,20 +165,28 @@ export default function MyVerses() {
         const response = await updateVerse(editingVerseId, {
           verse: form.verse,
           reference: form.reference,
-          categoryId: form.categoryId,
+          categoryId: form.categoryId || undefined,
+          categoryName: categoryName || undefined,
+          categoryColor: form.categoryColor,
         })
 
         setVerses((current) =>
           current.map((verse) => (verse.id === editingVerseId ? response.verse : verse)),
         )
+        syncCategoryInList(response.verse.categoryRel)
+        syncCategoryAcrossVerses(response.verse.categoryRel)
       } else {
         const response = await createVerse({
           verse: form.verse,
           reference: form.reference,
-          categoryId: form.categoryId,
+          categoryId: form.categoryId || undefined,
+          categoryName: categoryName || undefined,
+          categoryColor: form.categoryColor,
         })
 
         setVerses((current) => [response.verse, ...current])
+        syncCategoryInList(response.verse.categoryRel)
+        syncCategoryAcrossVerses(response.verse.categoryRel)
       }
 
       resetForm()
@@ -117,52 +198,54 @@ export default function MyVerses() {
   }
 
   const handleEdit = (verse: VerseItem) => {
+    setError(null)
     setEditingVerseId(verse.id)
+
+    const resolvedCategoryName = (verse.categoryRel?.name ?? verse.category ?? '').trim()
+    const hasCategory = Boolean(verse.categoryId || resolvedCategoryName)
+
     setForm({
       verse: verse.verse,
       reference: verse.reference,
-      categoryId: verse.categoryId ?? categories[0]?.id ?? '',
+      categoryId: hasCategory ? verse.categoryId ?? '' : '',
+      categoryName: hasCategory ? resolvedCategoryName : '',
+      categoryColor: hasCategory
+        ? (verse.categoryRel?.color ?? 'GRAY') as CategoryColorValue
+        : 'GRAY',
     })
+    setIsComposerOpen(true)
   }
 
-  const handleDelete = async (verse: VerseItem) => {
-    try {
-      await deleteVerse(verse.id)
-      setVerses((current) => current.filter((item) => item.id !== verse.id))
-      if (editingVerseId === verse.id) {
-        resetForm()
-      }
-    } catch {
-      setError(t('myVerses.deleteError'))
-    }
+  const handleRequestDelete = (verse: VerseItem) => {
+    setPendingDeleteVerse(verse)
   }
 
-  const handleProgressChange = async (verse: VerseItem, level: number) => {
-    if (verse.leitnerLevel === level) {
+  const handleCancelDelete = () => {
+    if (isDeleting) {
       return
     }
 
-    const previous = verse
-    setVerses((current) =>
-      current.map((item) =>
-        item.id === verse.id
-          ? {
-              ...item,
-              leitnerLevel: level,
-              learningState: level === 7 ? 'MASTERED' : 'LEARNING',
-            }
-          : item,
-      ),
-    )
+    setPendingDeleteVerse(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteVerse) {
+      return
+    }
+
+    setIsDeleting(true)
 
     try {
-      const response = await updateVerseProgress(verse.id, level)
-      setVerses((current) =>
-        current.map((item) => (item.id === verse.id ? response.verse : item)),
-      )
+      await deleteVerse(pendingDeleteVerse.id)
+      setVerses((current) => current.filter((item) => item.id !== pendingDeleteVerse.id))
+      if (editingVerseId === pendingDeleteVerse.id) {
+        resetForm()
+      }
+      setPendingDeleteVerse(null)
     } catch {
-      setVerses((current) => current.map((item) => (item.id === verse.id ? previous : item)))
-      setError(t('myVerses.progressError'))
+      setError(t('myVerses.deleteError'))
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -184,79 +267,117 @@ export default function MyVerses() {
         </div>
       ) : (
         <>
-          <form
-            className="mt-8 space-y-3 rounded-xl border border-border bg-card p-4"
-            onSubmit={handleSubmit}
-          >
-            <div className="grid gap-3 md:grid-cols-2">
-              <FormInput
-                id="verse-reference"
-                name="reference"
-                value={form.reference}
-                onChange={(event) => setForm((prev) => ({ ...prev, reference: event.target.value }))}
-                placeholder={t('myVerses.referencePlaceholder')}
-                required
-              />
-              <select
-                aria-label={t('myVerses.category')}
-                value={form.categoryId}
-                onChange={(event) => setForm((prev) => ({ ...prev, categoryId: event.target.value }))}
-                className="h-11 rounded-2xl border border-border bg-background px-4 text-sm text-foreground focus:outline-none"
-                required
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <FormTextArea
-              id="verse-text"
-              name="verse"
-              value={form.verse}
-              onChange={(event) => setForm((prev) => ({ ...prev, verse: event.target.value }))}
-              placeholder={t('myVerses.versePlaceholder')}
-              required
-            />
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="submit"
-                disabled={isSaving || categories.length === 0}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-              >
-                {submitLabel}
-              </button>
-              {editingVerseId ? (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground"
-                >
-                  {t('myVerses.cancelEdit')}
-                </button>
-              ) : null}
-            </div>
-          </form>
-
           {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
 
-          <div className="mt-6">
+          <div className="mt-8">
             <VerseList
               verses={verses}
               emptyText={t('myVerses.empty')}
               progressLabel={t('myVerses.level')}
               categoryLabel={t('myVerses.category')}
+              noCategoryLabel={t('myVerses.noCategory')}
               editLabel={t('myVerses.edit')}
               deleteLabel={t('myVerses.delete')}
-              levelOptionsLabel={t('myVerses.changeProgress')}
               onEdit={handleEdit}
-              onDelete={handleDelete}
-              onLevelChange={handleProgressChange}
+              onDelete={handleRequestDelete}
             />
           </div>
+
+          <button
+            type="button"
+            onClick={openCreateComposer}
+            aria-label={t('myVerses.addVerse')}
+            className="fixed right-6 bottom-6 z-40 inline-flex size-14 items-center justify-center rounded-full bg-primary text-3xl leading-none font-semibold text-primary-foreground shadow-lg transition hover:scale-105 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            +
+          </button>
+
+          <Modal open={isComposerOpen} onClose={resetForm} panelClassName="sm:max-w-2xl">
+            <div className="p-4 sm:p-6">
+              <form className="space-y-3" onSubmit={handleSubmit}>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <FormInput
+                    id="verse-reference"
+                    name="reference"
+                    value={form.reference}
+                    onChange={(event) => setForm((prev) => ({ ...prev, reference: event.target.value }))}
+                    placeholder={t('myVerses.referencePlaceholder')}
+                    required
+                  />
+                  <div className="flex items-center gap-2">
+                    <FormInputSelect
+                      id="verse-category"
+                      value={form.categoryId}
+                      inputValue={form.categoryName}
+                      selectedColor={form.categoryColor}
+                      containerClassName="flex-1"
+                      onChange={(nextValue) => setForm((prev) => {
+                        const selectedCategory = categories.find((category) => category.id === nextValue)
+
+                        return {
+                          ...prev,
+                          categoryId: nextValue,
+                          categoryColor: (selectedCategory?.color ?? prev.categoryColor ?? 'GRAY') as CategoryColorValue,
+                        }
+                      })}
+                      onInputValueChange={(nextValue) => setForm((prev) => ({ ...prev, categoryName: nextValue }))}
+                      options={categories.map((category) => ({
+                        value: category.id,
+                        label: category.name,
+                        color: category.color,
+                      }))}
+                      placeholder={t('myVerses.category')}
+                    />
+                    <CategoryColorSelect
+                      value={form.categoryColor}
+                      onChange={(nextColor) => setForm((prev) => ({ ...prev, categoryColor: nextColor }))}
+                      ariaLabel={t('myVerses.category')}
+                    />
+                  </div>
+                </div>
+
+                <FormTextArea
+                  id="verse-text"
+                  name="verse"
+                  value={form.verse}
+                  onChange={(event) => setForm((prev) => ({ ...prev, verse: event.target.value }))}
+                  placeholder={t('myVerses.versePlaceholder')}
+                  required
+                />
+
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={resetForm}
+                  >
+                    {t('myVerses.cancelEdit')}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSaving || categories.length === 0}
+                  >
+                    {submitLabel}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Modal>
+
+          <ConfirmDialog
+            open={Boolean(pendingDeleteVerse)}
+            title={t('myVerses.deleteDialogTitle')}
+            description={
+              pendingDeleteVerse
+                ? t('myVerses.deleteDialogDescription').replace('{reference}', pendingDeleteVerse.reference)
+                : t('myVerses.deleteDialogDescription').replace('{reference}', '')
+            }
+            confirmLabel={t('myVerses.deleteDialogConfirm')}
+            cancelLabel={t('myVerses.deleteDialogCancel')}
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+            isConfirming={isDeleting}
+          />
         </>
       )}
     </PageShell>

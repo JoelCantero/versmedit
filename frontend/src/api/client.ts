@@ -38,6 +38,15 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new ApiError(errorMessage, response.status, errorCode);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return undefined as T;
+  }
+
   return (await response.json()) as T;
 }
 
@@ -89,13 +98,17 @@ export type VersesResponse = {
 export type CreateVersePayload = {
   verse: string;
   reference: string;
-  categoryId: string;
+  categoryId?: string;
+  categoryName?: string;
+  categoryColor?: string;
 };
 
 export type UpdateVersePayload = {
   verse: string;
   reference: string;
-  categoryId: string;
+  categoryId?: string;
+  categoryName?: string;
+  categoryColor?: string;
 };
 
 export function fetchPosts(): Promise<{ posts: PostSummary[] }> {

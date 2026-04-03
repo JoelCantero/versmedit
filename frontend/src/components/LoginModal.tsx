@@ -1,10 +1,10 @@
 import { FormEvent, useState } from 'react'
-import { Dialog, DialogPanel } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { apiFetch } from '../api/client'
 import { useTranslation } from '../i18n/LanguageContext'
 import FormInput from './FormInput'
 import Button from './Button'
+import Modal from './Modal'
 
 type LoginModalProps = {
   open: boolean
@@ -43,67 +43,64 @@ export default function LoginModal({ open, onClose, onLoginSuccess, onNavigateTo
   }
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-gray-900/50" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl ring-1 ring-gray-900/10 dark:ring-white/10">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">{t('login.title')}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t('login.notMember')}{' '}
-                <button
-                  type="button"
-                  onClick={onNavigateToSignUp}
-                  className="cursor-pointer font-semibold text-primary hover:text-primary/80"
-                >
-                  {t('login.signUpLink')}
-                </button>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <span className="sr-only">{t('login.srClose')}</span>
-              <XMarkIcon aria-hidden="true" className="size-5" />
-            </button>
+    <Modal open={open} onClose={onClose} panelClassName="sm:max-w-md">
+      <div className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground">{t('login.title')}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t('login.notMember')}{' '}
+              <button
+                type="button"
+                onClick={onNavigateToSignUp}
+                className="cursor-pointer font-semibold text-primary hover:text-primary/80"
+              >
+                {t('login.signUpLink')}
+              </button>
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            <span className="sr-only">{t('login.srClose')}</span>
+            <XMarkIcon aria-hidden="true" className="size-5" />
+          </button>
+        </div>
 
-          <form className="mt-6 space-y-4" method="post" autoComplete="on" onSubmit={handleSubmit}>
-            <FormInput
-              id="login-email"
-              name="email"
-              type="email"
-              autoComplete="username"
-              inputMode="email"
-              spellCheck={false}
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder={t('login.email')}
-            />
+        <form className="mt-6 space-y-4" method="post" autoComplete="on" onSubmit={handleSubmit}>
+          <FormInput
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="username"
+            inputMode="email"
+            spellCheck={false}
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder={t('login.email')}
+          />
 
-            <FormInput
-              id="login-password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder={t('login.password')}
-            />
+          <FormInput
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder={t('login.password')}
+          />
 
-            {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
+          {errorMessage ? <p className="text-sm font-medium text-destructive">{errorMessage}</p> : null}
 
-            <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
-              {isSubmitting ? t('login.submitting') : t('login.submit')}
-            </Button>
-          </form>
-        </DialogPanel>
+          <Button type="submit" disabled={isSubmitting} className="w-full px-3.5 py-2.5">
+            {isSubmitting ? t('login.submitting') : t('login.submit')}
+          </Button>
+        </form>
       </div>
-    </Dialog>
+    </Modal>
   )
 }

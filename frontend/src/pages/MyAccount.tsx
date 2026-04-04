@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../api/client'
+import Button from '../components/Button'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { useTranslation } from '../i18n/LanguageContext'
@@ -54,6 +55,8 @@ export default function MyAccount() {
   const { t } = useTranslation()
   const [accountData, setAccountData] = useState<AuthSessionResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [resettingVerseId, setResettingVerseId] = useState<string | null>(null)
+  const [studyAgainError, setStudyAgainError] = useState<string | null>(null)
 
   const levelSummary = useMemo(() => {
     const levels = Array.from({ length: 7 }, (_, index) => ({
@@ -88,6 +91,52 @@ export default function MyAccount() {
 
     void loadSession()
   }, [])
+
+  const handleStudyAgain = async (verseId: string) => {
+    setResettingVerseId(verseId)
+    setStudyAgainError(null)
+
+    try {
+      const response = await apiFetch<{
+        verse: {
+          id: string
+          leitnerLevel: number
+          learningState: 'LEARNING' | 'MASTERED'
+          dueAt: string
+          masteredAt: string | null
+          resetCount: number
+        }
+      }>(`/account/verses/${encodeURIComponent(verseId)}/study-again`, {
+        method: 'POST',
+      })
+
+      setAccountData((current) => {
+        if (!current) {
+          return current
+        }
+
+        return {
+          ...current,
+          verses: current.verses.map((verse) =>
+            verse.id === response.verse.id
+              ? {
+                  ...verse,
+                  leitnerLevel: response.verse.leitnerLevel,
+                  learningState: response.verse.learningState,
+                  dueAt: response.verse.dueAt,
+                  masteredAt: response.verse.masteredAt,
+                  resetCount: response.verse.resetCount,
+                }
+              : verse,
+          ),
+        }
+      })
+    } catch {
+      setStudyAgainError(t('myAccount.studyAgainError'))
+    } finally {
+      setResettingVerseId(null)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -180,6 +229,7 @@ export default function MyAccount() {
             <h2 className="text-lg font-semibold text-foreground">{t('myAccount.verses')}</h2>
             <span className="text-sm text-muted-foreground">{accountData.verses.length} {t('myAccount.total')}</span>
           </div>
+          {studyAgainError ? <p className="mt-3 text-sm text-destructive">{studyAgainError}</p> : null}
           {accountData.verses.length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">{t('myAccount.noVerses')}</p>
           ) : (
@@ -197,6 +247,20 @@ export default function MyAccount() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {t('myAccount.reviews')}: {verse.totalReviews} {t('myAccount.total')} ({verse.successfulReviews} {t('myAccount.success')} / {verse.failedReviews} {t('myAccount.fail')}) · {t('myAccount.resets')}: {verse.resetCount}
                   </p>
+                  {verse.learningState === 'MASTERED' ? (
+                    <div className="mt-3">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={resettingVerseId === verse.id}
+                        onClick={() => {
+                          void handleStudyAgain(verse.id)
+                        }}
+                      >
+                        {resettingVerseId === verse.id ? t('myAccount.studyingAgain') : t('myAccount.studyAgain')}
+                      </Button>
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>

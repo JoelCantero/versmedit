@@ -138,6 +138,9 @@ const es: Record<TranslationKey, string> = {
   'myAccount.success': 'éxito',
   'myAccount.fail': 'fallo',
   'myAccount.resets': 'Reinicios',
+  'myAccount.studyAgain': 'Estudiar de nuevo',
+  'myAccount.studyingAgain': 'Reiniciando...',
+  'myAccount.studyAgainError': 'No se pudo reiniciar este versículo. Por favor, inténtalo de nuevo.',
 
   // My Verses
   'myVerses.title': 'Mis versículos',

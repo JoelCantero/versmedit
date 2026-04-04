@@ -136,6 +136,9 @@ const en = {
   'myAccount.success': 'success',
   'myAccount.fail': 'fail',
   'myAccount.resets': 'Resets',
+  'myAccount.studyAgain': 'Study Again',
+  'myAccount.studyingAgain': 'Resetting...',
+  'myAccount.studyAgainError': 'Unable to reset this verse right now. Please try again.',
 
   // My Verses
   'myVerses.title': 'My verses',

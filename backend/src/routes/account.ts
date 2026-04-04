@@ -246,3 +246,60 @@ accountRouter.post("/verses/:verseId/review", async (request, response) => {
 
   response.json({ verse: updated });
 });
+
+accountRouter.post("/verses/:verseId/study-again", async (request, response) => {
+  const session = await auth.api.getSession({
+    headers: request.headers as never
+  });
+
+  if (!session?.user?.id) {
+    response.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const userId = session.user.id;
+  const verseId = request.params.verseId;
+
+  const verse = await prisma.verse.findFirst({
+    where: {
+      id: verseId,
+      userId
+    },
+    select: {
+      id: true,
+      learningState: true
+    }
+  });
+
+  if (!verse) {
+    response.status(404).json({ error: "Verse not found" });
+    return;
+  }
+
+  if (verse.learningState !== "MASTERED") {
+    response.status(400).json({ error: "Only mastered verses can be reset" });
+    return;
+  }
+
+  const now = new Date();
+  const updated = await prisma.verse.update({
+    where: { id: verse.id },
+    data: {
+      leitnerLevel: 1,
+      learningState: "LEARNING",
+      dueAt: now,
+      masteredAt: null,
+      resetCount: { increment: 1 }
+    },
+    select: {
+      id: true,
+      leitnerLevel: true,
+      learningState: true,
+      dueAt: true,
+      masteredAt: true,
+      resetCount: true
+    }
+  });
+
+  response.json({ verse: updated });
+});

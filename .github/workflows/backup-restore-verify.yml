@@ -1,0 +1,92 @@
+name: Verify Backup And Restore
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/db-backup.sh"
+      - "scripts/db-restore.sh"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
+      - "prisma/**"
+      - ".github/workflows/backup-restore-verify.yml"
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-restore-verification-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Restore Into Fresh Database
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: backupverify
+      POSTGRES_PASSWORD: backup-verify-password
+      DATABASE_URL: postgresql://backupverify:backup-verify-password@127.0.0.1:5432/backupverify?schema=public
+      AUTH_SECRET: backup-verify-secret-not-used-runtime-000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start source database
+        run: docker compose up -d --wait db
+
+      - name: Migrate and add verification record
+        run: |
+          pnpm exec prisma migrate deploy
+          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+            --set ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"VerificationToken\" (identifier, token, expires) VALUES ('backup-check', 'restore-me', NOW() + interval '1 hour');"
+
+      - name: Create backup
+        run: pnpm db:backup:dev "$RUNNER_TEMP/backups"
+
+      - name: Recreate an empty database
+        run: |
+          docker compose down --volumes
+          docker compose up -d --wait db
+
+      - name: Refuse restore into a database with residual objects
+        run: |
+          backup_file="$(find "$RUNNER_TEMP/backups" -name '*.sql.gz' -print -quit)"
+          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+            --set ON_ERROR_STOP=1 -c \
+            "CREATE COLLATION public.residual_collation (provider = icu, locale = 'en-US');"
+          if pnpm db:restore:dev "$backup_file"; then
+            echo "Restore unexpectedly accepted a non-empty database." >&2
+            exit 1
+          fi
+          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+            --set ON_ERROR_STOP=1 -c "DROP COLLATION public.residual_collation;"
+
+      - name: Restore and verify record
+        run: |
+          backup_file="$(find "$RUNNER_TEMP/backups" -name '*.sql.gz' -print -quit)"
+          pnpm db:restore:dev "$backup_file"
+          restored="$(docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" -Atqc \
+            "SELECT token FROM \"VerificationToken\" WHERE identifier = 'backup-check';")"
+          test "$restored" = "restore-me"
+
+      - name: Clean up
+        if: always()
+        run: docker compose down --volumes

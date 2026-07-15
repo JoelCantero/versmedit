@@ -1,0 +1,158 @@
+name: Deploy Main To Raspberry
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  # Never interrupt a build or migration already running on the production host.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy with Docker Compose
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+    env:
+      # Deploy target is built from GitHub repo Variables (Settings > Secrets and
+      # variables > Actions > Variables). No fallback: the "Validate required
+      # variables and secrets" step below fails fast if they are not set.
+      DEPLOY_DIR: ${{ vars.DEPLOY_BASE_DIR }}/${{ vars.PROJECT_NAME }}
+
+    steps:
+      - name: Validate required variables and secrets
+        # Secrets are passed as env vars and only checked for emptiness (never printed),
+        # so their values are never exposed in the logs.
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+          DEPLOY_BASE_DIR: ${{ vars.DEPLOY_BASE_DIR }}
+          RUNNER_NAME: ${{ vars.RUNNER_NAME }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+        run: |
+          missing=()
+          [ -n "$PROJECT_NAME" ] || missing+=("PROJECT_NAME (Variable)")
+          [ -n "$APP_DOMAIN" ] || missing+=("APP_DOMAIN (Variable)")
+          [ -n "$DEPLOY_BASE_DIR" ] || missing+=("DEPLOY_BASE_DIR (Variable)")
+          [ -n "$RUNNER_NAME" ] || missing+=("RUNNER_NAME (Variable)")
+          [ -n "$POSTGRES_PASSWORD" ] || missing+=("POSTGRES_PASSWORD (Secret)")
+          [ -n "$AUTH_SECRET" ] || missing+=("AUTH_SECRET (Secret)")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "Missing required configuration:"
+            printf '  - %s\n' "${missing[@]}"
+            echo "Set them in Settings > Secrets and variables > Actions (Variables / Secrets)."
+            exit 1
+          fi
+          echo "All required variables and secrets are set."
+
+      - name: Ensure runner matches RUNNER_NAME
+        env:
+          RUNNER_NAME: ${{ vars.RUNNER_NAME }}
+        run: |
+          if [ "${{ runner.name }}" != "$RUNNER_NAME" ]; then
+            echo "This workflow must run on runner '$RUNNER_NAME'. Current runner: ${{ runner.name }}"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Sync repository to deploy directory
+        run: |
+          mkdir -p "$DEPLOY_DIR"
+          rsync -az --delete \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude ".next" \
+            --exclude "src/generated" \
+            --exclude ".env" \
+            --exclude ".env.*" \
+            --exclude "backups" \
+            --exclude "coverage" \
+            ./ "$DEPLOY_DIR/"
+
+      - name: Ensure external ingress network exists
+        run: docker network inspect traefik_network >/dev/null 2>&1 || docker network create traefik_network
+
+      - name: Build and deploy with Docker Compose
+        env:
+          # Non-sensitive config -> GitHub Variables; secrets -> GitHub Secrets.
+          # Compose reads these from the shell environment (no .env file on the host).
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          # Opt in only when Cloudflare is the exclusive origin path and the
+          # ingress overwrites forwarded host and client-address headers.
+          TRUST_PROXY_HEADERS: ${{ vars.TRUST_PROXY_HEADERS }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+          # Postgres user/db and the connection URL derive from PROJECT_NAME;
+          # only the password is a separate secret. DATABASE_URL is assembled
+          # below with percent-encoded credentials.
+          POSTGRES_USER: ${{ vars.PROJECT_NAME }}
+          POSTGRES_DB: ${{ vars.PROJECT_NAME }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          # SMTP for Auth.js email sign-in (external provider). Non-sensitive ->
+          # Variables; credentials -> Secrets. SMTP alone is insufficient:
+          # AUTH_EMAIL_ENABLED must be explicitly true after the product auth spec.
+          AUTH_EMAIL_ENABLED: ${{ vars.AUTH_EMAIL_ENABLED }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_SECURE: ${{ vars.SMTP_SECURE }}
+          SMTP_FROM: ${{ vars.SMTP_FROM }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          cd "$DEPLOY_DIR"
+          db_user="$(printf '%s\n' "$POSTGRES_USER" | scripts/urlencode.sh)"
+          db_password="$(printf '%s\n' "$POSTGRES_PASSWORD" | scripts/urlencode.sh)"
+          db_name="$(printf '%s\n' "$POSTGRES_DB" | scripts/urlencode.sh)"
+          export DATABASE_URL="postgresql://${db_user}:${db_password}@db:5432/${db_name}?schema=public"
+          export NEXTAUTH_URL="https://${APP_DOMAIN}"
+          # depends_on orchestrates the order: db (healthy) -> migrate (deploy, completes) -> app.
+          docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+
+      - name: Verify app health
+        # Post-deploy healthcheck validation (constitution Principle XII): wait for
+        # the app container's healthcheck (defined in docker-compose.prod.yml) to
+        # report "healthy"; fail the deploy and surface logs if it never does.
+        run: |
+          cd "$DEPLOY_DIR"
+          cid="$(docker compose -f docker-compose.prod.yml ps -q app)"
+          if [ -z "$cid" ]; then
+            echo "App container not found — deploy did not create it."
+            exit 1
+          fi
+          echo "Waiting for app container to report healthy..."
+          for attempt in $(seq 1 30); do
+            state="$(docker inspect -f '{{.State.Status}}' "$cid" 2>/dev/null || echo unknown)"
+            health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$cid" 2>/dev/null || echo unknown)"
+            echo "  attempt $attempt/30: state=$state health=$health"
+            if [ "$health" = "healthy" ]; then
+              echo "App is healthy."
+              exit 0
+            fi
+            if [ "$state" = "exited" ] || [ "$state" = "dead" ]; then
+              echo "App container stopped before becoming healthy. Recent logs:"
+              docker logs --tail 50 "$cid" || true
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "App did not become healthy within the timeout. Recent logs:"
+          docker logs --tail 50 "$cid" || true
+          exit 1
+
+      - name: Prune old images
+        run: docker image prune -f
+
+      - name: Show running containers
+        run: docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"

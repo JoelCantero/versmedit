@@ -1,0 +1,11 @@
+{
+  "Metadata": {
+    "title": "Aplicació web",
+    "description": "Plantilla de Next.js autoallotjada i dockeritzada"
+  },
+  "HomePage": {
+    "title": "Aplicació web",
+    "tagline": "Una plantilla de Next.js autoallotjada i dockeritzada.",
+    "getStarted": "Per començar, edita el fitxer page.tsx."
+  }
+}

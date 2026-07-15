@@ -1,0 +1,125 @@
+# Production stack: app behind Traefik + private PostgreSQL.
+# Usage: docker compose -f docker-compose.prod.yml up -d --build
+#
+# Prerequisites:
+#   - External ingress network exists: `docker network create traefik_network`
+#   - Production Variables and Secrets configured in GitHub Actions. The deploy
+#     workflow injects them from its shell; production does not use a .env file.
+#
+# The database has NO published ports (constitution Principle III): it is only
+# reachable on the private `internal` network.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: ${PROJECT_NAME}:latest
+    # Runtime vars are taken from the shell environment (CI injects them from
+    # GitHub Secrets/Variables); no .env file is written to the host.
+    environment:
+      - PROJECT_NAME
+      - DATABASE_URL
+      - AUTH_SECRET
+      - NEXTAUTH_URL
+      - TRUST_PROXY_HEADERS
+      - LOG_LEVEL
+      # SMTP for Auth.js email sign-in (external transactional provider).
+      - AUTH_EMAIL_ENABLED
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_SECURE
+      - SMTP_USER
+      - SMTP_PASSWORD
+      - SMTP_FROM
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - internal
+      - traefik_network
+    labels:
+      - traefik.enable=true
+      # Container is on multiple networks — tell Traefik which one to use.
+      - traefik.docker.network=traefik_network
+      - traefik.http.routers.${PROJECT_NAME}.rule=Host(`${APP_DOMAIN}`)
+      - traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${PROJECT_NAME}.tls=true
+      - traefik.http.routers.${PROJECT_NAME}.tls.certresolver=letsencrypt
+      - traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=3000
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          # Tune for Raspberry Pi memory constraints (constitution Principle VIII).
+          memory: 512M
+    restart: unless-stopped
+
+  # One-shot: applies Prisma migrations before `app` starts (see app.depends_on).
+  # Uses the lightweight `migrator` build target (Prisma CLI + schema, no app build).
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: migrator
+    image: ${PROJECT_NAME}-migrate:latest
+    environment:
+      - PROJECT_NAME
+      - DATABASE_URL
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: "no"
+
+  db:
+    image: postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+  traefik_network:
+    external: true
+
+volumes:
+  pgdata:

@@ -1,0 +1,92 @@
+name: CI
+
+# Authoritative pull-request gate: no PR is merge-ready unless every check passes.
+# Runs on GitHub-hosted x64 runners (NOT the self-hosted Raspberry Pi) so it
+# never competes with production for resources. Build/type errors are
+# platform-independent, so x64 is fine as a pre-merge gate.
+on:
+  pull_request:
+    branches:
+      - main
+
+# Cancel superseded runs when new commits are pushed to the same PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: ci-build
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+      AUTH_SECRET: ci-build-secret-not-used-in-runtime-000000
+      NEXTAUTH_URL: http://localhost:3100
+      RUN_INTEGRATION_TESTS: "true"
+
+    services:
+      postgres:
+        image: postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      # Install pnpm first so setup-node can compute the pnpm store cache.
+      # Version is read from the `packageManager` field in package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          # Matches the runtime image (node:24-slim) used in docker/Dockerfile.
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # src/generated is gitignored, so the Prisma client must be generated
+      # before the build (mirrors the builder stage in docker/Dockerfile).
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Audit production dependencies
+        run: pnpm audit:prod
+
+      - name: Migrate test database
+        run: pnpm db:deploy
+
+      - name: Validate SpecKit compliance
+        run: bash .specify/scripts/bash/compliance-check.sh --all
+
+      - name: Test with coverage thresholds
+        run: pnpm test:coverage
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build and end-to-end smoke test
+        run: pnpm test:e2e

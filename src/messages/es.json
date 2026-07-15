@@ -1,0 +1,11 @@
+{
+  "Metadata": {
+    "title": "Aplicación web",
+    "description": "Plantilla de Next.js autoalojada y dockerizada"
+  },
+  "HomePage": {
+    "title": "Aplicación web",
+    "tagline": "Una plantilla de Next.js autoalojada y dockerizada.",
+    "getStarted": "Para empezar, edita el archivo page.tsx."
+  }
+}

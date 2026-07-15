@@ -1,0 +1,31 @@
+# Local development database (PostgreSQL). Run the app on the host with `pnpm dev`
+# (the predev hook starts this DB). For a full containerized run, use docker-compose.prod.yml.
+
+services:
+  db:
+    image: postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    environment:
+      # User and db derive from PROJECT_NAME; password comes from .env.
+      POSTGRES_USER: ${PROJECT_NAME}
+      POSTGRES_DB: ${PROJECT_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Published only for local tooling/host-run dev. Removed in production.
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:

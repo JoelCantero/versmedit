@@ -1,0 +1,11 @@
+{
+  "Metadata": {
+    "title": "Web app",
+    "description": "Self-hosted, Dockerized Next.js starter"
+  },
+  "HomePage": {
+    "title": "Web app",
+    "tagline": "A self-hosted, Dockerized Next.js starter.",
+    "getStarted": "To get started, edit the page.tsx file."
+  }
+}

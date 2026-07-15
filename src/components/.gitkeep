@@ -1,0 +1,3 @@
+# Shared UI components live here (constitution → Code Organization).
+# Keep cross-cutting, reusable components in this folder; when a feature grows,
+# move feature-specific components into src/modules/<domain>/components/.

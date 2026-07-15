@@ -1,0 +1,37 @@
+# Keeps the stack patched (constitution Principle VII "boring, maintained stack"
+# and Principle X "Security by Default"). Dependabot opens PRs that still go
+# through the CI build gate before they can be merged into main.
+version: 2
+updates:
+  # Application dependencies (pnpm is handled by the "npm" ecosystem).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      # Bundle routine minor/patch bumps into one PR to keep noise low;
+      # major bumps stay as separate PRs for individual review.
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions used by the CI and deploy workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        update-types:
+          - minor
+          - patch
+
+  # Base images in the Dockerfile (e.g. node:24-slim).
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

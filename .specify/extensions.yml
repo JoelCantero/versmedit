@@ -1,0 +1,45 @@
+# Spec Kit extension hooks.
+#
+# Every speckit.* agent reads this file before running and executes any
+# registered hooks. See .github/agents/speckit.specify.agent.md
+# ("Pre-Execution Checks") for the exact contract.
+#
+# Fields per hook:
+#   extension    Human-readable name for the hook.
+#   command      Slash command the agent invokes (without the leading "/").
+#   description  What the hook does / any post-conditions for the agent.
+#   optional     false = mandatory (runs automatically, blocks on failure).
+#   enabled      Set to false to disable without deleting the entry.
+
+hooks:
+  before_specify:
+    - extension: prepare-feature-branch
+      command: speckit.prepare-branch
+      description: >-
+        Create a fresh feature branch from an up-to-date origin/main before the
+        spec is written. Aborts if the working tree has uncommitted changes to
+        tracked files. On success, reuse the returned BRANCH_NAME as the spec
+        directory name (SPECIFY_FEATURE_DIRECTORY=specs/<BRANCH_NAME>).
+      optional: false
+      enabled: true
+
+  after_implement:
+    - extension: compliance-check
+      command: speckit.compliance-check
+      description: >-
+        Verify that spec.md, plan.md and tasks.md remain complete after
+        implementation: required governance sections exist, placeholders are
+        resolved, and every implementation task is checked off.
+      optional: false
+      enabled: true
+
+    - extension: quality-gate
+      command: speckit.quality-gate
+      description: >-
+        Run the pre-PR quality gate (lint → typecheck → tests) once
+        implementation finishes, before the pull request is opened. Aborts if
+        any check fails so a red branch never reaches a PR. CI repeats these
+        checks as the authoritative merge gate; this hook provides earlier
+        feedback before the pull request is opened.
+      optional: false
+      enabled: true

@@ -44,10 +44,11 @@ services:
       - traefik.enable=true
       # Container is on multiple networks — tell Traefik which one to use.
       - traefik.docker.network=traefik_network
+      # Ingress model (see README): a Cloudflare Tunnel terminates TLS at the edge
+      # and forwards plain HTTP to Traefik's `web` entrypoint (:80). The router
+      # therefore does NOT enable Traefik-side TLS or an ACME certresolver.
       - traefik.http.routers.${PROJECT_NAME}.rule=Host(`${APP_DOMAIN}`)
-      - traefik.http.routers.${PROJECT_NAME}.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}.tls=true
-      - traefik.http.routers.${PROJECT_NAME}.tls.certresolver=letsencrypt
+      - traefik.http.routers.${PROJECT_NAME}.entrypoints=web
       - traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=3000
     healthcheck:
       test:

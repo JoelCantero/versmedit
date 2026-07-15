@@ -124,6 +124,13 @@ jobs:
         # Post-deploy healthcheck validation (constitution Principle XII): wait for
         # the app container's healthcheck (defined in docker-compose.prod.yml) to
         # report "healthy"; fail the deploy and surface logs if it never does.
+        # PROJECT_NAME/APP_DOMAIN are needed so Compose can interpolate the same
+        # service definition (image/labels) as the deploy step; without them
+        # `docker compose ps` warns "variable is not set" and may target a
+        # different project.
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
         run: |
           cd "$DEPLOY_DIR"
           cid="$(docker compose -f docker-compose.prod.yml ps -q app)"

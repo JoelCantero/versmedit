@@ -25,10 +25,13 @@ const envSchema = z
         );
       }, "NEXTAUTH_URL must be an HTTP(S) origin without a path, query, or fragment"),
     // Pino log level. Optional: the logger defaults to `info` in production and
-    // `debug` otherwise (constitution Principle VIII). An invalid value fails fast.
-    LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
-      .optional(),
+    // `debug` otherwise (constitution Principle VIII). An empty string (e.g. an
+    // unset GitHub Variable passed through by Compose) is treated as unset; any
+    // other invalid value fails fast.
+    LOG_LEVEL: z.preprocess(
+      emptyToUndefined,
+      z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
+    ),
     SMTP_HOST: optionalString,
     SMTP_PORT: z.preprocess(
       emptyToUndefined,

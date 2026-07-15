@@ -2,7 +2,7 @@
   "name": "fullstack-webapp-template",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "pnpm@11.13.0",
   "scripts": {
     "predev": "docker compose up -d db",
     "dev": "next dev",

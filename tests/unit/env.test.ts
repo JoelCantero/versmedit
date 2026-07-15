@@ -84,6 +84,16 @@ describe("validateEnv", () => {
     expect(() => validateEnv(process.env)).toThrow(/LOG_LEVEL/);
   });
 
+  it("treats an empty LOG_LEVEL as unset", () => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.LOG_LEVEL = "";
+
+    expect(validateEnv(process.env)).toMatchObject({ LOG_LEVEL: undefined });
+  });
+
   it("normalizes a complete SMTP configuration", () => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";

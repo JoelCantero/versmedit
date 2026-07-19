@@ -90,3 +90,8 @@ jobs:
 
       - name: Build and end-to-end smoke test
         run: pnpm test:e2e
+
+      - name: Validate production Docker images
+        run: |
+          docker build --target runner --tag versmedit-ci:latest --file docker/Dockerfile .
+          docker build --target migrator --tag versmedit-migrate-ci:latest --file docker/Dockerfile .

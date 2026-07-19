@@ -19,7 +19,7 @@ localized design and single-field flow without schema, migration, container, or 
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x on Node.js 24 LTS
+**Language/Version**: TypeScript 5.x on Node.js 26
 
 **Package Manager**: pnpm
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-19
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: Existing registered users need a localized, email-only sign-in page that sends a short-lived magic link without revealing whether an account exists.
 
@@ -89,6 +89,28 @@ As a keyboard, mobile, or assistive-technology user, I can understand and operat
 3. **Given** a validation, pending, accepted, limited, unavailable, or invalid-link state, **When** that state appears, **Then** it is announced appropriately without an unexpected layout shift.
 4. **Given** a 375×667 mobile viewport or a 1440×900 desktop viewport, **When** the page and each required state are displayed, **Then** the form remains readable and operable without clipped content or horizontal scrolling.
 
+---
+
+### User Story 5 - Navigate and Personalize the Authentication Shell (Priority: P3)
+
+As a visitor or authenticated user, I can use a localized account navigation shell, select my
+language, and choose a light or dark appearance without losing my current route context.
+
+**Why this priority**: These controls make the completed authentication flow discoverable and keep
+the localized application shell coherent before and after sign-in.
+
+**Independent Test**: Render the home navigation signed out and signed in, switch theme and locale,
+and verify the correct account action, locale-preserving destination, responsive grouping, and
+accessible labels.
+
+**Acceptance Scenarios**:
+
+1. **Given** an anonymous visitor, **When** the home page loads, **Then** Login is available and Sign up is visibly disabled because registration is outside this feature.
+2. **Given** an authenticated user, **When** the home page loads, **Then** Log out replaces the anonymous account actions and returns to the active locale home.
+3. **Given** any supported locale, **When** the user selects CA, ENG, or ES, **Then** a full-document transition preserves the active pathname and updates the locale context.
+4. **Given** the system or stored theme preference, **When** the application shell loads or the theme control is activated, **Then** light or dark mode is applied without a hydration flash or CSP violation.
+5. **Given** desktop or mobile navigation, **When** account and preference controls render, **Then** their icons and labels remain aligned without horizontal overflow; the decorative separator appears only when space permits.
+
 ### Edge Cases
 
 - An address differs only by case or surrounding whitespace from the stored address.
@@ -136,18 +158,26 @@ As a keyboard, mobile, or assistive-technology user, I can understand and operat
 - **FR-025**: Every accepted valid-email outcome MUST use a shared response floor of 500 ms plus server-selected bounded jitter of 0–100 ms before returning the canonical response, regardless of account existence or isolated delivery result. This control minimizes obvious immediate-response differences but does not claim statistical timing indistinguishability.
 - **FR-026**: A localized mail-service-unavailable outcome MUST be returned only when a shared global provider-availability state reports unavailability, and MUST use the same status and content for known and unknown valid addresses.
 - **FR-027**: An isolated delivery failure while the shared global provider-availability state remains available MUST immediately invalidate the newly created token, leave no valid pending token for the failed request, retain the generic accepted public status and content, and MUST NOT leak the address, token, verification URL, credentials, delivery result, or account-existence information.
+- **FR-028**: The localized home navigation MUST show Login and a disabled Sign up action to anonymous users, and MUST replace them with Log out for authenticated users.
+- **FR-029**: The application shell MUST provide CA, ENG, and ES locale choices that preserve the active pathname, update the locale cookie through canonical locale routing, and identify the current locale accessibly.
+- **FR-030**: The application shell MUST provide a system-aware light/dark theme control, persist the selected preference, and initialize it under the active content-security policy without a hydration mismatch.
+- **FR-031**: Account actions and language/theme preferences MUST be visually grouped with a responsive shadcn separator, aligned controls, a globe language icon, and stable spacing without horizontal overflow.
+- **FR-032**: Application-facing authentication and home branding MUST use the generic product name "Nextself" in every supported locale.
+- **FR-033**: Development seed identity MUST come from required `SEED_USER_NAME` and `SEED_USER_EMAIL` environment variables; personal seed values MUST NOT be hardcoded or committed.
 
 ### Verification Requirements
 
 - **VR-001**: Automated component-level verification MUST cover email validation, submission, pending behavior, duplicate prevention, generic confirmation, required error states, and accessibility semantics.
 - **VR-002**: Automated integration verification MUST demonstrate that an existing account receives a verification token, can complete login with the newest single-use link, and cannot use an earlier link after a newer one is issued.
 - **VR-003**: Automated integration verification MUST demonstrate that an unknown email creates neither a user nor a verification token and receives the same public response as an existing email.
-- **VR-004**: Automated comparison MUST assert equal observable HTTP status and response content for known and unknown valid emails and verify that both honor the shared 500–600 ms accepted-response envelope under a controlled clock.
+- **VR-004**: Automated comparison MUST assert equal observable HTTP status and response content for known and unknown valid emails and verify under a controlled clock that neither returns before its request-start-relative floor of 500 ms plus the selected 0–100 ms jitter. Processing that legitimately exceeds the floor, including SMTP latency, MUST NOT be treated as a failure solely for exceeding 600 ms.
 - **VR-005**: Automated verification MUST cover both the five-per-client and three-per-address limits, including `Retry-After`, client consumption before invalid-CSRF and invalid-email rejection, no address consumption for invalid emails, and equal address consumption for known and unknown valid emails.
 - **VR-006**: Automated route verification MUST cover English, Spanish, and Catalan login and post-login destinations.
 - **VR-007**: The critical request flow MUST pass an automated accessibility check and keyboard interaction verification.
 - **VR-008**: Feature-specific end-to-end browser tests MUST NOT be added; the required behavior MUST be verified at component and integration boundaries.
 - **VR-009**: Automated integration verification MUST demonstrate that an isolated delivery failure invalidates the newly created token, does not restore a superseded token, and retains the generic public response.
+- **VR-010**: Automated component verification MUST cover anonymous/authenticated navigation, logout locale preservation, theme toggling, and locale choices that preserve the active pathname.
+- **VR-011**: Responsive verification MUST assert `scrollWidth <= clientWidth` at 375×667 and 1440×900, required controls remain inside the viewport, and the login status region retains its reserved dimensions across required states.
 
 ### Key Entities
 
@@ -167,9 +197,10 @@ As a keyboard, mobile, or assistive-technology user, I can understand and operat
 - **SC-004**: All three supported login routes complete the request flow in their own language and return successful users to the corresponding localized home page.
 - **SC-005**: The critical flow has no automated accessibility violations, is fully operable by keyboard, and announces validation, pending, accepted, limited, unavailable, and invalid-link states.
 - **SC-006**: The sixth server-received request from one client and the fourth valid request for one normalized address within 15 minutes are limited in 100% of boundary tests and communicate a valid remaining wait; invalid emails consume only the client counter.
-- **SC-007**: At 375×667 and 1440×900 verification viewports, all required interface states remain readable and operable with no horizontal overflow or unexpected layout shift.
+- **SC-007**: At 375×667 and 1440×900, `document.documentElement.scrollWidth` does not exceed `clientWidth`, every required control remains within the viewport, and the reserved login status region does not change dimensions between initial, pending, accepted, invalid, limited, and unavailable states.
 - **SC-008**: In automated keyboard interaction tests, a user can submit a valid address using one field and one primary-action activation without encountering an accessibility violation.
 - **SC-009**: In automated integration verification, 0 isolated delivery failures leave the newly created token or any superseded token valid.
+- **SC-010**: In automated component verification, anonymous and authenticated navigation, locale selection, and theme toggling pass in all supported locales without changing the active pathname unexpectedly.
 
 ## Assumptions
 
@@ -179,6 +210,7 @@ As a keyboard, mobile, or assistive-technology user, I can understand and operat
 - Issuing a new link for an account immediately supersedes every older outstanding link for that account, leaving only the newest pending link valid.
 - A shared global provider-availability state is available to determine whether the public unavailable outcome applies uniformly to all valid addresses; isolated delivery outcomes do not alter the public response.
 - No data model or migration is required for this feature.
+- The application shell, generic branding, and development seed cleanup are cross-cutting completion work for the authentication entry experience and do not introduce registration behavior.
 
 ## Registration Boundary
 
@@ -224,4 +256,4 @@ Registration is a separate account-lifecycle flow and is never initiated or comp
 - **Deployment changes**: No new services, runtime configuration, secrets, networks, or volumes are expected.
 - **Data & migrations**: No schema change or migration is expected; the existing account, token, and shared request-limit data stores are reused.
 - **Recovery**: Deployment can be rolled back without data conversion. Outstanding links continue to follow the existing token lifecycle and may be allowed to expire if rollback invalidates the new localized flow.
-- **Observability**: Existing structured operational events may record outcome categories, request-limit decisions, provider availability, and correlation identifiers, but must never include email, token, verification URL, session material, or mail credentials. Account existence must not be inferable from public responses.
+- **Observability**: Existing structured operational events may record only coarse, account-independent categories (`accepted`, `rate_limited`, `provider_unavailable`, `invalid_request`), request-limit decisions, provider availability, and correlation identifiers. They must never record recipient-level delivery success/failure, email, account/user identifiers, token, verification URL, session material, or mail credentials. Account existence must not be inferable from logs or public responses.

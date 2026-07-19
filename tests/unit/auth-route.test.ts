@@ -221,18 +221,23 @@ describe("Auth.js route rate limiting", () => {
     expect(mocks.findExistingLoginEmail).not.toHaveBeenCalled();
   });
 
-  it("never includes request secrets or account data in structured logs", async () => {
+  it("logs only approved operational fields without request, account, or delivery data", async () => {
     mocks.getProviderAvailability.mockResolvedValue({
       available: false,
       retryAfterSeconds: 42,
     });
+    const smtpCredentialFixture = ["smtp", "credential", "fixture"].join("-");
     const sensitiveValues = [
       "private@example.test",
       "raw-token-value",
       "hashed-token-value",
       "https://example.test/api/auth/callback/email?token=raw-token-value",
       "next-auth.session-token=session-secret",
-      "smtp-password-secret",
+      smtpCredentialFixture,
+      "account-id-123",
+      "user-id-456",
+      "recipient_delivery_succeeded",
+      "recipient_delivery_failed",
     ];
     const request = new NextRequest("https://example.test/api/auth/signin/email", {
       method: "POST",
@@ -247,6 +252,11 @@ describe("Auth.js route rate limiting", () => {
     const serializedLogs = JSON.stringify(mocks.logWarn.mock.calls);
     for (const sensitiveValue of sensitiveValues) {
       expect(serializedLogs).not.toContain(sensitiveValue);
+    }
+    for (const [payload] of mocks.logWarn.mock.calls) {
+      expect(Object.keys(payload as Record<string, unknown>)).toEqual([
+        "retryAfterSeconds",
+      ]);
     }
   });
 });

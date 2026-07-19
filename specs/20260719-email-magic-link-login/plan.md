@@ -23,7 +23,7 @@ localized design and single-field flow without schema, migration, container, or 
 
 **Package Manager**: pnpm
 
-**Primary Dependencies**: Next.js 16.2 App Router, React 19.2, Tailwind CSS 4, shadcn CLI 4.13.1 / Base UI, next-intl 4.13, NextAuth 4.24, Prisma 7.8, Zod 4.4, Nodemailer 9.0, Pino 10.3
+**Primary Dependencies**: Next.js 16.2 App Router, React 19.2, Tailwind CSS 4, shadcn CLI 4.13.1 / Base UI, next-intl 4.13, next-themes 0.4, NextAuth 4.24, Prisma 7.8, Zod 4.4, Nodemailer 9.0, Pino 10.3
 
 **Storage**: PostgreSQL via Prisma; existing `User`, `VerificationToken`, and `RateLimitBucket` tables only
 
@@ -45,11 +45,11 @@ localized design and single-field flow without schema, migration, container, or 
 
 **Recovery Strategy**: Revert application code. No persistent schema conversion occurs; rate-limit/provider-state rows expire naturally and outstanding verification tokens expire within 15 minutes. If rollback follows a partially handled delivery failure, stale tokens are removed by the new compensation path or expire under the existing TTL.
 
-**Performance Goals**: Login page has no horizontal overflow or unexpected layout shift at 375×667 and 1440×900; accepted valid-email outcomes honor a shared 500–600 ms minimum response envelope under a controlled clock; request processing adds the existing client/address limiter operations plus one case-insensitive user lookup before SMTP. No absolute timing-indistinguishability target.
+**Performance Goals**: Login page and navigation have no horizontal overflow at 375×667 and 1440×900; required controls remain inside the viewport and the reserved login status region keeps stable dimensions. Accepted valid-email outcomes do not return before their request-start-relative floor of 500 ms plus selected 0–100 ms jitter under a controlled clock; SMTP or other processing may legitimately exceed 600 ms. Request processing adds the existing client/address limiter operations plus one case-insensitive user lookup before SMTP. No absolute timing-indistinguishability target.
 
 **Constraints**: Raspberry Pi memory/CPU limits; no host-specific paths/IPs; portable to VPS; public endpoint; emails/tokens/URLs/SMTP credentials excluded from logs; canonical-origin callbacks only; five client and three normalized-address attempts per 15 minutes; 15-minute single-use newest-only links; no account creation; no feature E2E; no schema/migration or SMTP-provider changes
 
-**Scale/Scope**: Three localized routes, one email field, eight UI states, one wrapped Auth.js request endpoint, one Auth.js callback path, existing-user accounts only, and shared PostgreSQL coordination across all application replicas
+**Scale/Scope**: Three localized login routes, one email field, eight login UI states, one wrapped Auth.js request endpoint, one Auth.js callback path, existing-user accounts only, shared PostgreSQL coordination across all application replicas, and one localized home navigation shell with session-aware account actions, locale selection, and persistent system-aware theming. Completion scope also replaces application-facing branding with Nextself and moves development seed identity to environment variables.
 
 ## Constitution Check
 
@@ -69,7 +69,8 @@ localized design and single-field flow without schema, migration, container, or 
   remain enforced; public known/unknown responses are canonicalized; token replay and replacement are
   handled atomically.
 - **XI (specs first)**: The clarified spec defines scope, non-goals, privacy, abuse cases, failure
-  states, and measurable acceptance criteria before implementation.
+  states, measurable acceptance criteria, and the cross-cutting authentication shell/seed completion
+  work represented by the implementation tasks.
 - **XII (verification)**: Component and PostgreSQL integration coverage verifies the critical auth
   flow and provider boundary. The repository's existing production-artifact smoke remains unchanged;
   no feature-specific E2E is added as explicitly required by the feature spec.
@@ -128,7 +129,10 @@ src/
 │   │   └── error/page.tsx              # generic invalid-link recovery UI
 │   ├── api/auth/[...nextauth]/route.ts # wrapped Auth.js request + native callbacks
 │   └── globals.css                     # shadcn tokens adapted to project design
-├── components/ui/                      # generated shadcn primitives used by login-03
+├── components/
+│   ├── home-navigation.tsx             # account, locale, theme, and responsive grouping
+│   ├── theme-provider.tsx               # CSP-aware next-themes integration
+│   └── ui/                              # generated shadcn primitives used by login and navigation
 ├── lib/
 │   ├── auth.ts                         # provider, delivery, locale redirects
 │   ├── auth-adapter.ts                 # existing-user + newest-token invariants
@@ -149,10 +153,12 @@ tests/
 │   ├── auth-route.test.ts
 │   ├── auth-adapter.test.ts
 │   └── provider-availability.test.ts
+│   └── home-navigation.test.tsx
 └── integration/
   └── magic-link-login.test.ts        # PostgreSQL token/request/callback flow
 
 components.json                         # shadcn generator configuration
+prisma/seed.mjs                         # environment-driven development identity
 prisma/schema.prisma                    # unchanged
 docker-compose*.yml                     # unchanged
 ```
@@ -160,7 +166,7 @@ docker-compose*.yml                     # unchanged
 **Structure Decision**: Keep one Next.js full-stack application. Login-specific validation, public
 response policy, request coordination, and UI live in `src/modules/login`; shared Auth.js adapter,
 provider, rate-limit, and database infrastructure remain in `src/lib`; routes stay in `src/app`.
-Use `npx shadcn@latest add login-03` as required for the official visual baseline, retain only
+Use `pnpm dlx shadcn@4.13.1 add login-03` as required for the official visual baseline, retain only
 primitives the adapted email-only page needs, and do not create a worker, auth microservice, custom
 token table, or second public API.
 

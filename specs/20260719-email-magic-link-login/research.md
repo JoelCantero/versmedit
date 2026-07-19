@@ -165,7 +165,7 @@ without trusting arbitrary callback origins.
 
 ## UI Baseline and Accessibility
 
-**Decision**: Run `npx shadcn@latest add login-03`, create its generator configuration if needed,
+**Decision**: Run `pnpm dlx shadcn@4.13.1 add login-03`, create its generator configuration if needed,
 then remove registration/password/social controls and adapt the composition to one email field and
 the project's styles. Model the form as stable initial, pending, accepted, invalid-email,
 invalid-request, rate-limited, unavailable, and generic invalid-link regions. Use associated labels,

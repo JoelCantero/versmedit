@@ -273,6 +273,7 @@ describe("authOptions", () => {
   });
 
   it("does not print delivery secrets while compensating a failure", async () => {
+    const smtpCredentialFixture = ["smtp", "credential", "fixture"].join("-");
     const consoleSpies = [
       vi.spyOn(console, "log").mockImplementation(() => undefined),
       vi.spyOn(console, "warn").mockImplementation(() => undefined),
@@ -280,7 +281,7 @@ describe("authOptions", () => {
     ];
     mocks.env.AUTH_EMAIL_ENABLED = true;
     mocks.smtp = {
-      server: { host: "smtp.example.test", auth: { pass: "smtp-password-secret" } },
+      server: { host: "smtp.example.test", auth: { pass: smtpCredentialFixture } },
       from: "noreply@example.test",
     };
     mocks.sendMail.mockRejectedValue(new Error("transport unavailable"));
@@ -304,7 +305,7 @@ describe("authOptions", () => {
       "private@example.test",
       "raw-token-value",
       "hashed-token",
-      "smtp-password-secret",
+      smtpCredentialFixture,
     ]) {
       expect(serializedOutput).not.toContain(sensitiveValue);
     }

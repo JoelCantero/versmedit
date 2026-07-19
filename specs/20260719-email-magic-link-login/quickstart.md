@@ -25,7 +25,7 @@ pnpm db:generate
 During implementation, install the required visual baseline once:
 
 ```bash
-npx shadcn@latest add login-03
+pnpm dlx shadcn@4.13.1 add login-03
 pnpm add -D axe-core
 ```
 
@@ -74,8 +74,9 @@ Expected outcomes:
 - every server request consumes the client limit before CSRF/email validation, while only valid
   normalized email consumes the address limit;
 - known and unknown accepted responses have identical status/body/headers;
-- under a controlled clock, known, unknown, delivered, and isolated-failure accepted paths all return
-  within the shared 500–600 ms minimum envelope;
+- under a controlled clock, known, unknown, delivered, and isolated-failure accepted paths do not
+  return before the request-start-relative 500 ms plus selected 0–100 ms jitter floor; processing
+  that exceeds 600 ms remains valid;
 - provider-wide cooldown is shared; isolated delivery failure remains publicly accepted;
 - callback paths cannot escape `NEXTAUTH_URL` and preserve `en`, `es`, or `ca`;
 - adapter refuses user creation and serializes newest-token replacement.
@@ -133,7 +134,10 @@ pnpm dev
 Open `/login`, `/es/login`, and `/ca/login` at the canonical local origin. At 375×667 and 1440×900,
 confirm one email field, localized text, visible keyboard focus, stable status space, disabled pending
 submit, exact generic confirmation, no horizontal overflow, and no registration/password/social
-controls. Verify that a stale CSRF token renders invalid-request rather than unavailable. Consume a
+controls. Confirm `document.documentElement.scrollWidth <= document.documentElement.clientWidth`,
+every required control remains inside the viewport, and the reserved status region keeps the same
+dimensions across initial, pending, accepted, invalid, limited, and unavailable states. Verify that
+a stale CSRF token renders invalid-request rather than unavailable. Consume a
 real development link and confirm redirection to `/`, `/es`, or `/ca` respectively; reuse it and
 confirm the same generic invalid-link presentation used for every rejected callback reason.
 

@@ -6,19 +6,19 @@
 
 **Tests**: Mandatory. Write each story's tests first and confirm they fail for the intended missing behavior before implementation. Do not add a feature-specific E2E test.
 
-**Organization**: Tasks are grouped by user story so request privacy, callback completion, failure handling, and localized accessibility can be implemented and verified as explicit increments.
+**Organization**: Tasks are grouped by user story so request privacy, callback completion, failure handling, localized accessibility, and the authentication shell can be implemented and verified as explicit increments. Cross-cutting verification remains in the final phase.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel because it changes different files and does not depend on another incomplete task in the same phase
-- **[Story]**: Maps the task to `US1`, `US2`, `US3`, or `US4` from `spec.md`
+- **[Story]**: Maps the task to `US1`, `US2`, `US3`, `US4`, or `US5` from `spec.md`
 - Every task names the exact repository path it changes or validates
 
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Install the required visual/test baseline and establish the login module contract without changing the database or deployment topology.
 
-- [X] T001 Run `npx shadcn@latest add login-03`, create the generator configuration in components.json, and retain the generated primitives under src/components/ui/ for later email-only adaptation
+- [X] T001 Run `pnpm dlx shadcn@4.13.1 add login-03`, create the generator configuration in components.json, and retain the generated primitives under src/components/ui/ for later email-only adaptation
 - [X] T002 Add `axe-core` as a pinned development dependency for Vitest DOM accessibility checks in package.json and pnpm-lock.yaml
 - [X] T003 [P] Define canonical login request/result, locale, and UI-state types including separate invalid-request and generic invalid-link states matching contracts/magic-link-login.md in src/modules/login/types.ts
 
@@ -48,7 +48,7 @@
 
 ### Tests for User Story 1
 
-- [X] T009 [P] [US1] Write failing server-policy tests for normalization, case-insensitive lookup of mixed-case stored email, server-only lookup, unknown-address short-circuiting, the controlled-clock 500–600 ms accepted-response envelope, canonical responses, and PII-free outcomes in tests/unit/login-service.test.ts
+- [X] T009 [P] [US1] Write failing server-policy tests for normalization, case-insensitive lookup of mixed-case stored email, server-only lookup, unknown-address short-circuiting, the controlled-clock request-start-relative floor of 500 ms plus selected 0–100 ms jitter without imposing a 600 ms upper bound, canonical responses, and PII-free outcomes in tests/unit/login-service.test.ts
 - [X] T010 [P] [US1] Extend failing route tests for client-limit-before-CSRF ordering, invalid-request and invalid-email responses, no lookup after invalid CSRF, trusted client identity, canonical known/unknown responses, and absence of PII in logs in tests/unit/auth-route.test.ts
 - [X] T011 [P] [US1] Write failing component tests for one-field rendering, client validation, pending duplicate prevention, and exact accepted messages in tests/unit/login-form.test.tsx
 - [X] T012 [P] [US1] Write failing PostgreSQL integration cases proving an existing user with mixed-case stored email is found case-insensitively and gets a token while an unknown address creates no User or VerificationToken and receives identical observable HTTP output in tests/integration/magic-link-login.test.ts
@@ -142,21 +142,22 @@
 
 **Purpose**: Verify privacy, recovery, documentation, and repository-wide quality without widening feature scope.
 
-- [X] T043 [P] Add regression assertions that email, raw/hashed token, verification URL, cookies, and SMTP credentials never enter structured log payloads in tests/unit/auth-route.test.ts and tests/unit/auth.test.ts
+- [X] T043 [P] Add regression assertions in tests/unit/auth-route.test.ts and tests/unit/auth.test.ts that structured auth logs contain only coarse account-independent categories and approved operational fields, and never contain email, account/user identifiers, recipient-level delivery success/failure, raw/hashed token, verification URL, cookies, or SMTP credentials
+- T044 retired when the optional real-provider inbox E2E scope was removed; deterministic SMTP transport coverage remains under T053
 - [X] T045 [P] Reconcile implemented commands, provider-state lifetime, cleanup fixtures, controlled-clock timing checks, and exact 375×667/1440×900 manual checks with specs/20260719-email-magic-link-login/quickstart.md
 - [X] T046 Run the complete feature-focused unit and PostgreSQL integration suites listed in specs/20260719-email-magic-link-login/quickstart.md and fix only failures attributable to this feature
 - [X] T047 Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage`, and `pnpm build`, recording any unrelated pre-existing failure in specs/20260719-email-magic-link-login/quickstart.md
 - [X] T048 Confirm the final diff adds no feature browser E2E, Prisma schema/migration, Compose service, committed provider-test secret, SMTP-provider replacement, worker, cache, or account-registration implementation against prisma/schema.prisma, prisma/migrations/, tests/e2e/, docker-compose.yml, docker-compose.prod.yml, and .env.example
-- [X] T049 Add the official shadcn navigation menu to the localized home with anonymous Login and disabled Sign up items, authenticated Log out behavior, and focused component coverage in src/components/home-navigation.tsx, src/app/[locale]/page.tsx, src/messages/en.json, src/messages/es.json, src/messages/ca.json, and tests/unit/home-navigation.test.tsx
-- [X] T050 Add system-aware light/dark mode with `next-themes`, a localized navigation-menu toggle, and focused component coverage in src/components/theme-provider.tsx, src/app/[locale]/layout.tsx, src/components/home-navigation.tsx, src/messages/en.json, src/messages/es.json, src/messages/ca.json, and tests/unit/home-navigation.test.tsx
-- [X] T051 Move the development seed user's name and email from hardcoded values to required `SEED_USER_NAME` and `SEED_USER_EMAIL` environment variables in prisma/seed.mjs, .env.example, and the ignored local .env
-- [X] T052 Rename all application-facing Versmedit branding to Nextself across the home, login and recovery pages, localized authentication email subjects, and related tests
-- [X] T053 Remove the optional real-provider inbox E2E test, environment contract, package command, and related documentation while retaining deterministic SMTP transport coverage
-- [X] T054 Add a shadcn navigation-menu language selector with CA, ENG, and ES options that preserves the active pathname, marks the current locale, and performs canonical full-document locale transitions
-- [X] T055 Add a responsive shadcn vertical separator between account actions and language/theme preferences in the home navigation
-- [X] T056 Center the vertical separator and absolutely positioned dark-mode icon with the navigation controls in src/components/home-navigation.tsx
-- [X] T057 Replace the language selector translation glyph with a globe icon in src/components/home-navigation.tsx
-- [X] T058 Add balanced spacing between the globe icon and active locale label in src/components/home-navigation.tsx
+- [X] T049 [US5] Add the official shadcn navigation menu to the localized home with anonymous Login and disabled Sign up items, authenticated Log out behavior, and focused component coverage in src/components/home-navigation.tsx, src/app/[locale]/page.tsx, src/messages/en.json, src/messages/es.json, src/messages/ca.json, and tests/unit/home-navigation.test.tsx
+- [X] T050 [US5] Add system-aware light/dark mode with `next-themes`, a localized navigation-menu toggle, and focused component coverage in src/components/theme-provider.tsx, src/app/[locale]/layout.tsx, src/components/home-navigation.tsx, src/messages/en.json, src/messages/es.json, src/messages/ca.json, and tests/unit/home-navigation.test.tsx
+- [X] T051 [US5] Move the development seed user's name and email from hardcoded values to required `SEED_USER_NAME` and `SEED_USER_EMAIL` environment variables in prisma/seed.mjs, .env.example, and the ignored local .env
+- [X] T052 [US5] Rename all application-facing Versmedit branding to Nextself in src/app/[locale]/page.tsx, src/app/[locale]/login/page.tsx, src/app/[locale]/login/error/page.tsx, src/lib/auth.ts, src/messages/en.json, src/messages/es.json, src/messages/ca.json, tests/unit/auth.test.ts, and tests/unit/login-routes.test.tsx
+- [X] T053 Remove the optional real-provider inbox E2E test and contract from tests/integration/magic-link-provider.test.ts, .env.example, package.json, README.md, specs/20260719-email-magic-link-login/spec.md, specs/20260719-email-magic-link-login/plan.md, specs/20260719-email-magic-link-login/research.md, specs/20260719-email-magic-link-login/quickstart.md, and specs/20260719-email-magic-link-login/tasks.md while retaining deterministic SMTP transport coverage
+- [X] T054 [US5] Add a shadcn navigation-menu language selector with CA, ENG, and ES options in src/components/home-navigation.tsx that preserves the active pathname, marks the current locale, performs canonical full-document locale transitions, and is covered in tests/unit/home-navigation.test.tsx
+- [X] T055 [US5] Add a responsive shadcn vertical separator between account actions and language/theme preferences in src/components/home-navigation.tsx and assert its rendered primitive in tests/unit/home-navigation.test.tsx
+- [X] T056 [US5] Center the vertical separator and absolutely positioned dark-mode icon in src/components/home-navigation.tsx so their computed vertical centers equal the 36px navigation-control center
+- [X] T057 [US5] Replace the language selector translation glyph with a 16×16px Lucide globe icon in src/components/home-navigation.tsx
+- [X] T058 [US5] Add a 4px computed gap between the globe icon and active locale label in src/components/home-navigation.tsx without horizontal overflow
 
 ---
 
@@ -170,7 +171,7 @@
 - **Phase 4 (US2)**: Depends on US1's delegated known-user request path and canonical response wrapper.
 - **Phase 5 (US3)**: Depends on US1's endpoint/form and US2's exact-token coordination so failures can be compensated safely.
 - **Phase 6 (US4)**: Depends on the complete UI state machine from US1/US3 and recovery route from US2.
-- **Phase 7 (Polish)**: Depends on every selected story.
+- **Phase 7 (Polish and US5)**: Depends on every selected authentication story; T049–T052 and T054–T058 complete US5 while the remaining tasks verify cross-cutting quality.
 
 ### User Story Dependency Graph
 
@@ -206,7 +207,7 @@ duplicating them.
 - US2 test tasks T018–T020 can run in parallel; all must fail for their intended missing behavior before T021/T024 implementation starts.
 - US3 test tasks T027–T030 can run in parallel before T031–T034.
 - US4 test tasks T036/T037 can run in parallel; both must fail for their intended missing behavior before T038/T039 implementation starts.
-- T043, T044, and T045 can run in parallel before final executable validation.
+- T043 and T045 can run in parallel before final executable validation; T044 is intentionally retired.
 
 ## Parallel Example: User Story 1
 

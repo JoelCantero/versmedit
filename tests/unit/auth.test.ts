@@ -8,25 +8,42 @@ const mocks = vi.hoisted(() => ({
   emailProvider: vi.fn((options: unknown) => ({ id: "email", options })),
   classifySmtpResult: vi.fn<
     (_identifier: string, _result: { accepted: unknown[]; rejected: unknown[] }) =>
-      { status: "accepted" | "rejected"; category?: "recipient" }
+      { status: "accepted" } | { status: "rejected"; category: "recipient" }
   >(() => ({ status: "accepted" })),
+  classifySmtpError: vi.fn(() => ({
+    status: "unknown" as const,
+    category: "connection" as const,
+  })),
+  markProviderUnavailable: vi.fn(),
   createSignupToken: vi.fn(() => ({ raw: "raw-token" })),
   createTransport: vi.fn(),
   sendMail: vi.fn(),
   closeTransport: vi.fn(),
+  getPublishedVerificationToken: vi.fn(),
+  deleteMany: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
 vi.mock("@next-auth/prisma-adapter", () => ({ PrismaAdapter: () => ({}) }));
 vi.mock("@/lib/auth-adapter", () => ({ hardenAdapter: (adapter: unknown) => adapter }));
-vi.mock("@/lib/db", () => ({ db: {} }));
+vi.mock("@/lib/db", () => ({
+  db: { verificationToken: { deleteMany: mocks.deleteMany } },
+}));
 vi.mock("@/lib/email", () => ({
   getEmailProviderConfig: () => (mocks.env.AUTH_EMAIL_ENABLED ? mocks.smtp : null),
   classifySmtpResult: mocks.classifySmtpResult,
+  classifySmtpError: mocks.classifySmtpError,
+}));
+vi.mock("@/lib/provider-availability", () => ({
+  isProviderWideFailure: (outcome: { category: string }) => outcome.category !== "recipient",
+  markProviderUnavailable: mocks.markProviderUnavailable,
 }));
 vi.mock("@/lib/env", () => ({ getEnv: () => mocks.env }));
 vi.mock("next-auth/providers/email", () => ({ default: mocks.emailProvider }));
 vi.mock("@/modules/signup/token", () => ({ createSignupToken: mocks.createSignupToken }));
+vi.mock("@/modules/login/verification-context", () => ({
+  getPublishedVerificationToken: mocks.getPublishedVerificationToken,
+}));
 vi.mock("nodemailer", () => ({
   default: {
     createTransport: mocks.createTransport,
@@ -41,6 +58,9 @@ describe("authOptions", () => {
     mocks.emailProvider.mockClear();
     mocks.classifySmtpResult.mockReset();
     mocks.classifySmtpResult.mockReturnValue({ status: "accepted" });
+    mocks.classifySmtpError.mockClear();
+    mocks.markProviderUnavailable.mockReset();
+    mocks.markProviderUnavailable.mockResolvedValue(undefined);
     mocks.createSignupToken.mockReset();
     mocks.createSignupToken.mockReturnValue({ raw: "raw-token" });
     mocks.sendMail.mockReset();
@@ -51,6 +71,13 @@ describe("authOptions", () => {
       sendMail: mocks.sendMail,
       close: mocks.closeTransport,
     });
+    mocks.getPublishedVerificationToken.mockReset();
+    mocks.getPublishedVerificationToken.mockResolvedValue({
+      identifier: "member@example.test",
+      token: "hashed-token",
+    });
+    mocks.deleteMany.mockReset();
+    mocks.deleteMany.mockResolvedValue({ count: 1 });
   });
 
   it("does not enable email auth from SMTP configuration alone", async () => {
@@ -81,17 +108,17 @@ describe("authOptions", () => {
 
     expect(
       redirect!({
-        url: "/api/auth/error?error=Verification&callbackUrl=%2Fes%2Fsignup",
+        url: "/api/auth/error?error=Verification&callbackUrl=%2Fes",
         baseUrl: "https://example.test",
       }),
-    ).toBe("https://example.test/es/signup/error?reason=invalid");
+    ).toBe("https://example.test/es/login/error");
 
     expect(
       redirect!({
-        url: "/api/auth/signin?error=Verification&reason=used&callbackUrl=%2Fca%2Fsignup",
+        url: "/api/auth/signin?error=Verification&reason=used&callbackUrl=%2Fca",
         baseUrl: "https://example.test",
       }),
-    ).toBe("https://example.test/ca/signup/error?reason=used");
+    ).toBe("https://example.test/ca/login/error");
   });
 
   it("keeps same-origin redirects and blocks cross-origin redirects", async () => {
@@ -101,10 +128,10 @@ describe("authOptions", () => {
 
     expect(
       redirect!({
-        url: "https://example.test/signup/error?callbackUrl=%2Fca%2Fsignup&error=Verification",
+        url: "https://example.test/login/error?callbackUrl=%2Fca&error=Verification",
         baseUrl: "https://example.test",
       }),
-    ).toBe("https://example.test/ca/signup/error?callbackUrl=%2Fca%2Fsignup&error=Verification");
+    ).toBe("https://example.test/ca/login/error");
 
     expect(
       redirect!({
@@ -129,7 +156,7 @@ describe("authOptions", () => {
       from: string;
     };
 
-    expect(authOptions.pages?.error).toBe("/signup/error");
+    expect(authOptions.pages?.error).toBe("/login/error");
     expect(providerOptions.generateVerificationToken()).toBe("raw-token");
     expect(mocks.createSignupToken).toHaveBeenCalled();
 
@@ -151,6 +178,33 @@ describe("authOptions", () => {
       rejected: [],
     });
     expect(mocks.closeTransport).toHaveBeenCalled();
+    expect(mocks.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["%2Fes", "Tu enlace de acceso a Nextself", "Usa este enlace para iniciar sesión"],
+    ["%2Fca", "El teu enllaç d'accés a Nextself", "Utilitza aquest enllaç per iniciar sessió"],
+  ])("localizes mail for callback %s", async (callbackUrl, subject, text) => {
+    mocks.env.AUTH_EMAIL_ENABLED = true;
+    mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };
+    await import("@/lib/auth");
+    const providerOptions = mocks.emailProvider.mock.calls[0]?.[0] as {
+      sendVerificationRequest: (params: {
+        identifier: string;
+        url: string;
+        provider: { server: object; from: string };
+      }) => Promise<void>;
+    };
+
+    await providerOptions.sendVerificationRequest({
+      identifier: "member@example.test",
+      url: `https://example.test/api/auth/callback/email?callbackUrl=${callbackUrl}`,
+      provider: { server: {}, from: "noreply@example.test" },
+    });
+
+    expect(mocks.sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject, text: expect.stringContaining(text) }),
+    );
   });
 
   it("throws when transport outcome is not accepted", async () => {
@@ -179,5 +233,80 @@ describe("authOptions", () => {
     ).rejects.toThrow("email provider did not accept intended recipient");
 
     expect(mocks.closeTransport).toHaveBeenCalled();
+    expect(mocks.deleteMany).toHaveBeenCalledWith({
+      where: {
+        identifier: "member@example.test",
+        token: "hashed-token",
+      },
+    });
+    expect(mocks.markProviderUnavailable).not.toHaveBeenCalled();
+  });
+
+  it("opens the shared cooldown after a provider connection failure", async () => {
+    mocks.env.AUTH_EMAIL_ENABLED = true;
+    mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };
+    mocks.sendMail.mockRejectedValue(Object.assign(new Error("connection failed"), {
+      code: "ECONNREFUSED",
+    }));
+
+    await import("@/lib/auth");
+    const providerOptions = mocks.emailProvider.mock.calls[0]?.[0] as {
+      sendVerificationRequest: (params: {
+        identifier: string;
+        url: string;
+        provider: { server: object; from: string };
+      }) => Promise<void>;
+    };
+    await expect(
+      providerOptions.sendVerificationRequest({
+        identifier: "member@example.test",
+        url: "https://example.test/api/auth/callback/email?token=abc",
+        provider: { server: {}, from: "noreply@example.test" },
+      }),
+    ).rejects.toThrow("connection failed");
+
+    expect(mocks.classifySmtpError).toHaveBeenCalled();
+    expect(mocks.markProviderUnavailable).toHaveBeenCalledOnce();
+    expect(mocks.deleteMany).toHaveBeenCalledWith({
+      where: { identifier: "member@example.test", token: "hashed-token" },
+    });
+  });
+
+  it("does not print delivery secrets while compensating a failure", async () => {
+    const consoleSpies = [
+      vi.spyOn(console, "log").mockImplementation(() => undefined),
+      vi.spyOn(console, "warn").mockImplementation(() => undefined),
+      vi.spyOn(console, "error").mockImplementation(() => undefined),
+    ];
+    mocks.env.AUTH_EMAIL_ENABLED = true;
+    mocks.smtp = {
+      server: { host: "smtp.example.test", auth: { pass: "smtp-password-secret" } },
+      from: "noreply@example.test",
+    };
+    mocks.sendMail.mockRejectedValue(new Error("transport unavailable"));
+
+    await import("@/lib/auth");
+    const providerOptions = mocks.emailProvider.mock.calls[0]?.[0] as {
+      sendVerificationRequest: (params: {
+        identifier: string;
+        url: string;
+        provider: { server: object; from: string };
+      }) => Promise<void>;
+    };
+    await expect(providerOptions.sendVerificationRequest({
+      identifier: "private@example.test",
+      url: "https://example.test/api/auth/callback/email?token=raw-token-value",
+      provider: mocks.smtp,
+    })).rejects.toThrow();
+
+    const serializedOutput = JSON.stringify(consoleSpies.flatMap((spy) => spy.mock.calls));
+    for (const sensitiveValue of [
+      "private@example.test",
+      "raw-token-value",
+      "hashed-token",
+      "smtp-password-secret",
+    ]) {
+      expect(serializedOutput).not.toContain(sensitiveValue);
+    }
   });
 });

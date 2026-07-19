@@ -1,6 +1,6 @@
 {
   "ai": "copilot",
-  "feature_numbering": "timestamp",
+  "feature_numbering": "date",
   "here": true,
   "integration": "copilot",
   "script": "sh",

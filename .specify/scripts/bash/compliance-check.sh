@@ -55,7 +55,7 @@ section_has_content() {
     local section="$2"
 
     awk -v section="$section" '
-        $0 == section { found = 1; next }
+        index($0, section) == 1 && (length($0) == length(section) || substr($0, length(section) + 1, 1) ~ /[[:space:]]/) { found = 1; next }
         found && /^## / { exit }
         found && /<!--/ { in_comment = 1; next }
         found && /-->/ { in_comment = 0; next }
@@ -67,17 +67,18 @@ section_has_content() {
 for requirement in "${required_sections[@]}"; do
     file="${requirement%%|*}"
     section="${requirement#*|}"
-    if ! grep -Fq -- "$section" "$file"; then
-        echo "[compliance-check] Missing required section in $file: $section" >&2
-        exit 1
-    fi
-    if [[ "$section" == "## "* ]] && ! section_has_content "$file" "$section"; then
-        echo "[compliance-check] Required section has no substantive content in $file: $section" >&2
+    if [[ "$section" == "## "* ]]; then
+        if ! section_has_content "$file" "$section"; then
+            echo "[compliance-check] Missing or empty required section in $file: $section" >&2
+            exit 1
+        fi
+    elif ! grep -Fq -- "$section" "$file"; then
+        echo "[compliance-check] Missing required content in $file: $section" >&2
         exit 1
     fi
 done
 
-placeholder_pattern='NEEDS CLARIFICATION|\[(FEATURE( NAME)?|DATE|YYYYMMDD-HHMMSS-feature-name|Brief Title)\]|:[[:space:]]*\[[^]]+\][[:space:]]*$'
+placeholder_pattern='NEEDS CLARIFICATION|\[(FEATURE( NAME)?|DATE|YYYYMMDD-english-feature-name|Brief Title)\]|:[[:space:]]*\[[^]]+\][[:space:]]*$'
 if grep -En "$placeholder_pattern" "${required_files[@]}"; then
     echo "[compliance-check] Resolve all template placeholders before completion." >&2
     exit 1

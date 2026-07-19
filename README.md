@@ -51,7 +51,6 @@ the mandatory `before_specify` hook stops without creating a branch.
 | `pnpm build` / `pnpm start` | Production build / start |
 | `pnpm lint` · `pnpm typecheck` · `pnpm test` | Static and unit/integration gates |
 | `pnpm audit:prod` / `pnpm test:e2e` | Production audit / isolated DB + migrations + build + deterministic standalone smoke tests |
-| `pnpm test:e2e:provider` | Real-provider controlled-inbox Playwright project (`signup-provider`) with required-env guard |
 | `pnpm db:migrate` / `db:deploy` | Create+apply (dev) / apply (prod) migrations |
 | `pnpm db:studio` | Prisma Studio |
 | `pnpm db:backup:dev` / `db:restore:dev` | Logical development DB backup / restore |
@@ -107,45 +106,6 @@ ingress overwrites `X-Forwarded-Host` and `CF-Connecting-IP` on every request. A
 alone is insufficient because a publicly reachable Traefik instance can forward client-supplied
 headers. When the guarantee is enforced, set the GitHub Variable to `true`; otherwise forwarded host
 and address headers remain ignored and the email limiter uses one conservative shared client bucket.
-
-### Signup provider verification gate
-
-Public signup has two E2E commands with different goals:
-
-- `pnpm test:e2e`: deterministic suite (no real SMTP/provider inbox dependency).
-- `pnpm test:e2e:provider`: real-provider suite for production enablement evidence.
-
-`scripts/test-e2e-provider.sh` enforces environment requirements before running the
-`signup-provider` Playwright project:
-
-- If `REQUIRE_PROVIDER_E2E=true` and required environment values are missing, the command fails.
-- If provider evidence is optional and variables are missing, the command skips safely and writes a
-  non-PII `provider-results.json` record explaining why.
-
-Required provider E2E variables:
-
-- `AUTH_EMAIL_ENABLED=true`
-- `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
-- `PROVIDER_E2E_INBOX_BASE_EMAIL` (or `PROVIDER_E2E_EMAIL_TEMPLATE`)
-- `PROVIDER_E2E_INBOX_API_URL` (plus optional `PROVIDER_E2E_INBOX_API_TOKEN`)
-
-The controlled inbox API must return JSON like:
-
-```json
-{
-  "messages": [
-    {
-      "receivedAt": "2026-07-17T20:40:12.000Z",
-      "magicLink": "https://example.com/api/auth/callback/email?..."
-    }
-  ]
-}
-```
-
-for query params `recipient` and `since`.
-
-Provider evidence output is stored at
-`specs/20260716-115127-public-email-signup/provider-results.json` with non-PII metrics only.
 
 ## Deployment
 
@@ -212,8 +172,9 @@ part of forward recovery and must remain reusable by later valid submissions.
 6. Adapt locales, message catalogs, Auth.js providers, Prisma models, resource limits, retention,
    availability, and monitoring to the derived application's requirements.
 7. Push the initial `main` to `origin`, then start the first real feature through SpecKit. Feature
-   directories use `YYYYMMDD-HHMMSS-feature-name`; the template itself intentionally has no
-   product-specific `specs/` directory.
+  directories use `YYYYMMDD-english-feature-name`; use a distinct concise English suffix for each
+  feature created on the same date. The template itself intentionally has no product-specific
+  `specs/` directory.
 8. Before production, run the CI gate, the backup/restore verification workflow, and a deployment
    healthcheck against the actual target environment.
 

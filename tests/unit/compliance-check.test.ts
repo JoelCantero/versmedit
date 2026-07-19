@@ -122,7 +122,7 @@ describe("compliance-check.sh", () => {
     );
 
     await expect(runComplianceCheck(directory)).rejects.toMatchObject({
-      stderr: expect.stringContaining("no substantive content"),
+      stderr: expect.stringContaining("Missing or empty required section"),
     });
   });
 

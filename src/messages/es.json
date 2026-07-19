@@ -6,7 +6,61 @@
   "HomePage": {
     "title": "Aplicación web",
     "tagline": "Una plantilla de Next.js autoalojada y dockerizada.",
-    "getStarted": "Para empezar, edita el archivo page.tsx."
+    "getStarted": "Para empezar, edita el archivo page.tsx.",
+    "navigation": {
+      "ariaLabel": "Navegación de cuenta",
+      "login": "Iniciar sesión",
+      "signup": "Registrarse",
+      "logout": "Cerrar sesión",
+      "toggleTheme": "Cambiar modo oscuro",
+      "language": "Seleccionar idioma"
+    }
+  },
+  "Login": {
+    "page": {
+      "metadata": {
+        "title": "Iniciar sesión",
+        "description": "Accede a tu cuenta existente con un enlace seguro por correo."
+      }
+    },
+    "form": {
+      "ariaLabel": "Formulario de inicio de sesión por correo"
+    },
+    "heading": {
+      "title": "Te damos la bienvenida",
+      "description": "Introduce tu correo y te enviaremos un enlace seguro para iniciar sesión."
+    },
+    "fields": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "nombre@ejemplo.com",
+        "description": "Usa la dirección asociada a tu cuenta."
+      }
+    },
+    "actions": {
+      "submitIdle": "Enviar enlace de acceso",
+      "submitPending": "Enviando...",
+      "retry": "Volver a intentarlo",
+      "goHome": "Ir al inicio"
+    },
+    "states": {
+      "sending": "Enviando tu enlace de acceso...",
+      "accepted": "Si existe una cuenta asociada a esta dirección, recibirás un enlace para iniciar sesión.",
+      "invalidRequest": "Esta solicitud ya no es válida. Actualiza la página y vuelve a intentarlo.",
+      "unavailable": "El acceso por correo no está disponible temporalmente. Inténtalo más tarde.",
+      "rateLimited": "Demasiados intentos. Vuelve a intentarlo en {seconds} segundos."
+    },
+    "validation": {
+      "email": {
+        "invalid": "Introduce un correo electrónico válido."
+      }
+    },
+    "recovery": {
+      "invalidLink": {
+        "title": "Este enlace de acceso no es válido",
+        "description": "Solicita un enlace nuevo y utiliza el correo más reciente que recibas."
+      }
+    }
   },
   "Signup": {
     "page": {

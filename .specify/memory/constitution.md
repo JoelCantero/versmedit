@@ -1,8 +1,12 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.6.1 → 1.6.2 (clarification)
-Ratified: 2026-07-10 | Last amended: 2026-07-14
+Version change: 1.6.2 → 1.7.0 (governance change)
+Ratified: 2026-07-10 | Last amended: 2026-07-19
+
+1.7.0 — Changed feature identifiers to `YYYYMMDD-english-feature-name`, matching the configured
+date-based workflow. English suffixes must be concise and unique when multiple features are created
+on the same date. Synchronized the spec, plan, and tasks templates.
 
 1.6.2 — Clarified that the template's reference deployment targets a self-hosted ARM64 Raspberry
 Pi while derived applications may select another Docker-compatible host without weakening the
@@ -367,8 +371,9 @@ the root cause of most authorization vulnerabilities.
 
 Every meaningful feature MUST start with a specification.
 
-Feature directories and branches MUST use the configured timestamp identifier format
-`YYYYMMDD-HHMMSS-feature-name` so parallel specification work cannot collide.
+Feature directories and branches MUST use the configured date identifier format
+`YYYYMMDD-english-feature-name`. The English suffix MUST be concise and descriptive; multiple
+features created on the same date MUST use distinct suffixes so parallel work cannot collide.
 
 The specification MUST describe: the user problem; the expected behavior; the users or roles
 involved; acceptance criteria; non-goals; edge cases; security or privacy implications; and
@@ -588,4 +593,4 @@ equivalent, documented exception).
 **Scope**: Self-hosted Docker web applications for Raspberry Pi, VPS, and small production
 deployments.
 
-**Version**: 1.6.2 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-07-14
+**Version**: 1.7.0 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-07-19

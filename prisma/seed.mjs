@@ -6,10 +6,19 @@ import pg from "pg";
 
 const { Client } = pg;
 
-const TEST_USER = {
-  name: "Joel",
-  email: "canterojoel@gmail.com",
-};
+function getSeedUser() {
+  const name = process.env.SEED_USER_NAME?.trim();
+  const email = process.env.SEED_USER_EMAIL?.trim().toLowerCase();
+
+  if (!name) {
+    throw new Error("SEED_USER_NAME is required");
+  }
+  if (!email) {
+    throw new Error("SEED_USER_EMAIL is required");
+  }
+
+  return { name, email };
+}
 
 function getLocalDatabaseUrl() {
   if (process.env.NODE_ENV !== "development") {
@@ -30,6 +39,7 @@ function getLocalDatabaseUrl() {
 }
 
 async function main() {
+  const seedUser = getSeedUser();
   const client = new Client({ connectionString: getLocalDatabaseUrl() });
   await client.connect();
 
@@ -42,7 +52,7 @@ async function main() {
          "emailVerified" = COALESCE("User"."emailVerified", EXCLUDED."emailVerified"),
          "updatedAt" = NOW()
        RETURNING "email"`,
-      [randomUUID(), TEST_USER.name, TEST_USER.email],
+      [randomUUID(), seedUser.name, seedUser.email],
     );
 
     console.log(`Development user ready: ${result.rows[0].email}`);

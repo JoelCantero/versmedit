@@ -9,7 +9,7 @@ The non-negotiable engineering principles for this architecture live in
 
 ## Stack
 
-- **Language / runtime**: TypeScript on Node.js 24 LTS · **pnpm**
+- **Language / runtime**: TypeScript on Node.js 26 · **pnpm**
 - **Framework**: Next.js (App Router) + React — one full-stack `app` (UI, SSR, API routes, Server Actions, auth)
 - **Database**: PostgreSQL via Prisma 7 (driver adapter)
 - **Validation**: Zod · **Auth**: NextAuth v4 stable · **Email**: Nodemailer (SMTP)
@@ -20,7 +20,7 @@ The non-negotiable engineering principles for this architecture live in
 
 ## Requirements
 
-- Node.js 24 + pnpm (`corepack enable`)
+- Node.js 26 + pnpm (`corepack enable`)
 - Docker + Docker Compose (for the local database)
 
 ## Getting started (development)

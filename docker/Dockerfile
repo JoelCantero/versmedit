@@ -12,6 +12,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN apt-get update \
  && apt-get install -y --no-install-recommends openssl \
  && rm -rf /var/lib/apt/lists/* \
+ && npm install --global corepack@0.35.0 \
  && corepack enable
 WORKDIR /app
 

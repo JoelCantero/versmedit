@@ -6,7 +6,61 @@
   "HomePage": {
     "title": "Web app",
     "tagline": "A self-hosted, Dockerized Next.js starter.",
-    "getStarted": "To get started, edit the page.tsx file."
+    "getStarted": "To get started, edit the page.tsx file.",
+    "navigation": {
+      "ariaLabel": "Account navigation",
+      "login": "Login",
+      "signup": "Sign up",
+      "logout": "Log out",
+      "toggleTheme": "Toggle dark mode",
+      "language": "Select language"
+    }
+  },
+  "Login": {
+    "page": {
+      "metadata": {
+        "title": "Sign in",
+        "description": "Sign in to your existing account with a secure email link."
+      }
+    },
+    "form": {
+      "ariaLabel": "Email sign-in form"
+    },
+    "heading": {
+      "title": "Welcome back",
+      "description": "Enter your email address and we will send you a secure sign-in link."
+    },
+    "fields": {
+      "email": {
+        "label": "Email",
+        "placeholder": "name@example.com",
+        "description": "Use the address associated with your account."
+      }
+    },
+    "actions": {
+      "submitIdle": "Send sign-in link",
+      "submitPending": "Sending...",
+      "retry": "Try again",
+      "goHome": "Go to home"
+    },
+    "states": {
+      "sending": "Sending your sign-in link...",
+      "accepted": "If an account exists for this address, you will receive a link to sign in.",
+      "invalidRequest": "This request is no longer valid. Refresh the page and try again.",
+      "unavailable": "Email sign-in is temporarily unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds."
+    },
+    "validation": {
+      "email": {
+        "invalid": "Enter a valid email address."
+      }
+    },
+    "recovery": {
+      "invalidLink": {
+        "title": "This sign-in link is not valid",
+        "description": "Request a new sign-in link and use the latest email you receive."
+      }
+    }
   },
   "Signup": {
     "page": {

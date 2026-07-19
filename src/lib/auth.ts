@@ -6,9 +6,15 @@ import nodemailer from "nodemailer";
 import { hardenAdapter } from "@/lib/auth-adapter";
 import { db } from "@/lib/db";
 import {
+  classifySmtpError,
   classifySmtpResult,
   getEmailProviderConfig,
 } from "@/lib/email";
+import {
+  isProviderWideFailure,
+  markProviderUnavailable,
+} from "@/lib/provider-availability";
+import { getPublishedVerificationToken } from "@/modules/login/verification-context";
 import { createSignupToken } from "@/modules/signup/token";
 
 // NextAuth v4 stable (App Router). Database-backed sessions via the Prisma adapter, with
@@ -18,10 +24,6 @@ import { createSignupToken } from "@/modules/signup/token";
 const smtp = getEmailProviderConfig();
 
 type SignupLocale = "en" | "es" | "ca";
-type RecoveryReason = "invalid" | "expired" | "superseded" | "used";
-
-const recoveryReasons: RecoveryReason[] = ["invalid", "expired", "superseded", "used"];
-
 function localePath(path: string, locale: SignupLocale) {
   if (locale === "en") return path;
   return `/${locale}${path}`;
@@ -42,12 +44,20 @@ function parseLocaleFromCallbackUrl(callbackUrl: string | null, baseUrl: string)
   }
 }
 
-function parseRecoveryReason(searchParams: URLSearchParams): RecoveryReason {
-  const reason = searchParams.get("reason");
-  return recoveryReasons.includes(reason as RecoveryReason)
-    ? (reason as RecoveryReason)
-    : "invalid";
-}
+const emailCopy: Record<SignupLocale, { subject: string; text: string }> = {
+  en: {
+    subject: "Your Nextself sign-in link",
+    text: "Use this link to sign in",
+  },
+  es: {
+    subject: "Tu enlace de acceso a Nextself",
+    text: "Usa este enlace para iniciar sesión",
+  },
+  ca: {
+    subject: "El teu enllaç d'accés a Nextself",
+    text: "Utilitza aquest enllaç per iniciar sessió",
+  },
+};
 
 function localizeAuthRedirect(url: string, baseUrl: string) {
   const base = new URL(baseUrl);
@@ -57,17 +67,11 @@ function localizeAuthRedirect(url: string, baseUrl: string) {
     target.pathname === "/api/auth/error" || target.pathname === "/api/auth/signin";
 
   if (isAuthErrorRoute && target.searchParams.get("error") === "Verification") {
-    const errorUrl = new URL(localePath("/signup/error", locale), base);
-    errorUrl.searchParams.set("reason", parseRecoveryReason(target.searchParams));
-    return errorUrl.toString();
+    return new URL(localePath("/login/error", locale), base).toString();
   }
 
-  if (target.pathname === "/signup/error" && locale !== "en") {
-    const localizedError = new URL(localePath("/signup/error", locale), base);
-    for (const [key, value] of target.searchParams.entries()) {
-      localizedError.searchParams.set(key, value);
-    }
-    return localizedError.toString();
+  if (target.pathname === "/login/error") {
+    return new URL(localePath("/login/error", locale), base).toString();
   }
 
   return target.origin === base.origin ? target.toString() : base.toString();
@@ -77,7 +81,7 @@ export const authOptions: NextAuthOptions = {
   adapter: hardenAdapter(PrismaAdapter(db)),
   session: { strategy: "database" },
   pages: {
-    error: "/signup/error",
+    error: "/login/error",
   },
   callbacks: {
     redirect: ({ url, baseUrl }) => localizeAuthRedirect(url, baseUrl),
@@ -93,21 +97,44 @@ export const authOptions: NextAuthOptions = {
           generateVerificationToken: () => createSignupToken().raw,
           sendVerificationRequest: async ({ identifier, url, provider }) => {
             const transport = nodemailer.createTransport(provider.server);
+            let deliveryFailure: ReturnType<typeof classifySmtpError> | undefined;
+            const verificationUrl = new URL(url);
+            const locale = parseLocaleFromCallbackUrl(
+              verificationUrl.searchParams.get("callbackUrl"),
+              verificationUrl.origin,
+            );
+            const copy = emailCopy[locale];
             try {
               const result = await transport.sendMail({
                 to: identifier,
                 from: provider.from,
-                subject: "Your Versmedit sign-in link",
-                text: `Use this link to sign in: ${url}`,
-                html: `<p>Use this link to sign in:</p><p><a href="${url}">${url}</a></p>`,
+                subject: copy.subject,
+                text: `${copy.text}: ${url}`,
+                html: `<p>${copy.text}:</p><p><a href="${url}">${url}</a></p>`,
               });
               const outcome = classifySmtpResult(identifier, {
                 accepted: result.accepted,
                 rejected: result.rejected,
               });
               if (outcome.status !== "accepted") {
+                deliveryFailure = outcome;
                 throw new Error("email provider did not accept intended recipient");
               }
+            } catch (error) {
+              const outcome = deliveryFailure ?? classifySmtpError(error);
+              if (outcome.status !== "accepted" && isProviderWideFailure(outcome)) {
+                await markProviderUnavailable();
+              }
+              const published = await getPublishedVerificationToken();
+              if (published) {
+                await db.verificationToken.deleteMany({
+                  where: {
+                    identifier: published.identifier,
+                    token: published.token,
+                  },
+                });
+              }
+              throw error;
             } finally {
               if (typeof transport.close === "function") transport.close();
             }

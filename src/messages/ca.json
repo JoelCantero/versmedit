@@ -6,7 +6,61 @@
   "HomePage": {
     "title": "Aplicació web",
     "tagline": "Una plantilla de Next.js autoallotjada i dockeritzada.",
-    "getStarted": "Per començar, edita el fitxer page.tsx."
+    "getStarted": "Per començar, edita el fitxer page.tsx.",
+    "navigation": {
+      "ariaLabel": "Navegació del compte",
+      "login": "Inicia sessió",
+      "signup": "Registra't",
+      "logout": "Tanca la sessió",
+      "toggleTheme": "Canvia el mode fosc",
+      "language": "Selecciona l'idioma"
+    }
+  },
+  "Login": {
+    "page": {
+      "metadata": {
+        "title": "Inicia sessió",
+        "description": "Accedeix al teu compte existent amb un enllaç segur per correu."
+      }
+    },
+    "form": {
+      "ariaLabel": "Formulari d'inici de sessió per correu"
+    },
+    "heading": {
+      "title": "Torna a entrar",
+      "description": "Introdueix el teu correu i t'enviarem un enllaç segur per iniciar sessió."
+    },
+    "fields": {
+      "email": {
+        "label": "Correu electrònic",
+        "placeholder": "nom@exemple.com",
+        "description": "Utilitza l'adreça associada al teu compte."
+      }
+    },
+    "actions": {
+      "submitIdle": "Envia l'enllaç d'accés",
+      "submitPending": "Enviant...",
+      "retry": "Torna-ho a provar",
+      "goHome": "Ves a l'inici"
+    },
+    "states": {
+      "sending": "Enviant el teu enllaç d'accés...",
+      "accepted": "Si existeix un compte associat a aquesta adreça, rebràs un enllaç per iniciar sessió.",
+      "invalidRequest": "Aquesta sol·licitud ja no és vàlida. Actualitza la pàgina i torna-ho a provar.",
+      "unavailable": "L'accés per correu no està disponible temporalment. Torna-ho a provar més tard.",
+      "rateLimited": "Massa intents. Torna-ho a provar d'aquí a {seconds} segons."
+    },
+    "validation": {
+      "email": {
+        "invalid": "Introdueix un correu electrònic vàlid."
+      }
+    },
+    "recovery": {
+      "invalidLink": {
+        "title": "Aquest enllaç d'accés no és vàlid",
+        "description": "Sol·licita un enllaç nou i utilitza el correu més recent que rebis."
+      }
+    }
   },
   "Signup": {
     "page": {

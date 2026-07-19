@@ -1,41 +1,41 @@
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { validateAuthCsrfToken } from "@/lib/auth-csrf";
 import { getRequestLogger } from "@/lib/logger";
+import { getProviderAvailability } from "@/lib/provider-availability";
 import { getClientIdentifier } from "@/lib/request-context";
 import { consumeSharedRateLimit } from "@/lib/shared-rate-limit";
+import { parseLoginEmail } from "@/modules/login/schema";
+import {
+	acceptedLoginResponse,
+	findExistingLoginEmail,
+	hashLoginEmail,
+} from "@/modules/login/service";
+import { runWithVerificationContext } from "@/modules/login/verification-context";
 
-// Auth.js route handler — serves sign-in, callback, session and CSRF endpoints
-// under /api/auth/* for the App Router.
-const authHandler = NextAuth(authOptions);
 type AuthRouteContext = {
 	params: Promise<{ nextauth: string[] }>;
 };
 
-export const GET = authHandler;
+async function authHandler(request: NextRequest, context: AuthRouteContext) {
+	return await NextAuth(request, context, authOptions);
+}
+
+export async function GET(request: NextRequest, context: AuthRouteContext) {
+	return await authHandler(request, context);
+}
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1_000;
-
-async function getEmailLimitKey(request: NextRequest): Promise<string | null> {
-	const formData = await request.clone().formData().catch(() => null);
-	const email = formData?.get("email");
-	if (typeof email !== "string" || email.trim() === "") return null;
-
-	const bytes = new TextEncoder().encode(email.trim().toLowerCase());
-	const digest = await crypto.subtle.digest("SHA-256", bytes);
-	return Array.from(new Uint8Array(digest), (byte) =>
-		byte.toString(16).padStart(2, "0"),
-	).join("");
-}
 
 export async function POST(request: NextRequest, context: AuthRouteContext) {
 	const pathname = new URL(request.url).pathname;
 	if (!pathname.endsWith("/signin/email")) {
-		return authHandler(request, context);
+		return await authHandler(request, context);
 	}
 
-	const emailKey = await getEmailLimitKey(request);
+	const startedAt = Date.now();
 	const clientResult = await consumeSharedRateLimit({
 		key: `auth:email:client:${getClientIdentifier(request)}`,
 		limit: 5,
@@ -45,18 +45,76 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 		return rateLimitResponse(request, pathname, clientResult.retryAfterSeconds);
 	}
 
-	const emailResult = emailKey
-		? await consumeSharedRateLimit({
-				key: `auth:email:address:${emailKey}`,
-				limit: 3,
-				windowMs: RATE_LIMIT_WINDOW_MS,
-			})
-		: null;
-	if (emailResult && !emailResult.allowed) {
+	const formData = await request.clone().formData().catch(() => null);
+	const csrfToken = formData?.get("csrfToken");
+	if (
+		!validateAuthCsrfToken({
+			bodyToken: typeof csrfToken === "string" ? csrfToken : undefined,
+			cookieHeader: request.headers.get("cookie") ?? undefined,
+			secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "",
+		})
+	) {
+		return Response.json({ status: "invalid_request" }, { status: 403 });
+	}
+
+	let normalizedEmail: string;
+	try {
+		normalizedEmail = parseLoginEmail(formData?.get("email"));
+	} catch {
+		return Response.json({ status: "invalid", field: "email" }, { status: 400 });
+	}
+
+	const emailResult = await consumeSharedRateLimit({
+		key: `auth:email:address:${hashLoginEmail(normalizedEmail)}`,
+		limit: 3,
+		windowMs: RATE_LIMIT_WINDOW_MS,
+	});
+	if (!emailResult.allowed) {
 		return rateLimitResponse(request, pathname, emailResult.retryAfterSeconds);
 	}
 
-	return authHandler(request, context);
+	const providerAvailability = await getProviderAvailability();
+	if (!providerAvailability.available) {
+		getRequestLogger(request, { route: pathname }).warn(
+			{ retryAfterSeconds: providerAvailability.retryAfterSeconds },
+			"email provider temporarily unavailable",
+		);
+		return Response.json(
+			{ status: "unavailable" },
+			{
+				status: 503,
+				headers: {
+					"Retry-After": String(providerAvailability.retryAfterSeconds),
+				},
+			},
+		);
+	}
+
+	const existingEmail = await findExistingLoginEmail(normalizedEmail);
+	if (!existingEmail) return acceptedLoginResponse({ startedAt });
+
+	formData?.set("email", existingEmail);
+	const delegatedBody = new URLSearchParams();
+	for (const [key, value] of formData?.entries() ?? []) {
+		if (typeof value === "string") delegatedBody.append(key, value);
+	}
+	const headers = new Headers(request.headers);
+	headers.delete("content-length");
+	await runWithVerificationContext(async () => {
+		try {
+			await authHandler(
+				new NextRequest(request.url, {
+					method: "POST",
+					headers,
+					body: delegatedBody,
+				}),
+				context,
+			);
+		} catch {
+			// Delivery failures are compensated inside the provider and remain private.
+		}
+	});
+	return acceptedLoginResponse({ startedAt });
 }
 
 function rateLimitResponse(
@@ -69,7 +127,7 @@ function rateLimitResponse(
 		"email sign-in rate limit exceeded",
 	);
 	return Response.json(
-		{ error: "Too many sign-in attempts. Try again later." },
+		{ status: "rate_limited", retryAfter: retryAfterSeconds },
 		{
 			status: 429,
 			headers: {

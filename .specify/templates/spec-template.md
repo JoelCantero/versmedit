@@ -1,6 +1,6 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[YYYYMMDD-HHMMSS-feature-name]`
+**Feature Branch**: `[YYYYMMDD-english-feature-name]`
 
 **Created**: [DATE]
 

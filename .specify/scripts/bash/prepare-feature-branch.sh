@@ -109,17 +109,18 @@ else
         exit 1
     fi
 
-    # Honour feature_numbering from init-options.json (sequential | timestamp).
-    USE_TIMESTAMP=false
+    # Honour feature_numbering from init-options.json (sequential | date).
+    USE_DATE=false
     INIT_OPTS="$REPO_ROOT/.specify/init-options.json"
     if [ -f "$INIT_OPTS" ]; then
         numbering="$(grep -o '"feature_numbering"[[:space:]]*:[[:space:]]*"[^"]*"' "$INIT_OPTS" 2>/dev/null | sed -E 's/.*"([^"]*)"$/\1/' || true)"
-        [ "$numbering" = "timestamp" ] && USE_TIMESTAMP=true
+        [ "$numbering" = "date" ] && USE_DATE=true
     fi
 
-    # Reuse the canonical name generator without creating any files (--dry-run).
-    if [ "$USE_TIMESTAMP" = true ]; then
-        DRY_OUT="$("$SCRIPT_DIR/create-new-feature.sh" --dry-run --timestamp "$DESCRIPTION")"
+    # Date mode requires the agent to translate and pass the exact English name.
+    if [ "$USE_DATE" = true ]; then
+        echo "Error: date mode requires GIT_BRANCH_NAME=YYYYMMDD-<english-2-4-word-short-name>" >&2
+        exit 1
     else
         DRY_OUT="$("$SCRIPT_DIR/create-new-feature.sh" --dry-run "$DESCRIPTION")"
     fi

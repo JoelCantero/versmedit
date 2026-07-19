@@ -7,7 +7,7 @@ DRY_RUN=false
 ALLOW_EXISTING=false
 SHORT_NAME=""
 BRANCH_NUMBER=""
-USE_TIMESTAMP=false
+USE_DATE=false
 ARGS=()
 i=1
 while [ $i -le $# ]; do
@@ -49,11 +49,11 @@ while [ $i -le $# ]; do
             fi
             BRANCH_NUMBER="$next_arg"
             ;;
-        --timestamp)
-            USE_TIMESTAMP=true
+        --date)
+            USE_DATE=true
             ;;
         --help|-h)
-            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] <feature_description>"
+            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--date] <feature_description>"
             echo ""
             echo "Options:"
             echo "  --json              Output in JSON format"
@@ -61,13 +61,13 @@ while [ $i -le $# ]; do
             echo "  --allow-existing-branch  Reuse an existing feature directory if it already exists"
             echo "  --short-name <name> Provide a custom short name (2-4 words) for the feature"
             echo "  --number N          Specify branch number manually (overrides auto-detection)"
-            echo "  --timestamp         Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
+            echo "  --date              Use date prefix (YYYYMMDD) with a unique English 2-4-word short name"
             echo "  --help, -h          Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 'Add user authentication system' --short-name 'user-auth'"
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
-            echo "  $0 --timestamp --short-name 'user-auth' 'Add user authentication'"
+            echo "  $0 --date --short-name 'user-auth' 'Add user authentication'"
             exit 0
             ;;
         *)
@@ -79,7 +79,7 @@ done
 
 FEATURE_DESCRIPTION="${ARGS[*]}"
 if [ -z "$FEATURE_DESCRIPTION" ]; then
-    echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] <feature_description>" >&2
+    echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--date] <feature_description>" >&2
     exit 1
 fi
 
@@ -191,15 +191,28 @@ else
     BRANCH_SUFFIX=$(generate_branch_name "$FEATURE_DESCRIPTION")
 fi
 
-# Warn if --number and --timestamp are both specified
-if [ "$USE_TIMESTAMP" = true ] && [ -n "$BRANCH_NUMBER" ]; then
-    >&2 echo "[specify] Warning: --number is ignored when --timestamp is used"
+if [ "$USE_DATE" = true ] && [ -z "$SHORT_NAME" ]; then
+    echo "Error: --date requires an explicit English --short-name containing 2-4 words" >&2
+    exit 1
+fi
+
+if [ "$USE_DATE" = true ]; then
+    suffix_words=$(printf '%s' "$BRANCH_SUFFIX" | awk -F- '{print NF}')
+    if [ "$suffix_words" -lt 2 ] || [ "$suffix_words" -gt 4 ]; then
+        echo "Error: --date requires an English --short-name containing 2-4 hyphen-separated words" >&2
+        exit 1
+    fi
+fi
+
+# Warn if --number and --date are both specified
+if [ "$USE_DATE" = true ] && [ -n "$BRANCH_NUMBER" ]; then
+    >&2 echo "[specify] Warning: --number is ignored when --date is used"
     BRANCH_NUMBER=""
 fi
 
 # Determine branch prefix
-if [ "$USE_TIMESTAMP" = true ]; then
-    FEATURE_NUM=$(date +%Y%m%d-%H%M%S)
+if [ "$USE_DATE" = true ]; then
+    FEATURE_NUM=$(date +%Y%m%d)
     BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
 else
     # Determine branch number from existing feature directories
@@ -218,7 +231,7 @@ fi
 MAX_BRANCH_LENGTH=244
 if [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
     # Calculate how much we need to trim from suffix
-    # Account for prefix length: timestamp (15) + hyphen (1) = 16, or sequential (3) + hyphen (1) = 4
+    # Account for the date/sequential prefix and separator.
     PREFIX_LENGTH=$(( ${#FEATURE_NUM} + 1 ))
     MAX_SUFFIX_LENGTH=$((MAX_BRANCH_LENGTH - PREFIX_LENGTH))
     
@@ -240,8 +253,8 @@ SPEC_FILE="$FEATURE_DIR/spec.md"
 
 if [ "$DRY_RUN" != true ]; then
     if [ -d "$FEATURE_DIR" ] && [ "$ALLOW_EXISTING" != true ]; then
-        if [ "$USE_TIMESTAMP" = true ]; then
-            >&2 echo "Error: Feature directory '$FEATURE_DIR' already exists. Rerun to get a new timestamp or use a different --short-name."
+        if [ "$USE_DATE" = true ]; then
+            >&2 echo "Error: Feature directory '$FEATURE_DIR' already exists. Use a different English 2-4-word --short-name for another feature on this date."
         else
             >&2 echo "Error: Feature directory '$FEATURE_DIR' already exists. Please use a different feature name or specify a different number with --number."
         fi

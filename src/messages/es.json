@@ -7,5 +7,84 @@
     "title": "Aplicación web",
     "tagline": "Una plantilla de Next.js autoalojada y dockerizada.",
     "getStarted": "Para empezar, edita el archivo page.tsx."
+  },
+  "Signup": {
+    "page": {
+      "metadata": {
+        "title": "Registro",
+        "description": "Crea tu cuenta y verifica tu correo electrónico."
+      }
+    },
+    "form": {
+      "ariaLabel": "Formulario de registro por correo"
+    },
+    "heading": {
+      "title": "Crea tu cuenta",
+      "description": "Introduce tu nombre y correo para recibir un enlace mágico seguro."
+    },
+    "fields": {
+      "firstName": {
+        "label": "Nombre",
+        "placeholder": "Taylor"
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "nombre@ejemplo.com",
+        "description": "Solo usamos tu correo para iniciar sesión."
+      }
+    },
+    "actions": {
+      "submitIdle": "Enviar enlace mágico",
+      "submitPending": "Enviando..."
+    },
+    "states": {
+      "sending": "Enviando tu enlace...",
+      "accepted": "Si esta dirección puede recibir correo, hemos enviado un enlace de acceso.",
+      "deliveryFailed": "No hemos podido confirmar la entrega. Inténtalo de nuevo.",
+      "unavailable": "El acceso por correo no está disponible temporalmente.",
+      "rateLimited": "Demasiados intentos. Espera antes de volver a intentarlo."
+    },
+    "summary": {
+      "title": "Corrige los errores indicados",
+      "description": "Revisa cada campo e inténtalo de nuevo."
+    },
+    "validation": {
+      "firstName": {
+        "required": "Introduce tu nombre.",
+        "max": "El nombre debe tener 80 caracteres o menos.",
+        "invalid": "Usa solo letras, espacios, apóstrofes o guiones."
+      },
+      "email": {
+        "invalid": "Introduce un correo electrónico válido."
+      },
+      "locale": {
+        "invalid": "Selecciona un idioma válido y vuelve a intentarlo."
+      },
+      "form": {
+        "invalidSubmission": "No hemos podido procesar tu solicitud. Revisa el formulario y vuelve a intentarlo."
+      }
+    },
+    "recovery": {
+      "invalid": {
+        "title": "Este enlace de acceso no es válido",
+        "description": "El enlace puede estar incompleto o mal formado. Solicita un nuevo correo y usa el enlace más reciente."
+      },
+      "expired": {
+        "title": "Este enlace de acceso ha caducado",
+        "description": "Por seguridad, los enlaces caducan tras 15 minutos. Solicita uno nuevo para continuar."
+      },
+      "superseded": {
+        "title": "Hay un enlace de acceso más reciente",
+        "description": "Solo funciona el último enlace aceptado. Abre el correo más reciente o solicita otro enlace."
+      },
+      "used": {
+        "title": "Este enlace de acceso ya se ha usado",
+        "description": "Cada enlace es de un solo uso. Solicita un nuevo correo si todavía necesitas acceder."
+      },
+      "action": {
+        "retry": "Solicitar un enlace nuevo",
+        "goHome": "Ir al inicio"
+      }
+    }
   }
 }

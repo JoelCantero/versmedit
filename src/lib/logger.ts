@@ -38,6 +38,12 @@ export function createLogger(
         paths: [
           "req.headers.authorization",
           "req.headers.cookie",
+          "*.email",
+          "*.firstName",
+          "*.name",
+          "*.proposedName",
+          "*.identifier",
+          "*.url",
           "*.password",
           "*.token",
           "*.secret",

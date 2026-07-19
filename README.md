@@ -50,7 +50,8 @@ the mandatory `before_specify` hook stops without creating a branch.
 | `pnpm dev` | Start DB (via `predev`), run Next dev |
 | `pnpm build` / `pnpm start` | Production build / start |
 | `pnpm lint` · `pnpm typecheck` · `pnpm test` | Static and unit/integration gates |
-| `pnpm audit:prod` / `pnpm test:e2e` | Production audit / isolated DB + migrations + build + standalone smoke tests |
+| `pnpm audit:prod` / `pnpm test:e2e` | Production audit / isolated DB + migrations + build + deterministic standalone smoke tests |
+| `pnpm test:e2e:provider` | Real-provider controlled-inbox Playwright project (`signup-provider`) with required-env guard |
 | `pnpm db:migrate` / `db:deploy` | Create+apply (dev) / apply (prod) migrations |
 | `pnpm db:studio` | Prisma Studio |
 | `pnpm db:backup:dev` / `db:restore:dev` | Logical development DB backup / restore |
@@ -98,13 +99,53 @@ with a different `Host` or `X-Forwarded-Host` are rejected before NextAuth. The 
 values point at an external transactional email provider. Leave them empty in the template. The
 first application spec must define registration, which existing users may authenticate, the email
 provider, and the integration tests before setting `AUTH_EMAIL_ENABLED=true`. SMTP configuration
-alone does not activate email sign-in. The hardened auth adapter refuses to create unknown users;
-registration remains a separate product flow that validates the application's required fields.
+alone does not activate email sign-in. The SMTP transport timeout is fixed at 10 seconds in
+`src/lib/email.ts`. The hardened auth adapter refuses to create unknown users; registration remains
+a separate product flow that validates the application's required fields.
 Keep `TRUST_PROXY_HEADERS=false` unless Cloudflare is the exclusive route to the origin and the
 ingress overwrites `X-Forwarded-Host` and `CF-Connecting-IP` on every request. A private app network
 alone is insufficient because a publicly reachable Traefik instance can forward client-supplied
 headers. When the guarantee is enforced, set the GitHub Variable to `true`; otherwise forwarded host
 and address headers remain ignored and the email limiter uses one conservative shared client bucket.
+
+### Signup provider verification gate
+
+Public signup has two E2E commands with different goals:
+
+- `pnpm test:e2e`: deterministic suite (no real SMTP/provider inbox dependency).
+- `pnpm test:e2e:provider`: real-provider suite for production enablement evidence.
+
+`scripts/test-e2e-provider.sh` enforces environment requirements before running the
+`signup-provider` Playwright project:
+
+- If `REQUIRE_PROVIDER_E2E=true` and required environment values are missing, the command fails.
+- If provider evidence is optional and variables are missing, the command skips safely and writes a
+  non-PII `provider-results.json` record explaining why.
+
+Required provider E2E variables:
+
+- `AUTH_EMAIL_ENABLED=true`
+- `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
+- `PROVIDER_E2E_INBOX_BASE_EMAIL` (or `PROVIDER_E2E_EMAIL_TEMPLATE`)
+- `PROVIDER_E2E_INBOX_API_URL` (plus optional `PROVIDER_E2E_INBOX_API_TOKEN`)
+
+The controlled inbox API must return JSON like:
+
+```json
+{
+  "messages": [
+    {
+      "receivedAt": "2026-07-17T20:40:12.000Z",
+      "magicLink": "https://example.com/api/auth/callback/email?..."
+    }
+  ]
+}
+```
+
+for query params `recipient` and `since`.
+
+Provider evidence output is stored at
+`specs/20260716-115127-public-email-signup/provider-results.json` with non-PII metrics only.
 
 ## Deployment
 
@@ -127,7 +168,9 @@ mid-build or mid-migration.
 Application code may be reverted only while it remains compatible with the applied schema. Prisma
 migrations are forward-only: recover with a corrective migration in normal operation. For an
 incompatible or destructive change, restore a verified backup into a fresh database/volume and
-switch traffic only after validation; reverting Git does not reverse schema or data.
+switch traffic only after validation; reverting Git does not reverse schema or data. Public signup
+does not introduce automatic or opportunistic disabled-user deletion; retained disabled accounts are
+part of forward recovery and must remain reusable by later valid submissions.
 
 ## Database, backups & health
 

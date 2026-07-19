@@ -4,7 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { getSmtpConfig } from "@/lib/email";
+import {
+  classifySmtpError,
+  classifySmtpResult,
+  getEmailProviderConfig,
+  getSmtpConfig,
+} from "@/lib/email";
 import type { Env } from "@/lib/env";
 
 const baseEnv: Env = {
@@ -37,6 +42,9 @@ describe("getSmtpConfig", () => {
         host: "smtp.example.com",
         port: 587,
         secure: false,
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 10_000,
         auth: { user: "mailer", pass: "mail-secret" },
       },
       from: "App <no-reply@example.com>",
@@ -54,5 +62,64 @@ describe("getSmtpConfig", () => {
     });
 
     expect(config?.server.secure).toBe(true);
+  });
+
+  it("requires both the feature gate and complete SMTP configuration", () => {
+    expect(getEmailProviderConfig(baseEnv)).toBeNull();
+    expect(
+      getEmailProviderConfig({
+        ...baseEnv,
+        AUTH_EMAIL_ENABLED: true,
+        SMTP_HOST: "smtp.example.com",
+        SMTP_USER: "mailer",
+        SMTP_PASSWORD: "mail-secret",
+        SMTP_FROM: "no-reply@example.com",
+      }),
+    ).not.toBeNull();
+  });
+});
+
+describe("SMTP outcome classification", () => {
+  it("accepts only when the intended recipient is accepted and not rejected", () => {
+    expect(
+      classifySmtpResult("person@example.test", {
+        accepted: ["person@example.test"],
+        rejected: [],
+      }),
+    ).toEqual({ status: "accepted" });
+    expect(
+      classifySmtpResult("person@example.test", {
+        accepted: ["other@example.test"],
+        rejected: [],
+      }),
+    ).toEqual({ status: "unknown", category: "partial" });
+  });
+
+  it("classifies intended-recipient and SMTP 5xx rejection definitively", () => {
+    expect(
+      classifySmtpResult("person@example.test", {
+        accepted: [],
+        rejected: ["person@example.test"],
+      }),
+    ).toEqual({ status: "rejected", category: "recipient" });
+    expect(classifySmtpError({ responseCode: 550 })).toEqual({
+      status: "rejected",
+      category: "smtp_5xx",
+    });
+  });
+
+  it("defaults transient and unclassified errors to unknown", () => {
+    expect(classifySmtpError({ responseCode: 450 })).toEqual({
+      status: "unknown",
+      category: "smtp_4xx",
+    });
+    expect(classifySmtpError({ code: "ETIMEDOUT" })).toEqual({
+      status: "unknown",
+      category: "timeout",
+    });
+    expect(classifySmtpError(new Error("provider detail"))).toEqual({
+      status: "unknown",
+      category: "unclassified",
+    });
   });
 });

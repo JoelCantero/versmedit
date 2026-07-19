@@ -4,6 +4,12 @@ import type { Adapter } from "next-auth/adapters";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
 
 import { hardenAdapter } from "@/lib/auth-adapter";
 

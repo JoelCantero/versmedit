@@ -3,6 +3,8 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("server-only", () => ({}));
+
 const mocks = vi.hoisted(() => ({
   post: vi.fn(() => Promise.resolve(new Response(null, { status: 204 }))),
   logWarn: vi.fn(),
@@ -20,6 +22,9 @@ vi.mock("@/lib/logger", () => ({
 }));
 vi.mock("@/lib/shared-rate-limit", () => ({
   consumeSharedRateLimit: mocks.consumeSharedRateLimit,
+}));
+vi.mock("@/modules/signup/verification-context", () => ({
+  runWithVerificationContext: (callback: () => Promise<Response>) => callback(),
 }));
 
 import { POST } from "@/app/api/auth/[...nextauth]/route";

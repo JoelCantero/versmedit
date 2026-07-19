@@ -17,12 +17,27 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      testIgnore: "**/signup-provider.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "chromium-320",
+      testIgnore: "**/signup-provider.spec.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 320, height: 900 },
+      },
+    },
+    {
+      name: "signup-provider",
+      testMatch: "**/signup-provider.spec.ts",
       use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: {
     command: `node ${distDir}/standalone/server.js`,
     env: {
+      ...process.env,
       PROJECT_NAME: process.env.PROJECT_NAME ?? "playwright",
       DATABASE_URL:
         process.env.DATABASE_URL ??

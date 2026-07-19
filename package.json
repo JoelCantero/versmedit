@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@11.13.0",
   "scripts": {
-    "predev": "docker compose up -d db",
+    "predev": "docker compose up -d --wait db && pnpm db:deploy && NODE_ENV=development node prisma/seed.mjs",
     "dev": "next dev",
     "build": "NODE_ENV=production next build",
     "start": "next start",

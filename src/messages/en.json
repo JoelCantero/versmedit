@@ -7,5 +7,84 @@
     "title": "Web app",
     "tagline": "A self-hosted, Dockerized Next.js starter.",
     "getStarted": "To get started, edit the page.tsx file."
+  },
+  "Signup": {
+    "page": {
+      "metadata": {
+        "title": "Sign up",
+        "description": "Create your account and verify your email."
+      }
+    },
+    "form": {
+      "ariaLabel": "Email signup form"
+    },
+    "heading": {
+      "title": "Create your account",
+      "description": "Enter your first name and email to receive a secure magic link."
+    },
+    "fields": {
+      "firstName": {
+        "label": "First name",
+        "placeholder": "Taylor"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "name@example.com",
+        "description": "We only use your email address to sign you in."
+      }
+    },
+    "actions": {
+      "submitIdle": "Send magic link",
+      "submitPending": "Sending..."
+    },
+    "states": {
+      "sending": "Sending your link...",
+      "accepted": "If this address can receive mail, we sent a sign-in link.",
+      "deliveryFailed": "We could not confirm delivery. Please try again.",
+      "unavailable": "Email sign-in is temporarily unavailable.",
+      "rateLimited": "Too many attempts. Please wait before trying again."
+    },
+    "summary": {
+      "title": "Please fix the errors below",
+      "description": "Review each field and try again."
+    },
+    "validation": {
+      "firstName": {
+        "required": "Enter your first name.",
+        "max": "First name must be 80 characters or fewer.",
+        "invalid": "Use letters, spaces, apostrophes, or hyphens only."
+      },
+      "email": {
+        "invalid": "Enter a valid email address."
+      },
+      "locale": {
+        "invalid": "Select a valid language and try again."
+      },
+      "form": {
+        "invalidSubmission": "We could not process your submission. Please review the form and try again."
+      }
+    },
+    "recovery": {
+      "invalid": {
+        "title": "This sign-in link is invalid",
+        "description": "The link may be incomplete or malformed. Request a new sign-in email and use the latest link."
+      },
+      "expired": {
+        "title": "This sign-in link has expired",
+        "description": "For security, links expire after 15 minutes. Request a new sign-in email to continue."
+      },
+      "superseded": {
+        "title": "A newer sign-in link is available",
+        "description": "Only the latest accepted link works. Open the newest email or request another link."
+      },
+      "used": {
+        "title": "This sign-in link was already used",
+        "description": "Each link is single-use. Request a new sign-in email if you still need access."
+      },
+      "action": {
+        "retry": "Request a new link",
+        "goHome": "Go to home"
+      }
+    }
   }
 }

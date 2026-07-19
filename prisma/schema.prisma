@@ -54,9 +54,12 @@ model Session {
 }
 
 model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
+  id           String   @id @default(cuid())
+  identifier   String
+  token        String
+  expires      DateTime
+  proposedName String?
+  createdAt    DateTime @default(now())
 
   @@unique([identifier, token])
 }

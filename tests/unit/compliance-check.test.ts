@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -74,7 +75,9 @@ afterEach(async () => {
 });
 
 describe("compliance-check.sh", () => {
-  it("accepts a template repository without feature specs", async () => {
+  const hasRepositorySpecs = existsSync(join(process.cwd(), "specs"));
+
+  it.skipIf(hasRepositorySpecs)("accepts a template repository without feature specs", async () => {
     await expect(runAllComplianceChecks()).resolves.toMatchObject({
       stderr: expect.stringContaining("nothing to validate"),
     });

@@ -7,5 +7,84 @@
     "title": "Aplicació web",
     "tagline": "Una plantilla de Next.js autoallotjada i dockeritzada.",
     "getStarted": "Per començar, edita el fitxer page.tsx."
+  },
+  "Signup": {
+    "page": {
+      "metadata": {
+        "title": "Registre",
+        "description": "Crea el teu compte i verifica el teu correu electrònic."
+      }
+    },
+    "form": {
+      "ariaLabel": "Formulari de registre per correu"
+    },
+    "heading": {
+      "title": "Crea el teu compte",
+      "description": "Introdueix el teu nom i correu per rebre un enllaç màgic segur."
+    },
+    "fields": {
+      "firstName": {
+        "label": "Nom",
+        "placeholder": "Taylor"
+      },
+      "email": {
+        "label": "Correu electrònic",
+        "placeholder": "nom@exemple.com",
+        "description": "Només utilitzem el teu correu per iniciar sessió."
+      }
+    },
+    "actions": {
+      "submitIdle": "Envia enllaç màgic",
+      "submitPending": "Enviant..."
+    },
+    "states": {
+      "sending": "Enviant el teu enllaç...",
+      "accepted": "Si aquesta adreça pot rebre correu, hem enviat un enllaç d'accés.",
+      "deliveryFailed": "No hem pogut confirmar el lliurament. Torna-ho a provar.",
+      "unavailable": "L'accés per correu no està disponible temporalment.",
+      "rateLimited": "Massa intents. Espera abans de tornar-ho a provar."
+    },
+    "summary": {
+      "title": "Corregeix els errors indicats",
+      "description": "Revisa cada camp i torna-ho a provar."
+    },
+    "validation": {
+      "firstName": {
+        "required": "Introdueix el teu nom.",
+        "max": "El nom ha de tenir 80 caràcters o menys.",
+        "invalid": "Utilitza només lletres, espais, apòstrofs o guions."
+      },
+      "email": {
+        "invalid": "Introdueix un correu electrònic vàlid."
+      },
+      "locale": {
+        "invalid": "Selecciona un idioma vàlid i torna-ho a provar."
+      },
+      "form": {
+        "invalidSubmission": "No hem pogut processar la teva sol·licitud. Revisa el formulari i torna-ho a provar."
+      }
+    },
+    "recovery": {
+      "invalid": {
+        "title": "Aquest enllaç d'accés no és vàlid",
+        "description": "L'enllaç pot estar incomplet o mal format. Sol·licita un correu nou i utilitza l'enllaç més recent."
+      },
+      "expired": {
+        "title": "Aquest enllaç d'accés ha caducat",
+        "description": "Per seguretat, els enllaços caduquen al cap de 15 minuts. Sol·licita'n un de nou per continuar."
+      },
+      "superseded": {
+        "title": "Hi ha un enllaç d'accés més recent",
+        "description": "Només funciona l'últim enllaç acceptat. Obre el correu més recent o sol·licita un altre enllaç."
+      },
+      "used": {
+        "title": "Aquest enllaç d'accés ja s'ha utilitzat",
+        "description": "Cada enllaç és d'un sol ús. Sol·licita un correu nou si encara necessites accedir-hi."
+      },
+      "action": {
+        "retry": "Sol·licita un enllaç nou",
+        "goHome": "Ves a l'inici"
+      }
+    }
   }
 }

@@ -22,4 +22,4 @@ export E2E_APP_PORT="$(node -e 'const server=require("node:net").createServer();
 export NEXTAUTH_URL="http://127.0.0.1:${E2E_APP_PORT}"
 pnpm db:deploy
 pnpm build
-pnpm exec playwright test
+pnpm exec playwright test --project chromium --project chromium-320

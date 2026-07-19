@@ -52,6 +52,39 @@ describe("createLogger", () => {
     });
   });
 
+  it("redacts signup PII and token fields", async () => {
+    const lines: string[] = [];
+    const destination: DestinationStream = {
+      write(chunk) {
+        lines.push(chunk);
+      },
+    };
+    const { createLogger } = await import("@/lib/logger");
+    const logger = createLogger(process.env, destination);
+
+    logger.info(
+      {
+        signup: {
+          email: "member@example.test",
+          proposedName: "Taylor",
+          token: "plain-token",
+          emailHash: "abc123",
+        },
+      },
+      "signup event",
+    );
+
+    const entry = JSON.parse(lines.at(-1)!) as {
+      signup: Record<string, unknown>;
+    };
+    expect(entry.signup).toEqual({
+      email: "[redacted]",
+      proposedName: "[redacted]",
+      token: "[redacted]",
+      emailHash: "abc123",
+    });
+  });
+
   it("creates a child logger with request context", async () => {
     const { getRequestLogger } = await import("@/lib/logger");
     const request = new Request("https://example.test/api/health", {

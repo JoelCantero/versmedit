@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getAccountPathForLocale,
+  getHomePathForLocale,
   parseLoginEmail,
+  parseLoginCallbackPath,
   parseLoginLocale,
 } from "@/modules/login/schema";
 
@@ -32,4 +35,38 @@ describe("login schema", () => {
   it.each(["fr", "", null])("rejects unsupported locale %j", (locale) => {
     expect(() => parseLoginLocale(locale)).toThrow();
   });
+
+  it.each([
+    ["en", "/account"],
+    ["es", "/es/account"],
+    ["ca", "/ca/account"],
+  ] as const)("accepts a locale-matched callback path for %s", (locale, callbackPath) => {
+    expect(parseLoginCallbackPath(locale, callbackPath)).toBe(callbackPath);
+  });
+
+  it.each([
+    ["en", "https://evil.example/path"],
+    ["en", "//evil.example/path"],
+    ["en", "%2F%2Fevil.example%2Fpath"],
+    ["en", "not/a/path"],
+    ["en", "/projects"],
+    ["en", "/es/account"],
+    ["es", "/account"],
+    ["ca", "/es/account"],
+  ] as const)(
+    "rejects callback path %s for locale %s",
+    (locale, callbackPath) => {
+      expect(parseLoginCallbackPath(locale, callbackPath)).toBe(
+        getHomePathForLocale(locale),
+      );
+    },
+  );
+
+  it.each(["en", "es", "ca"] as const)(
+    "builds locale account path for %s",
+    (locale) => {
+      const path = getAccountPathForLocale(locale);
+      expect(path).toMatch(/\/account$/);
+    },
+  );
 });

@@ -9,11 +9,58 @@
     "getStarted": "Para empezar, edita el archivo page.tsx.",
     "navigation": {
       "ariaLabel": "Navegación de cuenta",
+      "account": "Cuenta",
       "login": "Iniciar sesión",
       "signup": "Registrarse",
       "logout": "Cerrar sesión",
       "toggleTheme": "Cambiar modo oscuro",
       "language": "Seleccionar idioma"
+    }
+  },
+  "Account": {
+    "page": {
+      "metadata": {
+        "title": "Perfil de la cuenta",
+        "description": "Revisa tu perfil de cuenta y actualiza tu nombre."
+      }
+    },
+    "heading": {
+      "title": "Perfil",
+      "description": "Actualiza tu nombre visible y mantén el correo de la cuenta como solo lectura."
+    },
+    "navigation": {
+      "profile": "Perfil",
+      "profileAriaLabel": "Secciones del perfil",
+      "accountLink": "Cuenta"
+    },
+    "avatar": {
+      "label": "Avatar del perfil",
+      "imageAlt": "Imagen actual del perfil"
+    },
+    "fields": {
+      "name": {
+        "label": "Nombre",
+        "description": "Usa tu nombre real."
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "description": "Este correo se usa para acceder a tu cuenta y no se puede cambiar aquí."
+      }
+    },
+    "actions": {
+      "saveIdle": "Guardar cambios",
+      "savePending": "Guardando...",
+      "pendingAnnouncement": "Guardando los cambios de tu perfil..."
+    },
+    "states": {
+      "saved": "Se han guardado los cambios de tu perfil.",
+      "saveFailed": "No hemos podido guardar tu perfil. Inténtalo de nuevo."
+    },
+    "validation": {
+      "required": "Introduce tu nombre.",
+      "tooLong": "El nombre debe tener 80 caracteres o menos.",
+      "invalidCharacters": "Usa solo letras, espacios, apóstrofes o guiones.",
+      "invalidSubmission": "No hemos podido procesar esta solicitud. Revisa el formulario y vuelve a intentarlo."
     }
   },
   "Login": {

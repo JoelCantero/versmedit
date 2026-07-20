@@ -1,0 +1,55 @@
+import { getTranslations } from "next-intl/server";
+import { getServerSession } from "next-auth";
+
+import { AppNavigation } from "@/components/app-navigation";
+import { Link } from "@/i18n/navigation";
+import { authOptions } from "@/lib/auth";
+import { getProfileInitials } from "@/modules/account/initials";
+import { parseLoginLocale } from "@/modules/login/schema";
+
+interface AppHeaderProps {
+  locale: string;
+}
+
+export async function AppHeader({ locale: localeInput }: AppHeaderProps) {
+  const locale = parseLoginLocale(localeInput);
+  const t = await getTranslations({ locale, namespace: "HomePage.navigation" });
+  const session = await getServerSession(authOptions);
+
+  return (
+    <header className="border-b border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-950 sm:px-6">
+      <div className="flex h-16 w-full items-center justify-between gap-2">
+        <Link
+          href="/"
+          className="shrink-0 text-sm font-semibold text-zinc-950 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 dark:text-zinc-50"
+        >
+          Nextself
+        </Link>
+        <AppNavigation
+          authenticated={Boolean(session?.user)}
+          locale={locale}
+          labels={{
+            ariaLabel: t("ariaLabel"),
+            account: t("account"),
+            login: t("login"),
+            signup: t("signup"),
+            logout: t("logout"),
+            toggleTheme: t("toggleTheme"),
+            language: t("language"),
+          }}
+          user={
+            session?.user?.email
+              ? {
+                  image: session.user.image ?? null,
+                  initials: getProfileInitials({
+                    name: session.user.name ?? null,
+                    email: session.user.email,
+                  }),
+                }
+              : undefined
+          }
+        />
+      </div>
+    </header>
+  );
+}

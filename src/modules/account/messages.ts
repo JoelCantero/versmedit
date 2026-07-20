@@ -1,0 +1,26 @@
+export const accountMessageKeys = [
+  "Account.page.metadata.title",
+  "Account.page.metadata.description",
+  "Account.heading.title",
+  "Account.heading.description",
+  "Account.navigation.profile",
+  "Account.navigation.profileAriaLabel",
+  "Account.navigation.accountLink",
+  "Account.avatar.label",
+  "Account.avatar.imageAlt",
+  "Account.fields.name.label",
+  "Account.fields.name.description",
+  "Account.fields.email.label",
+  "Account.fields.email.description",
+  "Account.actions.saveIdle",
+  "Account.actions.savePending",
+  "Account.actions.pendingAnnouncement",
+  "Account.states.saved",
+  "Account.states.saveFailed",
+  "Account.validation.required",
+  "Account.validation.tooLong",
+  "Account.validation.invalidCharacters",
+  "Account.validation.invalidSubmission",
+] as const;
+
+export type AccountMessageKey = (typeof accountMessageKeys)[number];

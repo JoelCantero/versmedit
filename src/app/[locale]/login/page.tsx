@@ -4,9 +4,12 @@ import { GalleryVerticalEndIcon } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 import { LoginForm } from "@/modules/login/components/login-form";
-import { parseLoginLocale } from "@/modules/login/schema";
+import { parseLoginCallbackPath, parseLoginLocale } from "@/modules/login/schema";
 
-type LoginPageProps = { params: Promise<{ locale: string }> };
+type LoginPageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ callbackUrl?: string }>;
+};
 
 export async function generateMetadata({ params }: LoginPageProps): Promise<Metadata> {
   const locale = parseLoginLocale((await params).locale);
@@ -14,8 +17,10 @@ export async function generateMetadata({ params }: LoginPageProps): Promise<Meta
   return { title: t("title"), description: t("description") };
 }
 
-export default async function LoginPage({ params }: LoginPageProps) {
+export default async function LoginPage({ params, searchParams }: LoginPageProps) {
   const locale = parseLoginLocale((await params).locale);
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const callbackUrl = parseLoginCallbackPath(locale, resolvedSearchParams.callbackUrl);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Login" });
 
@@ -30,6 +35,7 @@ export default async function LoginPage({ params }: LoginPageProps) {
         </Link>
         <LoginForm
           locale={locale}
+          callbackUrl={callbackUrl}
           title={t("heading.title")}
           description={t("heading.description")}
           messages={{

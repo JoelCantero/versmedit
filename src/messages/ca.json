@@ -9,11 +9,58 @@
     "getStarted": "Per començar, edita el fitxer page.tsx.",
     "navigation": {
       "ariaLabel": "Navegació del compte",
+      "account": "Compte",
       "login": "Inicia sessió",
       "signup": "Registra't",
       "logout": "Tanca la sessió",
       "toggleTheme": "Canvia el mode fosc",
       "language": "Selecciona l'idioma"
+    }
+  },
+  "Account": {
+    "page": {
+      "metadata": {
+        "title": "Perfil del compte",
+        "description": "Revisa el perfil del teu compte i actualitza el teu nom."
+      }
+    },
+    "heading": {
+      "title": "Perfil",
+      "description": "Actualitza el teu nom visible i mantén el correu del compte com a només lectura."
+    },
+    "navigation": {
+      "profile": "Perfil",
+      "profileAriaLabel": "Seccions del perfil",
+      "accountLink": "Compte"
+    },
+    "avatar": {
+      "label": "Avatar del perfil",
+      "imageAlt": "Imatge actual del perfil"
+    },
+    "fields": {
+      "name": {
+        "label": "Nom",
+        "description": "Utilitza el teu nom real."
+      },
+      "email": {
+        "label": "Correu electrònic",
+        "description": "Aquest correu s'utilitza per accedir al teu compte i no es pot canviar aquí."
+      }
+    },
+    "actions": {
+      "saveIdle": "Desa els canvis",
+      "savePending": "Desant...",
+      "pendingAnnouncement": "S'estan desant els canvis del teu perfil..."
+    },
+    "states": {
+      "saved": "S'han desat els canvis del teu perfil.",
+      "saveFailed": "No hem pogut desar el teu perfil. Torna-ho a provar."
+    },
+    "validation": {
+      "required": "Introdueix el teu nom.",
+      "tooLong": "El nom ha de tenir 80 caràcters o menys.",
+      "invalidCharacters": "Utilitza només lletres, espais, apòstrofs o guions.",
+      "invalidSubmission": "No hem pogut processar aquesta sol·licitud. Revisa el formulari i torna-ho a provar."
     }
   },
   "Login": {

@@ -84,6 +84,38 @@ export const authOptions: NextAuthOptions = {
     error: "/login/error",
   },
   callbacks: {
+    session: async ({ session, user }) => {
+      if (!session.user) {
+        return session;
+      }
+
+      const directId =
+        typeof user?.id === "string" && user.id.length > 0 ? user.id : null;
+      const sessionEmail =
+        typeof session.user.email === "string" && session.user.email.length > 0
+          ? session.user.email
+          : null;
+      const resolvedFromEmail =
+        !directId && sessionEmail
+          ? await db.user.findUnique({
+              where: { email: sessionEmail },
+              select: { id: true },
+            })
+          : null;
+      const resolvedId = directId ?? resolvedFromEmail?.id ?? null;
+
+      if (resolvedId) {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: resolvedId,
+          },
+        };
+      }
+
+      return session;
+    },
     redirect: ({ url, baseUrl }) => localizeAuthRedirect(url, baseUrl),
   },
   // NEXTAUTH_URL is required and validated as a canonical origin, so forwarded

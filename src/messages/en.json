@@ -9,11 +9,58 @@
     "getStarted": "To get started, edit the page.tsx file.",
     "navigation": {
       "ariaLabel": "Account navigation",
+      "account": "Account",
       "login": "Login",
       "signup": "Sign up",
       "logout": "Log out",
       "toggleTheme": "Toggle dark mode",
       "language": "Select language"
+    }
+  },
+  "Account": {
+    "page": {
+      "metadata": {
+        "title": "Account profile",
+        "description": "Review your account profile and update your name."
+      }
+    },
+    "heading": {
+      "title": "Profile",
+      "description": "Update your display name while keeping your account email read-only."
+    },
+    "navigation": {
+      "profile": "Profile",
+      "profileAriaLabel": "Profile sections",
+      "accountLink": "Account"
+    },
+    "avatar": {
+      "label": "Profile avatar",
+      "imageAlt": "Current profile image"
+    },
+    "fields": {
+      "name": {
+        "label": "Name",
+        "description": "Use your real name."
+      },
+      "email": {
+        "label": "Email",
+        "description": "This email is used to access your account and cannot be changed here."
+      }
+    },
+    "actions": {
+      "saveIdle": "Save changes",
+      "savePending": "Saving...",
+      "pendingAnnouncement": "Saving your profile changes..."
+    },
+    "states": {
+      "saved": "Your profile changes were saved.",
+      "saveFailed": "We could not save your profile. Please try again."
+    },
+    "validation": {
+      "required": "Enter your name.",
+      "tooLong": "Name must be 80 characters or fewer.",
+      "invalidCharacters": "Use letters, spaces, apostrophes, or hyphens only.",
+      "invalidSubmission": "We could not process this submission. Review the form and try again."
     }
   },
   "Login": {

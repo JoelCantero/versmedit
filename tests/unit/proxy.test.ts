@@ -27,6 +27,7 @@ describe("proxy security boundary", () => {
     const policy = contentSecurityPolicy("nonce-value");
 
     expect(policy).toContain("script-src 'self' 'nonce-nonce-value' 'strict-dynamic'");
+    expect(policy).toContain("img-src 'self' data: blob: https:");
     expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
     expect(policy).not.toContain("'unsafe-eval'");
   });

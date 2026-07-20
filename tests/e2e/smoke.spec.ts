@@ -21,10 +21,24 @@ test("serves localized pages with strict CSP and request correlation", async ({
   expect(policy).toContain("'strict-dynamic'");
   expect(policy).toMatch(/script-src[^;]*'nonce-[^']+'/);
   expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+  const policyNonce = policy.match(/script-src[^;]*'nonce-([^']+)'/)?.[1];
+  const scriptNonces = await page.locator("script[nonce]").evaluateAll((scripts) =>
+    scripts.map((script) => (script as HTMLScriptElement).nonce),
+  );
+  expect(scriptNonces.length).toBeGreaterThan(0);
+  expect(new Set(scriptNonces)).toEqual(new Set([policyNonce]));
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
   await page.goto("/es");
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  const brandBox = await page.getByText("Nextself", { exact: true }).boundingBox();
+  const navigationBox = await page
+    .getByRole("navigation", { name: "Navegación de cuenta" })
+    .boundingBox();
+  expect(brandBox).not.toBeNull();
+  expect(navigationBox).not.toBeNull();
+  expect(Math.abs(brandBox!.y + brandBox!.height / 2 - (navigationBox!.y + navigationBox!.height / 2))).toBeLessThan(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
   expect(cspViolations).toEqual([]);
 });
 

@@ -3,6 +3,12 @@ import { defineConfig, devices } from "@playwright/test";
 const appPort = Number(process.env.E2E_APP_PORT ?? "3100");
 const baseURL = `http://127.0.0.1:${appPort}`;
 const distDir = process.env.NEXT_DIST_DIR ?? ".next";
+const standaloneStaticAssetsCommand = [
+  `mkdir -p ${distDir}/standalone/${distDir}`,
+  `rm -rf ${distDir}/standalone/${distDir}/static`,
+  `cp -R ${distDir}/static ${distDir}/standalone/${distDir}/static`,
+  `node ${distDir}/standalone/server.js`,
+].join(" && ");
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -35,7 +41,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `node ${distDir}/standalone/server.js`,
+    command: standaloneStaticAssetsCommand,
     env: {
       ...process.env,
       PROJECT_NAME: process.env.PROJECT_NAME ?? "playwright",

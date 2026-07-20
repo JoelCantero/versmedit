@@ -37,6 +37,7 @@ export interface LoginFormMessages {
 
 interface LoginFormProps {
   locale: LoginLocale;
+  callbackUrl: string;
   messages: LoginFormMessages;
   title?: string;
   description?: string;
@@ -46,6 +47,7 @@ interface LoginFormProps {
 
 export function LoginForm({
   locale,
+  callbackUrl,
   messages,
   title,
   description,
@@ -81,11 +83,11 @@ export function LoginForm({
       }
       if (!token) throw new Error("missing CSRF token");
 
-      const callbackUrl = locale === "en" ? "/" : `/${locale}`;
+      const trustedCallback = callbackUrl || (locale === "en" ? "/" : `/${locale}`);
       const body = new URLSearchParams({
         email,
         csrfToken: token,
-        callbackUrl,
+        callbackUrl: trustedCallback,
         json: "true",
       });
       const response = await fetcher("/api/auth/signin/email", {

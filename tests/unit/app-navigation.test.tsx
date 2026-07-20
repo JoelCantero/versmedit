@@ -1,8 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ signOut: vi.fn(), setTheme: vi.fn() }));
+const mocks = vi.hoisted(() => ({ signOut: vi.fn(), setTheme: vi.fn(), pathname: "/projects" }));
 
 vi.mock("next-auth/react", () => ({ signOut: mocks.signOut }));
 vi.mock("next-themes", () => ({
@@ -24,13 +24,14 @@ vi.mock("@/i18n/navigation", () => ({
   ),
   getPathname: ({ href, locale }: { href: string; locale: string }) =>
     locale === "en" ? href : `/${locale}${href}`,
-  usePathname: () => "/projects",
+  usePathname: () => mocks.pathname,
 }));
 
-import { HomeNavigation } from "@/components/home-navigation";
+import { AppNavigation } from "@/components/app-navigation";
 
 const labels = {
   ariaLabel: "Account navigation",
+  account: "Account",
   login: "Login",
   signup: "Sign up",
   logout: "Log out",
@@ -38,11 +39,14 @@ const labels = {
   language: "Select language",
 };
 
-describe("HomeNavigation", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe("AppNavigation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.pathname = "/projects";
+  });
 
   it("shows login and a disabled signup item to anonymous visitors", () => {
-    render(<HomeNavigation authenticated={false} locale="en" labels={labels} />);
+    render(<AppNavigation authenticated={false} locale="en" labels={labels} />);
 
     expect(screen.getByRole("navigation", { name: labels.ariaLabel })).toBeVisible();
     expect(screen.getByRole("link", { name: labels.login })).toHaveAttribute(
@@ -54,19 +58,43 @@ describe("HomeNavigation", () => {
     expect(document.querySelector('[data-slot="separator"]')).toBeInTheDocument();
   });
 
-  it("shows only logout to authenticated visitors and preserves locale", async () => {
+  it("shows account and logout inside one avatar menu and preserves locale", async () => {
     mocks.signOut.mockResolvedValue(undefined);
-    render(<HomeNavigation authenticated locale="es" labels={labels} />);
+    mocks.pathname = "/es/account";
+    render(
+      <AppNavigation
+        authenticated
+        user={{ image: "https://example.com/avatar.jpg", initials: "JC" }}
+        locale="es"
+        labels={labels}
+      />,
+    );
 
     expect(screen.queryByRole("link", { name: labels.login })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: labels.signup })).not.toBeInTheDocument();
+    const avatarTrigger = screen.getByRole("button", { name: labels.account });
+    expect(avatarTrigger.querySelector("img")).toHaveAttribute(
+      "src",
+      "https://example.com/avatar.jpg",
+    );
+    fireEvent.error(avatarTrigger.querySelector("img")!);
+    expect(avatarTrigger).toHaveTextContent("JC");
+    expect(avatarTrigger.querySelector("img")).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: labels.logout }));
+    await userEvent.click(avatarTrigger);
+    const accountLink = screen.getByRole("link", { name: labels.account });
+    expect(accountLink).toHaveAttribute("href", "/account");
+    expect(accountLink).toHaveAttribute("aria-current", "page");
+    expect(accountLink).toHaveClass("w-full", "justify-start");
+
+    const logoutButton = screen.getByRole("button", { name: labels.logout });
+    expect(logoutButton).toHaveClass("w-full", "justify-start");
+    await userEvent.click(logoutButton);
     expect(mocks.signOut).toHaveBeenCalledWith({ callbackUrl: "/es" });
   });
 
   it("switches from the resolved light theme to dark mode", async () => {
-    render(<HomeNavigation authenticated={false} locale="en" labels={labels} />);
+    render(<AppNavigation authenticated={false} locale="en" labels={labels} />);
 
     await userEvent.click(screen.getByRole("button", { name: labels.toggleTheme }));
 
@@ -74,7 +102,7 @@ describe("HomeNavigation", () => {
   });
 
   it("switches locale while preserving the active pathname", async () => {
-    render(<HomeNavigation authenticated={false} locale="es" labels={labels} />);
+    render(<AppNavigation authenticated={false} locale="es" labels={labels} />);
 
     await userEvent.click(screen.getByRole("button", { name: labels.language }));
 

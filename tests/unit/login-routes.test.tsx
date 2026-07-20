@@ -3,6 +3,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({
+  callbackUrl: "",
+}));
+
 const translations: Record<string, Record<string, string>> = {
   en: {
     "Login.heading.title": "Welcome back",
@@ -33,12 +37,32 @@ vi.mock("@/i18n/navigation", () => ({
     <a href={href}>{children}</a>
   ),
 }));
+vi.mock("@/modules/login/components/login-form", () => ({
+  LoginForm: ({
+    callbackUrl,
+    title,
+  }: {
+    callbackUrl: string;
+    title?: string;
+  }) => {
+    mocks.callbackUrl = callbackUrl;
+    return (
+      <div data-callback-url={callbackUrl}>
+        {title ? <h1>{title}</h1> : null}
+        mock-login-form
+      </div>
+    );
+  },
+}));
 
 import LoginErrorPage from "@/app/[locale]/login/error/page";
 import LoginPage, { generateMetadata } from "@/app/[locale]/login/page";
 
 describe("localized login routes", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.callbackUrl = "";
+  });
 
   it.each(["en", "es", "ca"])("renders login and recovery content for %s", async (locale) => {
     const loginHtml = renderToStaticMarkup(
@@ -62,4 +86,38 @@ describe("localized login routes", () => {
       title: translations[locale]["Login.page.metadata.title"],
     }));
   });
+
+  it.each([
+    ["en", "/account", "/account"],
+    ["es", "/es/account", "/es/account"],
+    ["ca", "/ca/account", "/ca/account"],
+  ] as const)(
+    "passes a validated callback path for %s",
+    async (locale, callbackUrl, expected) => {
+      renderToStaticMarkup(
+        await LoginPage({
+          params: Promise.resolve({ locale }),
+          searchParams: Promise.resolve({ callbackUrl }),
+        }),
+      );
+      expect(mocks.callbackUrl).toBe(expected);
+    },
+  );
+
+  it.each([
+    ["en", "https://evil.example", "/"],
+    ["es", "/ca/account", "/es"],
+    ["ca", "/projects", "/ca"],
+  ] as const)(
+    "falls back to locale home for invalid callback path in %s",
+    async (locale, callbackUrl, expected) => {
+      renderToStaticMarkup(
+        await LoginPage({
+          params: Promise.resolve({ locale }),
+          searchParams: Promise.resolve({ callbackUrl }),
+        }),
+      );
+      expect(mocks.callbackUrl).toBe(expected);
+    },
+  );
 });

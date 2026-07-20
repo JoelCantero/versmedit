@@ -23,6 +23,7 @@ interface HomeNavigationProps {
   locale: "en" | "es" | "ca";
   labels: {
     ariaLabel: string;
+    account?: string;
     login: string;
     signup: string;
     logout: string;
@@ -47,6 +48,8 @@ export function HomeNavigation({
   const pathname = usePathname();
   const homePath = locale === "en" ? "/" : `/${locale}`;
   const currentLanguage = languages.find((language) => language.locale === locale);
+  const accountPath = locale === "en" ? "/account" : `/${locale}/account`;
+  const isAccountRoute = pathname === accountPath;
 
   function logout() {
     startTransition(() => {
@@ -58,16 +61,27 @@ export function HomeNavigation({
     <NavigationMenu aria-label={labels.ariaLabel}>
       <NavigationMenuList>
         {authenticated ? (
-          <NavigationMenuItem>
-            <button
-              type="button"
-              className={navigationMenuTriggerStyle()}
-              disabled={isPending}
-              onClick={logout}
-            >
-              {labels.logout}
-            </button>
-          </NavigationMenuItem>
+          <>
+            {labels.account ? (
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  render={<Link href="/account" aria-current={isAccountRoute ? "page" : undefined} />}
+                >
+                  {labels.account}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ) : null}
+            <NavigationMenuItem>
+              <button
+                type="button"
+                className={navigationMenuTriggerStyle()}
+                disabled={isPending}
+                onClick={logout}
+              >
+                {labels.logout}
+              </button>
+            </NavigationMenuItem>
+          </>
         ) : (
           <>
             <NavigationMenuItem>

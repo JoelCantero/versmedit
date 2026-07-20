@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { AppHeader } from "@/components/app-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
 
@@ -71,7 +72,12 @@ export default async function LocaleLayout({
           nonce={nonce}
         >
           {/* Messages/locale are inherited from src/i18n/request.ts. */}
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider>
+            <AppHeader locale={locale} />
+            <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+              {children}
+            </div>
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

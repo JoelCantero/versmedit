@@ -1,0 +1,91 @@
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/lib/auth";
+import { updateProfile } from "@/modules/account/actions/update-profile";
+import { ProfileForm } from "@/modules/account/components/profile-form";
+import { getSessionUserId } from "@/modules/account/session";
+import { getCurrentUserProfile } from "@/modules/account/service";
+import {
+  getAccountPathForLocale,
+  getLoginPathForLocale,
+  parseLoginLocale,
+} from "@/modules/login/schema";
+
+interface AccountPageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: AccountPageProps): Promise<Metadata> {
+  const locale = parseLoginLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: "Account.page.metadata" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
+
+export default async function AccountPage({ params }: AccountPageProps) {
+  const locale = parseLoginLocale((await params).locale);
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "Account" });
+  const session = await getServerSession(authOptions);
+  const sessionUserId = getSessionUserId(session);
+
+  if (!sessionUserId) {
+    const callbackPath = getAccountPathForLocale(locale);
+    redirect(`${getLoginPathForLocale(locale)}?callbackUrl=${encodeURIComponent(callbackPath)}`);
+  }
+
+  const profile = await getCurrentUserProfile(sessionUserId);
+
+  return (
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
+      <section className="grid min-w-0 gap-6 md:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] md:items-start md:gap-8">
+        <nav
+          aria-label={t("navigation.profileAriaLabel")}
+          className="md:sticky md:top-6"
+        >
+          <ul className="flex min-w-0 flex-row gap-2 md:flex-col">
+            <li className="min-w-0">
+              <span
+                aria-current="page"
+                className="inline-flex min-w-0 rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground"
+              >
+                {t("navigation.profile")}
+              </span>
+            </li>
+          </ul>
+        </nav>
+
+        <ProfileForm
+          locale={locale}
+          initialProfile={profile}
+          action={updateProfile}
+          messages={{
+            profileHeading: t("heading.title"),
+            profileDescription: t("heading.description"),
+            avatarLabel: t("avatar.label"),
+            avatarImageAlt: t("avatar.imageAlt"),
+            nameLabel: t("fields.name.label"),
+            nameDescription: t("fields.name.description"),
+            emailLabel: t("fields.email.label"),
+            emailDescription: t("fields.email.description"),
+            saveIdle: t("actions.saveIdle"),
+            savePending: t("actions.savePending"),
+            pendingAnnouncement: t("actions.pendingAnnouncement"),
+            saved: t("states.saved"),
+            saveFailed: t("states.saveFailed"),
+            required: t("validation.required"),
+            tooLong: t("validation.tooLong"),
+            invalidCharacters: t("validation.invalidCharacters"),
+            invalidSubmission: t("validation.invalidSubmission"),
+          }}
+        />
+      </section>
+    </main>
+  );
+}

@@ -178,6 +178,25 @@ part of forward recovery and must remain reusable by later valid submissions.
 8. Before production, run the CI gate, the backup/restore verification workflow, and a deployment
    healthcheck against the actual target environment.
 
+## Account Profile Behavior
+
+- Protected localized routes:
+  - `/account`
+  - `/es/account`
+  - `/ca/account`
+- Signed-out access to those routes redirects to the matching localized login page with a validated
+  account callback destination.
+- Profile updates are limited to one mutable field: `name`.
+- Name validation rules:
+  - Required after trim.
+  - Maximum 80 characters.
+  - Letters, spaces, apostrophes, and hyphens only.
+- Immutable fields on the profile page:
+  - `email` is read-only and cannot be changed through profile updates.
+  - `image` can be rendered but is not mutable from this flow.
+- Authenticated navigation adds an Account entry in the user controls while preserving logout,
+  language selection, and theme switching.
+
 ## VPS migration
 
 Portable by design: install Docker on the target, copy the repository + compose files, recreate the

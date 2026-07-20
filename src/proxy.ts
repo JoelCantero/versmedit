@@ -60,7 +60,7 @@ export function contentSecurityPolicy(nonce: string): string {
     "default-src 'self'",
     `script-src ${scripts.join(" ")}`,
     `style-src ${styles.join(" ")}`,
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https:",
     "font-src 'self'",
     "connect-src 'self'",
     "object-src 'none'",
@@ -119,10 +119,15 @@ export default function proxy(request: NextRequest) {
         request.nextUrl.pathname.startsWith(`/${locale}/`),
     );
 
+  const requestForIntl = new NextRequest(request.url, {
+    headers: requestHeaders,
+    method: request.method,
+  });
+
   const response =
     request.nextUrl.pathname.startsWith("/api/") || isResolvedLocaleRewrite
     ? NextResponse.next({ request: { headers: requestHeaders } })
-    : intlMiddleware(request);
+    : intlMiddleware(requestForIntl);
 
   response.headers.set(REQUEST_ID_HEADER, requestId);
   response.headers.set("Content-Security-Policy", policy);

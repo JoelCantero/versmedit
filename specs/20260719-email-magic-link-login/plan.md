@@ -130,7 +130,7 @@ src/
 │   ├── api/auth/[...nextauth]/route.ts # wrapped Auth.js request + native callbacks
 │   └── globals.css                     # shadcn tokens adapted to project design
 ├── components/
-│   ├── home-navigation.tsx             # account, locale, theme, and responsive grouping
+│   ├── app-navigation.tsx              # account, locale, theme, and responsive grouping
 │   ├── theme-provider.tsx               # CSP-aware next-themes integration
 │   └── ui/                              # generated shadcn primitives used by login and navigation
 ├── lib/
@@ -153,7 +153,7 @@ tests/
 │   ├── auth-route.test.ts
 │   ├── auth-adapter.test.ts
 │   └── provider-availability.test.ts
-│   └── home-navigation.test.tsx
+│   └── app-navigation.test.tsx
 └── integration/
   └── magic-link-login.test.ts        # PostgreSQL token/request/callback flow
 

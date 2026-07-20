@@ -85,6 +85,39 @@ describe("createLogger", () => {
     });
   });
 
+  it("redacts account profile failure payload details", async () => {
+    const lines: string[] = [];
+    const destination: DestinationStream = {
+      write(chunk) {
+        lines.push(chunk);
+      },
+    };
+    const { createLogger } = await import("@/lib/logger");
+    const logger = createLogger(process.env, destination);
+
+    logger.error(
+      {
+        account: {
+          email: "member@example.test",
+          name: "Private Member",
+          image: "https://cdn.example.test/avatar/member.png",
+          sessionToken: "next-auth.session-token=session-secret",
+        },
+      },
+      "account profile update failed",
+    );
+
+    const entry = JSON.parse(lines.at(-1)!) as {
+      account: Record<string, unknown>;
+    };
+    expect(entry.account).toEqual({
+      email: "[redacted]",
+      name: "[redacted]",
+      image: "[redacted]",
+      sessionToken: "[redacted]",
+    });
+  });
+
   it("creates a child logger with request context", async () => {
     const { getRequestLogger } = await import("@/lib/logger");
     const request = new Request("https://example.test/api/health", {

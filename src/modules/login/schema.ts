@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { loginLocales } from "@/modules/login/types";
 
+const CALLBACK_PARSE_BASE = "https://app.local.test";
+
 export const loginEmailSchema = z
   .string()
   .trim()
@@ -17,4 +19,49 @@ export function parseLoginEmail(value: unknown) {
 
 export function parseLoginLocale(value: unknown) {
   return loginLocaleSchema.parse(value);
+}
+
+export function getHomePathForLocale(locale: z.infer<typeof loginLocaleSchema>) {
+  return locale === "en" ? "/" : `/${locale}`;
+}
+
+export function getLoginPathForLocale(locale: z.infer<typeof loginLocaleSchema>) {
+  return locale === "en" ? "/login" : `/${locale}/login`;
+}
+
+export function getAccountPathForLocale(locale: z.infer<typeof loginLocaleSchema>) {
+  return locale === "en" ? "/account" : `/${locale}/account`;
+}
+
+function decodeCandidatePath(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+export function parseLoginCallbackPath(
+  locale: z.infer<typeof loginLocaleSchema>,
+  callbackValue: unknown,
+) {
+  const fallback = getHomePathForLocale(locale);
+  if (typeof callbackValue !== "string") return fallback;
+
+  const trimmed = callbackValue.trim();
+  if (!trimmed) return fallback;
+
+  const decoded = decodeCandidatePath(trimmed);
+  if (!decoded.startsWith("/") || decoded.startsWith("//")) return fallback;
+
+  try {
+    const parsed = new URL(decoded, CALLBACK_PARSE_BASE);
+    const expected = getAccountPathForLocale(locale);
+    if (parsed.origin !== CALLBACK_PARSE_BASE) return fallback;
+    if (parsed.pathname !== expected) return fallback;
+    if (parsed.search || parsed.hash) return fallback;
+    return expected;
+  } catch {
+    return fallback;
+  }
 }

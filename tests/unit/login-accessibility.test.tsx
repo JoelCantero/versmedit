@@ -28,7 +28,12 @@ async function expectNoAxeViolations(container: HTMLElement) {
 describe("LoginForm accessibility", () => {
   it("has no automated violations and associates its only field", async () => {
     const { container } = render(
-      <LoginForm locale="en" csrfToken="csrf" messages={messages} />,
+      <LoginForm
+        locale="en"
+        callbackUrl="/"
+        csrfToken="csrf"
+        messages={messages}
+      />,
     );
     const input = screen.getByRole("textbox", { name: messages.emailLabel });
     expect(input).toHaveAccessibleDescription(
@@ -41,7 +46,13 @@ describe("LoginForm accessibility", () => {
 
   it("announces and associates invalid input without axe violations", async () => {
     const { container } = render(
-      <LoginForm locale="en" csrfToken="csrf" messages={messages} fetcher={vi.fn()} />,
+      <LoginForm
+        locale="en"
+        callbackUrl="/"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={vi.fn()}
+      />,
     );
     const input = screen.getByRole("textbox");
     await userEvent.type(input, "invalid");
@@ -59,7 +70,13 @@ describe("LoginForm accessibility", () => {
       resolveRequest = resolve;
     }));
     render(
-      <LoginForm locale="en" csrfToken="csrf" messages={messages} fetcher={fetcher} />,
+      <LoginForm
+        locale="en"
+        callbackUrl="/"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={fetcher}
+      />,
     );
     const input = screen.getByRole("textbox");
     await userEvent.type(input, "person@example.test");

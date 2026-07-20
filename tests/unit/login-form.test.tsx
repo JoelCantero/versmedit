@@ -23,7 +23,14 @@ describe("LoginForm", () => {
   beforeEach(() => vi.restoreAllMocks());
 
   it("renders only one email field and one primary action", () => {
-    render(<LoginForm locale="en" csrfToken="csrf" messages={messages} />);
+    render(
+      <LoginForm
+        locale="en"
+        callbackUrl="/account"
+        csrfToken="csrf"
+        messages={messages}
+      />,
+    );
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
     expect(screen.getAllByRole("button")).toHaveLength(1);
     expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
@@ -34,6 +41,7 @@ describe("LoginForm", () => {
     render(
       <LoginForm
         locale="en"
+        callbackUrl="/account"
         csrfToken="csrf"
         messages={messages}
         fetcher={fetchMock}
@@ -56,7 +64,13 @@ describe("LoginForm", () => {
         }),
     );
     render(
-      <LoginForm locale="en" csrfToken="csrf" messages={messages} fetcher={fetcher} />,
+      <LoginForm
+        locale="en"
+        callbackUrl="/account"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={fetcher}
+      />,
     );
 
     await userEvent.type(screen.getByRole("textbox"), "person@example.com");
@@ -76,10 +90,39 @@ describe("LoginForm", () => {
   ])("renders the failure contract %#", async (payload, expectedMessage) => {
     const fetcher = vi.fn().mockResolvedValue(Response.json(payload));
     render(
-      <LoginForm locale="en" csrfToken="csrf" messages={messages} fetcher={fetcher} />,
+      <LoginForm
+        locale="en"
+        callbackUrl="/account"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={fetcher}
+      />,
     );
     await userEvent.type(screen.getByRole("textbox"), "person@example.com");
     await userEvent.click(screen.getByRole("button"));
     expect(await screen.findByText(expectedMessage)).toBeVisible();
+  });
+
+  it("submits the validated callback path unchanged", async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ csrfToken: "csrf" }))
+      .mockResolvedValueOnce(Response.json({ status: "accepted" }));
+
+    render(
+      <LoginForm
+        locale="en"
+        callbackUrl="/account"
+        messages={messages}
+        fetcher={fetcher}
+      />,
+    );
+
+    await userEvent.type(screen.getByRole("textbox"), "person@example.com");
+    await userEvent.click(screen.getByRole("button", { name: messages.submitIdle }));
+
+    const signinRequest = fetcher.mock.calls.at(-1);
+    expect(signinRequest?.[0]).toBe("/api/auth/signin/email");
+    expect(String(signinRequest?.[1]?.body)).toContain("callbackUrl=%2Faccount");
   });
 });

@@ -80,6 +80,16 @@ describe("authOptions", () => {
     mocks.deleteMany.mockResolvedValue({ count: 1 });
   });
 
+  it("keeps database sessions for 30 days and refreshes them daily", async () => {
+    const { authOptions } = await import("@/lib/auth");
+
+    expect(authOptions.session).toEqual({
+      strategy: "database",
+      maxAge: 30 * 24 * 60 * 60,
+      updateAge: 24 * 60 * 60,
+    });
+  });
+
   it("does not enable email auth from SMTP configuration alone", async () => {
     mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };
 

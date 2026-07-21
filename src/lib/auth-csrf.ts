@@ -9,6 +9,7 @@ interface ValidateAuthCsrfTokenOptions {
 }
 
 const CSRF_COOKIE_NAMES = [
+  "__Host-next-auth.csrf-token",
   "__Secure-next-auth.csrf-token",
   "next-auth.csrf-token",
 ] as const;

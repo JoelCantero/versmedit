@@ -13,7 +13,11 @@ const token = "csrf-token-value";
 const hash = createHash("sha256").update(`${token}${secret}`).digest("hex");
 
 describe("Auth.js CSRF prevalidation", () => {
-  it.each(["next-auth.csrf-token", "__Secure-next-auth.csrf-token"])(
+  it.each([
+    "next-auth.csrf-token",
+    "__Secure-next-auth.csrf-token",
+    "__Host-next-auth.csrf-token",
+  ])(
     "accepts a signed double-submit token from %s",
     (cookieName) => {
       expect(

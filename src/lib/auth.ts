@@ -79,7 +79,11 @@ function localizeAuthRedirect(url: string, baseUrl: string) {
 
 export const authOptions: NextAuthOptions = {
   adapter: hardenAdapter(PrismaAdapter(db)),
-  session: { strategy: "database" },
+  session: {
+    strategy: "database",
+    maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
+  },
   pages: {
     error: "/login/error",
   },

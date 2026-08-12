@@ -4,7 +4,7 @@
 # Base image is Debian-slim (works on ARM64/Raspberry Pi and amd64/VPS) and
 # includes OpenSSL for Prisma. Build and runtime share the same base so the
 # Prisma engine matches the runtime platform (constitution Principle IV).
-FROM node:26-slim@sha256:715e55e4b84e4bb0ff48e49b398a848f08e55daed8eb6a0ea1839ae53bc57583 AS base
+FROM node:26-slim@sha256:4ebb5ace66f15a24c14c492e01a8beeed4fddf970a856109f5126e703e5fe503 AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 # Non-interactive corepack: let it fetch the pinned pnpm without prompting.

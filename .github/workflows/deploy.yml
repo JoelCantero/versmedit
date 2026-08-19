@@ -169,6 +169,47 @@ jobs:
           docker logs --tail 50 "$cid" || true
           exit 1
 
+      - name: Verify SMTP transport
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+        run: |
+          cd "$DEPLOY_DIR"
+          echo "Verifying SMTP transport from the production app container..."
+          docker compose -f docker-compose.prod.yml exec -T app node --input-type=module -e '
+            import nodemailer from "nodemailer";
+
+            const port = Number(process.env.SMTP_PORT || 587);
+            const transport = nodemailer.createTransport({
+              host: process.env.SMTP_HOST,
+              port,
+              secure: process.env.SMTP_SECURE === "true" || port === 465,
+              auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD,
+              },
+              connectionTimeout: 10000,
+              greetingTimeout: 10000,
+              socketTimeout: 10000,
+            });
+
+            try {
+              await transport.verify();
+              console.log("SMTP transport verified.");
+            } catch (error) {
+              const details = error && typeof error === "object" ? error : {};
+              console.error(JSON.stringify({
+                code: "code" in details ? details.code : undefined,
+                responseCode: "responseCode" in details ? details.responseCode : undefined,
+                command: "command" in details ? details.command : undefined,
+                errno: "errno" in details ? details.errno : undefined,
+              }));
+              process.exitCode = 1;
+            } finally {
+              transport.close();
+            }
+          '
+
       - name: Prune old images
         run: docker image prune -f
 

@@ -5,6 +5,7 @@ COMPOSE_FILE="docker-compose.e2e.yml"
 PROJECT="webapp-template-e2e-$$-$RANDOM"
 export NEXT_DIST_DIR="$(mktemp -d .next-e2e-XXXXXX)"
 SMTP_PID=""
+TSCONFIG_BACKUP=""
 
 cleanup() {
   if [[ -n "$SMTP_PID" ]] && kill -0 "$SMTP_PID" 2>/dev/null; then
@@ -13,8 +14,15 @@ cleanup() {
   fi
   docker compose -p "$PROJECT" -f "$COMPOSE_FILE" down --volumes --remove-orphans
   rm -rf -- "$NEXT_DIST_DIR"
+  if [[ -n "$TSCONFIG_BACKUP" && -f "$TSCONFIG_BACKUP" ]]; then
+    cp -- "$TSCONFIG_BACKUP" tsconfig.json
+    rm -f -- "$TSCONFIG_BACKUP"
+  fi
 }
 trap cleanup EXIT
+
+TSCONFIG_BACKUP="$(mktemp)"
+cp -- tsconfig.json "$TSCONFIG_BACKUP"
 
 free_port() {
   node -e 'const server=require("node:net").createServer();server.listen(0,"127.0.0.1",()=>{console.log(server.address().port);server.close()})'

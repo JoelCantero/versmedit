@@ -371,7 +371,7 @@ export function SignupForm({
                 </FieldDescription>
                 <p
                   id="signup-policy-error"
-                  className="min-h-5 text-sm text-destructive"
+                  className="min-h-10 text-sm text-destructive"
                   role={errors.policyAccepted ? "alert" : undefined}
                 >
                   {errors.policyAccepted ?? ""}

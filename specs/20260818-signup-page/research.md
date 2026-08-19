@@ -103,8 +103,11 @@ pinned NextAuth email callback, and commits pending-account/token replacement un
 advisory transaction lock keyed by normalized email. It then sends either a localized onboarding
 email or active-account login notice through the existing Nodemailer classification/provider-health
 boundary. On isolated onboarding delivery failure it deletes only the new token under the same
-identity lock and never restores the predecessor; the pending user remains reusable. Other isolated
-failures retain the generic accepted response.
+identity lock and never restores the predecessor; the pending user remains reusable. Signup tokens
+are created provisionally and the exact current token receives a delivery-confirmation timestamp
+under that lock only after SMTP accepts it. Activation rejects unconfirmed tokens, so a failed
+cleanup transaction cannot leave a usable credential. Other isolated failures retain the generic
+accepted response.
 
 **Rationale**: Owning token creation lets user creation, supersession, and candidate metadata commit
 atomically before a network call, while NextAuth remains the session owner. The repository already

@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -12,6 +11,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 import { SignupForm } from "@/modules/signup/components/signup-form";
+import { runAxeInJSDOM } from "../helpers/axe";
 
 const messages = {
   ariaLabel: "Email signup form",
@@ -64,7 +64,7 @@ function renderForm(fetcher: typeof fetch = vi.fn()) {
 }
 
 async function expectNoSeriousAxeViolations(container: HTMLElement) {
-  const result = await axe.run(container);
+  const result = await runAxeInJSDOM(container);
   const seriousOrCritical = result.violations.filter((violation) =>
     violation.nodes.some((node) =>
       ["serious", "critical"].includes(node.impact ?? ""),

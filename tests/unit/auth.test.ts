@@ -120,7 +120,7 @@ describe("authOptions", () => {
     mocks.env.AUTH_EMAIL_ENABLED = true;
     mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };
 
-    const { authOptions } = await import("@/lib/auth");
+    await import("@/lib/auth");
     const signupOptions = mocks.emailProvider.mock.calls[1]?.[0] as {
       sendVerificationRequest: () => Promise<void>;
     };

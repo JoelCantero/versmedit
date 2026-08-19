@@ -143,23 +143,27 @@ test("renders every locale and theme with long content and avatar fallback", asy
   }
 });
 
-test("keeps layout without horizontal overflow at 320px viewport", async ({
-  page,
-  context,
-  baseURL,
-}) => {
-  const seeded = await seedAuthenticatedUser({
-    name: "Long Profile Name For Mobile Width Validation",
-    email: `mobile-${crypto.randomUUID()}@example.test`,
-  });
-  await installAuthSessionCookie(context, seeded.sessionToken, baseURL ?? "http://127.0.0.1:3100");
+test(
+  "keeps layout without horizontal overflow at 320px viewport",
+  { tag: "@mobile" },
+  async ({ page, context, baseURL }) => {
+    const seeded = await seedAuthenticatedUser({
+      name: "Long Profile Name For Mobile Width Validation",
+      email: `mobile-${crypto.randomUUID()}@example.test`,
+    });
+    await installAuthSessionCookie(
+      context,
+      seeded.sessionToken,
+      baseURL ?? "http://127.0.0.1:3100",
+    );
 
-  await page.goto("/es/account");
-  await expect(page.getByRole("heading", { name: "Perfil" })).toBeVisible();
+    await page.goto("/es/account");
+    await expect(page.getByRole("heading", { name: "Perfil" })).toBeVisible();
 
-  const overflow = await page.evaluate(() => {
-    const doc = document.documentElement;
-    return doc.scrollWidth > doc.clientWidth;
-  });
-  expect(overflow).toBe(false);
-});
+    const overflow = await page.evaluate(() => {
+      const doc = document.documentElement;
+      return doc.scrollWidth > doc.clientWidth;
+    });
+    expect(overflow).toBe(false);
+  },
+);

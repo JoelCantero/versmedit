@@ -1,8 +1,11 @@
 // @vitest-environment node
 
+import "dotenv/config";
+
 import { createHash } from "node:crypto";
 
 import { NextRequest } from "next/server";
+import { Client } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createSignupFixtureScope } from "../helpers/signup-fixtures";
@@ -245,14 +248,85 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
   }
 
   function rawTokenFor(recipient: string) {
-    const message = [...smtp.messages]
-      .reverse()
-      .find((candidate) => candidate.to.includes(recipient));
-    const match = message?.raw
-      .toString()
-      .match(/token(?:=3D|=)([A-Za-z0-9_-]{43})/);
-    if (!match?.[1]) throw new Error("captured onboarding token was not found");
-    return match[1];
+    const token = rawTokensFor(recipient).at(-1);
+    if (!token) throw new Error("captured onboarding token was not found");
+    return token;
+  }
+
+  function rawTokensFor(recipient: string) {
+    return smtp.messages.flatMap((message) => {
+      if (!message.to.includes(recipient)) return [];
+      const match = message.raw
+        .toString()
+        .match(/token(?:=3D|=)([A-Za-z0-9_-]{43})/);
+      return match?.[1] ? [match[1]] : [];
+    });
+  }
+
+  function hashRawToken(rawToken: string) {
+    return createHash("sha256").update(`${rawToken}${secret}`).digest("hex");
+  }
+
+  async function holdIdentityLock(identifier: string) {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) throw new Error("DATABASE_URL is required");
+    const client = new Client({ connectionString: databaseUrl });
+    await client.connect();
+    await client.query("BEGIN");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+      [identifier],
+    );
+    let released = false;
+
+    return {
+      async waitForQueued(waiters: number) {
+        const deadline = Date.now() + 5_000;
+        while (Date.now() < deadline) {
+          const result = await client.query<{ count: number }>(
+            `SELECT COUNT(*)::int AS count
+             FROM pg_locks
+             WHERE locktype = 'advisory'
+               AND database = (SELECT oid FROM pg_database WHERE datname = current_database())
+               AND classid = ((hashtextextended($1, 0) >> 32) & 4294967295)::oid
+               AND objid = (hashtextextended($1, 0) & 4294967295)::oid
+               AND objsubid = 1
+               AND NOT granted`,
+            [identifier],
+          );
+          if ((result.rows[0]?.count ?? 0) >= waiters) return;
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        throw new Error(`Timed out waiting for ${waiters} identity lock waiters`);
+      },
+      async release() {
+        if (released) return;
+        released = true;
+        try {
+          await client.query("ROLLBACK");
+        } finally {
+          await client.end();
+        }
+      },
+    };
+  }
+
+  async function runInIdentityCommitOrder<TFirst, TSecond>(
+    identifier: string,
+    first: () => Promise<TFirst>,
+    second: () => Promise<TSecond>,
+  ): Promise<[TFirst, TSecond]> {
+    const heldLock = await holdIdentityLock(identifier);
+    try {
+      const firstResult = first();
+      await heldLock.waitForQueued(1);
+      const secondResult = second();
+      await heldLock.waitForQueued(2);
+      await heldLock.release();
+      return await Promise.all([firstResult, secondResult]);
+    } finally {
+      await heldLock.release();
+    }
   }
 
   function activationRequest(rawToken: string, cookie?: string) {
@@ -409,6 +483,221 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
     ).resolves.toBe(1);
   });
 
+  it("serializes simultaneous first signup and activates only the last committed snapshot", async () => {
+    const email = `${fixtures.scopeId}-simultaneous-first@example.test`;
+    const responses = await runInIdentityCommitOrder(
+      email,
+      () => submit({ name: "First Concurrent", email, locale: "en" }),
+      () => submit({ name: "Second Concurrent", email, locale: "ca" }),
+    );
+    expect(responses.map((response) => response.status)).toEqual([200, 200]);
+
+    const users = await db.user.findMany({
+      where: { normalizedEmail: email },
+    });
+    expect(users).toHaveLength(1);
+    const authoritativeToken = await db.verificationToken.findFirstOrThrow({
+      where: { identifier: email, purpose: "SIGNUP" },
+    });
+    expect(authoritativeToken).toMatchObject({
+      proposedName: "Second Concurrent",
+      locale: "ca",
+      termsVersion: "2026-08-18-draft",
+      privacyVersion: "2026-08-18-draft",
+      acceptedAt: expect.any(Date),
+      deliveredAt: expect.any(Date),
+    });
+
+    const rawTokens = rawTokensFor(email);
+    expect(rawTokens).toHaveLength(2);
+    const currentRawToken = rawTokens.find(
+      (rawToken) => hashRawToken(rawToken) === authoritativeToken.token,
+    );
+    const staleRawToken = rawTokens.find(
+      (rawToken) => rawToken !== currentRawToken,
+    );
+    expect(currentRawToken).toBeTruthy();
+    expect(staleRawToken).toBeTruthy();
+    expect(
+      (await activateSignup(activationRequest(staleRawToken!))).headers.get(
+        "location",
+      ),
+    ).toBe("https://app.example.test/signup?state=invalid_link");
+    expect(
+      (await activateSignup(activationRequest(currentRawToken!))).headers.get(
+        "location",
+      ),
+    ).toBe("https://app.example.test/ca");
+
+    const activated = await db.user.findUniqueOrThrow({
+      where: { normalizedEmail: email },
+      include: { policyAcceptance: true },
+    });
+    expect(activated).toMatchObject({
+      name: "Second Concurrent",
+      status: "ACTIVE",
+      policyAcceptance: {
+        termsVersion: authoritativeToken.termsVersion,
+        privacyVersion: authoritativeToken.privacyVersion,
+        acceptedAt: authoritativeToken.acceptedAt,
+      },
+    });
+  });
+
+  it("reuses one retained pending account under concurrent resubmission", async () => {
+    const pending = fixtures.account({ status: "PENDING" });
+    await db.user.create({ data: pending });
+    const responses = await runInIdentityCommitOrder(
+      pending.normalizedEmail,
+      () => submit({ name: "Earlier Pending", email: pending.email, locale: "es" }),
+      () => submit({ name: "Latest Pending", email: pending.email, locale: "en" }),
+    );
+    expect(responses.map((response) => response.status)).toEqual([200, 200]);
+
+    const users = await db.user.findMany({
+      where: { normalizedEmail: pending.normalizedEmail },
+    });
+    expect(users).toHaveLength(1);
+    expect(users[0]?.id).toBe(pending.id);
+    const authoritativeToken = await db.verificationToken.findFirstOrThrow({
+      where: { identifier: pending.normalizedEmail, purpose: "SIGNUP" },
+    });
+    expect(authoritativeToken).toMatchObject({
+      proposedName: "Latest Pending",
+      locale: "en",
+      termsVersion: "2026-08-18-draft",
+      privacyVersion: "2026-08-18-draft",
+      acceptedAt: expect.any(Date),
+      deliveredAt: expect.any(Date),
+    });
+    const rawTokens = rawTokensFor(pending.normalizedEmail);
+    const currentRawToken = rawTokens.find(
+      (rawToken) => hashRawToken(rawToken) === authoritativeToken.token,
+    );
+    const staleRawToken = rawTokens.find(
+      (rawToken) => rawToken !== currentRawToken,
+    );
+    expect(
+      (await activateSignup(activationRequest(staleRawToken!))).headers.get(
+        "location",
+      ),
+    ).toBe("https://app.example.test/signup?state=invalid_link");
+    expect(
+      (await activateSignup(activationRequest(currentRawToken!))).headers.get(
+        "location",
+      ),
+    ).toBe("https://app.example.test/");
+
+    const activated = await db.user.findUniqueOrThrow({
+      where: { id: pending.id },
+      include: { policyAcceptance: true },
+    });
+    expect(activated).toMatchObject({
+      name: "Latest Pending",
+      status: "ACTIVE",
+      policyAcceptance: {
+        termsVersion: authoritativeToken.termsVersion,
+        privacyVersion: authoritativeToken.privacyVersion,
+        acceptedAt: authoritativeToken.acceptedAt,
+      },
+    });
+  });
+
+  it("invalidates the old link when replacement signup commits before activation", async () => {
+    const email = `${fixtures.scopeId}-replacement-first@example.test`;
+    await submit({ name: "Original Snapshot", email, locale: "es" });
+    const originalRawToken = rawTokenFor(email);
+
+    const [replacement, oldActivation] = await runInIdentityCommitOrder(
+      email,
+      () => submit({ name: "Replacement Snapshot", email, locale: "ca" }),
+      () => activateSignup(activationRequest(originalRawToken)),
+    );
+    expect(replacement.status).toBe(200);
+    expect(oldActivation.headers.get("location")).toBe(
+      "https://app.example.test/es/signup?state=invalid_link",
+    );
+
+    const pendingUser = await db.user.findUniqueOrThrow({
+      where: { normalizedEmail: email },
+    });
+    expect(pendingUser).toMatchObject({ name: null, status: "PENDING" });
+    const authoritativeToken = await db.verificationToken.findFirstOrThrow({
+      where: { identifier: email, purpose: "SIGNUP" },
+    });
+    expect(authoritativeToken).toMatchObject({
+      proposedName: "Replacement Snapshot",
+      locale: "ca",
+      termsVersion: "2026-08-18-draft",
+      privacyVersion: "2026-08-18-draft",
+      deliveredAt: expect.any(Date),
+    });
+    const replacementRawToken = rawTokensFor(email).find(
+      (rawToken) => hashRawToken(rawToken) === authoritativeToken.token,
+    );
+    const activated = await activateSignup(
+      activationRequest(replacementRawToken!),
+    );
+    expect(activated.headers.get("location")).toBe(
+      "https://app.example.test/ca",
+    );
+    await expect(
+      db.user.findUnique({ where: { id: pendingUser.id } }),
+    ).resolves.toMatchObject({ name: "Replacement Snapshot", status: "ACTIVE" });
+    await expect(
+      db.policyAcceptance.findUnique({ where: { userId: pendingUser.id } }),
+    ).resolves.toMatchObject({
+      termsVersion: authoritativeToken.termsVersion,
+      privacyVersion: authoritativeToken.privacyVersion,
+      acceptedAt: authoritativeToken.acceptedAt,
+    });
+  });
+
+  it("keeps the activated snapshot immutable when activation commits before later signup", async () => {
+    const email = `${fixtures.scopeId}-activation-first@example.test`;
+    await submit({ name: "Activated Snapshot", email, locale: "es" });
+    const originalRawToken = rawTokenFor(email);
+    const originalToken = await db.verificationToken.findFirstOrThrow({
+      where: { identifier: email, purpose: "SIGNUP" },
+    });
+
+    const [activation, laterSignup] = await runInIdentityCommitOrder(
+      email,
+      () => activateSignup(activationRequest(originalRawToken)),
+      () => submit({ name: "Ignored Later Snapshot", email, locale: "ca" }),
+    );
+    expect(activation.headers.get("location")).toBe(
+      "https://app.example.test/es",
+    );
+    expect(activation.headers.get("set-cookie")).toContain(
+      "next-auth.session-token",
+    );
+    expect(laterSignup.status).toBe(200);
+
+    const user = await db.user.findUniqueOrThrow({
+      where: { normalizedEmail: email },
+      include: { policyAcceptance: true, sessions: true },
+    });
+    expect(user).toMatchObject({
+      name: "Activated Snapshot",
+      status: "ACTIVE",
+      policyAcceptance: {
+        termsVersion: originalToken.termsVersion,
+        privacyVersion: originalToken.privacyVersion,
+        acceptedAt: originalToken.acceptedAt,
+      },
+    });
+    expect(user.sessions).toHaveLength(1);
+    await expect(
+      db.verificationToken.count({ where: { identifier: email } }),
+    ).resolves.toBe(0);
+    const latestMail = smtp.messages
+      .filter((message) => message.to.includes(email))
+      .at(-1)?.raw.toString();
+    expect(latestMail).toContain("/login");
+    expect(latestMail).not.toContain("/api/signup/activate");
+  });
+
   it("preserves a different current session and leaves onboarding reusable", async () => {
     const email = `${fixtures.scopeId}-conflict@example.test`;
     await submit({ name: "Pending Person", email, locale: "ca" });
@@ -471,25 +760,29 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
     await expect(db.session.count({ where: { userId: user.id } })).resolves.toBe(0);
   });
 
-  it.each([
-    ["invalid name", { name: "", policyAccepted: true }],
-    ["malicious name", { name: "<script>alert(1)</script>", policyAccepted: true }],
-    ["additional field", { name: "Safe Person", policyAccepted: true, role: "admin" }],
-  ])("rejects %s without account, credential, acceptance, or session mutation", async (_case, fields) => {
-    const email = `${fixtures.scopeId}-${crypto.randomUUID()}@example.test`;
-    const response = await submitPayload({
-      email,
-      locale: "en",
-      ...fields,
-    });
+  it("rejects invalid, malicious, and additional fields without lifecycle mutation", async () => {
+    const invalidCases = [
+      { name: "", policyAccepted: true },
+      { name: "<script>alert(1)</script>", policyAccepted: true },
+      { name: "Safe Person", policyAccepted: true, role: "admin" },
+    ];
 
-    expect(response.status).toBe(400);
-    await expect(lifecycleCounts(email)).resolves.toEqual({
-      users: 0,
-      tokens: 0,
-      acceptances: 0,
-      sessions: 0,
-    });
+    for (const [index, fields] of invalidCases.entries()) {
+      const email = `${fixtures.scopeId}-invalid-${index}@example.test`;
+      const response = await submitPayload({
+        email,
+        locale: "en",
+        ...fields,
+      });
+
+      expect(response.status).toBe(400);
+      await expect(lifecycleCounts(email)).resolves.toEqual({
+        users: 0,
+        tokens: 0,
+        acceptances: 0,
+        sessions: 0,
+      });
+    }
     expect(smtp.messages).toHaveLength(0);
   });
 

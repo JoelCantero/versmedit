@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   userCreate: vi.fn(),
   tokenDeleteMany: vi.fn(),
   tokenCreate: vi.fn(),
+  tokenUpdateMany: vi.fn(),
   createSignupCredential: vi.fn(),
   sendOnboardingEmail: vi.fn(),
   sendActiveAccountEmail: vi.fn(),
@@ -66,6 +67,7 @@ describe("signup service", () => {
         verificationToken: {
           deleteMany: mocks.tokenDeleteMany,
           create: mocks.tokenCreate,
+          updateMany: mocks.tokenUpdateMany,
         },
       }),
     );
@@ -76,6 +78,7 @@ describe("signup service", () => {
       status: "PENDING",
     });
     mocks.tokenCreate.mockResolvedValue({ identifier: request.email });
+    mocks.tokenUpdateMany.mockResolvedValue({ count: 1 });
     mocks.createSignupCredential.mockReturnValue({
       raw: "raw-signup-token",
       persisted: { token: "hashed-signup-token", expires },
@@ -114,6 +117,7 @@ describe("signup service", () => {
         privacyVersion: "2026-08-18-draft",
         acceptedAt: issuedAt,
         createdAt: issuedAt,
+        deliveredAt: null,
       },
     });
     expect(mocks.sendOnboardingEmail).toHaveBeenCalledWith({
@@ -121,6 +125,15 @@ describe("signup service", () => {
       rawToken: "raw-signup-token",
       locale: request.locale,
       origin: "https://app.example.test",
+    });
+    expect(mocks.tokenUpdateMany).toHaveBeenCalledWith({
+      where: {
+        identifier: request.email,
+        token: "hashed-signup-token",
+        purpose: "SIGNUP",
+        deliveredAt: null,
+      },
+      data: { deliveredAt: issuedAt },
     });
   });
 
@@ -164,7 +177,7 @@ describe("signup service", () => {
 
   it("acquires the identity advisory lock before lifecycle lookup", async () => {
     await processSignup(request, { now: () => issuedAt });
-    expect(mocks.executeRaw).toHaveBeenCalledOnce();
+    expect(mocks.executeRaw).toHaveBeenCalledTimes(2);
     expect(mocks.executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.userFindUnique.mock.invocationCallOrder[0]!,
     );
@@ -188,6 +201,26 @@ describe("signup service", () => {
         purpose: "SIGNUP",
       },
     });
+  });
+
+  it("leaves a failed-delivery token provisional when compensation also fails", async () => {
+    mocks.sendOnboardingEmail.mockResolvedValue({
+      status: "rejected",
+      category: "recipient",
+    });
+    const transactionImplementation = mocks.transaction.getMockImplementation();
+    mocks.transaction
+      .mockImplementationOnce(transactionImplementation!)
+      .mockRejectedValueOnce(new Error("cleanup unavailable"));
+
+    await expect(
+      processSignup(request, { now: () => issuedAt }),
+    ).resolves.toEqual({ outcome: "onboarding_delivery_failed" });
+
+    expect(mocks.tokenCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ deliveredAt: null }) }),
+    );
+    expect(mocks.tokenUpdateMany).not.toHaveBeenCalled();
   });
 
   it("maps isolated persistence failure privately and logs no sensitive data", async () => {

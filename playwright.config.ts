@@ -35,21 +35,16 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: "**/signup-provider.spec.ts",
+      grepInvert: /@mobile/,
       use: { ...devices["Desktop Chrome"] },
     },
     {
       name: "chromium-320",
-      testIgnore: "**/signup-provider.spec.ts",
+      grep: /@mobile/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 320, height: 900 },
       },
-    },
-    {
-      name: "signup-provider",
-      testMatch: "**/signup-provider.spec.ts",
-      use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: {

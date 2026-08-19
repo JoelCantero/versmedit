@@ -5,21 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({
-  providerFindUnique: vi.fn(),
-  providerUpsert: vi.fn(),
   logInfo: vi.fn(),
   logWarn: vi.fn(),
   logError: vi.fn(),
 }));
 
-vi.mock("@/lib/db", () => ({
-  db: {
-    rateLimitBucket: {
-      findUnique: mocks.providerFindUnique,
-      upsert: mocks.providerUpsert,
-    },
-  },
-}));
 vi.mock("@/lib/logger", () => ({
   logger: {
     info: mocks.logInfo,
@@ -35,11 +25,6 @@ import {
   getSmtpConfig,
 } from "@/lib/email";
 import type { Env } from "@/lib/env";
-import {
-  getProviderAvailability,
-  isProviderWideFailure,
-  markProviderUnavailable,
-} from "@/lib/provider-availability";
 
 const baseEnv: Env = {
   PROJECT_NAME: "test-app",
@@ -165,53 +150,7 @@ describe("SMTP outcome classification", () => {
   });
 });
 
-describe("account-independent email provider health", () => {
-  it("opens shared health only for transport-level connection and timeout failures", () => {
-    for (const category of ["connection", "timeout"] as const) {
-      expect(isProviderWideFailure({ status: "unknown", category })).toBe(true);
-    }
-
-    for (const category of [
-      "recipient",
-      "smtp_5xx",
-      "smtp_4xx",
-      "partial",
-      "unclassified",
-    ] as const) {
-      expect(isProviderWideFailure({ status: "unknown", category })).toBe(false);
-    }
-  });
-
-  it("transitions one account-independent cooldown marker from available to unavailable and back", async () => {
-    const now = new Date("2026-08-18T12:00:00.000Z");
-    const resetAt = new Date("2026-08-18T12:01:00.000Z");
-    mocks.providerFindUnique.mockResolvedValueOnce(null);
-
-    await expect(getProviderAvailability(now)).resolves.toEqual({
-      available: true,
-      retryAfterSeconds: 0,
-    });
-    await markProviderUnavailable(now);
-    expect(mocks.providerUpsert).toHaveBeenCalledWith({
-      where: { key: "auth:email:provider:unavailable" },
-      create: {
-        key: "auth:email:provider:unavailable",
-        count: 1,
-        resetAt,
-      },
-      update: { count: 1, resetAt },
-    });
-
-    mocks.providerFindUnique.mockResolvedValue({ resetAt });
-    await expect(getProviderAvailability(now)).resolves.toEqual({
-      available: false,
-      retryAfterSeconds: 60,
-    });
-    await expect(
-      getProviderAvailability(new Date("2026-08-18T12:01:00.000Z")),
-    ).resolves.toEqual({ available: true, retryAfterSeconds: 0 });
-  });
-
+describe("email log privacy", () => {
   it("never emits recipient or lifecycle-sensitive delivery data to logs", async () => {
     const consoleSpies = [
       vi.spyOn(console, "log").mockImplementation(() => undefined),

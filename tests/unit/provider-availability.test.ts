@@ -57,8 +57,19 @@ describe("provider availability", () => {
     ).resolves.toEqual({ available: true, retryAfterSeconds: 0 });
   });
 
-  it("does not classify recipient rejection as provider-wide", () => {
-    expect(isProviderWideFailure({ status: "rejected", category: "recipient" })).toBe(false);
-    expect(isProviderWideFailure({ status: "unknown", category: "connection" })).toBe(true);
+  it("classifies only transport connection and timeout failures as provider-wide", () => {
+    for (const category of ["connection", "timeout"] as const) {
+      expect(isProviderWideFailure({ status: "unknown", category })).toBe(true);
+    }
+
+    for (const category of [
+      "recipient",
+      "smtp_5xx",
+      "smtp_4xx",
+      "partial",
+      "unclassified",
+    ] as const) {
+      expect(isProviderWideFailure({ status: "unknown", category })).toBe(false);
+    }
   });
 });

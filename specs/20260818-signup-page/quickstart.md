@@ -39,7 +39,7 @@ Expected outcome:
 Run the form, schema, route, adapter, localization, and accessibility slice:
 
 ```bash
-pnpm test -- tests/unit/signup-schema.test.ts \
+pnpm exec vitest run tests/unit/signup-schema.test.ts \
   tests/unit/signup-form.test.tsx \
   tests/unit/signup-accessibility.test.tsx \
   tests/unit/signup-route.test.ts \
@@ -50,7 +50,7 @@ pnpm test -- tests/unit/signup-schema.test.ts \
 Run the real PostgreSQL lifecycle, controlled SMTP transport, and Auth.js session boundary:
 
 ```bash
-RUN_INTEGRATION_TESTS=true pnpm test -- tests/integration/signup-onboarding.test.ts \
+RUN_INTEGRATION_TESTS=true pnpm exec vitest run tests/integration/signup-onboarding.test.ts \
   tests/integration/magic-link-login.test.ts
 ```
 
@@ -152,8 +152,8 @@ Expected outcome:
 - A known shared outage returns the same `503 unavailable` response and `Retry-After` before account
   mutation for every account state.
 - Isolated failures retain the generic accepted public response.
-- Failed onboarding delivery removes the new token, restores no predecessor, and retains a reusable
-  pending user.
+- Failed onboarding delivery leaves no usable credential, attempts exact-token cleanup, restores no
+  predecessor, and retains a reusable pending user even if cleanup also fails.
 - Failed active-account notice creates no token, session, acceptance, or account change.
 - Logs contain no recipient, name, token, URL, account identifier, acceptance value, or session data.
 
@@ -217,6 +217,19 @@ Compose project; no production or development data was modified:
   signup retry/failure behavior and active-user login regression coverage.
 - Cleanup completed: the isolated Compose project, volume, and temporary backup directory were
   removed after verification.
+
+## Verified Convergence Outcomes (2026-08-19)
+
+- Fresh production-artifact deployment applied all five migrations, including
+  `20260819000000_add_signup_delivery_confirmation`.
+- The focused unit command collected 6 files and passed 86/86 tests; the focused integration command
+  collected 2 files and passed 20/20 tests without running unrelated suites.
+- The full integration-enabled coverage gate passed 398 tests with 1 intentional skip across 48
+  files. Coverage remained at 90.51% statements, 82.99% branches, 90.58% functions, and 92.25%
+  lines.
+- The production Playwright gate passed 14 tests with no project-specific skips. EN/ES/CA each
+  completed an accessible keyboard submission; every required signup state was checked in light and
+  dark appearances at 375x667 and 1440x900; the real SMTP/Auth.js activation journey remained intact.
 
 ## Full Pre-PR Gate
 

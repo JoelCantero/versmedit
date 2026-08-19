@@ -78,6 +78,7 @@ candidate snapshot that is committed on activation.
 | `termsVersion` | String | Conditional | Required server-selected version for `SIGNUP`; null for `LOGIN` |
 | `privacyVersion` | String | Conditional | Required server-selected version for `SIGNUP`; null for `LOGIN` |
 | `acceptedAt` | DateTime | Conditional | Required server time for `SIGNUP`; null for `LOGIN` |
+| `deliveredAt` | DateTime | Conditional | Null while a `SIGNUP` token is provisional; set only after SMTP accepts the exact token; null for `LOGIN` |
 | `createdAt` | DateTime | Yes | Server issuance time |
 
 **Keys and indexes**:
@@ -90,12 +91,15 @@ candidate snapshot that is committed on activation.
 
 **Validation and invariants**:
 
-- A database check requires all candidate fields for `SIGNUP` and requires them to be null for
-  `LOGIN`.
+- A database check requires all candidate fields for `SIGNUP` and requires them, including
+  `deliveredAt`, to be null for `LOGIN`.
 - A valid pending signup commit deletes/supersedes every earlier signup token before inserting the
-  next token and snapshot.
-- Delivery failure deletes only the newly issued token and never restores a predecessor.
-- Expired, consumed, superseded, malformed, or active-account signup tokens cannot activate.
+  next provisional token and snapshot.
+- SMTP acceptance confirms only the exact current token under the identity lock. Delivery failure
+  attempts to delete only that token and never restores a predecessor; if cleanup also fails, its
+  null `deliveredAt` keeps it unusable.
+- Provisional, expired, consumed, superseded, malformed, or active-account signup tokens cannot
+  activate.
 - A signup token can be consumed only while a server-only activation context is active; direct use
   through the generic Auth.js callback returns the generic invalid-link result.
 - Token rows remain short-lived credentials, not a history table. The authoritative accepted
@@ -153,7 +157,7 @@ Existing shared PostgreSQL counter. No schema change.
 |---------------|-------|------------|----------------|
 | No user | Valid signup, provider globally available | `PENDING` | Insert normalized user and one signup token/candidate snapshot |
 | `PENDING` | Later valid signup commits first | `PENDING` | Keep same user; replace all signup tokens with latest name, locale, versions, and acceptance time |
-| `PENDING` | Onboarding delivery fails | `PENDING` | Delete failed new token; do not restore previous token; retain user without a valid link |
+| `PENDING` | Onboarding delivery fails | `PENDING` | Keep the failed new token unusable, attempt exact-token cleanup, never restore a predecessor, and retain the user without a valid link |
 | `PENDING` | Current valid token consumed in activation context | `ACTIVE` | Consume token, set name and verification time, insert acceptance, invalidate remaining signup tokens |
 | `PENDING` | Expired, superseded, malformed, direct-callback, or replayed token | `PENDING` | No account, acceptance, or session change; generic invalid result |
 | `PENDING` | Valid token opened during a different session | `PENDING` | Preserve session and token; show sign-out/reopen guidance |
@@ -186,7 +190,9 @@ Signup issuance and activation use the same transaction-scoped advisory lock der
    un-migrated `proposedName` and `createdAt`, then add purpose and candidate fields/defaults.
 7. Add token uniqueness, signup partial uniqueness, lookup index, and purpose/metadata check.
 8. Create `PolicyAcceptance` with a unique/restricted `userId` relationship.
-9. Regenerate Prisma Client and run login plus signup integration tests against a freshly migrated
+9. Add the nullable delivery-confirmation timestamp in a forward migration; pre-existing signup
+  rows remain unconfirmed and therefore unusable until replaced by a new delivered link.
+10. Regenerate Prisma Client and run login plus signup integration tests against a freshly migrated
    database and an existing-data fixture.
 
 No legacy acceptance is fabricated, no pending row is deleted, and rollback documentation does not

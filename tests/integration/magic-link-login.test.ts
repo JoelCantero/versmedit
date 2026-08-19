@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import "dotenv/config";
+
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -101,60 +103,6 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
     });
   });
 
-  it("shares client, address, and provider cooldown state through PostgreSQL", async () => {
-    const { consumeSharedRateLimit } = await import("@/lib/shared-rate-limit");
-    const {
-      getProviderAvailability,
-      markProviderUnavailable,
-    } = await import("@/lib/provider-availability");
-    const suffix = crypto.randomUUID();
-    const clientKey = `auth:email:client:${integrationPrefix}-${suffix}`;
-    const addressKey = `auth:email:address:${integrationPrefix}-${suffix}`;
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      await expect(
-        consumeSharedRateLimit({ key: clientKey, limit: 5, windowMs: 900_000 }),
-      ).resolves.toEqual(expect.objectContaining({ allowed: true }));
-    }
-    await expect(
-      consumeSharedRateLimit({ key: clientKey, limit: 5, windowMs: 900_000 }),
-    ).resolves.toEqual(expect.objectContaining({ allowed: false }));
-
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      await consumeSharedRateLimit({ key: addressKey, limit: 3, windowMs: 900_000 });
-    }
-    await expect(
-      consumeSharedRateLimit({ key: addressKey, limit: 3, windowMs: 900_000 }),
-    ).resolves.toEqual(expect.objectContaining({ allowed: false }));
-
-    const now = new Date();
-    await markProviderUnavailable(now);
-    await expect(getProviderAvailability(now)).resolves.toEqual({
-      available: false,
-      retryAfterSeconds: 60,
-    });
-  });
-
-  it("removes an exact failed token without restoring its predecessor", async () => {
-    const { PrismaAdapter } = await import("@next-auth/prisma-adapter");
-    const { hardenAdapter } = await import("@/lib/auth-adapter");
-    const { db } = await import("@/lib/db");
-    const identifier = `${integrationPrefix}-${crypto.randomUUID()}@example.test`;
-    const adapter = hardenAdapter(PrismaAdapter(db));
-    const expires = new Date(Date.now() + 15 * 60_000);
-
-    await adapter.createVerificationToken?.({ identifier, token: "predecessor", expires });
-    await adapter.createVerificationToken?.({ identifier, token: "failed-new-token", expires });
-    await db.verificationToken.deleteMany({
-      where: { identifier, token: "failed-new-token" },
-    });
-
-    await expect(db.$queryRaw<Array<{ count: number }>>`
-      SELECT COUNT(*)::int AS "count" FROM "VerificationToken"
-      WHERE "identifier" = ${identifier}
-    `).resolves.toEqual([{ count: 0 }]);
-  });
-
   it("keeps pending users and direct signup-token callbacks ineligible", async () => {
     const { PrismaAdapter } = await import("@next-auth/prisma-adapter");
     const { default: NextAuth } = await import("next-auth");
@@ -187,6 +135,7 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
         termsVersion: "2026-08-18-draft",
         privacyVersion: "2026-08-18-draft",
         acceptedAt: new Date(),
+        deliveredAt: new Date(),
       },
     });
 

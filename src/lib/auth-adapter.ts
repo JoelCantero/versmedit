@@ -90,6 +90,7 @@ export function hardenAdapter(adapter: Adapter): Adapter {
           storedToken.token !== token ||
           storedToken.purpose !== VerificationPurpose.SIGNUP ||
           storedToken.expires.getTime() <= Date.now() ||
+          !storedToken.deliveredAt ||
           !storedToken.proposedName ||
           !storedToken.locale ||
           !storedToken.termsVersion ||

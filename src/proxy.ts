@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 import {
   createRequestId,
+  isCanonicalRequestOrigin,
   REQUEST_ID_HEADER,
 } from "@/lib/request-context";
 
@@ -14,34 +15,6 @@ import {
 // prefix while Spanish (`/es`) and Catalan (`/ca`) are prefixed.
 const intlMiddleware = createMiddleware(routing);
 const NEXT_INTL_LOCALE_HEADER = "x-next-intl-locale";
-
-function effectivePort(protocol: string, port: string): string {
-  if (port) return port;
-  return protocol === "https:" ? "443" : "80";
-}
-
-function isCanonicalAuthHost(requestHost: string | null, canonicalUrl: URL): boolean {
-  if (
-    !requestHost ||
-    requestHost !== requestHost.trim() ||
-    /[\s@/?#,\\]/.test(requestHost) ||
-    !/^(?:\[[0-9A-Fa-f:.]+\]|[A-Za-z0-9.-]+)(?::[0-9]{1,5})?$/.test(requestHost)
-  ) {
-    return false;
-  }
-
-  try {
-    const received = new URL(`${canonicalUrl.protocol}//${requestHost}`);
-    if (received.port && Number(received.port) > 65_535) return false;
-    return (
-      received.hostname.toLowerCase() === canonicalUrl.hostname.toLowerCase() &&
-      effectivePort(received.protocol, received.port) ===
-        effectivePort(canonicalUrl.protocol, canonicalUrl.port)
-    );
-  } catch {
-    return false;
-  }
-}
 
 export function createNonce(): string {
   return btoa(crypto.randomUUID());
@@ -83,7 +56,11 @@ export default function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
 
-  if (request.nextUrl.pathname.startsWith("/api/auth/")) {
+  const requiresCanonicalOrigin =
+    request.nextUrl.pathname.startsWith("/api/auth/") ||
+    request.nextUrl.pathname === "/api/signup" ||
+    request.nextUrl.pathname.startsWith("/api/signup/");
+  if (requiresCanonicalOrigin) {
     let canonicalUrl: URL;
     try {
       canonicalUrl = new URL(process.env.NEXTAUTH_URL ?? "");
@@ -96,11 +73,7 @@ export default function proxy(request: NextRequest) {
         },
       });
     }
-    const forwardedHost = process.env.TRUST_PROXY_HEADERS === "true"
-      ? request.headers.get("x-forwarded-host")
-      : undefined;
-    const requestHost = forwardedHost || request.headers.get("host");
-    if (!isCanonicalAuthHost(requestHost, canonicalUrl)) {
+    if (!isCanonicalRequestOrigin(request, canonicalUrl)) {
       return new NextResponse(null, {
         status: 421,
         headers: {

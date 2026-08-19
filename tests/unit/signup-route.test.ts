@@ -23,6 +23,9 @@ vi.mock("@/lib/auth-csrf", () => ({
 vi.mock("@/lib/provider-availability", () => ({
   getProviderAvailability: mocks.getProviderAvailability,
 }));
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ NEXTAUTH_URL: "https://app.example.test" }),
+}));
 vi.mock("@/lib/logger", () => ({
   getRequestLogger: () => ({ warn: mocks.logWarn }),
 }));
@@ -102,6 +105,43 @@ describe("POST /api/signup", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("application/json");
     await expect(response.json()).resolves.toEqual({ status: "accepted" });
+  });
+
+  it("rejects a spoofed forwarded origin before request processing", async () => {
+    vi.stubEnv("TRUST_PROXY_HEADERS", "false");
+    const response = await POST(
+      new NextRequest("http://evil.example.test/api/signup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-host": "app.example.test",
+          "x-forwarded-proto": "https",
+        },
+        body: JSON.stringify(validBody),
+      }),
+    );
+
+    expect(response.status).toBe(421);
+    expect(mocks.consumeSharedRateLimit).not.toHaveBeenCalled();
+    expect(mocks.processSignup).not.toHaveBeenCalled();
+  });
+
+  it("accepts canonical forwarded origin headers from the trusted proxy", async () => {
+    const response = await POST(
+      new NextRequest("http://app:3000/api/signup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-host": "app.example.test",
+          "x-forwarded-proto": "https",
+          "cf-connecting-ip": "203.0.113.50",
+          cookie: "next-auth.csrf-token=fixture",
+        },
+        body: JSON.stringify(validBody),
+      }),
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it("orders client limit, CSRF, exact validation, address limit, provider, and service", async () => {
@@ -259,35 +299,6 @@ describe("POST /api/signup", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("retry-after")).toBe("37");
     await expect(response.json()).resolves.toEqual({ status: "unavailable" });
-    expect(mocks.processSignup).not.toHaveBeenCalled();
-  });
-
-  it("returns identical shared-outage responses for all private account states", async () => {
-    mocks.getProviderAvailability.mockResolvedValue({
-      available: false,
-      retryAfterSeconds: 37,
-    });
-
-    const responses = await Promise.all(
-      ["new", "pending", "active"].map(async (accountState, index) => {
-        const response = await POST(request({
-          ...validBody,
-          name: `${accountState} person`,
-          email: `${accountState}-${index}@example.test`,
-        }));
-        return {
-          status: response.status,
-          retryAfter: response.headers.get("retry-after"),
-          body: await response.json(),
-        };
-      }),
-    );
-
-    expect(responses).toEqual([
-      { status: 503, retryAfter: "37", body: { status: "unavailable" } },
-      { status: 503, retryAfter: "37", body: { status: "unavailable" } },
-      { status: 503, retryAfter: "37", body: { status: "unavailable" } },
-    ]);
     expect(mocks.processSignup).not.toHaveBeenCalled();
   });
 

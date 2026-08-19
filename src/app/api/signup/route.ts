@@ -3,9 +3,13 @@ import { createHash } from "node:crypto";
 import { NextRequest } from "next/server";
 
 import { validateAuthCsrfToken } from "@/lib/auth-csrf";
+import { getEnv } from "@/lib/env";
 import { getRequestLogger } from "@/lib/logger";
 import { getProviderAvailability } from "@/lib/provider-availability";
-import { getClientIdentifier } from "@/lib/request-context";
+import {
+  getClientIdentifier,
+  isCanonicalRequestOrigin,
+} from "@/lib/request-context";
 import { consumeSharedRateLimit } from "@/lib/shared-rate-limit";
 import { signupRequestSchema } from "@/modules/signup/schema";
 import {
@@ -52,6 +56,11 @@ function validationResponse(error: ReturnType<typeof signupRequestSchema.safePar
 }
 
 export async function POST(request: NextRequest) {
+  const canonicalUrl = new URL(getEnv().NEXTAUTH_URL);
+  if (!isCanonicalRequestOrigin(request, canonicalUrl)) {
+    return Response.json({ status: "misdirected_request" }, { status: 421 });
+  }
+
   const startedAt = Date.now();
   const clientResult = await consumeSharedRateLimit({
     key: `auth:email:client:${getClientIdentifier(request)}`,

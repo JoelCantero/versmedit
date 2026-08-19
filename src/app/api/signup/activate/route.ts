@@ -5,6 +5,7 @@ import { UserStatus, VerificationPurpose } from "@/generated/prisma/client";
 import { GET as authGet } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
+import { isCanonicalRequestOrigin } from "@/lib/request-context";
 import { hashSignupToken } from "@/modules/signup/token";
 import type { SignupLocale } from "@/modules/signup/types";
 import { runWithSignupActivation } from "@/modules/signup/verification-context";
@@ -30,17 +31,6 @@ function stateRedirect(
   return Response.redirect(target, 302);
 }
 
-function externalRequestOrigin(request: NextRequest) {
-  const host =
-    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
-    request.headers.get("host")?.trim() ||
-    request.nextUrl.host;
-  const protocol =
-    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
-    request.nextUrl.protocol.slice(0, -1);
-  return `${protocol.toLowerCase()}://${host.toLowerCase()}`;
-}
-
 async function getCurrentSessionUserId(request: NextRequest, origin: string) {
   const sessionRequest = new NextRequest(new URL("/api/auth/session", origin), {
     method: "GET",
@@ -59,7 +49,7 @@ async function getCurrentSessionUserId(request: NextRequest, origin: string) {
 export async function GET(request: NextRequest) {
   const env = getEnv();
   const canonical = new URL(env.NEXTAUTH_URL);
-  if (externalRequestOrigin(request) !== canonical.origin.toLowerCase()) {
+  if (!isCanonicalRequestOrigin(request, canonical)) {
     return Response.json({ status: "misdirected_request" }, { status: 421 });
   }
 
@@ -77,6 +67,7 @@ export async function GET(request: NextRequest) {
   if (
     !storedToken ||
     storedToken.purpose !== VerificationPurpose.SIGNUP ||
+    !storedToken.deliveredAt ||
     storedToken.expires.getTime() <= Date.now()
   ) {
     return stateRedirect(canonical.origin, locale, "invalid_link");

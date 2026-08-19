@@ -74,6 +74,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnavailableResult"
+        "421":
+          description: Request origin does not match the configured canonical authentication origin.
   /api/signup/activate:
     get:
       operationId: activateSignup

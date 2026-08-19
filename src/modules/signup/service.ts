@@ -79,6 +79,28 @@ async function compensateFailedToken(identifier: string, token: string) {
   });
 }
 
+async function confirmDeliveredToken(
+  identifier: string,
+  token: string,
+  deliveredAt: Date,
+) {
+  return db.$transaction(async (transaction) => {
+    await transaction.$executeRaw(Prisma.sql`
+      SELECT pg_advisory_xact_lock(hashtextextended(${identifier}, 0))
+    `);
+    const confirmed = await transaction.verificationToken.updateMany({
+      where: {
+        identifier,
+        token,
+        purpose: VerificationPurpose.SIGNUP,
+        deliveredAt: null,
+      },
+      data: { deliveredAt },
+    });
+    return confirmed.count === 1;
+  });
+}
+
 export async function processSignup(
   request: ValidatedSignupRequest,
   { now = () => new Date() }: ProcessSignupOptions = {},
@@ -137,6 +159,7 @@ export async function processSignup(
           termsVersion: TERMS_VERSION,
           privacyVersion: PRIVACY_NOTICE_VERSION,
           acceptedAt: issuedAt,
+          deliveredAt: null,
           createdAt: issuedAt,
         },
       });
@@ -181,12 +204,19 @@ export async function processSignup(
       origin,
     });
     if (delivery.status === "accepted") {
-      const outcome = "onboarding_sent";
-      recordOutcome(outcome, startedAt);
-      return { outcome };
+      const confirmed = await confirmDeliveredToken(
+        request.email,
+        issuance.tokenHash,
+        now(),
+      );
+      if (confirmed) {
+        const outcome = "onboarding_sent";
+        recordOutcome(outcome, startedAt);
+        return { outcome };
+      }
     }
   } catch {
-    // The exact issued token is compensated below.
+    // The provisional exact token is compensated below.
   }
 
   try {

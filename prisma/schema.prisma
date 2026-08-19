@@ -76,6 +76,7 @@ model VerificationToken {
   termsVersion   String?
   privacyVersion String?
   acceptedAt     DateTime?
+  deliveredAt    DateTime?
   createdAt      DateTime            @default(now())
 
   @@unique([identifier, token])

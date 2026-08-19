@@ -225,12 +225,11 @@ flow distinct from registration.
 
 ## Phase 8: Polish and Cross-Cutting Validation
 
-**Purpose**: Validate the integrated feature, operational recovery, documentation, usability target,
-and repository governance after all desired story phases are complete.
+**Purpose**: Validate the integrated feature, operational recovery, documentation, and repository
+governance after all desired story phases are complete.
 
 - [x] T064 [P] Document explicit signup versus login lifecycle, approved-policy ownership, pending-account behavior, SMTP reuse, and no-new-secret deployment impact in `README.md`
 - [x] T065 Execute fresh-install, existing-data upgrade, collision-abort, logical backup, clean restore, migration deploy, and signup/login recovery checks and record verified outcomes in `specs/20260818-signup-page/quickstart.md` using `scripts/db-backup.sh` and `scripts/db-restore.sh`
-- [ ] T066 Conduct the SC-010 no-coaching usability evaluation with at least 20 first-time target users who have not seen the flow, at least five participants assigned to each locale, at least eight participants using a mobile viewport, and at least eight participants using a desktop viewport; apply the first-attempt two-minute success script and `ceil(0.95 × N)` threshold; and record only anonymized aggregate results in `specs/20260818-signup-page/usability-results.md`
 - [x] T067 Run the lint, typecheck, production audit, integration coverage, production-artifact Playwright, and runner/migrator Docker build gate documented in `specs/20260818-signup-page/quickstart.md` and mirrored by `.github/workflows/ci.yml`
 - [x] T068 Run `.specify/scripts/bash/compliance-check.sh --all` and confirm `specs/20260818-signup-page/spec.md`, `specs/20260818-signup-page/plan.md`, and `specs/20260818-signup-page/tasks.md` remain complete and placeholder-free
 
@@ -379,3 +378,18 @@ Then: T062/T063 -> T059 localized navigation E2E rerun
   must not appear in test output, fixtures committed with real data, or logs.
 - Do not weaken `createUser`, invent a custom session cookie, draft legal content, or add another
   runtime service while completing these tasks.
+
+## Phase 9: Convergence
+
+- [x] T069 CRITICAL centralize trusted canonical-origin validation for `POST /api/signup` and `GET /api/signup/activate`, ignore forwarded host/protocol headers unless `TRUST_PROXY_HEADERS` is enabled, and add trusted/untrusted proxy regression coverage per Constitution X / FR-022 / FR-041 (contradicts)
+- [x] T070 Guarantee that an isolated onboarding-delivery failure cannot leave the newly issued signup credential usable when the compensating transaction fails, and add injected cleanup-failure coverage per FR-030 / FR-044 (partial)
+- [x] T071 Add real PostgreSQL concurrency coverage for simultaneous first signup, retained-pending resubmission, and both signup-versus-activation commit orders, asserting the authoritative name, locale, policy snapshot, and only valid link per US1/AC5 / FR-043 / FR-047 (missing)
+- [x] T073 Extend production-artifact responsive checks to invalid-email, missing-policy, invalid-request, rate-limited, shared-unavailable, invalid-link, session-conflict, and session-failed states at 375x667 and 1440x900 in both appearances per SC-009 / FR-034 (partial)
+- [x] T074 Replace the non-filtering `pnpm test -- ...` quickstart examples with verified focused Vitest commands for unit and integration slices per plan: testing strategy (partial)
+
+## Phase 10: Test Suite Convergence
+
+- [x] T075 Remove unit-test cases that repeat identical mocked behavior or validate only the test harness while preserving each component and security boundary contract
+- [x] T076 Reduce integration cases already owned by unit tests while retaining real PostgreSQL, SMTP, Auth.js, migration, and concurrency guarantees
+- [x] T077 Route Playwright tests to purpose-specific desktop and mobile projects and replace the full locale/theme/viewport state-product with focused behavior, locale, appearance, and responsive coverage
+- [x] T078 Run focused and full validation, update verified test counts in `specs/20260818-signup-page/quickstart.md`, and confirm coverage thresholds remain satisfied

@@ -184,6 +184,7 @@ describe("hardenAdapter", () => {
       termsVersion: "terms-v1",
       privacyVersion: "privacy-v1",
       acceptedAt: new Date("2026-08-18T12:00:00Z"),
+      deliveredAt: new Date("2026-08-18T12:00:01Z"),
     };
     mocks.getSignupActivationAuthorization.mockReturnValue({
       identifier: token.identifier,
@@ -240,6 +241,35 @@ describe("hardenAdapter", () => {
     expect(mocks.transaction).not.toHaveBeenCalled();
   });
 
+  it("rejects a provisional signup token that was not confirmed delivered", async () => {
+    mocks.getSignupActivationAuthorization.mockReturnValue({
+      identifier: "pending@example.test",
+      token: "signup-hash",
+    });
+    mocks.tokenFindUnique.mockResolvedValue({
+      identifier: "pending@example.test",
+      token: "signup-hash",
+      expires: new Date(Date.now() + 60_000),
+      purpose: "SIGNUP",
+      proposedName: "Pending Person",
+      locale: "en",
+      termsVersion: "terms-v1",
+      privacyVersion: "privacy-v1",
+      acceptedAt: new Date(),
+      deliveredAt: null,
+    });
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.useVerificationToken!({
+        identifier: "pending@example.test",
+        token: "signup-hash",
+      }),
+    ).resolves.toBeNull();
+    expect(mocks.userFindUnique).not.toHaveBeenCalled();
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["replayed", null, { id: "pending-user", status: "PENDING" }],
     ["stale", { identifier: "pending@example.test", token: "newer-hash" }, { id: "pending-user", status: "PENDING" }],
@@ -260,6 +290,7 @@ describe("hardenAdapter", () => {
             termsVersion: "terms-v1",
             privacyVersion: "privacy-v1",
             acceptedAt: new Date(),
+            deliveredAt: new Date(),
           }
         : null,
     );

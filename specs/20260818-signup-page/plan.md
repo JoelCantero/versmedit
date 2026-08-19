@@ -38,9 +38,7 @@ email, and database integration tests; Playwright 1.61 against the production st
 for the critical browser journey, localization, cookies/redirects, keyboard operation, axe checks,
 and 375x667/1440x900 layout measurements. Provider integration exercises the real Nodemailer and
 Auth.js boundaries with controlled transport outcomes; no external inbox is required by the default
-CI gate. A no-coaching usability evaluation with at least 20 first-time target users uses the
-specified locale and mobile/desktop quotas, first-attempt two-minute script, and
-`ceil(0.95 × N)` pass threshold; only anonymized aggregate results are retained.
+CI gate.
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
 
@@ -61,14 +59,15 @@ or timestamp is trusted.
 rotation. Emit only aggregate outcome categories and durations; redact name, email, normalized-email
 keys, tokens, policy acceptance values, session data, URLs, and recipient-level delivery outcomes.
 
-**Migration Strategy**: One forward-only additive migration introduces `UserStatus`, nullable
+**Migration Strategy**: The initial forward-only additive migration introduces `UserStatus`, nullable
 `User.normalizedEmail`, signup metadata columns/default purpose on `VerificationToken`, and the
 `PolicyAcceptance` table. It also reconciles the current schema-only `VerificationToken` fields with
 the actual migration history. Existing users are preflighted for lowercased/trimmed collisions,
 backfilled with `normalizedEmail` and `ACTIVE`, then protected by a unique index before application
 code relies on it. Existing login tokens default to `LOGIN`; legacy users are not assigned invented
 acceptance records. Application code remains compatible with all existing active users throughout
-the rollout.
+the rollout. A follow-up forward migration adds nullable signup delivery confirmation; existing
+signup rows remain unconfirmed and unusable until a later successful submission replaces them.
 
 **Recovery Strategy**: The migration is additive and preserves existing account/session data. A
 compatible application correction may be deployed after migration; reverting code never claims to

@@ -57,6 +57,7 @@ export function createSignupFixtureScope(label = "signup") {
       termsVersion?: string;
       privacyVersion?: string;
       acceptedAt?: Date;
+      deliveredAt?: Date | null;
       createdAt?: Date;
       expires?: Date;
     } = {},
@@ -73,6 +74,7 @@ export function createSignupFixtureScope(label = "signup") {
       termsVersion: overrides.termsVersion ?? TERMS_VERSION,
       privacyVersion: overrides.privacyVersion ?? PRIVACY_NOTICE_VERSION,
       acceptedAt: overrides.acceptedAt ?? createdAt,
+      deliveredAt: overrides.deliveredAt === undefined ? createdAt : overrides.deliveredAt,
       createdAt,
     };
 

@@ -19,6 +19,8 @@ const legacyMigrations = [
 ];
 const signupMigration =
   "prisma/migrations/20260818000000_add_signup_lifecycle/migration.sql";
+const deliveryMigration =
+  "prisma/migrations/20260819000000_add_signup_delivery_confirmation/migration.sql";
 
 function quoteIdentifier(identifier: string) {
   return `"${identifier.replaceAll('"', '""')}"`;
@@ -73,16 +75,11 @@ afterAll(async () => {
 describe.skipIf(!runIntegrationTests || !databaseUrl)(
   "signup lifecycle migration",
   () => {
-    it("provides the forward lifecycle migration artifact", async () => {
-      await expect(
-        readFile(path.join(process.cwd(), signupMigration), "utf8"),
-      ).resolves.toContain('ALTER TABLE "User"');
-    });
-
     it("applies on a fresh schema with lifecycle defaults and constraints", async () => {
       const { client } = await createSchema();
       await applyLegacyMigrations(client);
       await applyMigration(client, signupMigration);
+      await applyMigration(client, deliveryMigration);
 
       const userColumns = await client.query<{
         column_name: string;
@@ -104,6 +101,19 @@ describe.skipIf(!runIntegrationTests || !databaseUrl)(
         `SELECT COUNT(*)::int AS count FROM "PolicyAcceptance"`,
       );
       expect(acceptanceCount.rows).toEqual([{ count: 0 }]);
+      const tokenColumns = await client.query<{
+        column_name: string;
+        is_nullable: string;
+      }>(`
+        SELECT column_name, is_nullable
+        FROM information_schema.columns
+        WHERE table_schema = current_schema()
+          AND table_name = 'VerificationToken'
+          AND column_name = 'deliveredAt'
+      `);
+      expect(tokenColumns.rows).toEqual([
+        { column_name: "deliveredAt", is_nullable: "YES" },
+      ]);
     });
 
     it("backfills legacy users and tokens without fabricating acceptance", async () => {
@@ -121,6 +131,7 @@ describe.skipIf(!runIntegrationTests || !databaseUrl)(
       );
 
       await applyMigration(client, signupMigration);
+      await applyMigration(client, deliveryMigration);
 
       const users = await client.query<{
         normalizedEmail: string;

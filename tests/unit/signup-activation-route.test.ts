@@ -44,6 +44,7 @@ const currentToken = {
   expires: new Date(Date.now() + 60_000),
   purpose: "SIGNUP",
   locale: "es",
+  deliveredAt: new Date(),
 };
 
 function request(query = "token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678") {
@@ -53,6 +54,7 @@ function request(query = "token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678") {
 describe("GET /api/signup/activate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("TRUST_PROXY_HEADERS", "false");
     mocks.hashSignupToken.mockReturnValue("hashed-token");
     mocks.tokenFindUnique.mockResolvedValue(currentToken);
     mocks.userFindUnique.mockResolvedValue({ id: "pending-user", status: "PENDING" });
@@ -95,11 +97,57 @@ describe("GET /api/signup/activate", () => {
     expect(mocks.tokenFindUnique).not.toHaveBeenCalled();
   });
 
+  it("ignores spoofed forwarded origin headers when proxy trust is disabled", async () => {
+    const response = await GET(
+      new NextRequest(
+        "http://evil.example.test/api/signup/activate?token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
+        {
+          headers: {
+            "x-forwarded-host": "app.example.test",
+            "x-forwarded-proto": "https",
+          },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(421);
+    expect(mocks.tokenFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("accepts canonical forwarded origin headers only from the trusted proxy", async () => {
+    vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+
+    const response = await GET(
+      new NextRequest(
+        "http://app:3000/api/signup/activate?token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
+        {
+          headers: {
+            "x-forwarded-host": "app.example.test",
+            "x-forwarded-proto": "https",
+          },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("https://app.example.test/es");
+  });
+
   it.each([
-    [null, "missing"],
-    [{ ...currentToken, expires: new Date(Date.now() - 1) }, "expired"],
-    [{ ...currentToken, purpose: "LOGIN" }, "wrong purpose"],
-  ])("maps %s token state to one localized invalid result", async (token, _case) => {
+    { token: null, case: "missing" },
+    {
+      token: { ...currentToken, expires: new Date(Date.now() - 1) },
+      case: "expired",
+    },
+    {
+      token: { ...currentToken, purpose: "LOGIN" },
+      case: "wrong purpose",
+    },
+    {
+      token: { ...currentToken, deliveredAt: null },
+      case: "delivery unconfirmed",
+    },
+  ])("maps $case token state to one localized invalid result", async ({ token }) => {
     mocks.tokenFindUnique.mockResolvedValue(token);
     const response = await GET(request());
     expect(response.status).toBe(302);

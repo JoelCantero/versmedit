@@ -3,6 +3,18 @@ import { defineConfig, devices } from "@playwright/test";
 const appPort = Number(process.env.E2E_APP_PORT ?? "3100");
 const baseURL = `http://127.0.0.1:${appPort}`;
 const distDir = process.env.NEXT_DIST_DIR ?? ".next";
+const smtpPort = process.env.E2E_SMTP_PORT;
+const smtpEnv: Record<string, string> = smtpPort
+  ? {
+      AUTH_EMAIL_ENABLED: "true",
+      SMTP_HOST: "127.0.0.1",
+      SMTP_PORT: smtpPort,
+      SMTP_SECURE: "false",
+      SMTP_USER: "signup-test",
+      SMTP_PASSWORD: "signup-test-password",
+      SMTP_FROM: "Versmedit Test <no-reply@example.test>",
+    }
+  : {};
 const standaloneStaticAssetsCommand = [
   `mkdir -p ${distDir}/standalone/${distDir}`,
   `rm -rf ${distDir}/standalone/${distDir}/static`,
@@ -50,6 +62,7 @@ export default defineConfig({
         "postgresql://playwright:playwright@127.0.0.1:5432/playwright?schema=public",
       AUTH_SECRET:
         process.env.AUTH_SECRET ?? "playwright-secret-not-used-in-runtime-000",
+      ...smtpEnv,
       TRUST_PROXY_HEADERS: "false",
       NEXTAUTH_URL: baseURL,
       NODE_ENV: "production",

@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  env: { AUTH_EMAIL_ENABLED: false as boolean },
+  env: { AUTH_EMAIL_ENABLED: false as boolean, PROJECT_NAME: "versmedit" },
   smtp: null as null | { server: object; from: string },
   emailProvider: vi.fn((options: unknown) => ({ id: "email", options })),
   classifySmtpResult: vi.fn<
@@ -31,6 +31,8 @@ vi.mock("@/lib/db", () => ({
 }));
 vi.mock("@/lib/email", () => ({
   getEmailProviderConfig: () => (mocks.env.AUTH_EMAIL_ENABLED ? mocks.smtp : null),
+  formatEmailSubject: (template: string, projectName: string) =>
+    template.replaceAll("{projectName}", () => projectName),
   classifySmtpResult: mocks.classifySmtpResult,
   classifySmtpError: mocks.classifySmtpError,
 }));
@@ -105,9 +107,27 @@ describe("authOptions", () => {
 
     const { authOptions } = await import("@/lib/auth");
 
-    expect(authOptions.providers).toHaveLength(1);
+    expect(authOptions.providers).toHaveLength(2);
     expect(mocks.emailProvider).toHaveBeenCalledWith(
       expect.objectContaining({ maxAge: 900, from: "noreply@example.test" }),
+    );
+    expect(authOptions.providers.map((provider) =>
+      typeof provider === "function" ? "function" : provider.id,
+    )).toEqual(["email", "signup"]);
+  });
+
+  it("keeps the signup provider callback-only", async () => {
+    mocks.env.AUTH_EMAIL_ENABLED = true;
+    mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };
+
+    const { authOptions } = await import("@/lib/auth");
+    const signupOptions = mocks.emailProvider.mock.calls[1]?.[0] as {
+      sendVerificationRequest: () => Promise<void>;
+    };
+
+    expect(signupOptions).toBeTruthy();
+    await expect(signupOptions.sendVerificationRequest()).rejects.toThrow(
+      /cannot initiate delivery/i,
     );
   });
 
@@ -192,8 +212,8 @@ describe("authOptions", () => {
   });
 
   it.each([
-    ["%2Fes", "Tu enlace de acceso a Nextself", "Usa este enlace para iniciar sesión"],
-    ["%2Fca", "El teu enllaç d'accés a Nextself", "Utilitza aquest enllaç per iniciar sessió"],
+    ["%2Fes", "Tu enlace de acceso a versmedit", "Usa este enlace para iniciar sesión"],
+    ["%2Fca", "El teu enllaç d'accés a versmedit", "Utilitza aquest enllaç per iniciar sessió"],
   ])("localizes mail for callback %s", async (callbackUrl, subject, text) => {
     mocks.env.AUTH_EMAIL_ENABLED = true;
     mocks.smtp = { server: { host: "smtp.example.test" }, from: "noreply@example.test" };

@@ -34,7 +34,13 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
     const { findExistingLoginEmail } = await import("@/modules/login/service");
     const suffix = crypto.randomUUID();
     const storedEmail = `Integration-Login-${suffix}@Example.test`;
-    const user = await db.user.create({ data: { email: storedEmail } });
+    const user = await db.user.create({
+      data: {
+        email: storedEmail,
+        normalizedEmail: storedEmail.trim().toLowerCase(),
+        status: "ACTIVE",
+      },
+    });
     createdUserIds.push(user.id);
 
     await expect(findExistingLoginEmail(storedEmail.toLowerCase())).resolves.toBe(storedEmail);
@@ -79,8 +85,9 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
   it("creates and resolves a database session for an existing user", async () => {
     const { PrismaAdapter } = await import("@next-auth/prisma-adapter");
     const { db } = await import("@/lib/db");
+    const email = `${integrationPrefix}-${crypto.randomUUID()}@example.test`;
     const user = await db.user.create({
-      data: { email: `${integrationPrefix}-${crypto.randomUUID()}@example.test` },
+      data: { email, normalizedEmail: email, status: "ACTIVE" },
     });
     createdUserIds.push(user.id);
     const adapter = PrismaAdapter(db);
@@ -146,5 +153,76 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
       SELECT COUNT(*)::int AS "count" FROM "VerificationToken"
       WHERE "identifier" = ${identifier}
     `).resolves.toEqual([{ count: 0 }]);
+  });
+
+  it("keeps pending users and direct signup-token callbacks ineligible", async () => {
+    const { PrismaAdapter } = await import("@next-auth/prisma-adapter");
+    const { default: NextAuth } = await import("next-auth");
+    const { default: Email } = await import("next-auth/providers/email");
+    const { NextRequest } = await import("next/server");
+    const { hardenAdapter } = await import("@/lib/auth-adapter");
+    const { db } = await import("@/lib/db");
+    const { findExistingLoginEmail } = await import("@/modules/login/service");
+    const { createSignupCredential } = await import("@/modules/signup/token");
+    const email = `${integrationPrefix}-${crypto.randomUUID()}@example.test`;
+    const user = await db.user.create({
+      data: {
+        email,
+        normalizedEmail: email,
+        status: "PENDING",
+      },
+    });
+    createdUserIds.push(user.id);
+    const credential = createSignupCredential({
+      secret: process.env.AUTH_SECRET!,
+    });
+    await db.verificationToken.create({
+      data: {
+        identifier: email,
+        token: credential.persisted.token,
+        expires: credential.persisted.expires,
+        purpose: "SIGNUP",
+        proposedName: "Pending Person",
+        locale: "en",
+        termsVersion: "2026-08-18-draft",
+        privacyVersion: "2026-08-18-draft",
+        acceptedAt: new Date(),
+      },
+    });
+
+    await expect(findExistingLoginEmail(email)).resolves.toBeNull();
+    const adapter = hardenAdapter(PrismaAdapter(db));
+    const signupProvider = Email({
+      server: { host: "127.0.0.1", port: 1 },
+      from: "no-reply@example.test",
+    });
+    Object.assign(
+      signupProvider as unknown as { id: string; name: string },
+      { id: "signup", name: "Signup" },
+    );
+    const directResponse = await NextAuth(
+      new NextRequest(
+        `http://localhost:3000/api/auth/callback/signup?token=${credential.raw}&email=${encodeURIComponent(email)}&callbackUrl=%2F`,
+      ),
+      { params: Promise.resolve({ nextauth: ["callback", "signup"] }) },
+      {
+        adapter,
+        secret: process.env.AUTH_SECRET,
+        session: { strategy: "database" },
+        providers: [signupProvider],
+      },
+    );
+
+    expect(directResponse.status).toBe(302);
+    expect(directResponse.headers.get("location")).toContain("error=Verification");
+    await expect(
+      db.verificationToken.count({
+        where: { identifier: email, token: credential.persisted.token },
+      }),
+    ).resolves.toBe(1);
+    await expect(db.session.count({ where: { userId: user.id } })).resolves.toBe(0);
+    await expect(
+      db.user.findUnique({ where: { id: user.id }, select: { status: true } }),
+    ).resolves.toEqual({ status: "PENDING" });
   });
 });

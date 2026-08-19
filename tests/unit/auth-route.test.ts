@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   getProviderAvailability: vi.fn(() =>
     Promise.resolve({ available: true, retryAfterSeconds: 0 }),
   ),
+  getSignupActivationAuthorization: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({
@@ -49,6 +50,9 @@ vi.mock("@/lib/provider-availability", () => ({
 vi.mock("@/modules/login/verification-context", () => ({
   runWithVerificationContext: (callback: () => Promise<Response>) => callback(),
 }));
+vi.mock("@/modules/signup/verification-context", () => ({
+  getSignupActivationAuthorization: mocks.getSignupActivationAuthorization,
+}));
 
 import { GET, POST } from "@/app/api/auth/[...nextauth]/route";
 
@@ -74,6 +78,7 @@ describe("Auth.js route rate limiting", () => {
       available: true,
       retryAfterSeconds: 0,
     });
+    mocks.getSignupActivationAuthorization.mockReturnValue(null);
     const counts = new Map<string, number>();
     mocks.consumeSharedRateLimit.mockImplementation(
       ({ key, limit }: { key: string; limit: number }) => {
@@ -172,6 +177,52 @@ describe("Auth.js route rate limiting", () => {
 
     expect((await POST(request, routeContext)).status).toBe(204);
     expect(mocks.post).toHaveBeenCalledOnce();
+  });
+
+  it("rejects direct signup provider callbacks without delegation", async () => {
+    const request = new NextRequest(
+      "https://example.test/api/auth/callback/signup?token=raw&email=pending%40example.test",
+    );
+    const context = {
+      params: Promise.resolve({ nextauth: ["callback", "signup"] }),
+    };
+
+    const response = await GET(request, context);
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe(
+      "https://example.test/signup?state=invalid_link",
+    );
+    expect(mocks.nextAuth).not.toHaveBeenCalled();
+  });
+
+  it("delegates signup callbacks only inside activation authorization", async () => {
+    mocks.getSignupActivationAuthorization.mockReturnValue({
+      identifier: "pending@example.test",
+      token: "hashed-token",
+    });
+    const request = new NextRequest(
+      "https://example.test/api/auth/callback/signup?token=raw&email=pending%40example.test",
+    );
+    const context = {
+      params: Promise.resolve({ nextauth: ["callback", "signup"] }),
+    };
+
+    await expect(GET(request, context)).resolves.toHaveProperty("status", 204);
+    expect(mocks.nextAuth).toHaveBeenCalledOnce();
+  });
+
+  it("rejects direct signup-provider sign-in initiation", async () => {
+    const request = new NextRequest("https://example.test/api/auth/signin/signup", {
+      method: "POST",
+    });
+    const context = {
+      params: Promise.resolve({ nextauth: ["signin", "signup"] }),
+    };
+
+    const response = await POST(request, context);
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toContain("/signup?state=invalid_link");
+    expect(mocks.nextAuth).not.toHaveBeenCalled();
   });
 
   it("rejects invalid CSRF after charging only the client bucket", async () => {

@@ -2,6 +2,8 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 
+import { UserStatus } from "@/generated/prisma/client";
+
 import { db } from "@/lib/db";
 import type { LoginLocale } from "@/modules/login/types";
 
@@ -17,7 +19,10 @@ interface AcceptedLoginResponseOptions {
 
 export async function findExistingLoginEmail(normalizedEmail: string) {
   const user = await db.user.findFirst({
-    where: { email: { equals: normalizedEmail, mode: "insensitive" } },
+    where: {
+      normalizedEmail: normalizedEmail.trim().toLowerCase(),
+      status: UserStatus.ACTIVE,
+    },
     select: { email: true },
   });
   return user?.email ?? null;

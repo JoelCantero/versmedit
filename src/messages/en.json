@@ -113,7 +113,7 @@
     "page": {
       "metadata": {
         "title": "Sign up",
-        "description": "Create your account and verify your email."
+        "description": "Create a passwordless account and verify your email address."
       }
     },
     "form": {
@@ -121,70 +121,166 @@
     },
     "heading": {
       "title": "Create your account",
-      "description": "Enter your first name and email to receive a secure magic link."
+      "description": "Enter your name and email. We will send the next step to your inbox."
     },
     "fields": {
-      "firstName": {
-        "label": "First name",
-        "placeholder": "Taylor"
+      "name": {
+        "label": "Name",
+        "placeholder": "Taylor Example",
+        "description": "Use letters, spaces, apostrophes, or hyphens."
       },
       "email": {
         "label": "Email",
         "placeholder": "name@example.com",
-        "description": "We only use your email address to sign you in."
+        "description": "Use an email address you can open now."
+      },
+      "policy": {
+        "labelPrefix": "I accept the",
+        "terms": "terms of use",
+        "and": "and",
+        "privacy": "privacy notice",
+        "description": "Required to create an account."
       }
     },
     "actions": {
-      "submitIdle": "Send magic link",
-      "submitPending": "Sending..."
+      "submitIdle": "Create account",
+      "submitPending": "Sending...",
+      "loginPrompt": "Already have an account?",
+      "login": "Sign in"
     },
     "states": {
-      "sending": "Sending your link...",
-      "accepted": "If this address can receive mail, we sent a sign-in link.",
-      "deliveryFailed": "We could not confirm delivery. Please try again.",
-      "unavailable": "Email sign-in is temporarily unavailable.",
-      "rateLimited": "Too many attempts. Please wait before trying again."
+      "sending": "Sending your request...",
+      "accepted": "Check your email for the next step.",
+      "invalidRequest": "This request is no longer valid. Refresh the page and try again.",
+      "unavailable": "Signup is temporarily unavailable. Please try again later.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds."
     },
     "summary": {
       "title": "Please fix the errors below",
       "description": "Review each field and try again."
     },
     "validation": {
-      "firstName": {
-        "required": "Enter your first name.",
-        "max": "First name must be 80 characters or fewer.",
+      "name": {
+        "required": "Enter your name.",
+        "max": "Name must be 80 characters or fewer.",
         "invalid": "Use letters, spaces, apostrophes, or hyphens only."
       },
       "email": {
         "invalid": "Enter a valid email address."
       },
+      "policy": {
+        "required": "Accept the terms of use and privacy notice to continue."
+      },
       "locale": {
         "invalid": "Select a valid language and try again."
       },
       "form": {
-        "invalidSubmission": "We could not process your submission. Please review the form and try again."
+        "invalidSubmission": "We could not process this submission. Review the form and try again."
+      }
+    },
+    "email": {
+      "onboarding": {
+        "subject": "Complete your {projectName} signup",
+        "intro": "Finish creating your account within 15 minutes.",
+        "action": "Complete signup"
+      },
+      "activeAccount": {
+        "subject": "A {projectName} account already exists",
+        "intro": "An account already exists for this email address. Sign in instead.",
+        "action": "Sign in"
       }
     },
     "recovery": {
-      "invalid": {
-        "title": "This sign-in link is invalid",
-        "description": "The link may be incomplete or malformed. Request a new sign-in email and use the latest link."
+      "invalidLink": {
+        "title": "This signup link is not valid",
+        "description": "Request a new signup email and use the latest link you receive.",
+        "action": "Request a new signup email"
       },
-      "expired": {
-        "title": "This sign-in link has expired",
-        "description": "For security, links expire after 15 minutes. Request a new sign-in email to continue."
+      "sessionConflict": {
+        "title": "Sign out before using this link",
+        "description": "Your current session was preserved. Sign out, then reopen the link from your email.",
+        "action": "Sign out"
       },
-      "superseded": {
-        "title": "A newer sign-in link is available",
-        "description": "Only the latest accepted link works. Open the newest email or request another link."
+      "sessionFailed": {
+        "title": "Your account is ready",
+        "description": "We could not start your session. Sign in with your verified email address.",
+        "action": "Sign in"
+      }
+    }
+  },
+  "Policies": {
+    "draftNotice": "Unreviewed development draft. This sample content is provided for testing and is not legal advice.",
+    "versionLabel": "Version: {version}",
+    "terms": {
+      "metadata": {
+        "title": "Terms of Use",
+        "description": "Development draft terms for using this application."
       },
-      "used": {
-        "title": "This sign-in link was already used",
-        "description": "Each link is single-use. Request a new sign-in email if you still need access."
+      "title": "Terms of Use",
+      "intro": "These dummy terms describe the expected use of this development service. By creating an account, you accept this version for testing purposes.",
+      "sections": {
+        "service": {
+          "title": "Using the service",
+          "body": "Use the service only for lawful testing and in a way that does not harm other people, accounts, systems, or networks. The operator may change, suspend, or withdraw development features without notice."
+        },
+        "account": {
+          "title": "Your account",
+          "body": "Provide an email address you control, use verification links only for your own account, and protect your active session. You are responsible for activity performed through your session."
+        },
+        "conduct": {
+          "title": "Acceptable conduct",
+          "body": "Do not automate abusive requests, probe for other users, bypass access controls or request limits, interfere with delivery, or use the service to distribute unlawful or harmful material."
+        },
+        "availability": {
+          "title": "Development availability",
+          "body": "The service is provided as available for development and testing. It may contain defects or lose availability, and no uninterrupted or error-free operation is promised."
+        },
+        "changes": {
+          "title": "Changes to these terms",
+          "body": "This draft may be replaced by a later version. A new signup records the version accepted at submission, and the recorded version remains associated with that activation."
+        },
+        "contact": {
+          "title": "Questions",
+          "body": "Direct questions about this draft or the service to the operator responsible for this deployment."
+        }
+      }
+    },
+    "privacy": {
+      "metadata": {
+        "title": "Privacy Notice",
+        "description": "Development draft notice describing signup data handling."
       },
-      "action": {
-        "retry": "Request a new link",
-        "goHome": "Go to home"
+      "title": "Privacy Notice",
+      "intro": "This dummy notice explains how the development service handles information used for signup and account access.",
+      "sections": {
+        "collection": {
+          "title": "Information collected",
+          "body": "The service stores the name and email you submit, account and verification state, the accepted policy versions and time, database session records, and coarse security or request-limit data."
+        },
+        "use": {
+          "title": "How information is used",
+          "body": "Information is used to create and verify your account, send account emails, establish sessions, preserve your policy acceptance, operate the service, and prevent abuse."
+        },
+        "sharing": {
+          "title": "Service providers",
+          "body": "Information is processed by the application hosting, database, and configured email-delivery services needed to operate the account flow. This development service does not sell personal information."
+        },
+        "retention": {
+          "title": "Retention",
+          "body": "Active account and acceptance records are retained with the account. Inactive pending accounts may be retained for safe signup retries. Short-lived verification links expire, and application logs are designed to exclude names, emails, links, and session material."
+        },
+        "security": {
+          "title": "Security",
+          "body": "The service uses mailbox verification, one-time links, request limits, private database networking, and protected sessions. No development system can guarantee absolute security."
+        },
+        "choices": {
+          "title": "Your choices",
+          "body": "You may choose not to create an account. Direct questions or requests about stored information to the operator responsible for this deployment."
+        },
+        "changes": {
+          "title": "Changes to this notice",
+          "body": "This draft may be replaced by a later version. Signup records the notice version accepted with the onboarding link."
+        }
       }
     }
   }

@@ -14,6 +14,7 @@ import {
 	hashLoginEmail,
 } from "@/modules/login/service";
 import { runWithVerificationContext } from "@/modules/login/verification-context";
+import { getSignupActivationAuthorization } from "@/modules/signup/verification-context";
 
 type AuthRouteContext = {
 	params: Promise<{ nextauth: string[] }>;
@@ -23,13 +24,32 @@ async function authHandler(request: NextRequest, context: AuthRouteContext) {
 	return await NextAuth(request, context, authOptions);
 }
 
+async function rejectUnauthorizedSignupProvider(
+	request: NextRequest,
+	context: AuthRouteContext,
+) {
+	const { nextauth = [] } = await context.params;
+	if (nextauth[1] !== "signup") return null;
+	if (nextauth[0] === "callback" && getSignupActivationAuthorization()) {
+		return null;
+	}
+	return Response.redirect(
+		new URL("/signup?state=invalid_link", request.url),
+		302,
+	);
+}
+
 export async function GET(request: NextRequest, context: AuthRouteContext) {
+	const rejection = await rejectUnauthorizedSignupProvider(request, context);
+	if (rejection) return rejection;
 	return await authHandler(request, context);
 }
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1_000;
 
 export async function POST(request: NextRequest, context: AuthRouteContext) {
+	const rejection = await rejectUnauthorizedSignupProvider(request, context);
+	if (rejection) return rejection;
 	const pathname = new URL(request.url).pathname;
 	if (!pathname.endsWith("/signin/email")) {
 		return await authHandler(request, context);

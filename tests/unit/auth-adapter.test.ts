@@ -9,6 +9,12 @@ const mocks = vi.hoisted(() => ({
   deleteMany: vi.fn(),
   transaction: vi.fn(),
   publishVerificationToken: vi.fn(),
+  userFindFirst: vi.fn(),
+  getSignupActivationAuthorization: vi.fn(),
+  tokenFindUnique: vi.fn(),
+  userFindUnique: vi.fn(),
+  userUpdate: vi.fn(),
+  acceptanceCreate: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -19,10 +25,17 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 vi.mock("@/lib/db", () => ({
-  db: { $transaction: mocks.transaction, $queryRaw: mocks.queryRaw },
+  db: {
+    $transaction: mocks.transaction,
+    $queryRaw: mocks.queryRaw,
+    user: { findFirst: mocks.userFindFirst },
+  },
 }));
 vi.mock("@/modules/login/verification-context", () => ({
   publishVerificationToken: mocks.publishVerificationToken,
+}));
+vi.mock("@/modules/signup/verification-context", () => ({
+  getSignupActivationAuthorization: mocks.getSignupActivationAuthorization,
 }));
 
 import { hardenAdapter } from "@/lib/auth-adapter";
@@ -30,12 +43,19 @@ import { hardenAdapter } from "@/lib/auth-adapter";
 describe("hardenAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getSignupActivationAuthorization.mockReturnValue(null);
     mocks.transaction.mockImplementation((callback) =>
       callback({
         $executeRaw: mocks.executeRaw,
+        user: {
+          findUnique: mocks.userFindUnique,
+          update: mocks.userUpdate,
+        },
         verificationToken: {
           deleteMany: mocks.deleteMany,
+          findUnique: mocks.tokenFindUnique,
         },
+        policyAcceptance: { create: mocks.acceptanceCreate },
       }),
     );
   });
@@ -69,6 +89,39 @@ describe("hardenAdapter", () => {
     expect(createUser).not.toHaveBeenCalled();
   });
 
+  it("resolves generic email lookup only through active normalized accounts", async () => {
+    const activeUser = {
+      id: "active-user",
+      name: "Active User",
+      email: "Person@Example.test",
+      emailVerified: new Date("2026-08-18T10:00:00Z"),
+      image: null,
+    };
+    const originalLookup = vi.fn();
+    mocks.userFindFirst.mockResolvedValue(activeUser);
+    const adapter = hardenAdapter({ getUserByEmail: originalLookup } as Adapter);
+
+    await expect(
+      adapter.getUserByEmail!("  PERSON@example.test "),
+    ).resolves.toEqual(activeUser);
+    expect(mocks.userFindFirst).toHaveBeenCalledWith({
+      where: {
+        normalizedEmail: "person@example.test",
+        status: "ACTIVE",
+      },
+    });
+    expect(originalLookup).not.toHaveBeenCalled();
+  });
+
+  it("returns null for pending normalized accounts", async () => {
+    mocks.userFindFirst.mockResolvedValue(null);
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.getUserByEmail!("pending@example.test"),
+    ).resolves.toBeNull();
+  });
+
   it("adds safe methods when an adapter omits deleteSession", async () => {
     const adapter = {} as Adapter;
     const hardened = hardenAdapter(adapter);
@@ -87,7 +140,7 @@ describe("hardenAdapter", () => {
     await expect(adapter.createVerificationToken!(created)).resolves.toEqual(created);
     expect(mocks.executeRaw).toHaveBeenCalledTimes(2);
     expect(mocks.deleteMany).toHaveBeenCalledWith({
-      where: { identifier: created.identifier },
+      where: { identifier: created.identifier, purpose: "LOGIN" },
     });
     expect(mocks.publishVerificationToken).toHaveBeenCalledWith({
       identifier: created.identifier,
@@ -118,5 +171,108 @@ describe("hardenAdapter", () => {
       identifier: consumed.identifier,
       token: consumed.token,
     })).resolves.toBeNull();
+  });
+
+  it("atomically activates a pending user and persists the signup snapshot in context", async () => {
+    const token = {
+      identifier: "pending@example.test",
+      token: "signup-hash",
+      expires: new Date(Date.now() + 60_000),
+      purpose: "SIGNUP",
+      proposedName: "Pending Person",
+      locale: "es",
+      termsVersion: "terms-v1",
+      privacyVersion: "privacy-v1",
+      acceptedAt: new Date("2026-08-18T12:00:00Z"),
+    };
+    mocks.getSignupActivationAuthorization.mockReturnValue({
+      identifier: token.identifier,
+      token: token.token,
+    });
+    mocks.tokenFindUnique.mockResolvedValue(token);
+    mocks.userFindUnique.mockResolvedValue({
+      id: "pending-user",
+      status: "PENDING",
+    });
+    mocks.userUpdate.mockResolvedValue({ id: "pending-user" });
+    mocks.acceptanceCreate.mockResolvedValue({ id: "acceptance" });
+    mocks.deleteMany.mockResolvedValue({ count: 1 });
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.useVerificationToken!({
+        identifier: token.identifier,
+        token: token.token,
+      }),
+    ).resolves.toEqual({
+      identifier: token.identifier,
+      token: token.token,
+      expires: token.expires,
+    });
+    expect(mocks.userUpdate).toHaveBeenCalledWith({
+      where: { id: "pending-user" },
+      data: {
+        name: token.proposedName,
+        status: "ACTIVE",
+        emailVerified: expect.any(Date),
+      },
+    });
+    expect(mocks.acceptanceCreate).toHaveBeenCalledWith({
+      data: {
+        userId: "pending-user",
+        termsVersion: token.termsVersion,
+        privacyVersion: token.privacyVersion,
+        acceptedAt: token.acceptedAt,
+      },
+    });
+  });
+
+  it("rejects signup purpose without an activation context", async () => {
+    mocks.queryRaw.mockResolvedValue([]);
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.useVerificationToken!({
+        identifier: "pending@example.test",
+        token: "signup-hash",
+      }),
+    ).resolves.toBeNull();
+    expect(mocks.transaction).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["replayed", null, { id: "pending-user", status: "PENDING" }],
+    ["stale", { identifier: "pending@example.test", token: "newer-hash" }, { id: "pending-user", status: "PENDING" }],
+    ["active", { identifier: "pending@example.test", token: "signup-hash" }, { id: "active-user", status: "ACTIVE" }],
+  ])("rejects %s signup activation without mutation", async (_case, storedToken, user) => {
+    mocks.getSignupActivationAuthorization.mockReturnValue({
+      identifier: "pending@example.test",
+      token: "signup-hash",
+    });
+    mocks.tokenFindUnique.mockResolvedValue(
+      storedToken
+        ? {
+            ...storedToken,
+            expires: new Date(Date.now() + 60_000),
+            purpose: "SIGNUP",
+            proposedName: "Pending Person",
+            locale: "en",
+            termsVersion: "terms-v1",
+            privacyVersion: "privacy-v1",
+            acceptedAt: new Date(),
+          }
+        : null,
+    );
+    mocks.userFindUnique.mockResolvedValue(user);
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.useVerificationToken!({
+        identifier: "pending@example.test",
+        token: "signup-hash",
+      }),
+    ).resolves.toBeNull();
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.acceptanceCreate).not.toHaveBeenCalled();
   });
 });

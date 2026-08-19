@@ -1,11 +1,29 @@
 import "server-only";
 
 import nodemailer from "nodemailer";
+import addressparser from "nodemailer/lib/addressparser";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 import { getEnv, type Env } from "@/lib/env";
 
 const SMTP_TIMEOUT_MS = 10_000;
+
+function formatSmtpFrom(projectName: string, configuredFrom: string) {
+  const addresses = addressparser(configuredFrom, { flatten: true });
+  if (addresses.length !== 1 || !addresses[0]?.address) {
+    throw new Error("SMTP_FROM must contain exactly one email address");
+  }
+  if (/\r|\n/.test(projectName)) {
+    throw new Error("PROJECT_NAME must not contain line breaks");
+  }
+
+  const escapedProjectName = projectName.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+  return `"${escapedProjectName}" <${addresses[0].address}>`;
+}
+
+export function formatEmailSubject(template: string, projectName: string) {
+  return template.replaceAll("{projectName}", () => projectName);
+}
 
 type DeliveryOutcome =
   | { status: "accepted" }
@@ -43,7 +61,7 @@ export function getSmtpConfig(env: Env = getEnv()) {
         pass: env.SMTP_PASSWORD!,
       },
     },
-    from: env.SMTP_FROM!,
+    from: formatSmtpFrom(env.PROJECT_NAME, env.SMTP_FROM!),
   };
 }
 

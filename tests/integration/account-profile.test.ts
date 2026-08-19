@@ -6,6 +6,14 @@ vi.mock("server-only", () => ({}));
 
 const runIntegrationTests = process.env.RUN_INTEGRATION_TESTS === "true";
 
+function activeUser(email: string) {
+  return {
+    email,
+    normalizedEmail: email.trim().toLowerCase(),
+    status: "ACTIVE" as const,
+  };
+}
+
 const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
   redirect: vi.fn((path: string) => {
@@ -48,10 +56,10 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
 
     const suffix = crypto.randomUUID();
     const owner = await db.user.create({
-      data: { email: `owner-${suffix}@example.test`, name: "Owner Name" },
+      data: { ...activeUser(`owner-${suffix}@example.test`), name: "Owner Name" },
     });
     const other = await db.user.create({
-      data: { email: `other-${suffix}@example.test`, name: "Other Name" },
+      data: { ...activeUser(`other-${suffix}@example.test`), name: "Other Name" },
     });
     createdUserIds.push(owner.id, other.id);
     mocks.getServerSession.mockResolvedValue({ user: { id: owner.id } });
@@ -83,7 +91,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
     const suffix = crypto.randomUUID();
     const owner = await db.user.create({
       data: {
-        email: `owner-forged-${suffix}@example.test`,
+        ...activeUser(`owner-forged-${suffix}@example.test`),
         name: "Owner Name",
         image: "https://cdn.example.test/owner.png",
       },
@@ -127,7 +135,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
     const suffix = crypto.randomUUID();
     const owner = await db.user.create({
       data: {
-        email: `owner-replay-${suffix}@example.test`,
+        ...activeUser(`owner-replay-${suffix}@example.test`),
         name: "Replay Name",
       },
     });
@@ -161,7 +169,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
     const suffix = crypto.randomUUID();
     const owner = await db.user.create({
       data: {
-        email: `owner-concurrency-${suffix}@example.test`,
+        ...activeUser(`owner-concurrency-${suffix}@example.test`),
         name: "Original",
       },
     });
@@ -191,7 +199,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
       const suffix = crypto.randomUUID();
       const owner = await db.user.create({
         data: {
-          email: `owner-redirect-${suffix}@example.test`,
+          ...activeUser(`owner-redirect-${suffix}@example.test`),
           name: "Owner Name",
         },
       });
@@ -216,7 +224,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
       const suffix = crypto.randomUUID();
       const owner = await db.user.create({
         data: {
-          email: `owner-invalid-${suffix}@example.test`,
+          ...activeUser(`owner-invalid-${suffix}@example.test`),
           name: "Owner Name",
           image: "https://cdn.example.test/owner.png",
         },
@@ -248,7 +256,7 @@ describe.skipIf(!runIntegrationTests)("account profile integration", () => {
     const suffix = crypto.randomUUID();
     const owner = await db.user.create({
       data: {
-        email: `owner-persistence-${suffix}@example.test`,
+        ...activeUser(`owner-persistence-${suffix}@example.test`),
         name: "Owner Name",
         image: "https://cdn.example.test/owner.png",
       },

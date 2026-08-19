@@ -98,9 +98,10 @@ with a different `Host` or `X-Forwarded-Host` are rejected before NextAuth. The 
 values point at an external transactional email provider. Leave them empty in the template. The
 first application spec must define registration, which existing users may authenticate, the email
 provider, and the integration tests before setting `AUTH_EMAIL_ENABLED=true`. SMTP configuration
-alone does not activate email sign-in. The SMTP transport timeout is fixed at 10 seconds in
-`src/lib/email.ts`. The hardened auth adapter refuses to create unknown users; registration remains
-a separate product flow that validates the application's required fields.
+alone does not activate email sign-in. This application now defines that boundary in the signup
+feature described below. The SMTP transport timeout is fixed at 10 seconds in `src/lib/email.ts`.
+The hardened auth adapter refuses to create unknown users; registration remains a separate product
+flow that validates the application's required fields.
 Keep `TRUST_PROXY_HEADERS=false` unless Cloudflare is the exclusive route to the origin and the
 ingress overwrites `X-Forwarded-Host` and `CF-Connecting-IP` on every request. A private app network
 alone is insufficient because a publicly reachable Traefik instance can forward client-supplied
@@ -122,15 +123,48 @@ The local SpecKit hooks provide pre-PR feedback. CI is authoritative and require
 unit/integration tests with coverage thresholds, SpecKit compliance, a production dependency audit,
 a production build, and Playwright smoke tests for routing, CSP, request correlation, and database
 readiness against the standalone artifact. The template intentionally does not emulate SMTP or test
-an application-specific authentication flow. Deployments are serialized and are never canceled
-mid-build or mid-migration.
+an external inbox: signup verification uses a controlled local SMTP fixture and the real Auth.js
+database-session boundary in integration and production-artifact tests. Deployments are serialized
+and are never canceled mid-build or mid-migration.
 
 Application code may be reverted only while it remains compatible with the applied schema. Prisma
 migrations are forward-only: recover with a corrective migration in normal operation. For an
 incompatible or destructive change, restore a verified backup into a fresh database/volume and
 switch traffic only after validation; reverting Git does not reverse schema or data. Public signup
-does not introduce automatic or opportunistic disabled-user deletion; retained disabled accounts are
+does not introduce automatic or opportunistic pending-user deletion; retained `PENDING` accounts are
 part of forward recovery and must remain reusable by later valid submissions.
+
+## Signup and login lifecycle
+
+- **Signup is explicit registration.** Signed-out visitors use `/signup`, `/es/signup`, or
+  `/ca/signup` and provide a validated name, normalized email, and one unchecked combined Terms and
+  Privacy acceptance. Signup is the only flow allowed to create a `PENDING` user.
+- **Login remains existing-user-only.** Ordinary email login resolves only `ACTIVE` users. Unknown
+  and pending addresses keep the same private accepted response but receive no login credential;
+  the Auth.js adapter's `createUser` method remains an unconditional failure.
+- **Mailbox activation owns the transition.** A pending signup receives one newest-only 15-minute
+  onboarding link. Its candidate name, locale, `2026-08-18-draft` policy versions, and server time
+  stay bound to that credential until atomic consumption activates the same user and inserts one
+  immutable policy acceptance. Auth.js alone creates the normal database session and cookie.
+- **Existing accounts are not modified.** Signup for an active address returns the same public
+  confirmation and privately sends a credential-free localized login notice. It does not change
+  profile, acceptance, token, or session data.
+- **Pending users are retained for recovery.** A later valid signup reuses the row and supersedes its
+  earlier candidate link. Isolated delivery failure removes the unusable newest token without
+  restoring its predecessor; the pending account remains safe to retry. No cleanup job deletes it.
+- **Limits and availability are shared.** Login and signup share PostgreSQL-backed limits of five
+  attempts per trusted client and three per normalized address in 15 minutes. Only connection- or
+  timeout-level SMTP failures open the account-independent provider cooldown.
+- **Policy content is product-owned development input.** English, Spanish, and Catalan Terms and
+  Privacy Notice pages use the user-authorized `2026-08-18-draft` dummy content. Every page visibly
+  identifies it as an unreviewed development draft and not legal advice. A reviewed replacement must
+  update the source-controlled copy and version identifiers together; engineering does not determine
+  legal sufficiency.
+- **Deployment reuses existing infrastructure.** Signup uses the configured Nodemailer transport,
+  existing `AUTH_SECRET`, canonical `NEXTAUTH_URL`, SMTP settings, PostgreSQL database, and Auth.js
+  database sessions. It adds no runtime service, port, queue, custom session cookie, environment
+  variable, or secret. Keep `AUTH_EMAIL_ENABLED` and the existing SMTP values configured for both
+  login and signup delivery.
 
 ## Database, backups & health
 

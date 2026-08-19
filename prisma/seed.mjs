@@ -45,11 +45,13 @@ async function main() {
 
   try {
     const result = await client.query(
-      `INSERT INTO "User" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, NOW(), NOW(), NOW())
-       ON CONFLICT ("email") DO UPDATE SET
+      `INSERT INTO "User" ("id", "name", "email", "normalizedEmail", "emailVerified", "status", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $3, NOW(), 'ACTIVE', NOW(), NOW())
+       ON CONFLICT ("normalizedEmail") DO UPDATE SET
          "name" = EXCLUDED."name",
+         "email" = EXCLUDED."email",
          "emailVerified" = COALESCE("User"."emailVerified", EXCLUDED."emailVerified"),
+         "status" = 'ACTIVE',
          "updatedAt" = NOW()
        RETURNING "email"`,
       [randomUUID(), seedUser.name, seedUser.email],

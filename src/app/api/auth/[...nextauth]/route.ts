@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { validateAuthCsrfToken } from "@/lib/auth-csrf";
+import { getEnv } from "@/lib/env";
 import { getRequestLogger } from "@/lib/logger";
 import { getProviderAvailability } from "@/lib/provider-availability";
 import { getClientIdentifier } from "@/lib/request-context";
@@ -54,6 +55,10 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 	if (!pathname.endsWith("/signin/email")) {
 		return await authHandler(request, context);
 	}
+	const mail = getEnv().MAIL;
+	if (!mail.enabled) {
+		return Response.json({ status: "unavailable" }, { status: 503 });
+	}
 
 	const startedAt = Date.now();
 	const clientResult = await consumeSharedRateLimit({
@@ -93,7 +98,7 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 		return rateLimitResponse(request, pathname, emailResult.retryAfterSeconds);
 	}
 
-	const providerAvailability = await getProviderAvailability();
+	const providerAvailability = await getProviderAvailability(mail);
 	if (!providerAvailability.available) {
 		getRequestLogger(request, { route: pathname }).warn(
 			{ retryAfterSeconds: providerAvailability.retryAfterSeconds },

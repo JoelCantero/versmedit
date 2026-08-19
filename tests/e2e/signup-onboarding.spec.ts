@@ -4,8 +4,19 @@ import { expect, test } from "@playwright/test";
 import { source as axeSource } from "axe-core";
 import { Pool } from "pg";
 
-const smtpControlUrl = process.env.E2E_SMTP_HTTP_URL;
+const providerControlUrl = process.env.E2E_PROVIDER_HTTP_URL;
+const e2eProvider = process.env.E2E_MAIL_PROVIDER ?? "brevo";
+const e2eApiKey = process.env.E2E_MAIL_API_KEY ?? "e2e-provider-key";
+const e2eApiSecret = process.env.E2E_MAIL_API_SECRET ?? "e2e-provider-secret";
 const trackedEmails = new Set<string>();
+
+interface CapturedProviderRequest {
+  target: "brevo.health" | "brevo.send" | "mailjet.health" | "mailjet.send";
+  logicalUrl: string;
+  method: string;
+  headers: Record<string, string | string[]>;
+  body: string;
+}
 
 const localizedSignupTargets = [
   {
@@ -313,7 +324,8 @@ async function cleanupSignupData() {
     );
     await pool.query(
       `DELETE FROM "RateLimitBucket" WHERE "key" = ANY($1::text[])
-         OR "key" = 'auth:email:client:untrusted-direct-client'`,
+         OR "key" = 'auth:email:client:untrusted-direct-client'
+         OR "key" LIKE 'mail:provider-health%'`,
       [addressKeys],
     );
   } finally {
@@ -331,9 +343,18 @@ test("keeps signup private and activates through the normal Auth.js session", as
   context,
   baseURL,
 }) => {
-  test.skip(!smtpControlUrl, "controlled SMTP fixture is required");
+  test.skip(!providerControlUrl, "controlled HTTP provider fixture is required");
+  test.skip(
+    e2eProvider !== "brevo" && e2eProvider !== "mailjet",
+    "E2E_MAIL_PROVIDER must be brevo or mailjet",
+  );
 
-  await fetch(`${smtpControlUrl}/reset`, { method: "POST" });
+  await fetch(`${providerControlUrl}/control/reset`, { method: "POST" });
+  const pool = getPool();
+  await pool.query(
+    `DELETE FROM "RateLimitBucket" WHERE "key" LIKE 'mail:provider-health%'`,
+  );
+  await pool.end();
   const suffix = randomUUID();
   const newEmail = `new-${suffix}@example.test`;
   const pendingEmail = `pending-${suffix}@example.test`;
@@ -368,23 +389,90 @@ test("keeps signup private and activates through the normal Auth.js session", as
     new Set(["/signup"]),
   );
 
-  const capture = (await fetch(`${smtpControlUrl}/messages`).then((response) =>
-    response.json(),
-  )) as { messages: Array<{ to: string[]; raw: string }> };
-  expect(capture.messages).toHaveLength(3);
-  const activeNotice = capture.messages.find((message) =>
-    message.to.includes(activeEmail),
+  const capture = (await fetch(
+    `${providerControlUrl}/control/requests`,
+  ).then((response) => response.json())) as {
+    requests: CapturedProviderRequest[];
+  };
+  expect(capture.requests).toHaveLength(4);
+  const providerPrefix = e2eProvider === "brevo" ? "brevo" : "mailjet";
+  const healthRequest = capture.requests.filter(
+    (request) => request.target === `${providerPrefix}.health`,
   );
-  expect(activeNotice?.raw).toContain("/login");
-  expect(activeNotice?.raw).not.toContain("/api/signup/activate");
+  const sendRequests = capture.requests.filter(
+    (request) => request.target === `${providerPrefix}.send`,
+  );
+  expect(healthRequest).toHaveLength(1);
+  expect(sendRequests).toHaveLength(3);
 
-  const onboarding = capture.messages.find((message) =>
-    message.to.includes(newEmail),
-  );
-  const decodedMessage = onboarding?.raw
-    .replace(/=\r?\n/g, "")
-    .replaceAll("=3D", "=");
-  const activationUrl = decodedMessage?.match(
+  const expectedAuthorization = `Basic ${Buffer.from(`${e2eApiKey}:${e2eApiSecret}`).toString("base64")}`;
+  if (e2eProvider === "brevo") {
+    expect(healthRequest[0]).toMatchObject({
+      logicalUrl: "https://api.brevo.com/v3/account",
+      method: "GET",
+    });
+    expect(healthRequest[0]?.headers["api-key"]).toBe(e2eApiKey);
+    for (const request of sendRequests) {
+      expect(request).toMatchObject({
+        logicalUrl: "https://api.brevo.com/v3/smtp/email",
+        method: "POST",
+      });
+      expect(request.headers["api-key"]).toBe(e2eApiKey);
+    }
+  } else {
+    expect(healthRequest[0]).toMatchObject({
+      logicalUrl: "https://api.mailjet.com/v3/REST/sender?Limit=1",
+      method: "GET",
+    });
+    expect(healthRequest[0]?.headers.authorization).toBe(expectedAuthorization);
+    for (const request of sendRequests) {
+      expect(request).toMatchObject({
+        logicalUrl: "https://api.mailjet.com/v3.1/send",
+        method: "POST",
+      });
+      expect(request.headers.authorization).toBe(expectedAuthorization);
+    }
+  }
+
+  const messages = sendRequests.map((request) => {
+    const body = JSON.parse(request.body) as Record<string, unknown>;
+    if (e2eProvider === "brevo") {
+      const sender = body.sender as { email: string; name: string };
+      const to = body.to as Array<{ email: string }>;
+      return {
+        recipient: to[0]!.email,
+        sender,
+        subject: body.subject as string,
+        text: body.textContent as string,
+        html: body.htmlContent as string,
+      };
+    }
+    const message = (body.Messages as Array<Record<string, unknown>>)[0]!;
+    const sender = message.From as { Email: string; Name: string };
+    const to = message.To as Array<{ Email: string }>;
+    return {
+      recipient: to[0]!.Email,
+      sender: { email: sender.Email, name: sender.Name },
+      subject: message.Subject as string,
+      text: message.TextPart as string,
+      html: message.HTMLPart as string,
+    };
+  });
+  for (const message of messages) {
+    expect(message.sender).toEqual({
+      email: "no-reply@example.test",
+      name: "playwright",
+    });
+    expect(message.subject).toBeTruthy();
+    expect(message.text).toBeTruthy();
+    expect(message.html).toBeTruthy();
+  }
+  const activeNotice = messages.find((message) => message.recipient === activeEmail);
+  expect(activeNotice?.text).toContain("/login");
+  expect(activeNotice?.text).not.toContain("/api/signup/activate");
+
+  const onboarding = messages.find((message) => message.recipient === newEmail);
+  const activationUrl = onboarding?.text.match(
     /https?:\/\/[^\s<"]+\/api\/signup\/activate\?token=[A-Za-z0-9_-]{43}/,
   )?.[0];
   expect(activationUrl).toBeTruthy();

@@ -184,7 +184,7 @@ export async function processSignup(
         origin,
       });
       const outcome =
-        delivery.status === "accepted"
+        delivery.accepted
           ? "active_notice_sent"
           : "active_notice_failed";
       recordOutcome(outcome, startedAt);
@@ -203,7 +203,7 @@ export async function processSignup(
       locale: request.locale,
       origin,
     });
-    if (delivery.status === "accepted") {
+    if (delivery.accepted) {
       const confirmed = await confirmDeliveredToken(
         request.email,
         issuance.tokenHash,

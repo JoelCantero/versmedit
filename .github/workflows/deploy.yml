@@ -50,6 +50,11 @@ jobs:
           RUNNER_NAME: ${{ vars.RUNNER_NAME }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
+          MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
+          MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
         run: |
           missing=()
           [ -n "$PROJECT_NAME" ] || missing+=("PROJECT_NAME (Variable)")
@@ -58,6 +63,19 @@ jobs:
           [ -n "$RUNNER_NAME" ] || missing+=("RUNNER_NAME (Variable)")
           [ -n "$POSTGRES_PASSWORD" ] || missing+=("POSTGRES_PASSWORD (Secret)")
           [ -n "$AUTH_SECRET" ] || missing+=("AUTH_SECRET (Secret)")
+          [ -n "$MAIL_ENABLED" ] || missing+=("MAIL_ENABLED (Variable)")
+          if [ "$MAIL_ENABLED" = "true" ]; then
+            [ -n "$MAIL_PROVIDER" ] || missing+=("MAIL_PROVIDER (Variable)")
+            [ -n "$MAIL_FROM" ] || missing+=("MAIL_FROM (Variable)")
+            [ -n "$MAIL_API_KEY" ] || missing+=("MAIL_API_KEY (Secret)")
+            if [ "$MAIL_PROVIDER" = "mailjet" ]; then
+              [ -n "$MAIL_API_SECRET" ] || missing+=("MAIL_API_SECRET (Secret)")
+            elif [ "$MAIL_PROVIDER" != "brevo" ]; then
+              missing+=("MAIL_PROVIDER must be brevo or mailjet")
+            fi
+          elif [ "$MAIL_ENABLED" != "false" ]; then
+            missing+=("MAIL_ENABLED must be true or false")
+          fi
           if [ ${#missing[@]} -ne 0 ]; then
             echo "Missing required configuration:"
             printf '  - %s\n' "${missing[@]}"
@@ -112,16 +130,12 @@ jobs:
           POSTGRES_DB: ${{ vars.PROJECT_NAME }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          # SMTP for Auth.js email sign-in (external provider). Non-sensitive ->
-          # Variables; credentials -> Secrets. SMTP alone is insufficient:
-          # AUTH_EMAIL_ENABLED must be explicitly true after the product auth spec.
-          AUTH_EMAIL_ENABLED: ${{ vars.AUTH_EMAIL_ENABLED }}
-          SMTP_HOST: ${{ vars.SMTP_HOST }}
-          SMTP_PORT: ${{ vars.SMTP_PORT }}
-          SMTP_SECURE: ${{ vars.SMTP_SECURE }}
-          SMTP_FROM: ${{ vars.SMTP_FROM }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          # Transactional email config. Endpoints are fixed in application code.
+          MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
+          MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
+          MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
         run: |
           cd "$DEPLOY_DIR"
           db_user="$(printf '%s\n' "$POSTGRES_USER" | scripts/urlencode.sh)"
@@ -169,22 +183,6 @@ jobs:
           echo "App did not become healthy within the timeout. Recent logs:"
           docker logs --tail 50 "$cid" || true
           exit 1
-
-      - name: Verify SMTP transport
-        run: |
-          cd "$DEPLOY_DIR"
-          echo "Verifying SMTP transport from the production app container..."
-          docker compose -f docker-compose.prod.yml exec -T app sh -eu -c '
-            user_b64="$(printf %s "$SMTP_USER" | openssl base64 -A)"
-            password_b64="$(printf %s "$SMTP_PASSWORD" | openssl base64 -A)"
-            response="$(printf "EHLO versmedit.com\\r\\nAUTH LOGIN\\r\\n%s\\r\\n%s\\r\\nQUIT\\r\\n" "$user_b64" "$password_b64" | openssl s_client -connect "$SMTP_HOST:$SMTP_PORT" -servername "$SMTP_HOST" -quiet 2>&1)"
-            printf "%s\\n" "$response" | sed -E "s/^[[:space:]]*[0-9]{3}[- ]/SMTP response: /" | tail -20
-            printf "%s\\n" "$response" | grep -q "235" || {
-              echo "SMTP authentication failed or the server rejected the session."
-              exit 1
-            }
-            echo "SMTP transport verified."
-          '
 
       - name: Prune old images
         run: docker image prune -f

@@ -1,0 +1,123 @@
+// @vitest-environment node
+
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createHttpMailProvider } from "../helpers/http-mail-provider";
+
+vi.mock("server-only", () => ({}));
+
+const mocks = vi.hoisted(() => ({
+  info: vi.fn(),
+}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: { info: mocks.info },
+}));
+
+import { sendTransactionalEmail } from "@/lib/email/index";
+import type { BrevoMailConfig } from "@/lib/env";
+
+const config: BrevoMailConfig = {
+  enabled: true,
+  provider: "brevo",
+  apiKey: "private-api-key",
+  fromEmail: "no-reply@example.test",
+  senderName: "versmedit",
+  sendTimeoutMs: 2_500,
+  healthTimeoutMs: 1_500,
+  responseLimitBytes: 65_536,
+};
+const message = {
+  recipient: "private.person@example.test",
+  locale: "en" as const,
+  subject: "Private sign-in subject",
+  text: "Use https://app.example.test/callback?token=raw-private-token",
+  html: "<a href='https://app.example.test/callback?token=raw-private-token'>Private</a>",
+};
+
+describe("transactional email submission logging", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("disables framework request logs that could expose callback query values", async () => {
+    const nextConfig = await readFile(path.join(process.cwd(), "next.config.ts"), "utf8");
+
+    expect(nextConfig).toMatch(/logging:\s*{\s*incomingRequests:\s*false/);
+  });
+
+  it("records one allowlisted accepted-submission event without claiming delivery", async () => {
+    const http = createHttpMailProvider([
+      {
+        status: 201,
+        body: JSON.stringify({ messageId: "safe-message-id-42" }),
+      },
+    ]);
+
+    await sendTransactionalEmail(message, config, http.client, {
+      correlationId: "request-42",
+    });
+
+    expect(mocks.info).toHaveBeenCalledOnce();
+    expect(mocks.info).toHaveBeenCalledWith(
+      {
+        event: "transactional_email_submission",
+        provider: "brevo",
+        category: "accepted",
+        accepted: true,
+        providerMessageId: "safe-message-id-42",
+        statusClass: "2xx",
+        durationMs: expect.any(Number),
+        correlationId: "request-42",
+      },
+      "transactional email submission accepted",
+    );
+    const serialized = JSON.stringify(mocks.info.mock.calls);
+    expect(serialized).not.toMatch(/deliver(?:y|ed)/i);
+    for (const privateValue of [
+      config.apiKey,
+      config.fromEmail,
+      config.senderName,
+      message.recipient,
+      message.subject,
+      message.text,
+      message.html,
+      "raw-private-token",
+    ]) {
+      expect(serialized).not.toContain(privateValue);
+    }
+  });
+
+  it.each([
+    ["rate_limited", { status: 429, body: "private raw response" }, "4xx"],
+    ["provider_unavailable", { error: new Error("private network details") }, null],
+    ["unknown", { status: 202, body: "malformed private body" }, "2xx"],
+  ] as const)(
+    "records one normalized %s event without raw provider data",
+    async (category, behavior, statusClass) => {
+      const http = createHttpMailProvider([behavior]);
+
+      await sendTransactionalEmail(message, config, http.client, {
+        correlationId: "request-failure",
+      });
+
+      expect(mocks.info).toHaveBeenCalledOnce();
+      expect(mocks.info).toHaveBeenCalledWith(
+        {
+          event: "transactional_email_submission",
+          provider: "brevo",
+          category,
+          accepted: false,
+          providerMessageId: null,
+          statusClass,
+          durationMs: expect.any(Number),
+          correlationId: "request-failure",
+        },
+        "transactional email submission not accepted",
+      );
+      const serialized = JSON.stringify(mocks.info.mock.calls);
+      expect(serialized).not.toMatch(/private raw response|private network details|malformed private body/);
+    },
+  );
+});

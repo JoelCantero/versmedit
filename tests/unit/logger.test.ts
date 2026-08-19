@@ -118,6 +118,42 @@ describe("createLogger", () => {
     });
   });
 
+  it("redacts outbound HTTP credentials, recipients, content, and raw payloads", async () => {
+    const lines: string[] = [];
+    const destination: DestinationStream = {
+      write(chunk) {
+        lines.push(chunk);
+      },
+    };
+    const { createLogger } = await import("@/lib/logger");
+    const logger = createLogger(process.env, destination);
+    const privateValues = {
+      apiKey: "private-api-key",
+      apiSecret: "private-api-secret",
+      authorization: "Basic private-authorization",
+      recipient: "private@example.test",
+      fromEmail: "sender@example.test",
+      subject: "Private subject",
+      text: "Private plain text",
+      html: "<p>Private HTML</p>",
+      body: "private request body",
+      raw: "private raw response",
+      headers: { "api-key": "private-header-key" },
+    };
+
+    logger.info({ outbound: privateValues }, "outbound request");
+
+    const serialized = lines.at(-1)!;
+    for (const privateValue of [
+      ...Object.values(privateValues).filter(
+        (value): value is string => typeof value === "string",
+      ),
+      "private-header-key",
+    ]) {
+      expect(serialized).not.toContain(privateValue);
+    }
+  });
+
   it("creates a child logger with request context", async () => {
     const { getRequestLogger } = await import("@/lib/logger");
     const request = new Request("https://example.test/api/health", {

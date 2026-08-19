@@ -83,8 +83,8 @@ describe("signup service", () => {
       raw: "raw-signup-token",
       persisted: { token: "hashed-signup-token", expires },
     });
-    mocks.sendOnboardingEmail.mockResolvedValue({ status: "accepted" });
-    mocks.sendActiveAccountEmail.mockResolvedValue({ status: "accepted" });
+    mocks.sendOnboardingEmail.mockResolvedValue({ accepted: true });
+    mocks.sendActiveAccountEmail.mockResolvedValue({ accepted: true });
   });
 
   it("creates one pending account and link-bound candidate snapshot", async () => {
@@ -183,10 +183,17 @@ describe("signup service", () => {
     );
   });
 
-  it("removes only the failed new token and never restores a predecessor", async () => {
+  it.each([
+    "authentication",
+    "rate_limited",
+    "recipient_rejected",
+    "provider_unavailable",
+    "invalid_request",
+    "unknown",
+  ] as const)("removes only the failed new token for %s and never restores a predecessor", async (category) => {
     mocks.sendOnboardingEmail.mockResolvedValue({
-      status: "rejected",
-      category: "recipient",
+      accepted: false,
+      category,
     });
 
     await expect(
@@ -201,12 +208,35 @@ describe("signup service", () => {
         purpose: "SIGNUP",
       },
     });
+    expect(mocks.sendOnboardingEmail).toHaveBeenCalledOnce();
+    expect(mocks.tokenUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("maps a non-accepted active-account notice without issuing credentials", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "active-user",
+      normalizedEmail: request.email,
+      status: "ACTIVE",
+    });
+    mocks.sendActiveAccountEmail.mockResolvedValue({
+      accepted: false,
+      category: "provider_unavailable",
+    });
+
+    await expect(
+      processSignup(request, { now: () => issuedAt }),
+    ).resolves.toEqual({ outcome: "active_notice_failed" });
+
+    expect(mocks.sendActiveAccountEmail).toHaveBeenCalledOnce();
+    expect(mocks.createSignupCredential).not.toHaveBeenCalled();
+    expect(mocks.tokenCreate).not.toHaveBeenCalled();
+    expect(mocks.tokenUpdateMany).not.toHaveBeenCalled();
   });
 
   it("leaves a failed-delivery token provisional when compensation also fails", async () => {
     mocks.sendOnboardingEmail.mockResolvedValue({
-      status: "rejected",
-      category: "recipient",
+      accepted: false,
+      category: "recipient_rejected",
     });
     const transactionImplementation = mocks.transaction.getMockImplementation();
     mocks.transaction

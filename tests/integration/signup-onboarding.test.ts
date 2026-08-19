@@ -9,7 +9,7 @@ import { Client } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createSignupFixtureScope } from "../helpers/signup-fixtures";
-import { startTestSmtpServer } from "../helpers/smtp-server";
+import { createHttpMailProvider } from "../helpers/http-mail-provider";
 
 vi.mock("server-only", () => ({}));
 
@@ -20,13 +20,11 @@ const managedEnv = [
   "PROJECT_NAME",
   "AUTH_SECRET",
   "NEXTAUTH_URL",
-  "AUTH_EMAIL_ENABLED",
-  "SMTP_HOST",
-  "SMTP_PORT",
-  "SMTP_SECURE",
-  "SMTP_USER",
-  "SMTP_PASSWORD",
-  "SMTP_FROM",
+  "MAIL_ENABLED",
+  "MAIL_PROVIDER",
+  "MAIL_API_KEY",
+  "MAIL_API_SECRET",
+  "MAIL_FROM",
   "TRUST_PROXY_HEADERS",
 ] as const;
 
@@ -34,36 +32,133 @@ type Database = (typeof import("@/lib/db"))["db"];
 type SignupPost = (typeof import("@/app/api/signup/route"))["POST"];
 type SignupActivate = (typeof import("@/app/api/signup/activate/route"))["GET"];
 type AuthPost = (typeof import("@/app/api/auth/[...nextauth]/route"))["POST"];
-type SmtpFixture = Awaited<ReturnType<typeof startTestSmtpServer>>;
+
+describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
+  it("normalizes disabled mail without constructing a provider request", async () => {
+    const { validateEnv } = await import("@/lib/env");
+    const http = createHttpMailProvider();
+    const env = validateEnv({
+      NODE_ENV: "test",
+      PROJECT_NAME: "versmedit",
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
+      AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
+      NEXTAUTH_URL: "https://app.example.test",
+      MAIL_ENABLED: "false",
+      MAIL_PROVIDER: "brevo",
+      MAIL_API_KEY: "provisioned-but-disabled",
+      MAIL_FROM: "no-reply@example.test",
+    });
+
+    expect(env.MAIL).toEqual({ enabled: false });
+    expect(http.requests).toHaveLength(0);
+  });
+
+  it.each(["brevo", "mailjet"] as const)(
+    "submits new, pending, and active-account messages through %s",
+    async (providerName) => {
+      const { createTransactionalEmailProvider } = await import("@/lib/email/index");
+      const { buildActiveAccountEmail, buildOnboardingEmail } = await import(
+        "@/modules/signup/email"
+      );
+      const mailjetSuccess = (id?: string) => ({
+        body: JSON.stringify({
+          Messages: [
+            {
+              Status: "success",
+              To: [
+                {
+                  Email: "person@example.test",
+                  ...(id ? { MessageUUID: id } : {}),
+                },
+              ],
+            },
+          ],
+        }),
+      });
+      const http = createHttpMailProvider(
+        providerName === "brevo"
+          ? [
+              { body: JSON.stringify({ messageId: "new-id" }) },
+              { body: "{}" },
+              { body: JSON.stringify({ messageId: "active-id" }) },
+            ]
+          : [mailjetSuccess("new-id"), mailjetSuccess(), mailjetSuccess("active-id")],
+      );
+      const { validateEnv } = await import("@/lib/env");
+      const env = validateEnv({
+        NODE_ENV: "test",
+        PROJECT_NAME: "versmedit",
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
+        AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
+        NEXTAUTH_URL: "https://app.example.test",
+        MAIL_ENABLED: "true",
+        MAIL_PROVIDER: providerName,
+        MAIL_API_KEY: "integration-key",
+        MAIL_API_SECRET: providerName === "mailjet" ? "integration-secret" : undefined,
+        MAIL_FROM: "no-reply@example.test",
+      });
+      if (!env.MAIL.enabled) throw new Error("mail must be enabled for this test");
+      const provider = createTransactionalEmailProvider(env.MAIL, http.client);
+      const base = {
+        recipient: "person@example.test",
+        locale: "es" as const,
+        origin: "https://app.example.test",
+      };
+      const messages = [
+        buildOnboardingEmail({ ...base, rawToken: "new-token" }, "versmedit"),
+        buildOnboardingEmail({ ...base, rawToken: "pending-token" }, "versmedit"),
+        buildActiveAccountEmail(base, "versmedit"),
+      ];
+
+      const results = [];
+      for (const message of messages) results.push(await provider.send(message));
+
+      expect(results.map(({ accepted, providerMessageId }) => ({
+        accepted,
+        providerMessageId,
+      }))).toEqual([
+        { accepted: true, providerMessageId: "new-id" },
+        { accepted: true, providerMessageId: null },
+        { accepted: true, providerMessageId: "active-id" },
+      ]);
+      expect(http.requests).toHaveLength(3);
+      expect(http.requests[0]?.body).toContain("new-token");
+      expect(http.requests[1]?.body).toContain("pending-token");
+      expect(http.requests[2]?.body).not.toMatch(/token|signup\/activate/i);
+    },
+  );
+});
 
 describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
   let db: Database;
   let postSignup: SignupPost;
   let activateSignup: SignupActivate;
   let postAuth: AuthPost;
-  let smtp: SmtpFixture;
+  let http: ReturnType<typeof createHttpMailProvider>;
   let fixtures = createSignupFixtureScope("signup-onboarding");
   const limiterKeys = new Set<string>();
   const submittedEmails = new Set<string>();
   let clientSequence = 60;
 
   beforeAll(async () => {
-    smtp = await startTestSmtpServer({ clientTimeoutMs: 1_000 });
     for (const key of managedEnv) originalEnv.set(key, process.env[key]);
     Object.assign(process.env, {
       PROJECT_NAME: "versmedit-signup-test",
       AUTH_SECRET: secret,
       NEXTAUTH_URL: "https://app.example.test",
-      AUTH_EMAIL_ENABLED: "true",
-      SMTP_HOST: smtp.host,
-      SMTP_PORT: String(smtp.port),
-      SMTP_SECURE: "false",
-      SMTP_USER: "signup-test",
-      SMTP_PASSWORD: "signup-test-password",
-      SMTP_FROM: "Versmedit Test <no-reply@example.test>",
+      MAIL_ENABLED: "true",
+      MAIL_PROVIDER: "brevo",
+      MAIL_API_KEY: "signup-integration-key",
+      MAIL_API_SECRET: "",
+      MAIL_FROM: "no-reply@example.test",
       TRUST_PROXY_HEADERS: "true",
     });
     vi.resetModules();
+    http = createHttpMailProvider();
+    vi.doMock("@/lib/email/http", async (importOriginal) => ({
+      ...(await importOriginal<typeof import("@/lib/email/http")>()),
+      nativeProviderHttpClient: http.client,
+    }));
     db = (await import("@/lib/db")).db;
     postSignup = (await import("@/app/api/signup/route")).POST;
     activateSignup = (await import("@/app/api/signup/activate/route")).GET;
@@ -72,9 +167,16 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
 
   beforeEach(async () => {
     fixtures = createSignupFixtureScope("signup-onboarding");
-    smtp.reset();
+    http.requests.splice(0);
     await db.rateLimitBucket.deleteMany({
-      where: { key: "auth:email:provider:unavailable" },
+      where: { key: { startsWith: "mail:provider-health" } },
+    });
+    await db.rateLimitBucket.create({
+      data: {
+        key: "mail:provider-health:brevo",
+        count: 0,
+        resetAt: new Date(Date.now() + 60_000),
+      },
     });
   });
 
@@ -111,13 +213,13 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
       limiterKeys.clear();
     }
     await db.rateLimitBucket.deleteMany({
-      where: { key: "auth:email:provider:unavailable" },
+      where: { key: { startsWith: "mail:provider-health" } },
     });
   });
 
   afterAll(async () => {
-    await smtp?.stop();
     await db?.$disconnect();
+    vi.doUnmock("@/lib/email/http");
     for (const key of managedEnv) {
       const value = originalEnv.get(key);
       if (value === undefined) delete process.env[key];
@@ -254,13 +356,20 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
   }
 
   function rawTokensFor(recipient: string) {
-    return smtp.messages.flatMap((message) => {
-      if (!message.to.includes(recipient)) return [];
-      const match = message.raw
-        .toString()
-        .match(/token(?:=3D|=)([A-Za-z0-9_-]{43})/);
+    return providerRequestsFor(recipient).flatMap((request) => {
+      const match = request.body?.match(/token=([A-Za-z0-9_-]{43})/);
       return match?.[1] ? [match[1]] : [];
     });
+  }
+
+  function providerRequestsFor(recipient: string) {
+    return providerSubmissionRequests().filter((request) =>
+      request.body?.includes(recipient),
+    );
+  }
+
+  function providerSubmissionRequests() {
+    return http.requests.filter((request) => request.method === "POST");
   }
 
   function hashRawToken(rawToken: string) {
@@ -411,18 +520,14 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
       db.policyAcceptance.count({ where: { userId: { in: lifecycleUserIds } } }),
     ).resolves.toBe(0);
 
-    expect(smtp.messages).toHaveLength(4);
-    const activeMail = smtp.messages.find((message) =>
-      message.to.includes(active.normalizedEmail),
-    );
-    expect(activeMail?.raw.toString()).toContain("/login");
-    expect(activeMail?.raw.toString()).not.toContain("/api/signup/activate");
+    expect(providerSubmissionRequests()).toHaveLength(4);
+    const activeMail = providerRequestsFor(active.normalizedEmail)[0];
+    expect(activeMail?.body).toContain("/login");
+    expect(activeMail?.body).not.toContain("/api/signup/activate");
     for (const recipient of [newEmail, pending.normalizedEmail]) {
-      const onboarding = smtp.messages.filter((message) =>
-        message.to.includes(recipient),
-      );
+      const onboarding = providerRequestsFor(recipient);
       expect(onboarding.length).toBeGreaterThan(0);
-      expect(onboarding.at(-1)?.raw.toString()).toContain("/api/signup/activate");
+      expect(onboarding.at(-1)?.body).toContain("/api/signup/activate");
     }
   });
 
@@ -691,9 +796,7 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
     await expect(
       db.verificationToken.count({ where: { identifier: email } }),
     ).resolves.toBe(0);
-    const latestMail = smtp.messages
-      .filter((message) => message.to.includes(email))
-      .at(-1)?.raw.toString();
+    const latestMail = providerRequestsFor(email).at(-1)?.body;
     expect(latestMail).toContain("/login");
     expect(latestMail).not.toContain("/api/signup/activate");
   });
@@ -783,7 +886,7 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
         sessions: 0,
       });
     }
-    expect(smtp.messages).toHaveLength(0);
+    expect(providerSubmissionRequests()).toHaveLength(0);
   });
 
   it("rejects malformed JSON and invalid CSRF without lifecycle mutation", async () => {
@@ -807,7 +910,7 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
       acceptances: 0,
       sessions: 0,
     });
-    expect(smtp.messages).toHaveLength(0);
+    expect(providerSubmissionRequests()).toHaveLength(0);
   });
 
   it("shares exact client and normalized-address boundaries across login and signup", async () => {
@@ -875,12 +978,14 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
   });
 
   it("applies one shared outage before mutation for new, pending, and active addresses", async () => {
-    const { markProviderUnavailable } = await import("@/lib/provider-availability");
     const pending = fixtures.account({ status: "PENDING" });
     const active = fixtures.account({ status: "ACTIVE", name: "Existing Name" });
     await db.user.createMany({ data: [pending, active] });
     const newEmail = `${fixtures.scopeId}-outage-new@example.test`;
-    await markProviderUnavailable();
+    await db.rateLimitBucket.update({
+      where: { key: "mail:provider-health:brevo" },
+      data: { count: 1, resetAt: new Date(Date.now() + 60_000) },
+    });
 
     const responses = await Promise.all([
       submit({ name: "New Person", email: newEmail, locale: "en" }),
@@ -906,13 +1011,17 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
       status: "ACTIVE",
       name: "Existing Name",
     });
-    expect(smtp.messages).toHaveLength(0);
+    expect(providerSubmissionRequests()).toHaveLength(0);
   });
 
   it("cleans an isolated rejected credential and safely reuses the pending account", async () => {
     const { getProviderAvailability } = await import("@/lib/provider-availability");
+    const { getEnv } = await import("@/lib/env");
     const email = `${fixtures.scopeId}-recipient-reject@example.test`;
-    smtp.setBehavior("reject");
+    http.enqueue({
+      status: 400,
+      body: JSON.stringify({ code: "invalid_recipient" }),
+    });
 
     const rejected = await submit({ name: "First Candidate", email, locale: "en" });
     expect(rejected.status).toBe(200);
@@ -922,12 +1031,13 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
     });
     expect(pending.status).toBe("PENDING");
     await expect(db.verificationToken.count({ where: { identifier: email } })).resolves.toBe(0);
-    await expect(getProviderAvailability()).resolves.toEqual({
+    const config = getEnv().MAIL;
+    if (!config.enabled) throw new Error("mail must be enabled for this test");
+    await expect(getProviderAvailability(config)).resolves.toEqual({
       available: true,
       retryAfterSeconds: 0,
     });
 
-    smtp.reset();
     const retry = await submit({ name: "Retry Candidate", email, locale: "ca" });
     expect(retry.status).toBe(200);
     const reused = await db.user.findUniqueOrThrow({
@@ -962,7 +1072,10 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
 
     const active = fixtures.account({ status: "ACTIVE", name: "Stable Name" });
     await db.user.create({ data: active });
-    smtp.setBehavior("reject");
+    http.enqueue({
+      status: 400,
+      body: JSON.stringify({ code: "invalid_recipient" }),
+    });
     const notice = await submit({
       name: "Ignored Name",
       email: active.email,

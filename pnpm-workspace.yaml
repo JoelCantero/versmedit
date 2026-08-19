@@ -11,7 +11,6 @@ overrides:
   deepmerge-ts: 8.0.0
   fast-uri: 3.1.5
   nanoid: 3.3.18
-  nodemailer: 9.0.5
   postcss: 8.5.23
   sharp: 0.35.3
   uuid: 11.1.1

@@ -12,7 +12,7 @@ The non-negotiable engineering principles for this architecture live in
 - **Language / runtime**: TypeScript on Node.js 26 · **pnpm**
 - **Framework**: Next.js (App Router) + React — one full-stack `app` (UI, SSR, API routes, Server Actions, auth)
 - **Database**: PostgreSQL via Prisma 7 (driver adapter)
-- **Validation**: Zod · **Auth**: NextAuth v4 stable · **Email**: Nodemailer (SMTP)
+- **Validation**: Zod · **Auth**: NextAuth v4 stable · **Email**: Brevo or Mailjet over HTTPS
 - **Testing**: Vitest + jsdom + Testing Library + Playwright
 - **Logging**: Pino (structured JSON to stdout)
 - **Infra**: Docker + Docker Compose · Traefik ingress · Cloudflare Tunnel (home hosting)
@@ -87,19 +87,18 @@ All runtime configuration comes from environment variables.
 | GitHub **Variables** (non-sensitive) | GitHub **Secrets** (sensitive) |
 |---|---|
 | `PROJECT_NAME`, `APP_DOMAIN`, `DEPLOY_BASE_DIR`, `RUNNER_NAME`, `LOG_LEVEL`, `TRUST_PROXY_HEADERS` _(optional)_ | `POSTGRES_PASSWORD`, `AUTH_SECRET` |
-| `AUTH_EMAIL_ENABLED` _(email feature gate, optional)_ | |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM` _(email, optional)_ | `SMTP_USER`, `SMTP_PASSWORD` _(email, optional)_ |
+| `MAIL_ENABLED`, `MAIL_PROVIDER`, `MAIL_FROM` | `MAIL_API_KEY`, `MAIL_API_SECRET` _(Mailjet only)_ |
 
 `POSTGRES_USER`, `POSTGRES_DB`, `DATABASE_URL` and the image/router names are **derived**
 from `PROJECT_NAME` / `APP_DOMAIN`. Production percent-encodes database credentials when it builds
 `DATABASE_URL`; for local development, encode reserved password characters in the URL yourself.
 `NEXTAUTH_URL` is the canonical external origin (`https://APP_DOMAIN` in production); Auth requests
-with a different `Host` or `X-Forwarded-Host` are rejected before NextAuth. The optional `SMTP_*`
-values point at an external transactional email provider. Leave them empty in the template. The
-first application spec must define registration, which existing users may authenticate, the email
-provider, and the integration tests before setting `AUTH_EMAIL_ENABLED=true`. SMTP configuration
-alone does not activate email sign-in. This application now defines that boundary in the signup
-feature described below. The SMTP transport timeout is fixed at 10 seconds in `src/lib/email.ts`.
+with a different `Host` or `X-Forwarded-Host` are rejected before NextAuth. `MAIL_ENABLED` is the
+single explicit gate for login, signup activation, and existing-account notices. When enabled,
+`MAIL_PROVIDER` must be `brevo` or `mailjet`, `MAIL_FROM` must be a verified bare address, and
+`MAIL_API_KEY` must be set. Mailjet also requires `MAIL_API_SECRET`. Provider endpoints are fixed in
+application code; no runtime endpoint override is supported. Each operation makes one bounded HTTP
+submission attempt with no retry or provider fallback.
 The hardened auth adapter refuses to create unknown users; registration remains a separate product
 flow that validates the application's required fields.
 Keep `TRUST_PROXY_HEADERS=false` unless Cloudflare is the exclusive route to the origin and the
@@ -122,10 +121,10 @@ named by the `RUNNER_NAME` Variable:
 The local SpecKit hooks provide pre-PR feedback. CI is authoritative and requires lint, typecheck,
 unit/integration tests with coverage thresholds, SpecKit compliance, a production dependency audit,
 a production build, and Playwright smoke tests for routing, CSP, request correlation, and database
-readiness against the standalone artifact. The template intentionally does not emulate SMTP or test
-an external inbox: signup verification uses a controlled local SMTP fixture and the real Auth.js
-database-session boundary in integration and production-artifact tests. Deployments are serialized
-and are never canceled mid-build or mid-migration.
+readiness against the standalone artifact. Transactional-email tests use a controlled local HTTP
+fixture that intercepts only the exact official provider URLs and exercises the real Auth.js
+database-session boundary without external traffic. Deployments are serialized and are never
+canceled mid-build or mid-migration.
 
 Application code may be reverted only while it remains compatible with the applied schema. Prisma
 migrations are forward-only: recover with a corrective migration in normal operation. For an
@@ -153,18 +152,17 @@ part of forward recovery and must remain reusable by later valid submissions.
   earlier candidate link. Isolated delivery failure removes the unusable newest token without
   restoring its predecessor; the pending account remains safe to retry. No cleanup job deletes it.
 - **Limits and availability are shared.** Login and signup share PostgreSQL-backed limits of five
-  attempts per trusted client and three per normalized address in 15 minutes. Only connection- or
-  timeout-level SMTP failures open the account-independent provider cooldown.
+  attempts per trusted client and three per normalized address in 15 minutes. Provider availability
+  is a recipient-independent metadata probe cached for 60 seconds; individual send outcomes never
+  change shared health.
 - **Policy content is product-owned development input.** English, Spanish, and Catalan Terms and
   Privacy Notice pages use the user-authorized `2026-08-18-draft` dummy content. Every page visibly
   identifies it as an unreviewed development draft and not legal advice. A reviewed replacement must
   update the source-controlled copy and version identifiers together; engineering does not determine
   legal sufficiency.
-- **Deployment reuses existing infrastructure.** Signup uses the configured Nodemailer transport,
-  existing `AUTH_SECRET`, canonical `NEXTAUTH_URL`, SMTP settings, PostgreSQL database, and Auth.js
-  database sessions. It adds no runtime service, port, queue, custom session cookie, environment
-  variable, or secret. Keep `AUTH_EMAIL_ENABLED` and the existing SMTP values configured for both
-  login and signup delivery.
+- **Deployment reuses existing infrastructure.** Signup uses the selected HTTP provider, existing
+  `AUTH_SECRET`, canonical `NEXTAUTH_URL`, PostgreSQL database, and Auth.js database sessions. It adds
+  no runtime service, port, queue, custom session cookie, webhook, or delivery-status persistence.
 
 ## Database, backups & health
 
@@ -199,9 +197,9 @@ part of forward recovery and must remain reusable by later valid submissions.
 3. Set the real domain and deployment target through GitHub Variables: `PROJECT_NAME`,
   `APP_DOMAIN`, `DEPLOY_BASE_DIR`, and `RUNNER_NAME`; optionally configure `LOG_LEVEL`. Set
   `TRUST_PROXY_HEADERS=true` only after enforcing the exclusive Cloudflare ingress contract above.
-4. Create `POSTGRES_PASSWORD` and `AUTH_SECRET` as GitHub Secrets. Configure SMTP and set
-  `AUTH_EMAIL_ENABLED=true` only after the first application spec defines registration,
-  existing-user authentication, and their tests.
+4. Create `POSTGRES_PASSWORD`, `AUTH_SECRET`, and `MAIL_API_KEY` as GitHub Secrets. For Mailjet also
+  create `MAIL_API_SECRET`. Configure `MAIL_ENABLED`, `MAIL_PROVIDER`, and `MAIL_FROM` as GitHub
+  Variables after verifying the sender and the login/signup lifecycle tests.
 5. Confirm the `traefik_network` exists on the target host and that the named ARM64 runner is online.
 6. Adapt locales, message catalogs, Auth.js providers, Prisma models, resource limits, retention,
    availability, and monitoring to the derived application's requirements.

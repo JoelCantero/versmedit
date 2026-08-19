@@ -1,20 +1,32 @@
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
 import { defineConfig, devices } from "@playwright/test";
 
 const appPort = Number(process.env.E2E_APP_PORT ?? "3100");
 const baseURL = `http://127.0.0.1:${appPort}`;
 const distDir = process.env.NEXT_DIST_DIR ?? ".next";
-const smtpPort = process.env.E2E_SMTP_PORT;
-const smtpEnv: Record<string, string> = smtpPort
+const providerFixtureUrl = process.env.E2E_PROVIDER_HTTP_URL;
+const mailProvider = process.env.E2E_MAIL_PROVIDER ?? "brevo";
+const providerEnv: Record<string, string> = providerFixtureUrl
   ? {
-      AUTH_EMAIL_ENABLED: "true",
-      SMTP_HOST: "127.0.0.1",
-      SMTP_PORT: smtpPort,
-      SMTP_SECURE: "false",
-      SMTP_USER: "signup-test",
-      SMTP_PASSWORD: "signup-test-password",
-      SMTP_FROM: "Versmedit Test <no-reply@example.test>",
+      MAIL_ENABLED: "true",
+      MAIL_PROVIDER: mailProvider,
+      MAIL_API_KEY: process.env.E2E_MAIL_API_KEY ?? "e2e-provider-key",
+      MAIL_API_SECRET:
+        process.env.E2E_MAIL_API_SECRET ?? "e2e-provider-secret",
+      MAIL_FROM: "no-reply@example.test",
     }
-  : {};
+  : { MAIL_ENABLED: "false" };
+const preloadUrl = pathToFileURL(
+  path.resolve("tests/e2e/helpers/provider-fetch-preload.mjs"),
+).href;
+const nodeOptions = [
+  process.env.NODE_OPTIONS,
+  providerFixtureUrl ? `--import=${preloadUrl}` : undefined,
+]
+  .filter(Boolean)
+  .join(" ");
 const standaloneStaticAssetsCommand = [
   `mkdir -p ${distDir}/standalone/${distDir}`,
   `rm -rf ${distDir}/standalone/${distDir}/static`,
@@ -57,7 +69,13 @@ export default defineConfig({
         "postgresql://playwright:playwright@127.0.0.1:5432/playwright?schema=public",
       AUTH_SECRET:
         process.env.AUTH_SECRET ?? "playwright-secret-not-used-in-runtime-000",
-      ...smtpEnv,
+      ...providerEnv,
+      ...(providerFixtureUrl
+        ? {
+            E2E_PROVIDER_HTTP_URL: providerFixtureUrl,
+            NODE_OPTIONS: nodeOptions,
+          }
+        : {}),
       TRUST_PROXY_HEADERS: "false",
       NEXTAUTH_URL: baseURL,
       NODE_ENV: "production",

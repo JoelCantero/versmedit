@@ -1,10 +1,44 @@
 import { z } from "zod";
 
+import {
+  EMAIL_HEALTH_TIMEOUT_MS,
+  EMAIL_RESPONSE_LIMIT_BYTES,
+  EMAIL_SEND_TIMEOUT_MS,
+} from "@/lib/email/types";
+
 const emptyToUndefined = (value: unknown) => (value === "" ? undefined : value);
 
 const optionalString = z.preprocess(emptyToUndefined, z.string().min(1).optional());
 
-const envSchema = z
+export interface DisabledMailConfig {
+  enabled: false;
+}
+
+interface EnabledMailConfigBase {
+  enabled: true;
+  apiKey: string;
+  fromEmail: string;
+  senderName: string;
+  sendTimeoutMs: typeof EMAIL_SEND_TIMEOUT_MS;
+  healthTimeoutMs: typeof EMAIL_HEALTH_TIMEOUT_MS;
+  responseLimitBytes: typeof EMAIL_RESPONSE_LIMIT_BYTES;
+}
+
+export interface BrevoMailConfig extends EnabledMailConfigBase {
+  provider: "brevo";
+}
+
+export interface MailjetMailConfig extends EnabledMailConfigBase {
+  provider: "mailjet";
+  apiSecret: string;
+}
+
+export type MailConfig =
+  | DisabledMailConfig
+  | BrevoMailConfig
+  | MailjetMailConfig;
+
+const rawEnvSchema = z
   .object({
     PROJECT_NAME: z.string().min(1, "PROJECT_NAME is required"),
     DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL"),
@@ -32,53 +66,126 @@ const envSchema = z
       emptyToUndefined,
       z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
     ),
-    SMTP_HOST: optionalString,
-    SMTP_PORT: z.preprocess(
-      emptyToUndefined,
-      z.coerce.number().int().min(1).max(65535).optional(),
-    ),
-    SMTP_SECURE: z.preprocess(
-      emptyToUndefined,
-      z.enum(["true", "false"]).transform((value) => value === "true").optional(),
-    ),
-    SMTP_USER: optionalString,
-    SMTP_PASSWORD: optionalString,
-    SMTP_FROM: optionalString,
-    AUTH_EMAIL_ENABLED: z.preprocess(
+    MAIL_ENABLED: z.preprocess(
       emptyToUndefined,
       z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
     ),
+    MAIL_PROVIDER: optionalString,
+    MAIL_API_KEY: optionalString,
+    MAIL_API_SECRET: optionalString,
+    MAIL_FROM: optionalString,
     TRUST_PROXY_HEADERS: z.preprocess(
       emptyToUndefined,
       z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
     ),
   })
   .superRefine((env, context) => {
-    const smtpFields = ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM"] as const;
-    const smtpEnabled = smtpFields.some((field) => env[field] !== undefined);
+    if (!env.MAIL_ENABLED) return;
 
-    if (smtpEnabled) {
-      for (const field of smtpFields) {
-        if (env[field] === undefined) {
-          context.addIssue({
-            code: "custom",
-            path: [field],
-            message: `${field} is required when SMTP is configured`,
-          });
-        }
-      }
-    }
-
-    if (env.AUTH_EMAIL_ENABLED && !smtpEnabled) {
+    if (env.MAIL_PROVIDER !== "brevo" && env.MAIL_PROVIDER !== "mailjet") {
       context.addIssue({
         code: "custom",
-        path: ["AUTH_EMAIL_ENABLED"],
-        message: "AUTH_EMAIL_ENABLED requires a complete SMTP configuration",
+        path: ["MAIL_PROVIDER"],
+        message: "MAIL_PROVIDER must be brevo or mailjet when mail is enabled",
+      });
+    }
+    if (env.MAIL_API_KEY === undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["MAIL_API_KEY"],
+        message: "MAIL_API_KEY is required when mail is enabled",
+      });
+    }
+    if (env.MAIL_PROVIDER === "mailjet" && env.MAIL_API_SECRET === undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["MAIL_API_SECRET"],
+        message: "MAIL_API_SECRET is required for Mailjet",
+      });
+    }
+
+    const sender = env.MAIL_FROM;
+    if (
+      sender === undefined ||
+      sender !== sender.trim() ||
+      !z.email().safeParse(sender).success
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["MAIL_FROM"],
+        message: "MAIL_FROM must be one bare email address",
+      });
+    }
+
+    const senderName = env.PROJECT_NAME.trim();
+    if (
+      senderName.length === 0 ||
+      senderName.length > 70 ||
+      /[\u0000-\u001f\u007f]/u.test(senderName)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["PROJECT_NAME"],
+        message: "PROJECT_NAME must be a safe sender name of 1-70 characters",
       });
     }
   });
 
-export type Env = z.infer<typeof envSchema>;
+type RawEnv = z.infer<typeof rawEnvSchema>;
+
+export type Env = Pick<
+  RawEnv,
+  | "PROJECT_NAME"
+  | "DATABASE_URL"
+  | "AUTH_SECRET"
+  | "NEXTAUTH_URL"
+  | "LOG_LEVEL"
+  | "TRUST_PROXY_HEADERS"
+> & { MAIL: MailConfig };
+
+const envSchema = rawEnvSchema.transform((env): Env => {
+  const base = {
+    PROJECT_NAME: env.PROJECT_NAME,
+    DATABASE_URL: env.DATABASE_URL,
+    AUTH_SECRET: env.AUTH_SECRET,
+    NEXTAUTH_URL: env.NEXTAUTH_URL,
+    LOG_LEVEL: env.LOG_LEVEL,
+    TRUST_PROXY_HEADERS: env.TRUST_PROXY_HEADERS,
+  };
+
+  if (!env.MAIL_ENABLED) {
+    return { ...base, MAIL: { enabled: false } };
+  }
+
+  const common = {
+    enabled: true as const,
+    apiKey: env.MAIL_API_KEY!,
+    fromEmail: env.MAIL_FROM!,
+    senderName: env.PROJECT_NAME.trim(),
+    sendTimeoutMs: EMAIL_SEND_TIMEOUT_MS,
+    healthTimeoutMs: EMAIL_HEALTH_TIMEOUT_MS,
+    responseLimitBytes: EMAIL_RESPONSE_LIMIT_BYTES,
+  } as const;
+
+  if (env.MAIL_PROVIDER === "mailjet") {
+    return {
+      ...base,
+      MAIL: {
+        ...common,
+        provider: "mailjet",
+        apiSecret: env.MAIL_API_SECRET!,
+      },
+    };
+  }
+
+  return {
+    ...base,
+    MAIL: {
+      ...common,
+      provider: "brevo",
+    },
+  };
+});
 
 export function validateEnv(env: NodeJS.ProcessEnv): Env {
   const parsed = envSchema.safeParse(env);

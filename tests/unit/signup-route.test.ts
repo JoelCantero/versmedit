@@ -12,6 +12,10 @@ const mocks = vi.hoisted(() => ({
   processSignup: vi.fn(),
   acceptedSignupResponse: vi.fn(),
   logWarn: vi.fn(),
+  env: {
+    NEXTAUTH_URL: "https://app.example.test",
+    MAIL: { enabled: true as boolean },
+  },
 }));
 
 vi.mock("@/lib/shared-rate-limit", () => ({
@@ -24,7 +28,7 @@ vi.mock("@/lib/provider-availability", () => ({
   getProviderAvailability: mocks.getProviderAvailability,
 }));
 vi.mock("@/lib/env", () => ({
-  getEnv: () => ({ NEXTAUTH_URL: "https://app.example.test" }),
+  getEnv: () => mocks.env,
 }));
 vi.mock("@/lib/logger", () => ({
   getRequestLogger: () => ({ warn: mocks.logWarn }),
@@ -89,6 +93,7 @@ describe("POST /api/signup", () => {
     mocks.acceptedSignupResponse.mockResolvedValue(
       Response.json({ status: "accepted" }),
     );
+    mocks.env.MAIL.enabled = true;
   });
 
   it.each([
@@ -299,6 +304,56 @@ describe("POST /api/signup", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("retry-after")).toBe("37");
     await expect(response.json()).resolves.toEqual({ status: "unavailable" });
+    expect(mocks.processSignup).not.toHaveBeenCalled();
+  });
+
+  it("keeps unavailable logs and public errors free of request and account data", async () => {
+    mocks.getProviderAvailability.mockResolvedValue({
+      available: false,
+      retryAfterSeconds: 37,
+    });
+    const privateValues = [
+      validBody.email,
+      validBody.name,
+      validBody.csrfToken,
+      "private-api-key",
+      "https://app.example.test/api/signup/activate?token=private-token",
+    ];
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(503);
+    const publicBody = JSON.stringify(await response.json());
+    const serializedLogs = JSON.stringify(mocks.logWarn.mock.calls);
+    for (const privateValue of privateValues) {
+      expect(publicBody).not.toContain(privateValue);
+      expect(serializedLogs).not.toContain(privateValue);
+    }
+    for (const [payload] of mocks.logWarn.mock.calls) {
+      expect(Object.keys(payload as Record<string, unknown>)).toEqual([
+        "retryAfterSeconds",
+      ]);
+    }
+  });
+
+  it("captures exactly one available snapshot before signup account work", async () => {
+    await POST(request());
+
+    expect(mocks.getProviderAvailability).toHaveBeenCalledOnce();
+    expect(mocks.getProviderAvailability.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.processSignup.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("stops disabled mail before limits, health, account mutation, token issuance, or delivery", async () => {
+    mocks.env.MAIL.enabled = false;
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ status: "unavailable" });
+    expect(mocks.consumeSharedRateLimit).not.toHaveBeenCalled();
+    expect(mocks.getProviderAvailability).not.toHaveBeenCalled();
     expect(mocks.processSignup).not.toHaveBeenCalled();
   });
 

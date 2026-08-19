@@ -1,49 +1,50 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
-import Email from "next-auth/providers/email";
-import nodemailer from "nodemailer";
 
 import { hardenAdapter } from "@/lib/auth-adapter";
 import { db } from "@/lib/db";
-import {
-  classifySmtpError,
-  classifySmtpResult,
-  formatEmailSubject,
-  getEmailProviderConfig,
-} from "@/lib/email";
+import { sendTransactionalEmail } from "@/lib/email/index";
 import { getEnv } from "@/lib/env";
-import {
-  isProviderWideFailure,
-  markProviderUnavailable,
-} from "@/lib/provider-availability";
 import { getPublishedVerificationToken } from "@/modules/login/verification-context";
 import { createSignupToken } from "@/modules/signup/token";
 
-// NextAuth v4 stable (App Router). Database-backed sessions via the Prisma adapter, with
-// passwordless email sign-in through the project's SMTP (Nodemailer) settings.
-// `AUTH_SECRET` is read from the environment automatically. Add more providers
-// here as features require them (constitution Principle XI).
-const smtp = getEmailProviderConfig();
-const projectName = getEnv().PROJECT_NAME;
-
-function createSignupProvider(config: NonNullable<typeof smtp>) {
-  const provider = Email({
-    maxAge: 15 * 60,
-    generateVerificationToken: () => createSignupToken().raw,
-    sendVerificationRequest: async () => {
-      throw new Error("Signup provider cannot initiate delivery");
-    },
-    server: config.server,
-    from: config.from,
-  });
-  Object.assign(
-    provider as unknown as { id: string; name: string },
-    { id: "signup", name: "Signup" },
-  );
-  return provider;
-}
+const env = getEnv();
+const projectName = env.PROJECT_NAME;
 
 type SignupLocale = "en" | "es" | "ca";
+
+interface VerificationRequest {
+  identifier: string;
+  url: string;
+}
+
+function createInternalEmailProvider({
+  id,
+  name,
+  from,
+  sendVerificationRequest,
+}: {
+  id: "email" | "signup";
+  name: "Email" | "Signup";
+  from: string;
+  sendVerificationRequest: (request: VerificationRequest) => Promise<void>;
+}) {
+  const options = {
+    maxAge: 15 * 60,
+    from,
+    generateVerificationToken: () => createSignupToken().raw,
+    sendVerificationRequest,
+  };
+  return {
+    id,
+    type: "email" as const,
+    name,
+    server: {},
+    ...options,
+    options,
+  } as unknown as NonNullable<NextAuthOptions["providers"]>[number];
+}
+
 function localePath(path: string, locale: SignupLocale) {
   if (locale === "en") return path;
   return `/${locale}${path}`;
@@ -78,6 +79,66 @@ const emailCopy: Record<SignupLocale, { subject: string; text: string }> = {
     text: "Utilitza aquest enllaç per iniciar sessió",
   },
 };
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function createLoginProvider(from: string) {
+  return createInternalEmailProvider({
+    id: "email",
+    name: "Email",
+    from,
+    sendVerificationRequest: async ({ identifier, url }) => {
+      const verificationUrl = new URL(url);
+      const locale = parseLocaleFromCallbackUrl(
+        verificationUrl.searchParams.get("callbackUrl"),
+        verificationUrl.origin,
+      );
+      const copy = emailCopy[locale];
+
+      try {
+        const result = await sendTransactionalEmail({
+          recipient: identifier,
+          locale,
+          subject: copy.subject.replaceAll("{projectName}", projectName),
+          text: `${copy.text}: ${url}`,
+          html: `<p>${escapeHtml(copy.text)}:</p><p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`,
+        });
+        if (result.accepted) return;
+      } catch {
+        // The exact token published by the concurrent adapter write is removed below.
+      }
+
+      const published = await getPublishedVerificationToken();
+      if (published) {
+        await db.verificationToken.deleteMany({
+          where: {
+            identifier: published.identifier,
+            token: published.token,
+          },
+        });
+      }
+      throw new Error("Email provider did not accept submission");
+    },
+  });
+}
+
+function createSignupProvider(from: string) {
+  return createInternalEmailProvider({
+    id: "signup",
+    name: "Signup",
+    from,
+    sendVerificationRequest: async () => {
+      throw new Error("Signup provider cannot initiate delivery");
+    },
+  });
+}
 
 function localizeAuthRedirect(url: string, baseUrl: string) {
   const base = new URL(baseUrl);
@@ -144,61 +205,10 @@ export const authOptions: NextAuthOptions = {
   },
   // NEXTAUTH_URL is required and validated as a canonical origin, so forwarded
   // Host values cannot control callback or verification URLs.
-  providers: smtp
+  providers: env.MAIL.enabled
     ? [
-        Email({
-          // Magic-link token lifetime: 15 minutes (default is 24h). Shorter TTL
-          // reduces the window an intercepted link stays valid.
-          maxAge: 15 * 60,
-          generateVerificationToken: () => createSignupToken().raw,
-          sendVerificationRequest: async ({ identifier, url, provider }) => {
-            const transport = nodemailer.createTransport(provider.server);
-            let deliveryFailure: ReturnType<typeof classifySmtpError> | undefined;
-            const verificationUrl = new URL(url);
-            const locale = parseLocaleFromCallbackUrl(
-              verificationUrl.searchParams.get("callbackUrl"),
-              verificationUrl.origin,
-            );
-            const copy = emailCopy[locale];
-            try {
-              const result = await transport.sendMail({
-                to: identifier,
-                from: provider.from,
-                subject: formatEmailSubject(copy.subject, projectName),
-                text: `${copy.text}: ${url}`,
-                html: `<p>${copy.text}:</p><p><a href="${url}">${url}</a></p>`,
-              });
-              const outcome = classifySmtpResult(identifier, {
-                accepted: result.accepted,
-                rejected: result.rejected,
-              });
-              if (outcome.status !== "accepted") {
-                deliveryFailure = outcome;
-                throw new Error("email provider did not accept intended recipient");
-              }
-            } catch (error) {
-              const outcome = deliveryFailure ?? classifySmtpError(error);
-              if (outcome.status !== "accepted" && isProviderWideFailure(outcome)) {
-                await markProviderUnavailable();
-              }
-              const published = await getPublishedVerificationToken();
-              if (published) {
-                await db.verificationToken.deleteMany({
-                  where: {
-                    identifier: published.identifier,
-                    token: published.token,
-                  },
-                });
-              }
-              throw error;
-            } finally {
-              if (typeof transport.close === "function") transport.close();
-            }
-          },
-          server: smtp.server,
-          from: smtp.from,
-        }),
-        createSignupProvider(smtp),
+        createLoginProvider(env.MAIL.fromEmail),
+        createSignupProvider(env.MAIL.fromEmail),
       ]
     : [],
 };

@@ -1,191 +1,110 @@
 // @vitest-environment node
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-vi.mock("server-only", () => ({}));
-
-const mocks = vi.hoisted(() => ({
-  logInfo: vi.fn(),
-  logWarn: vi.fn(),
-  logError: vi.fn(),
-}));
-
-vi.mock("@/lib/logger", () => ({
-  logger: {
-    info: mocks.logInfo,
-    warn: mocks.logWarn,
-    error: mocks.logError,
-  },
-}));
-
+import { serializeProviderJson } from "@/lib/email/http";
 import {
-  classifySmtpError,
-  classifySmtpResult,
-  getEmailProviderConfig,
-  getSmtpConfig,
-} from "@/lib/email";
-import type { Env } from "@/lib/env";
+  createSendResult,
+  normalizeProviderMessageId,
+  validateTransactionalEmail,
+  type TransactionalEmail,
+  type TransactionalEmailProvider,
+} from "@/lib/email/types";
 
-const baseEnv: Env = {
-  PROJECT_NAME: "test-app",
-  DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
-  AUTH_SECRET: "test-auth-secret-at-least-32-chars-long",
-  NEXTAUTH_URL: "http://localhost:3000",
-  AUTH_EMAIL_ENABLED: false,
-  TRUST_PROXY_HEADERS: false,
+const message: TransactionalEmail = {
+  recipient: "person@example.test",
+  locale: "es",
+  subject: "Asunto seguro",
+  text: "Contenido de texto",
+  html: "<p>Contenido HTML</p>",
 };
 
-describe("getSmtpConfig", () => {
-  it("disables email when SMTP is not configured", () => {
-    expect(getSmtpConfig(baseEnv)).toBeNull();
+describe("transactional email boundary", () => {
+  it("accepts one complete localized message", () => {
+    expect(validateTransactionalEmail(message)).toEqual(message);
   });
 
-  it("builds an authenticated SMTP transport with the project name as sender", () => {
-    expect(
-      getSmtpConfig({
-        ...baseEnv,
-        SMTP_HOST: "smtp.example.com",
-        SMTP_PORT: 587,
-        SMTP_SECURE: false,
-        SMTP_USER: "mailer",
-        SMTP_PASSWORD: "mail-secret",
-        SMTP_FROM: "App <no-reply@example.com>",
-      }),
-    ).toEqual({
-      server: {
-        host: "smtp.example.com",
-        port: 587,
-        secure: false,
-        connectionTimeout: 10_000,
-        greetingTimeout: 10_000,
-        socketTimeout: 10_000,
-        auth: { user: "mailer", pass: "mail-secret" },
-      },
-      from: '"test-app" <no-reply@example.com>',
-    });
-  });
+  it.each([
+    ["recipient", { ...message, recipient: "not-an-email" }],
+    ["locale", { ...message, locale: "fr" }],
+    ["subject", { ...message, subject: "" }],
+    ["subject controls", { ...message, subject: "unsafe\r\nsubject" }],
+    ["text", { ...message, text: "" }],
+    ["html", { ...message, html: "" }],
+  ])("rejects an invalid %s without echoing message content", (_field, input) => {
+    expect(() => validateTransactionalEmail(input)).toThrow("Invalid transactional email");
 
-  it("adds the project name when SMTP_FROM is a bare address", () => {
-    expect(
-      getSmtpConfig({
-        ...baseEnv,
-        SMTP_HOST: "smtp.example.com",
-        SMTP_USER: "mailer",
-        SMTP_PASSWORD: "mail-secret",
-        SMTP_FROM: "no-reply@example.com",
-      })?.from,
-    ).toBe('"test-app" <no-reply@example.com>');
-  });
-
-  it("infers implicit TLS for port 465", () => {
-    const config = getSmtpConfig({
-      ...baseEnv,
-      SMTP_HOST: "smtp.example.com",
-      SMTP_PORT: 465,
-      SMTP_USER: "mailer",
-      SMTP_PASSWORD: "mail-secret",
-      SMTP_FROM: "App <no-reply@example.com>",
-    });
-
-    expect(config?.server.secure).toBe(true);
-  });
-
-  it("requires both the feature gate and complete SMTP configuration", () => {
-    expect(getEmailProviderConfig(baseEnv)).toBeNull();
-    expect(
-      getEmailProviderConfig({
-        ...baseEnv,
-        AUTH_EMAIL_ENABLED: true,
-        SMTP_HOST: "smtp.example.com",
-        SMTP_USER: "mailer",
-        SMTP_PASSWORD: "mail-secret",
-        SMTP_FROM: "no-reply@example.com",
-      }),
-    ).not.toBeNull();
-  });
-});
-
-describe("SMTP outcome classification", () => {
-  it("accepts only when the intended recipient is accepted and not rejected", () => {
-    expect(
-      classifySmtpResult("person@example.test", {
-        accepted: ["person@example.test"],
-        rejected: [],
-      }),
-    ).toEqual({ status: "accepted" });
-    expect(
-      classifySmtpResult("person@example.test", {
-        accepted: ["other@example.test"],
-        rejected: [],
-      }),
-    ).toEqual({ status: "unknown", category: "partial" });
-  });
-
-  it("classifies intended-recipient and SMTP 5xx rejection definitively", () => {
-    expect(
-      classifySmtpResult("person@example.test", {
-        accepted: [],
-        rejected: ["person@example.test"],
-      }),
-    ).toEqual({ status: "rejected", category: "recipient" });
-    expect(classifySmtpError({ responseCode: 550 })).toEqual({
-      status: "rejected",
-      category: "smtp_5xx",
-    });
-  });
-
-  it("defaults transient and unclassified errors to unknown", () => {
-    expect(classifySmtpError({ responseCode: 450 })).toEqual({
-      status: "unknown",
-      category: "smtp_4xx",
-    });
-    expect(classifySmtpError({ code: "ETIMEDOUT" })).toEqual({
-      status: "unknown",
-      category: "timeout",
-    });
-    expect(classifySmtpError(new Error("provider detail"))).toEqual({
-      status: "unknown",
-      category: "unclassified",
-    });
-  });
-});
-
-describe("email log privacy", () => {
-  it("never emits recipient or lifecycle-sensitive delivery data to logs", async () => {
-    const consoleSpies = [
-      vi.spyOn(console, "log").mockImplementation(() => undefined),
-      vi.spyOn(console, "warn").mockImplementation(() => undefined),
-      vi.spyOn(console, "error").mockImplementation(() => undefined),
-    ];
-    const sensitiveValues = [
-      "private@example.test",
-      "Private Person",
-      "raw-token-value",
-      "https://app.example.test/api/signup/activate?token=raw-token-value",
-      "2026-08-18T12:00:00.000Z",
-      "account-id-123",
-      "session-token-456",
-    ];
-
-    classifySmtpResult(sensitiveValues[0]!, {
-      accepted: [],
-      rejected: [sensitiveValues[0]!],
-    });
-    classifySmtpError(
-      Object.assign(new Error(sensitiveValues.join(" ")), {
-        code: "ECONNREFUSED",
-      }),
-    );
-
-    const serializedOutput = JSON.stringify([
-      ...mocks.logInfo.mock.calls,
-      ...mocks.logWarn.mock.calls,
-      ...mocks.logError.mock.calls,
-      ...consoleSpies.flatMap((spy) => spy.mock.calls),
-    ]);
-    for (const sensitiveValue of sensitiveValues) {
-      expect(serializedOutput).not.toContain(sensitiveValue);
+    try {
+      validateTransactionalEmail(input);
+    } catch (error) {
+      expect(String(error)).not.toContain(message.recipient);
+      expect(String(error)).not.toContain(message.text);
+      expect(String(error)).not.toContain(message.html);
     }
-    for (const spy of consoleSpies) spy.mockRestore();
+  });
+
+  it("creates exact four-field normalized results", () => {
+    expect(createSendResult("brevo", "accepted", " provider-id ")).toEqual({
+      accepted: true,
+      providerMessageId: "provider-id",
+      provider: "brevo",
+      category: "accepted",
+    });
+    expect(createSendResult("mailjet", "rate_limited", "ignored-id")).toEqual({
+      accepted: false,
+      providerMessageId: null,
+      provider: "mailjet",
+      category: "rate_limited",
+    });
+  });
+
+  it.each([
+    [undefined, null],
+    [null, null],
+    ["", null],
+    ["   ", null],
+    ["ok-id", "ok-id"],
+    [" safe-id ", "safe-id"],
+    ["x".repeat(513), null],
+    ["unsafe\u0000id", null],
+    [42, null],
+    [{ id: "nested" }, null],
+  ])("normalizes provider identifier %j to %j", (input, expected) => {
+    expect(normalizeProviderMessageId(input)).toBe(expected);
+  });
+
+  it("enforces the one MiB serialized request limit by UTF-8 bytes", () => {
+    expect(serializeProviderJson({ content: "a".repeat(1_048_560) })).toContain(
+      '"content"',
+    );
+    expect(() =>
+      serializeProviderJson({ content: "é".repeat(524_289) }),
+    ).toThrow("Email provider request exceeds size limit");
+  });
+
+  it("accepts interchangeable adapters without changing consumer input", async () => {
+    const providers: TransactionalEmailProvider[] = [
+      {
+        provider: "brevo",
+        send: async (input) => {
+          expect(input).toEqual(message);
+          return createSendResult("brevo", "accepted", "brevo-id");
+        },
+      },
+      {
+        provider: "mailjet",
+        send: async (input) => {
+          expect(input).toEqual(message);
+          return createSendResult("mailjet", "accepted", "mailjet-id");
+        },
+      },
+    ];
+
+    await expect(
+      Promise.all(providers.map((provider) => provider.send(message))),
+    ).resolves.toEqual([
+      createSendResult("brevo", "accepted", "brevo-id"),
+      createSendResult("mailjet", "accepted", "mailjet-id"),
+    ]);
   });
 });

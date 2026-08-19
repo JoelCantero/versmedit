@@ -1,30 +1,27 @@
 // @vitest-environment node
 
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  sendTransactionalEmail: vi.fn(),
+}));
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/email", () => ({
-  classifySmtpError: vi.fn(),
-  classifySmtpResult: vi.fn(),
-  createSmtpTransport: vi.fn(),
-  formatEmailSubject: (template: string, projectName: string) =>
-    template.replaceAll("{projectName}", () => projectName),
-  getEmailProviderConfig: vi.fn(),
+vi.mock("@/lib/email/index", () => ({
+  sendTransactionalEmail: mocks.sendTransactionalEmail,
 }));
-vi.mock("@/lib/provider-availability", () => ({
-  isProviderWideFailure: vi.fn(),
-  markProviderUnavailable: vi.fn(),
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ PROJECT_NAME: "versmedit" }),
 }));
 
 import {
   buildActiveAccountEmail,
   buildOnboardingEmail,
+  sendActiveAccountEmail,
+  sendOnboardingEmail,
 } from "@/modules/signup/email";
 
-const projectName = process.env.PROJECT_NAME;
-if (!projectName) {
-  throw new Error("PROJECT_NAME is required to test signup email branding");
-}
+const projectName = "versmedit";
 
 const localeCopy = {
   en: {
@@ -51,6 +48,16 @@ const localeCopy = {
 } as const;
 
 describe("signup email", () => {
+  beforeEach(() => {
+    mocks.sendTransactionalEmail.mockReset();
+    mocks.sendTransactionalEmail.mockResolvedValue({
+      accepted: true,
+      providerMessageId: null,
+      provider: "brevo",
+      category: "accepted",
+    });
+  });
+
   it.each(Object.entries(localeCopy))(
     "builds a credential-bearing %s onboarding email",
     (locale, copy) => {
@@ -65,7 +72,8 @@ describe("signup email", () => {
       );
 
       expect(message).toMatchObject({
-        to: "person@example.test",
+        recipient: "person@example.test",
+        locale,
         subject: copy.onboardingSubject,
       });
       expect(message.text).toContain(copy.onboardingText);
@@ -90,11 +98,56 @@ describe("signup email", () => {
       );
 
       expect(message).toMatchObject({
-        to: "person@example.test",
+        recipient: "person@example.test",
+        locale,
         subject: copy.activeSubject,
       });
       expect(message.text).toContain(copy.activeText);
       expect(message.text).toContain(`https://app.example.test${copy.loginPath}`);
+      expect(`${message.text}${message.html}`).not.toMatch(
+        /token=|\/api\/signup\/activate/i,
+      );
+    },
+  );
+
+  it.each(Object.keys(localeCopy) as Array<keyof typeof localeCopy>)(
+    "submits the complete %s onboarding message through the common boundary",
+    async (locale) => {
+      const options = {
+        recipient: "person@example.test",
+        rawToken: "raw_signup_token",
+        locale,
+        origin: "https://app.example.test",
+      };
+
+      await expect(sendOnboardingEmail(options)).resolves.toEqual(
+        expect.objectContaining({ accepted: true }),
+      );
+
+      expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
+        buildOnboardingEmail(options, projectName),
+      );
+      expect(mocks.sendTransactionalEmail.mock.calls[0]?.[0]).not.toHaveProperty(
+        "from",
+      );
+    },
+  );
+
+  it.each(Object.keys(localeCopy) as Array<keyof typeof localeCopy>)(
+    "submits the credential-free %s active-account notice through the common boundary",
+    async (locale) => {
+      const options = {
+        recipient: "person@example.test",
+        locale,
+        origin: "https://app.example.test",
+      };
+
+      await expect(sendActiveAccountEmail(options)).resolves.toEqual(
+        expect.objectContaining({ accepted: true }),
+      );
+
+      const message = buildActiveAccountEmail(options, projectName);
+      expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(message);
       expect(`${message.text}${message.html}`).not.toMatch(
         /token=|\/api\/signup\/activate/i,
       );

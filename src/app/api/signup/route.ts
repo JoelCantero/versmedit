@@ -56,9 +56,13 @@ function validationResponse(error: ReturnType<typeof signupRequestSchema.safePar
 }
 
 export async function POST(request: NextRequest) {
-  const canonicalUrl = new URL(getEnv().NEXTAUTH_URL);
+  const env = getEnv();
+  const canonicalUrl = new URL(env.NEXTAUTH_URL);
   if (!isCanonicalRequestOrigin(request, canonicalUrl)) {
     return Response.json({ status: "misdirected_request" }, { status: 421 });
+  }
+  if (!env.MAIL.enabled) {
+    return Response.json({ status: "unavailable" }, { status: 503 });
   }
 
   const startedAt = Date.now();
@@ -99,7 +103,7 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse(request, addressResult.retryAfterSeconds);
   }
 
-  const availability = await getProviderAvailability();
+  const availability = await getProviderAvailability(env.MAIL);
   if (!availability.available) {
     getRequestLogger(request, { route: "/api/signup" }).warn(
       { retryAfterSeconds: availability.retryAfterSeconds },

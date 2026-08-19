@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
     Promise.resolve({ available: true, retryAfterSeconds: 0 }),
   ),
   getSignupActivationAuthorization: vi.fn(),
+  env: { MAIL: { enabled: true as boolean } },
 }));
 
 vi.mock("@/lib/auth", () => ({
@@ -33,6 +34,7 @@ vi.mock("next-auth", () => ({
 vi.mock("@/lib/logger", () => ({
   getRequestLogger: () => ({ warn: mocks.logWarn }),
 }));
+vi.mock("@/lib/env", () => ({ getEnv: () => mocks.env }));
 vi.mock("@/lib/shared-rate-limit", () => ({
   consumeSharedRateLimit: mocks.consumeSharedRateLimit,
 }));
@@ -79,6 +81,7 @@ describe("Auth.js route rate limiting", () => {
       retryAfterSeconds: 0,
     });
     mocks.getSignupActivationAuthorization.mockReturnValue(null);
+    mocks.env.MAIL.enabled = true;
     const counts = new Map<string, number>();
     mocks.consumeSharedRateLimit.mockImplementation(
       ({ key, limit }: { key: string; limit: number }) => {
@@ -272,19 +275,55 @@ describe("Auth.js route rate limiting", () => {
     expect(mocks.findExistingLoginEmail).not.toHaveBeenCalled();
   });
 
+  it("captures exactly one available snapshot before account lookup and delegation", async () => {
+    const request = new NextRequest("https://example.test/api/auth/signin/email", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "email=target%40example.test&csrfToken=csrf",
+    });
+
+    await POST(request, routeContext);
+
+    expect(mocks.getProviderAvailability).toHaveBeenCalledOnce();
+    expect(mocks.getProviderAvailability.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.findExistingLoginEmail.mock.invocationCallOrder[0]!,
+    );
+    expect(mocks.findExistingLoginEmail.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.nextAuth.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("stops disabled mail before limits, health, account lookup, token issuance, or delivery", async () => {
+    mocks.env.MAIL.enabled = false;
+    const request = new NextRequest("https://example.test/api/auth/signin/email", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "email=target%40example.test&csrfToken=csrf",
+    });
+
+    const response = await POST(request, routeContext);
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ status: "unavailable" });
+    expect(mocks.consumeSharedRateLimit).not.toHaveBeenCalled();
+    expect(mocks.getProviderAvailability).not.toHaveBeenCalled();
+    expect(mocks.findExistingLoginEmail).not.toHaveBeenCalled();
+    expect(mocks.nextAuth).not.toHaveBeenCalled();
+  });
+
   it("logs only approved operational fields without request, account, or delivery data", async () => {
     mocks.getProviderAvailability.mockResolvedValue({
       available: false,
       retryAfterSeconds: 42,
     });
-    const smtpCredentialFixture = ["smtp", "credential", "fixture"].join("-");
+    const credentialFixture = ["provider", "credential", "fixture"].join("-");
     const sensitiveValues = [
       "private@example.test",
       "raw-token-value",
       "hashed-token-value",
       "https://example.test/api/auth/callback/email?token=raw-token-value",
       "next-auth.session-token=session-secret",
-      smtpCredentialFixture,
+      credentialFixture,
       "account-id-123",
       "user-id-456",
       "recipient_delivery_succeeded",

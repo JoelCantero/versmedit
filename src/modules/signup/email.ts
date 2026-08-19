@@ -4,18 +4,8 @@ import caMessages from "@/messages/ca.json";
 import enMessages from "@/messages/en.json";
 import esMessages from "@/messages/es.json";
 
-import {
-  classifySmtpError,
-  classifySmtpResult,
-  createSmtpTransport,
-  formatEmailSubject,
-  getEmailProviderConfig,
-} from "@/lib/email";
+import { sendTransactionalEmail } from "@/lib/email/index";
 import { getEnv } from "@/lib/env";
-import {
-  isProviderWideFailure,
-  markProviderUnavailable,
-} from "@/lib/provider-availability";
 import type { SignupLocale } from "@/modules/signup/types";
 
 const emailCopy = {
@@ -59,8 +49,9 @@ export function buildOnboardingEmail({
   const url = activationUrl.toString();
 
   return {
-    to: recipient,
-    subject: formatEmailSubject(copy.subject, projectName),
+    recipient,
+    locale,
+    subject: copy.subject.replaceAll("{projectName}", projectName),
     text: `${copy.intro}\n\n${copy.action}: ${url}`,
     html: `<p>${escapeHtml(copy.intro)}</p><p><a href="${escapeHtml(url)}">${escapeHtml(copy.action)}</a></p>`,
   };
@@ -75,48 +66,22 @@ export function buildActiveAccountEmail({
   const loginUrl = new URL(localizePath("/login", locale), origin).toString();
 
   return {
-    to: recipient,
-    subject: formatEmailSubject(copy.subject, projectName),
+    recipient,
+    locale,
+    subject: copy.subject.replaceAll("{projectName}", projectName),
     text: `${copy.intro}\n\n${copy.action}: ${loginUrl}`,
     html: `<p>${escapeHtml(copy.intro)}</p><p><a href="${escapeHtml(loginUrl)}">${escapeHtml(copy.action)}</a></p>`,
   };
 }
 
-async function deliver(message: ReturnType<typeof buildOnboardingEmail>) {
-  const config = getEmailProviderConfig();
-  if (!config) {
-    return { status: "unknown", category: "connection" } as const;
-  }
-
-  const transport = createSmtpTransport(config);
-  try {
-    const result = await transport.sendMail({
-      ...message,
-      from: config.from,
-    });
-    const outcome = classifySmtpResult(message.to, {
-      accepted: result.accepted,
-      rejected: result.rejected,
-    });
-    if (outcome.status !== "accepted" && isProviderWideFailure(outcome)) {
-      await markProviderUnavailable();
-    }
-    return outcome;
-  } catch (error) {
-    const outcome = classifySmtpError(error);
-    if (outcome.status !== "accepted" && isProviderWideFailure(outcome)) {
-      await markProviderUnavailable();
-    }
-    return outcome;
-  } finally {
-    if (typeof transport.close === "function") transport.close();
-  }
-}
-
 export async function sendOnboardingEmail(options: OnboardingEmailOptions) {
-  return deliver(buildOnboardingEmail(options, getEnv().PROJECT_NAME));
+  return sendTransactionalEmail(
+    buildOnboardingEmail(options, getEnv().PROJECT_NAME),
+  );
 }
 
 export async function sendActiveAccountEmail(options: BaseEmailOptions) {
-  return deliver(buildActiveAccountEmail(options, getEnv().PROJECT_NAME));
+  return sendTransactionalEmail(
+    buildActiveAccountEmail(options, getEnv().PROJECT_NAME),
+  );
 }

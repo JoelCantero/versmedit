@@ -24,14 +24,12 @@ services:
       - NEXTAUTH_URL
       - TRUST_PROXY_HEADERS
       - LOG_LEVEL
-      # SMTP for Auth.js email sign-in (external transactional provider).
-      - AUTH_EMAIL_ENABLED
-      - SMTP_HOST
-      - SMTP_PORT
-      - SMTP_SECURE
-      - SMTP_USER
-      - SMTP_PASSWORD
-      - SMTP_FROM
+      # Transactional email through the selected provider's fixed HTTP API.
+      - MAIL_ENABLED
+      - MAIL_PROVIDER
+      - MAIL_API_KEY
+      - MAIL_API_SECRET
+      - MAIL_FROM
     depends_on:
       db:
         condition: service_healthy

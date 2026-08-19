@@ -23,6 +23,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  logging: {
+    incomingRequests: false,
+  },
   // Emit a minimal standalone server bundle for small Docker images.
   output: "standalone",
   // Keep Pino (and its optional pretty transport) external at runtime instead of

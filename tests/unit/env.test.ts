@@ -12,13 +12,13 @@ describe("validateEnv", () => {
     delete process.env.AUTH_SECRET;
     delete process.env.NEXTAUTH_URL;
     delete process.env.LOG_LEVEL;
-    delete process.env.SMTP_HOST;
-    delete process.env.SMTP_PORT;
-    delete process.env.SMTP_SECURE;
-    delete process.env.SMTP_USER;
-    delete process.env.SMTP_PASSWORD;
-    delete process.env.SMTP_FROM;
-    delete process.env.AUTH_EMAIL_ENABLED;
+    delete process.env.MAIL_ENABLED;
+    delete process.env.MAIL_PROVIDER;
+    delete process.env.MAIL_API_KEY;
+    delete process.env.MAIL_API_SECRET;
+    delete process.env.MAIL_FROM;
+    delete process.env.MAIL_API_BASE_URL;
+    delete process.env.MAIL_FROM_NAME;
     delete process.env.TRUST_PROXY_HEADERS;
   });
 
@@ -94,40 +94,170 @@ describe("validateEnv", () => {
     expect(validateEnv(process.env)).toMatchObject({ LOG_LEVEL: undefined });
   });
 
-  it("normalizes a complete SMTP configuration", () => {
+  it("keeps all transactional email disabled by default", () => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
     process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
     process.env.NEXTAUTH_URL = "https://app.example.com";
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "465";
-    process.env.SMTP_SECURE = "true";
-    process.env.SMTP_USER = "mailer";
-    process.env.SMTP_PASSWORD = "mail-secret";
-    process.env.SMTP_FROM = "App <no-reply@example.com>";
-    process.env.AUTH_EMAIL_ENABLED = "true";
 
     expect(validateEnv(process.env)).toMatchObject({
-      SMTP_HOST: "smtp.example.com",
-      SMTP_PORT: 465,
-      SMTP_SECURE: true,
-      SMTP_USER: "mailer",
-      SMTP_PASSWORD: "mail-secret",
-      SMTP_FROM: "App <no-reply@example.com>",
-      AUTH_EMAIL_ENABLED: true,
+      MAIL: { enabled: false },
+      TRUST_PROXY_HEADERS: false,
     });
   });
 
-  it("keeps email authentication disabled by default", () => {
+  it("does not let provider credentials enable a disabled gate", () => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
     process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
     process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "false";
+    process.env.MAIL_PROVIDER = "mailjet";
+    process.env.MAIL_API_KEY = "unused-key";
+    process.env.MAIL_API_SECRET = "unused-secret";
+    process.env.MAIL_FROM = "unused@example.test";
 
-    expect(validateEnv(process.env)).toMatchObject({
-      AUTH_EMAIL_ENABLED: false,
-      TRUST_PROXY_HEADERS: false,
+    expect(validateEnv(process.env).MAIL).toEqual({ enabled: false });
+  });
+
+  it("normalizes complete Brevo configuration and drops a Mailjet secret", () => {
+    process.env.PROJECT_NAME = "  test-app  ";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "true";
+    process.env.MAIL_PROVIDER = "brevo";
+    process.env.MAIL_API_KEY = "brevo-key";
+    process.env.MAIL_API_SECRET = "must-not-survive";
+    process.env.MAIL_FROM = "no-reply@example.test";
+
+    expect(validateEnv(process.env).MAIL).toEqual({
+      enabled: true,
+      provider: "brevo",
+      apiKey: "brevo-key",
+      fromEmail: "no-reply@example.test",
+      senderName: "test-app",
+      sendTimeoutMs: 2_500,
+      healthTimeoutMs: 1_500,
+      responseLimitBytes: 65_536,
     });
+  });
+
+  it("normalizes complete Mailjet configuration", () => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "true";
+    process.env.MAIL_PROVIDER = "mailjet";
+    process.env.MAIL_API_KEY = "mailjet-key";
+    process.env.MAIL_API_SECRET = "mailjet-secret";
+    process.env.MAIL_FROM = "no-reply@example.test";
+
+    expect(validateEnv(process.env).MAIL).toEqual({
+      enabled: true,
+      provider: "mailjet",
+      apiKey: "mailjet-key",
+      apiSecret: "mailjet-secret",
+      fromEmail: "no-reply@example.test",
+      senderName: "test-app",
+      sendTimeoutMs: 2_500,
+      healthTimeoutMs: 1_500,
+      responseLimitBytes: 65_536,
+    });
+  });
+
+  it.each(["1", "yes", "TRUE", " true "])(
+    "rejects invalid MAIL_ENABLED value %j",
+    (value) => {
+      process.env.PROJECT_NAME = "test-app";
+      process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+      process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+      process.env.NEXTAUTH_URL = "https://app.example.com";
+      process.env.MAIL_ENABLED = value;
+
+      expect(() => validateEnv(process.env)).toThrow(/MAIL_ENABLED/);
+    },
+  );
+
+  it.each([undefined, "resend", "Brevo"])(
+    "rejects enabled unsupported provider %j",
+    (provider) => {
+      process.env.PROJECT_NAME = "test-app";
+      process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+      process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+      process.env.NEXTAUTH_URL = "https://app.example.com";
+      process.env.MAIL_ENABLED = "true";
+      if (provider) process.env.MAIL_PROVIDER = provider;
+      process.env.MAIL_API_KEY = "provider-key";
+      process.env.MAIL_FROM = "no-reply@example.test";
+
+      expect(() => validateEnv(process.env)).toThrow(/MAIL_PROVIDER/);
+    },
+  );
+
+  it.each([
+    ["MAIL_API_KEY", "brevo", undefined],
+    ["MAIL_API_SECRET", "mailjet", "provider-key"],
+    ["MAIL_FROM", "brevo", "provider-key"],
+  ])("requires %s for enabled %s", (field, provider, apiKey) => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "true";
+    process.env.MAIL_PROVIDER = provider;
+    if (apiKey) process.env.MAIL_API_KEY = apiKey;
+    if (field !== "MAIL_FROM") process.env.MAIL_FROM = "no-reply@example.test";
+
+    expect(() => validateEnv(process.env)).toThrow(new RegExp(field));
+  });
+
+  it.each([
+    ["MAIL_FROM", "Display Name <no-reply@example.test>"],
+    ["MAIL_FROM", "not-an-email"],
+    ["PROJECT_NAME", "x".repeat(71)],
+    ["PROJECT_NAME", "unsafe\nname"],
+  ])("rejects invalid %s", (field, value) => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "true";
+    process.env.MAIL_PROVIDER = "brevo";
+    process.env.MAIL_API_KEY = "provider-key";
+    process.env.MAIL_FROM = "no-reply@example.test";
+    process.env[field] = value;
+
+    expect(() => validateEnv(process.env)).toThrow(new RegExp(field));
+  });
+
+  it("keeps validation errors redacted and ignores unsupported endpoint variables", () => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_ENABLED = "true";
+    process.env.MAIL_PROVIDER = "brevo";
+    process.env.MAIL_API_KEY = "fixture-private-api-key";
+    process.env.MAIL_FROM = "private-invalid-sender";
+    process.env.MAIL_API_BASE_URL = "https://attacker.example";
+    process.env.MAIL_FROM_NAME = "Injected Sender";
+
+    expect(() => validateEnv(process.env)).toThrow(/MAIL_FROM/);
+    try {
+      validateEnv(process.env);
+    } catch (error) {
+      const output = String(error);
+      expect(output).not.toContain("fixture-private-api-key");
+      expect(output).not.toContain("private-invalid-sender");
+      expect(output).not.toContain("attacker.example");
+    }
+
+    process.env.MAIL_FROM = "no-reply@example.test";
+    const env = validateEnv(process.env);
+    expect(env).not.toHaveProperty("MAIL_API_BASE_URL");
+    expect(env).not.toHaveProperty("MAIL_FROM_NAME");
   });
 
   it("normalizes an explicitly trusted proxy boundary", () => {
@@ -138,26 +268,5 @@ describe("validateEnv", () => {
     process.env.TRUST_PROXY_HEADERS = "true";
 
     expect(validateEnv(process.env)).toMatchObject({ TRUST_PROXY_HEADERS: true });
-  });
-
-  it("rejects enabling email authentication without SMTP", () => {
-    process.env.PROJECT_NAME = "test-app";
-    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
-    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
-    process.env.NEXTAUTH_URL = "https://app.example.com";
-    process.env.AUTH_EMAIL_ENABLED = "true";
-
-    expect(() => validateEnv(process.env)).toThrow(/AUTH_EMAIL_ENABLED/);
-  });
-
-  it("rejects partial or invalid SMTP configuration", () => {
-    process.env.PROJECT_NAME = "test-app";
-    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
-    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
-    process.env.NEXTAUTH_URL = "https://app.example.com";
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "not-a-port";
-
-    expect(() => validateEnv(process.env)).toThrow(/SMTP_/);
   });
 });

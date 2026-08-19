@@ -4,13 +4,13 @@ set -Eeuo pipefail
 COMPOSE_FILE="docker-compose.e2e.yml"
 PROJECT="webapp-template-e2e-$$-$RANDOM"
 export NEXT_DIST_DIR="$(mktemp -d .next-e2e-XXXXXX)"
-SMTP_PID=""
+PROVIDER_PID=""
 TSCONFIG_BACKUP=""
 
 cleanup() {
-  if [[ -n "$SMTP_PID" ]] && kill -0 "$SMTP_PID" 2>/dev/null; then
-    kill -TERM "$SMTP_PID" 2>/dev/null || true
-    wait "$SMTP_PID" 2>/dev/null || true
+  if [[ -n "$PROVIDER_PID" ]] && kill -0 "$PROVIDER_PID" 2>/dev/null; then
+    kill -TERM "$PROVIDER_PID" 2>/dev/null || true
+    wait "$PROVIDER_PID" 2>/dev/null || true
   fi
   docker compose -p "$PROJECT" -f "$COMPOSE_FILE" down --volumes --remove-orphans
   rm -rf -- "$NEXT_DIST_DIR"
@@ -31,14 +31,26 @@ free_port() {
 export PROJECT_NAME="playwright"
 export AUTH_SECRET="playwright-secret-not-used-in-runtime-000"
 export TRUST_PROXY_HEADERS="false"
-export E2E_SMTP_PORT="$(free_port)"
-export E2E_SMTP_HTTP_PORT="$(free_port)"
-export E2E_SMTP_HTTP_URL="http://127.0.0.1:${E2E_SMTP_HTTP_PORT}"
+export E2E_PROVIDER_HTTP_PORT="$(free_port)"
+export E2E_PROVIDER_HTTP_URL="http://127.0.0.1:${E2E_PROVIDER_HTTP_PORT}"
+export E2E_MAIL_PROVIDER="${E2E_MAIL_PROVIDER:-brevo}"
+export E2E_MAIL_API_KEY="e2e-provider-key"
+export E2E_MAIL_API_SECRET="e2e-provider-secret"
+export MAIL_ENABLED="true"
+export MAIL_PROVIDER="$E2E_MAIL_PROVIDER"
+export MAIL_API_KEY="$E2E_MAIL_API_KEY"
+export MAIL_API_SECRET="$E2E_MAIL_API_SECRET"
+export MAIL_FROM="no-reply@example.test"
 
-node --experimental-strip-types tests/e2e/helpers/smtp-fixture-server.ts &
-SMTP_PID=$!
+if [[ "$E2E_MAIL_PROVIDER" != "brevo" && "$E2E_MAIL_PROVIDER" != "mailjet" ]]; then
+  echo "E2E_MAIL_PROVIDER must be brevo or mailjet" >&2
+  exit 1
+fi
+
+node --experimental-strip-types tests/e2e/helpers/provider-http-fixture.ts &
+PROVIDER_PID=$!
 node --input-type=module -e '
-const url = `${process.env.E2E_SMTP_HTTP_URL}/health`;
+const url = `${process.env.E2E_PROVIDER_HTTP_URL}/control/health`;
 for (let attempt = 0; attempt < 100; attempt += 1) {
   try {
     const response = await fetch(url);
@@ -46,7 +58,7 @@ for (let attempt = 0; attempt < 100; attempt += 1) {
   } catch {}
   await new Promise((resolve) => setTimeout(resolve, 50));
 }
-throw new Error(`SMTP fixture did not become ready at ${url}`);
+throw new Error(`Provider fixture did not become ready at ${url}`);
 '
 
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" up -d --wait db

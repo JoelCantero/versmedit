@@ -16,6 +16,7 @@ import {
   isProviderWideFailure,
   markProviderUnavailable,
 } from "@/lib/provider-availability";
+import { logger } from "@/lib/logger";
 import { getPublishedVerificationToken } from "@/modules/login/verification-context";
 import { createSignupToken } from "@/modules/signup/token";
 
@@ -172,12 +173,41 @@ export const authOptions: NextAuthOptions = {
                 accepted: result.accepted,
                 rejected: result.rejected,
               });
+              logger.info(
+                {
+                  event: "email_delivery_accepted",
+                  messageId: result.messageId,
+                  acceptedCount: result.accepted.length,
+                  rejectedCount: result.rejected.length,
+                },
+                "email delivery accepted by SMTP provider",
+              );
               if (outcome.status !== "accepted") {
                 deliveryFailure = outcome;
                 throw new Error("email provider did not accept intended recipient");
               }
             } catch (error) {
               const outcome = deliveryFailure ?? classifySmtpError(error);
+              logger.error(
+                {
+                  event: "email_delivery_failed",
+                  category: "category" in outcome ? outcome.category : undefined,
+                  status: outcome.status,
+                  code:
+                    error && typeof error === "object" && "code" in error
+                      ? error.code
+                      : undefined,
+                  responseCode:
+                    error && typeof error === "object" && "responseCode" in error
+                      ? error.responseCode
+                      : undefined,
+                  command:
+                    error && typeof error === "object" && "command" in error
+                      ? error.command
+                      : undefined,
+                },
+                "email delivery failed",
+              );
               if (outcome.status !== "accepted" && isProviderWideFailure(outcome)) {
                 await markProviderUnavailable();
               }

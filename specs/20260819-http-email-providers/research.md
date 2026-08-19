@@ -5,7 +5,7 @@
 
 ## 1. HTTP Client and Dependency Strategy
 
-**Decision**: Use Node.js 26's built-in WHATWG `fetch`, `Headers`, and `AbortSignal.timeout()` through an injected server-only request function. Do not add Brevo, Mailjet, Axios, Undici, or retry libraries.
+**Decision**: Use Node.js 24 LTS's built-in WHATWG `fetch`, `Headers`, and `AbortSignal.timeout()` through an injected server-only request function. Do not add Brevo, Mailjet, Axios, Undici, or retry libraries.
 
 **Rationale**: Node documents global `fetch` as stable and backed by Undici, and `AbortSignal.timeout()` is available natively. The feature needs one JSON POST and one recipient-independent JSON GET per provider, with no proxy, custom dispatcher, streaming upload, or retry requirement. An injected request function gives unit and integration tests a controlled fake HTTP boundary without a runtime URL override.
 

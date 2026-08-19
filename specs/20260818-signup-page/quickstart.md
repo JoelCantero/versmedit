@@ -6,7 +6,7 @@ are defined in [contracts/openapi.yaml](./contracts/openapi.yaml).
 
 ## Prerequisites
 
-- Node.js 26 and pnpm 11.13.0.
+- Node.js 24 LTS and pnpm 11.13.0.
 - Docker with Compose.
 - Existing local development environment values, including `AUTH_SECRET`.
 - User-authorized development dummy English, Spanish, and Catalan Terms and Privacy Notice content,

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.13.0",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0"
+  },
   "scripts": {
     "predev": "docker compose up -d --wait db && pnpm db:deploy && NODE_ENV=development node prisma/seed.mjs",
     "dev": "next dev",
@@ -52,7 +55,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.4",
-    "@types/node": "^26",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.10",

@@ -29,7 +29,7 @@ updates:
           - minor
           - patch
 
-  # Base images in the Dockerfile (e.g. node:26-slim).
+  # Base images in the Dockerfile (e.g. node:24-slim).
   - package-ecosystem: docker
     directory: /docker
     schedule:

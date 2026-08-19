@@ -19,7 +19,7 @@ session.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x on Node.js 26
+**Language/Version**: TypeScript 5.x on Node.js 24 LTS
 
 **Package Manager**: pnpm 11.13.0
 

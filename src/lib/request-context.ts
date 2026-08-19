@@ -40,7 +40,7 @@ function getCloudflareProtocol(request: Request): string | null {
 
   try {
     const scheme = JSON.parse(value).scheme;
-    return scheme === "http" || scheme === "https" ? `${scheme}:` : null;
+    return scheme === "http" || scheme === "https" ? scheme : null;
   } catch {
     return null;
   }

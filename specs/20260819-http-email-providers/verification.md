@@ -47,32 +47,32 @@ Provider: Brevo
 
 ## Production HTTP Deployment and Smoke (T049)
 
-Status: **BLOCKED**
+Status: **PASS**
 
-At `2026-08-19T16:19:37Z`, the HTTP implementation existed only as uncommitted work on branch
-`20260819-http-email-providers`. Repository configuration exposed only the legacy
-`AUTH_EMAIL_ENABLED`/`SMTP_*` mail settings; required `MAIL_*` Variables and Secrets were absent.
-No HTTP artifact was deployed and no production smoke was attempted.
+Completed at: `2026-08-19T19:49:07Z`
 
-The latest successful deployment before this migration used commit
-`9375b2f7377f8c2cf39a492e8e6e75e3ec03ba80` (workflow run `32242471084`). It is the current
-pre-cleanup rollback candidate and must remain available with legacy SMTP configuration until the
-HTTP production smoke succeeds.
+Provider: Brevo
 
-Required evidence before completion:
+- Commit `79adb85f49ce61b9929548295fb231b9d254f7e5` deployed successfully in workflow run
+	`32294817909`. Configuration validation, checkout, Compose build/deploy, and application health
+	checks all passed.
+- The public health endpoint reported both application and database status as healthy.
+- Controlled known-user login and new-signup submissions returned the established generic success
+	responses. Both messages reached the controlled mailbox; the login link created a usable session
+	and the signup link activated the pending account and redirected successfully.
+- A local scan of the complete deployment log found none of the known secret values and no callback
+	token or email query parameters.
+- The pre-migration artifact reference remains commit
+	`9375b2f7377f8c2cf39a492e8e6e75e3ec03ba80` / workflow run `32242471084`. Its credentials were
+	removed early at the user's explicit direction, so it is retained only as an audit reference and
+	is not an executable rollback. Recovery is configuration correction or a forward fix.
 
-- immutable HTTP artifact reference and successful deployment run;
-- active provider and UTC timestamp;
-- accepted controlled login and signup submissions;
-- usable mailbox links without content disclosure;
-- confirmed rollback artifact reference;
-- zero secret/content leakage in deployment and application logs.
 
 ## Legacy Transport Cleanup
 
 Recorded at: `2026-08-19T19:19:39Z`
 
-Status: **REPOSITORY AND REMOTE CONFIGURATION CLEANUP COMPLETE; REDEPLOY PENDING**
+Status: **PASS**
 
 At the user's explicit direction, rollback configuration was removed before T048 and T049 completed.
 The obsolete fixtures and direct development/runtime packages were deleted, the lockfile was
@@ -80,13 +80,11 @@ regenerated, and the repository runbook now documents only the HTTP providers. T
 passed 4/4, `pnpm why` reported no installed path for either removed package, the affected unit slice
 passed 45/45, and TypeScript completed without errors.
 
-All matching legacy GitHub Repository Variables and Secrets were deleted and a name-only query
-confirmed none remained. This intentionally retires the pre-cleanup rollback procedure. Recovery is
-now limited to rotating or correcting `MAIL_*` configuration or deploying a compatible forward fix.
-
-T053 remains open until the cleaned artifact is deployed and controlled production login/signup
-smoke checks pass. T048 and T049 also remain open because no real mailbox evidence has yet been
-recorded.
+All matching legacy GitHub Repository Variables and Secrets were deleted and repeated name-only
+queries confirmed none remained. The cleaned artifact was then deployed in workflow run
+`32294817909`; controlled production login and signup links both succeeded. This intentionally
+retires the pre-cleanup rollback procedure. Recovery is now limited to rotating or correcting
+`MAIL_*` configuration or deploying a compatible forward fix.
 
 ## Quality Gates (T054)
 
@@ -119,11 +117,12 @@ Both E2E runs applied migrations to isolated PostgreSQL instances, built the sta
 artifact, and used only the exact-URL allowlisted HTTP fixture. No external provider traffic or
 runtime endpoint override was used.
 
-## Production Image Gate (T056 Partial)
+## Production Image and Release Gate (T056)
 
 Recorded at: `2026-08-19T19:36:12Z`
 
 `docker build -f docker/Dockerfile .` passed. A runtime check inside the resulting runner image
-confirmed that neither removed mail package was resolvable. Final release readiness remains pending
-until T049 and T053 deploy the cleaned artifact and complete controlled production login/signup
-smoke checks with a rotated provider credential.
+confirmed that neither removed mail package was resolvable. The complete quickstart matrix is
+covered by the provider contract, architecture, privacy, PostgreSQL race, response-time, full
+coverage, dual-provider standalone E2E, audit, build, image, real development-provider, and
+production smoke evidence above. The HTTP migration is release-ready.

@@ -157,11 +157,11 @@
 - [X] T046 [US5] Replace SMTP process lifecycle/env setup with the provider fixture, preload, safe fake credentials, and readiness checks in `scripts/test-e2e.sh`
 - [X] T047 [US5] Start the standalone app with `MAIL_*` configuration and the isolated preload while exposing no application base-URL override in `playwright.config.ts`
 - [X] T048 [US5] Execute the redacted development login/signup smoke procedure for the selected real provider and record provider, timestamp, acceptance, usable-link result, and zero-secret evidence in `specs/20260819-http-email-providers/verification.md`
-- [ ] T049 [US5] Deploy the HTTP artifact with legacy SMTP secrets retained only for release rollback, execute controlled production login/signup smoke sends, and append redacted evidence plus the rollback artifact reference to `specs/20260819-http-email-providers/verification.md`
+- [X] T049 [US5] Deploy the HTTP artifact with legacy SMTP secrets retained only for release rollback, execute controlled production login/signup smoke sends, and append redacted evidence plus the rollback artifact reference to `specs/20260819-http-email-providers/verification.md`
 - [X] T050 [P] [US5] Delete the obsolete SMTP fixtures in `tests/helpers/smtp-server.ts` and `tests/e2e/helpers/smtp-fixture-server.ts` after T049 succeeds
 - [X] T051 [US5] Remove `nodemailer`, `@types/nodemailer`, `smtp-server`, `@types/smtp-server`, and the Nodemailer override from `package.json` and `pnpm-workspace.yaml`, regenerate `pnpm-lock.yaml`, and make `pnpm why nodemailer` report no installed path
 - [X] T052 [P] [US5] Replace SMTP architecture/configuration/deployment guidance with provider setup, staged verification, rollback-before-cleanup, credential rotation, and post-cleanup recovery instructions in `README.md`
-- [ ] T053 [US5] Remove the legacy GitHub `AUTH_EMAIL_ENABLED`/`SMTP_*` Variables and SMTP Secrets only after T049-T052, redeploy without them, rerun controlled login/signup smoke checks, and append non-secret cleanup evidence to `specs/20260819-http-email-providers/verification.md`
+- [X] T053 [US5] Remove the legacy GitHub `AUTH_EMAIL_ENABLED`/`SMTP_*` Variables and SMTP Secrets only after T049-T052, redeploy without them, rerun controlled login/signup smoke checks, and append non-secret cleanup evidence to `specs/20260819-http-email-providers/verification.md`
 
 **Checkpoint**: US5 independently proves the completed artifact and deployment operate through HTTP with zero SMTP/Nodemailer path and a documented forward-recovery procedure.
 
@@ -173,7 +173,7 @@
 
 - [X] T054 Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm test:coverage`, then record command outcomes and any justified exclusions in `specs/20260819-http-email-providers/verification.md`
 - [X] T055 Run `pnpm test:e2e`, `pnpm audit:prod`, and `pnpm build`, then record command outcomes in `specs/20260819-http-email-providers/verification.md`
-- [ ] T056 Build the production image with `docker build -f docker/Dockerfile .`, execute the complete matrix from `specs/20260819-http-email-providers/quickstart.md`, and record final release readiness in `specs/20260819-http-email-providers/verification.md`
+- [X] T056 Build the production image with `docker build -f docker/Dockerfile .`, execute the complete matrix from `specs/20260819-http-email-providers/quickstart.md`, and record final release readiness in `specs/20260819-http-email-providers/verification.md`
 
 ---
 

@@ -4,6 +4,20 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+const mocks = vi.hoisted(() => ({
+  logInfo: vi.fn(),
+  logWarn: vi.fn(),
+  logError: vi.fn(),
+}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    info: mocks.logInfo,
+    warn: mocks.logWarn,
+    error: mocks.logError,
+  },
+}));
+
 import {
   classifySmtpError,
   classifySmtpResult,
@@ -26,7 +40,7 @@ describe("getSmtpConfig", () => {
     expect(getSmtpConfig(baseEnv)).toBeNull();
   });
 
-  it("builds an authenticated SMTP transport", () => {
+  it("builds an authenticated SMTP transport with the project name as sender", () => {
     expect(
       getSmtpConfig({
         ...baseEnv,
@@ -47,8 +61,20 @@ describe("getSmtpConfig", () => {
         socketTimeout: 10_000,
         auth: { user: "mailer", pass: "mail-secret" },
       },
-      from: "App <no-reply@example.com>",
+      from: '"test-app" <no-reply@example.com>',
     });
+  });
+
+  it("adds the project name when SMTP_FROM is a bare address", () => {
+    expect(
+      getSmtpConfig({
+        ...baseEnv,
+        SMTP_HOST: "smtp.example.com",
+        SMTP_USER: "mailer",
+        SMTP_PASSWORD: "mail-secret",
+        SMTP_FROM: "no-reply@example.com",
+      })?.from,
+    ).toBe('"test-app" <no-reply@example.com>');
   });
 
   it("infers implicit TLS for port 465", () => {
@@ -121,5 +147,45 @@ describe("SMTP outcome classification", () => {
       status: "unknown",
       category: "unclassified",
     });
+  });
+});
+
+describe("email log privacy", () => {
+  it("never emits recipient or lifecycle-sensitive delivery data to logs", async () => {
+    const consoleSpies = [
+      vi.spyOn(console, "log").mockImplementation(() => undefined),
+      vi.spyOn(console, "warn").mockImplementation(() => undefined),
+      vi.spyOn(console, "error").mockImplementation(() => undefined),
+    ];
+    const sensitiveValues = [
+      "private@example.test",
+      "Private Person",
+      "raw-token-value",
+      "https://app.example.test/api/signup/activate?token=raw-token-value",
+      "2026-08-18T12:00:00.000Z",
+      "account-id-123",
+      "session-token-456",
+    ];
+
+    classifySmtpResult(sensitiveValues[0]!, {
+      accepted: [],
+      rejected: [sensitiveValues[0]!],
+    });
+    classifySmtpError(
+      Object.assign(new Error(sensitiveValues.join(" ")), {
+        code: "ECONNREFUSED",
+      }),
+    );
+
+    const serializedOutput = JSON.stringify([
+      ...mocks.logInfo.mock.calls,
+      ...mocks.logWarn.mock.calls,
+      ...mocks.logError.mock.calls,
+      ...consoleSpies.flatMap((spy) => spy.mock.calls),
+    ]);
+    for (const sensitiveValue of sensitiveValues) {
+      expect(serializedOutput).not.toContain(sensitiveValue);
+    }
+    for (const spy of consoleSpies) spy.mockRestore();
   });
 });

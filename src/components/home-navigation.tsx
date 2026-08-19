@@ -90,13 +90,9 @@ export function HomeNavigation({
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <button
-                type="button"
-                className={cn(navigationMenuTriggerStyle(), "cursor-not-allowed")}
-                disabled
-              >
+              <NavigationMenuLink render={<Link href="/signup" />}>
                 {labels.signup}
-              </button>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </>
         )}

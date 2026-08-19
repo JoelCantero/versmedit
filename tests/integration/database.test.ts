@@ -18,8 +18,9 @@ describe.skipIf(!runIntegrationTests)("PostgreSQL Auth.js schema", () => {
     disconnect = () => db.$disconnect();
 
     const suffix = crypto.randomUUID();
+    const email = `integration-${suffix}@example.test`;
     const user = await db.user.create({
-      data: { email: `integration-${suffix}@example.test` },
+      data: { email, normalizedEmail: email, status: "ACTIVE" },
     });
     const session = await db.session.create({
       data: {

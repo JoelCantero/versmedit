@@ -113,7 +113,7 @@
     "page": {
       "metadata": {
         "title": "Registre",
-        "description": "Crea el teu compte i verifica el teu correu electrònic."
+        "description": "Crea un compte sense contrasenya i verifica el teu correu electrònic."
       }
     },
     "form": {
@@ -121,36 +121,46 @@
     },
     "heading": {
       "title": "Crea el teu compte",
-      "description": "Introdueix el teu nom i correu per rebre un enllaç màgic segur."
+      "description": "Introdueix el teu nom i correu. T'enviarem el pas següent a la safata d'entrada."
     },
     "fields": {
-      "firstName": {
+      "name": {
         "label": "Nom",
-        "placeholder": "Taylor"
+        "placeholder": "Taylor Exemple",
+        "description": "Utilitza lletres, espais, apòstrofs o guions."
       },
       "email": {
         "label": "Correu electrònic",
         "placeholder": "nom@exemple.com",
-        "description": "Només utilitzem el teu correu per iniciar sessió."
+        "description": "Utilitza una adreça de correu que puguis obrir ara."
+      },
+      "policy": {
+        "labelPrefix": "Accepto les",
+        "terms": "condicions d'ús",
+        "and": "i",
+        "privacy": "l'avís de privacitat",
+        "description": "És obligatori per crear un compte."
       }
     },
     "actions": {
-      "submitIdle": "Envia enllaç màgic",
-      "submitPending": "Enviant..."
+      "submitIdle": "Crea el compte",
+      "submitPending": "Enviant...",
+      "loginPrompt": "Ja tens un compte?",
+      "login": "Inicia sessió"
     },
     "states": {
-      "sending": "Enviant el teu enllaç...",
-      "accepted": "Si aquesta adreça pot rebre correu, hem enviat un enllaç d'accés.",
-      "deliveryFailed": "No hem pogut confirmar el lliurament. Torna-ho a provar.",
-      "unavailable": "L'accés per correu no està disponible temporalment.",
-      "rateLimited": "Massa intents. Espera abans de tornar-ho a provar."
+      "sending": "Enviant la teva sol·licitud...",
+      "accepted": "Revisa el correu per continuar.",
+      "invalidRequest": "Aquesta sol·licitud ja no és vàlida. Actualitza la pàgina i torna-ho a provar.",
+      "unavailable": "El registre no està disponible temporalment. Torna-ho a provar més tard.",
+      "rateLimited": "Massa intents. Torna-ho a provar d'aquí a {seconds} segons."
     },
     "summary": {
       "title": "Corregeix els errors indicats",
       "description": "Revisa cada camp i torna-ho a provar."
     },
     "validation": {
-      "firstName": {
+      "name": {
         "required": "Introdueix el teu nom.",
         "max": "El nom ha de tenir 80 caràcters o menys.",
         "invalid": "Utilitza només lletres, espais, apòstrofs o guions."
@@ -158,33 +168,119 @@
       "email": {
         "invalid": "Introdueix un correu electrònic vàlid."
       },
+      "policy": {
+        "required": "Accepta les condicions d'ús i l'avís de privacitat per continuar."
+      },
       "locale": {
         "invalid": "Selecciona un idioma vàlid i torna-ho a provar."
       },
       "form": {
-        "invalidSubmission": "No hem pogut processar la teva sol·licitud. Revisa el formulari i torna-ho a provar."
+        "invalidSubmission": "No hem pogut processar aquesta sol·licitud. Revisa el formulari i torna-ho a provar."
+      }
+    },
+    "email": {
+      "onboarding": {
+        "subject": "Completa el teu registre a {projectName}",
+        "intro": "Acaba de crear el teu compte en un termini de 15 minuts.",
+        "action": "Completa el registre"
+      },
+      "activeAccount": {
+        "subject": "Ja existeix un compte de {projectName}",
+        "intro": "Ja existeix un compte per a aquesta adreça electrònica. Inicia la sessió.",
+        "action": "Inicia sessió"
       }
     },
     "recovery": {
-      "invalid": {
-        "title": "Aquest enllaç d'accés no és vàlid",
-        "description": "L'enllaç pot estar incomplet o mal format. Sol·licita un correu nou i utilitza l'enllaç més recent."
+      "invalidLink": {
+        "title": "Aquest enllaç de registre no és vàlid",
+        "description": "Sol·licita un correu de registre nou i utilitza l'enllaç més recent que rebis.",
+        "action": "Sol·licita un correu de registre nou"
       },
-      "expired": {
-        "title": "Aquest enllaç d'accés ha caducat",
-        "description": "Per seguretat, els enllaços caduquen al cap de 15 minuts. Sol·licita'n un de nou per continuar."
+      "sessionConflict": {
+        "title": "Tanca la sessió abans d'utilitzar aquest enllaç",
+        "description": "Hem conservat la sessió actual. Tanca-la i torna a obrir l'enllaç del correu.",
+        "action": "Tanca la sessió"
       },
-      "superseded": {
-        "title": "Hi ha un enllaç d'accés més recent",
-        "description": "Només funciona l'últim enllaç acceptat. Obre el correu més recent o sol·licita un altre enllaç."
+      "sessionFailed": {
+        "title": "El teu compte està preparat",
+        "description": "No hem pogut iniciar la sessió. Accedeix amb el correu verificat.",
+        "action": "Inicia sessió"
+      }
+    }
+  },
+  "Policies": {
+    "draftNotice": "Esborrany de desenvolupament sense revisar. Aquest contingut d'exemple s'ofereix per a proves i no constitueix assessorament jurídic.",
+    "versionLabel": "Versió: {version}",
+    "terms": {
+      "metadata": {
+        "title": "Condicions d'ús",
+        "description": "Condicions provisionals de desenvolupament per utilitzar aquesta aplicació."
       },
-      "used": {
-        "title": "Aquest enllaç d'accés ja s'ha utilitzat",
-        "description": "Cada enllaç és d'un sol ús. Sol·licita un correu nou si encara necessites accedir-hi."
+      "title": "Condicions d'ús",
+      "intro": "Aquestes condicions de prova descriuen l'ús previst d'aquest servei de desenvolupament. En crear un compte, acceptes aquesta versió amb finalitats de prova.",
+      "sections": {
+        "service": {
+          "title": "Ús del servei",
+          "body": "Utilitza el servei només per a proves lícites i sense perjudicar altres persones, comptes, sistemes o xarxes. L'operador pot canviar, suspendre o retirar funcions de desenvolupament sense avís previ."
+        },
+        "account": {
+          "title": "El teu compte",
+          "body": "Proporciona una adreça de correu que controlis, utilitza els enllaços de verificació només per al teu compte i protegeix la sessió activa. Ets responsable de l'activitat feta mitjançant la teva sessió."
+        },
+        "conduct": {
+          "title": "Conducta acceptable",
+          "body": "No automatitzis sol·licituds abusives, investiguis altres usuaris, eludeixis controls d'accés o límits, interfereixis amb el lliurament ni utilitzis el servei per distribuir material il·lícit o perjudicial."
+        },
+        "availability": {
+          "title": "Disponibilitat de desenvolupament",
+          "body": "El servei s'ofereix segons disponibilitat per a desenvolupament i proves. Pot contenir defectes o deixar d'estar disponible, i no es garanteix un funcionament ininterromput ni sense errors."
+        },
+        "changes": {
+          "title": "Canvis en aquestes condicions",
+          "body": "Aquest esborrany es pot substituir per una versió posterior. Cada registre nou conserva la versió acceptada en enviar el formulari i l'associa amb l'activació."
+        },
+        "contact": {
+          "title": "Preguntes",
+          "body": "Adreça les preguntes sobre aquest esborrany o el servei a l'operador responsable d'aquest desplegament."
+        }
+      }
+    },
+    "privacy": {
+      "metadata": {
+        "title": "Avís de privacitat",
+        "description": "Avís provisional de desenvolupament sobre el tractament de dades de registre."
       },
-      "action": {
-        "retry": "Sol·licita un enllaç nou",
-        "goHome": "Ves a l'inici"
+      "title": "Avís de privacitat",
+      "intro": "Aquest avís de prova explica com el servei de desenvolupament tracta la informació utilitzada per al registre i l'accés al compte.",
+      "sections": {
+        "collection": {
+          "title": "Informació recopilada",
+          "body": "El servei desa el nom i el correu enviats, l'estat del compte i de verificació, les versions de polítiques acceptades i l'hora, les sessions de base de dades i dades generals de seguretat o límits de sol·licituds."
+        },
+        "use": {
+          "title": "Ús de la informació",
+          "body": "La informació s'utilitza per crear i verificar el compte, enviar correus del compte, establir sessions, conservar l'acceptació, operar el servei i prevenir abusos."
+        },
+        "sharing": {
+          "title": "Proveïdors del servei",
+          "body": "La informació és tractada pels serveis d'allotjament, base de dades i lliurament de correu configurats i necessaris per operar el flux del compte. Aquest servei de desenvolupament no ven informació personal."
+        },
+        "retention": {
+          "title": "Conservació",
+          "body": "Els registres de compte actiu i acceptació es conserven amb el compte. Els comptes pendents inactius es poden conservar per a reintents segurs. Els enllaços caduquen i els registres de l'aplicació estan dissenyats per excloure noms, correus, enllaços i dades de sessió."
+        },
+        "security": {
+          "title": "Seguretat",
+          "body": "El servei utilitza verificació de la bústia, enllaços d'un sol ús, límits de sol·licituds, xarxa privada de base de dades i sessions protegides. Cap sistema de desenvolupament pot garantir una seguretat absoluta."
+        },
+        "choices": {
+          "title": "Les teves opcions",
+          "body": "Pots decidir no crear un compte. Adreça les preguntes o sol·licituds sobre la informació desada a l'operador responsable d'aquest desplegament."
+        },
+        "changes": {
+          "title": "Canvis en aquest avís",
+          "body": "Aquest esborrany es pot substituir per una versió posterior. El registre conserva la versió de l'avís acceptada amb l'enllaç d'incorporació."
+        }
       }
     }
   }

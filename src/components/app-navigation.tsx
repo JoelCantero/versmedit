@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Globe, LogIn, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import {
+  Check,
+  Globe,
+  LogIn,
+  LogOut,
+  Moon,
+  Sun,
+  UserPlus,
+  UserRound,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 
@@ -140,14 +149,15 @@ export function AppNavigation({
                 <span className="sr-only min-[30rem]:not-sr-only">{labels.login}</span>
               </NavigationMenuLink>
             </NavigationMenuItem>
-            <NavigationMenuItem className="hidden min-[30rem]:block">
-              <button
-                type="button"
-                className={cn(navigationMenuTriggerStyle(), "cursor-not-allowed")}
-                disabled
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                aria-label={labels.signup}
+                className="size-9 justify-center p-0 min-[30rem]:h-auto min-[30rem]:w-auto min-[30rem]:justify-start min-[30rem]:p-2"
+                render={<Link href="/signup" />}
               >
-                {labels.signup}
-              </button>
+                <UserPlus aria-hidden="true" />
+                <span className="sr-only min-[30rem]:not-sr-only">{labels.signup}</span>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </>
         )}

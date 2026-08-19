@@ -15,6 +15,7 @@ function Avatar({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/* eslint-disable @next/next/no-img-element -- Consumers require native refs and load-error handling. */
 function AvatarImage({ className, alt, ...props }: React.ComponentProps<"img">) {
   return (
     <img
@@ -25,6 +26,7 @@ function AvatarImage({ className, alt, ...props }: React.ComponentProps<"img">) 
     />
   );
 }
+/* eslint-enable @next/next/no-img-element */
 
 function AvatarFallback({ className, ...props }: React.ComponentProps<"span">) {
   return (

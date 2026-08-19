@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 
 import { LoginForm } from "@/modules/login/components/login-form";
+import { runAxeInJSDOM } from "../helpers/axe";
 
 const messages = {
   ariaLabel: "Email sign-in form",
@@ -21,7 +21,7 @@ const messages = {
 };
 
 async function expectNoAxeViolations(container: HTMLElement) {
-  const result = await axe.run(container);
+  const result = await runAxeInJSDOM(container);
   expect(result.violations).toEqual([]);
 }
 

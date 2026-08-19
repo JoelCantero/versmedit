@@ -8,9 +8,13 @@ allowBuilds:
 
 overrides:
   '@hono/node-server': 1.19.13
-  nodemailer: 9.0.3
-  postcss: 8.5.10
+  deepmerge-ts: 8.0.0
+  fast-uri: 3.1.5
+  nanoid: 3.3.18
+  nodemailer: 9.0.5
+  postcss: 8.5.23
+  sharp: 0.35.3
   uuid: 11.1.1
 
 patchedDependencies:
-  next-auth@4.24.14: patches/next-auth@4.24.14.patch
+  next-auth@4.24.15: patches/next-auth@4.24.15.patch

@@ -1,0 +1,34 @@
+diff --git a/next/index.js b/next/index.js
+index b806967506122671a4672bff47dd8559d223007b..9c9f3f18ce471bb2b6882d6610ca114dd4ad6438 100644
+--- a/next/index.js
++++ b/next/index.js
+@@ -7,6 +7,7 @@ exports.default = void 0;
+ exports.getServerSession = getServerSession;
+ exports.unstable_getServerSession = unstable_getServerSession;
+ var _core = require("../core");
++var _cookie = require("cookie");
+ var _utils = require("./utils");
+ async function NextAuthApiHandler(req, res, options) {
+   var _options$secret, _ref, _options$jwt$secret, _options$jwt, _ref2, _handler$status, _handler$cookies, _handler$headers;
+@@ -47,10 +48,6 @@ async function NextAuthApiHandler(req, res, options) {
+ async function NextAuthRouteHandler(req, context, options) {
+   var _options$secret2, _process$env$NEXTAUTH, _await$context$params, _query$error;
+   (_options$secret2 = options.secret) !== null && _options$secret2 !== void 0 ? _options$secret2 : options.secret = (_process$env$NEXTAUTH = process.env.NEXTAUTH_SECRET) !== null && _process$env$NEXTAUTH !== void 0 ? _process$env$NEXTAUTH : process.env.AUTH_SECRET;
+-  const {
+-    headers,
+-    cookies
+-  } = require("next/headers");
+   const nextauth = (_await$context$params = await context.params) === null || _await$context$params === void 0 ? void 0 : _await$context$params.nextauth;
+   const query = Object.fromEntries(req.nextUrl.searchParams);
+   const body = await (0, _utils.getBody)(req);
+@@ -58,8 +55,8 @@ async function NextAuthRouteHandler(req, context, options) {
+     req: {
+       body,
+       query,
+-      cookies: Object.fromEntries((await cookies()).getAll().map(c => [c.name, c.value])),
+-      headers: Object.fromEntries(await headers()),
++      cookies: (0, _cookie.parse)(req.headers.get("cookie") || ""),
++      headers: Object.fromEntries(req.headers),
+       method: req.method,
+       action: nextauth === null || nextauth === void 0 ? void 0 : nextauth[0],
+       providerId: nextauth === null || nextauth === void 0 ? void 0 : nextauth[1],

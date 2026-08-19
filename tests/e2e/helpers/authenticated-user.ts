@@ -36,8 +36,8 @@ export async function seedAuthenticatedUser(overrides?: {
 
   try {
     await pool.query(
-      `INSERT INTO "User" ("id", "email", "name", "image", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-      [userId, email, name, image],
+      `INSERT INTO "User" ("id", "email", "normalizedEmail", "status", "name", "image", "createdAt", "updatedAt") VALUES ($1, $2, $3, 'ACTIVE', $4, $5, NOW(), NOW())`,
+      [userId, email, email.trim().toLowerCase(), name, image],
     );
     await pool.query(
       `INSERT INTO "Session" ("id", "sessionToken", "userId", "expires") VALUES ($1, $2, $3, $4)`,

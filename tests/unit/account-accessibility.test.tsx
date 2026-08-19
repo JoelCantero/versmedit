@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axe from "axe-core";
 import { describe, expect, it, vi } from "vitest";
 
 import { ProfileForm } from "@/modules/account/components/profile-form";
+import { runAxeInJSDOM } from "../helpers/axe";
 
 const messages = {
   profileHeading: "Profile",
@@ -26,7 +26,7 @@ const messages = {
 };
 
 async function expectNoAxeViolations(container: HTMLElement) {
-  const result = await axe.run(container);
+  const result = await runAxeInJSDOM(container);
   const seriousOrCritical = result.violations.filter((violation) =>
     violation.nodes.some((node) => ["serious", "critical"].includes(node.impact ?? "")),
   );

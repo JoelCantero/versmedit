@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: Signup Onboarding Contract
+  version: 1.0.0
+  description: >-
+    Public, localized, non-enumerating signup submission and onboarding activation contracts.
+    Login remains a separate existing-user-only Auth.js flow.
+servers:
+  - url: /
+paths:
+  /api/signup:
+    post:
+      operationId: submitSignup
+      summary: Start or privately route an email-based signup request
+      description: >-
+        Consumes the shared client limit before request validation and the shared address limit
+        after CSRF and all submitted fields are valid. New, pending, and active-account requests
+        have the same accepted response; only the private email effect differs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "200":
+          description: >-
+            Uniform accepted result for valid new, pending, and active-account submissions,
+            including isolated post-validation failures.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcceptedResult"
+        "400":
+          description: Invalid field value or malformed request body; no account lookup or mutation.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/InvalidFieldResult"
+                  - $ref: "#/components/schemas/InvalidRequestResult"
+        "403":
+          description: Missing, expired, or invalid CSRF proof or disallowed request shape.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequestResult"
+        "429":
+          description: Shared client or normalized-address limit exceeded.
+          headers:
+            Retry-After:
+              required: true
+              schema:
+                type: integer
+                minimum: 1
+            X-RateLimit-Remaining:
+              required: true
+              schema:
+                type: integer
+                const: 0
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitedResult"
+        "503":
+          description: Account-independent shared mail-service outage detected before mutation.
+          headers:
+            Retry-After:
+              required: true
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnavailableResult"
+        "421":
+          description: Request origin does not match the configured canonical authentication origin.
+  /api/signup/activate:
+    get:
+      operationId: activateSignup
+      summary: Consume a signup onboarding link and establish the normal Auth.js session
+      description: >-
+        The raw token is hashed before lookup and never logged. A valid link opened during another
+        authenticated session is not consumed. Otherwise the wrapper delegates a purpose-validated
+        callback to Auth.js after atomic account activation.
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9_-]{43}$"
+          description: 32-byte Base64URL onboarding secret; no email address is included in the URL.
+      responses:
+        "302":
+          description: >-
+            Redirects to localized home on success, generic invalid-link state for invalid tokens,
+            session-conflict guidance without consumption, or login recovery after durable
+            activation followed by session failure.
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+            Set-Cookie:
+              required: false
+              schema:
+                type: string
+              description: Present only when Auth.js successfully establishes the database session.
+        "421":
+          description: Request host does not match the configured canonical authentication origin.
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - email
+        - policyAccepted
+        - locale
+        - csrfToken
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Trimmed name using the shared Unicode letter/space/apostrophe/hyphen contract.
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: Address is trimmed and lowercased authoritatively by the server.
+        policyAccepted:
+          type: boolean
+          const: true
+          description: >-
+            Affirmative combined Terms and Privacy acceptance only. Versions and time are selected
+            by the server and are not request fields.
+        locale:
+          type: string
+          enum: [en, es, ca]
+        csrfToken:
+          type: string
+          minLength: 1
+    AcceptedResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: accepted
+    InvalidFieldResult:
+      type: object
+      additionalProperties: false
+      required: [status, field]
+      properties:
+        status:
+          type: string
+          const: invalid
+        field:
+          type: string
+          enum: [name, email, policyAccepted]
+    InvalidRequestResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: invalid_request
+    RateLimitedResult:
+      type: object
+      additionalProperties: false
+      required: [status, retryAfter]
+      properties:
+        status:
+          type: string
+          const: rate_limited
+        retryAfter:
+          type: integer
+          minimum: 1
+    UnavailableResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: unavailable

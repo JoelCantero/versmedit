@@ -113,7 +113,7 @@
     "page": {
       "metadata": {
         "title": "Registro",
-        "description": "Crea tu cuenta y verifica tu correo electrónico."
+        "description": "Crea una cuenta sin contraseña y verifica tu correo electrónico."
       }
     },
     "form": {
@@ -121,36 +121,46 @@
     },
     "heading": {
       "title": "Crea tu cuenta",
-      "description": "Introduce tu nombre y correo para recibir un enlace mágico seguro."
+      "description": "Introduce tu nombre y correo. Te enviaremos el siguiente paso a tu bandeja de entrada."
     },
     "fields": {
-      "firstName": {
+      "name": {
         "label": "Nombre",
-        "placeholder": "Taylor"
+        "placeholder": "Taylor Ejemplo",
+        "description": "Usa letras, espacios, apóstrofes o guiones."
       },
       "email": {
         "label": "Correo electrónico",
         "placeholder": "nombre@ejemplo.com",
-        "description": "Solo usamos tu correo para iniciar sesión."
+        "description": "Usa una dirección de correo que puedas abrir ahora."
+      },
+      "policy": {
+        "labelPrefix": "Acepto los",
+        "terms": "términos de uso",
+        "and": "y el",
+        "privacy": "aviso de privacidad",
+        "description": "Es obligatorio para crear una cuenta."
       }
     },
     "actions": {
-      "submitIdle": "Enviar enlace mágico",
-      "submitPending": "Enviando..."
+      "submitIdle": "Crear cuenta",
+      "submitPending": "Enviando...",
+      "loginPrompt": "¿Ya tienes una cuenta?",
+      "login": "Inicia sesión"
     },
     "states": {
-      "sending": "Enviando tu enlace...",
-      "accepted": "Si esta dirección puede recibir correo, hemos enviado un enlace de acceso.",
-      "deliveryFailed": "No hemos podido confirmar la entrega. Inténtalo de nuevo.",
-      "unavailable": "El acceso por correo no está disponible temporalmente.",
-      "rateLimited": "Demasiados intentos. Espera antes de volver a intentarlo."
+      "sending": "Enviando tu solicitud...",
+      "accepted": "Revisa tu correo para continuar.",
+      "invalidRequest": "Esta solicitud ya no es válida. Actualiza la página y vuelve a intentarlo.",
+      "unavailable": "El registro no está disponible temporalmente. Inténtalo más tarde.",
+      "rateLimited": "Demasiados intentos. Vuelve a intentarlo en {seconds} segundos."
     },
     "summary": {
       "title": "Corrige los errores indicados",
       "description": "Revisa cada campo e inténtalo de nuevo."
     },
     "validation": {
-      "firstName": {
+      "name": {
         "required": "Introduce tu nombre.",
         "max": "El nombre debe tener 80 caracteres o menos.",
         "invalid": "Usa solo letras, espacios, apóstrofes o guiones."
@@ -158,33 +168,119 @@
       "email": {
         "invalid": "Introduce un correo electrónico válido."
       },
+      "policy": {
+        "required": "Acepta los términos de uso y el aviso de privacidad para continuar."
+      },
       "locale": {
         "invalid": "Selecciona un idioma válido y vuelve a intentarlo."
       },
       "form": {
-        "invalidSubmission": "No hemos podido procesar tu solicitud. Revisa el formulario y vuelve a intentarlo."
+        "invalidSubmission": "No hemos podido procesar esta solicitud. Revisa el formulario y vuelve a intentarlo."
+      }
+    },
+    "email": {
+      "onboarding": {
+        "subject": "Completa tu registro en {projectName}",
+        "intro": "Termina de crear tu cuenta en un plazo de 15 minutos.",
+        "action": "Completar registro"
+      },
+      "activeAccount": {
+        "subject": "Ya existe una cuenta de {projectName}",
+        "intro": "Ya existe una cuenta para esta dirección de correo. Inicia sesión.",
+        "action": "Iniciar sesión"
       }
     },
     "recovery": {
-      "invalid": {
-        "title": "Este enlace de acceso no es válido",
-        "description": "El enlace puede estar incompleto o mal formado. Solicita un nuevo correo y usa el enlace más reciente."
+      "invalidLink": {
+        "title": "Este enlace de registro no es válido",
+        "description": "Solicita un nuevo correo de registro y usa el enlace más reciente que recibas.",
+        "action": "Solicitar un nuevo correo de registro"
       },
-      "expired": {
-        "title": "Este enlace de acceso ha caducado",
-        "description": "Por seguridad, los enlaces caducan tras 15 minutos. Solicita uno nuevo para continuar."
+      "sessionConflict": {
+        "title": "Cierra la sesión antes de usar este enlace",
+        "description": "Hemos conservado tu sesión actual. Ciérrala y vuelve a abrir el enlace del correo.",
+        "action": "Cerrar sesión"
       },
-      "superseded": {
-        "title": "Hay un enlace de acceso más reciente",
-        "description": "Solo funciona el último enlace aceptado. Abre el correo más reciente o solicita otro enlace."
+      "sessionFailed": {
+        "title": "Tu cuenta está lista",
+        "description": "No hemos podido iniciar tu sesión. Accede con tu correo verificado.",
+        "action": "Iniciar sesión"
+      }
+    }
+  },
+  "Policies": {
+    "draftNotice": "Borrador de desarrollo sin revisar. Este contenido de ejemplo se ofrece para pruebas y no constituye asesoramiento jurídico.",
+    "versionLabel": "Versión: {version}",
+    "terms": {
+      "metadata": {
+        "title": "Términos de uso",
+        "description": "Términos provisionales de desarrollo para usar esta aplicación."
       },
-      "used": {
-        "title": "Este enlace de acceso ya se ha usado",
-        "description": "Cada enlace es de un solo uso. Solicita un nuevo correo si todavía necesitas acceder."
+      "title": "Términos de uso",
+      "intro": "Estos términos de prueba describen el uso previsto de este servicio de desarrollo. Al crear una cuenta, aceptas esta versión con fines de prueba.",
+      "sections": {
+        "service": {
+          "title": "Uso del servicio",
+          "body": "Usa el servicio solo para pruebas lícitas y sin perjudicar a otras personas, cuentas, sistemas o redes. El operador puede cambiar, suspender o retirar funciones de desarrollo sin previo aviso."
+        },
+        "account": {
+          "title": "Tu cuenta",
+          "body": "Proporciona una dirección de correo que controles, usa los enlaces de verificación solo para tu cuenta y protege tu sesión activa. Eres responsable de la actividad realizada mediante tu sesión."
+        },
+        "conduct": {
+          "title": "Conducta aceptable",
+          "body": "No automatices solicitudes abusivas, investigues a otros usuarios, eludas controles de acceso o límites, interfieras con la entrega ni uses el servicio para distribuir material ilícito o dañino."
+        },
+        "availability": {
+          "title": "Disponibilidad de desarrollo",
+          "body": "El servicio se ofrece según disponibilidad para desarrollo y pruebas. Puede contener defectos o dejar de estar disponible, y no se garantiza un funcionamiento ininterrumpido ni sin errores."
+        },
+        "changes": {
+          "title": "Cambios en estos términos",
+          "body": "Este borrador puede sustituirse por una versión posterior. Cada nuevo registro conserva la versión aceptada al enviar el formulario y la asocia con la activación."
+        },
+        "contact": {
+          "title": "Preguntas",
+          "body": "Dirige las preguntas sobre este borrador o el servicio al operador responsable de este despliegue."
+        }
+      }
+    },
+    "privacy": {
+      "metadata": {
+        "title": "Aviso de privacidad",
+        "description": "Aviso provisional de desarrollo sobre el tratamiento de datos de registro."
       },
-      "action": {
-        "retry": "Solicitar un enlace nuevo",
-        "goHome": "Ir al inicio"
+      "title": "Aviso de privacidad",
+      "intro": "Este aviso de prueba explica cómo el servicio de desarrollo trata la información utilizada para el registro y el acceso a la cuenta.",
+      "sections": {
+        "collection": {
+          "title": "Información recopilada",
+          "body": "El servicio guarda el nombre y correo enviados, el estado de cuenta y verificación, las versiones de políticas aceptadas y la hora, las sesiones de base de datos y datos generales de seguridad o límites de solicitudes."
+        },
+        "use": {
+          "title": "Uso de la información",
+          "body": "La información se utiliza para crear y verificar tu cuenta, enviar correos de cuenta, establecer sesiones, conservar tu aceptación, operar el servicio y prevenir abusos."
+        },
+        "sharing": {
+          "title": "Proveedores del servicio",
+          "body": "La información es tratada por los servicios de alojamiento, base de datos y entrega de correo configurados y necesarios para operar el flujo de cuenta. Este servicio de desarrollo no vende información personal."
+        },
+        "retention": {
+          "title": "Conservación",
+          "body": "Los registros de cuenta activa y aceptación se conservan con la cuenta. Las cuentas pendientes inactivas pueden conservarse para reintentos seguros. Los enlaces caducan y los registros de aplicación están diseñados para excluir nombres, correos, enlaces y datos de sesión."
+        },
+        "security": {
+          "title": "Seguridad",
+          "body": "El servicio utiliza verificación del buzón, enlaces de un solo uso, límites de solicitudes, red privada de base de datos y sesiones protegidas. Ningún sistema de desarrollo puede garantizar una seguridad absoluta."
+        },
+        "choices": {
+          "title": "Tus opciones",
+          "body": "Puedes decidir no crear una cuenta. Dirige las preguntas o solicitudes sobre la información almacenada al operador responsable de este despliegue."
+        },
+        "changes": {
+          "title": "Cambios en este aviso",
+          "body": "Este borrador puede sustituirse por una versión posterior. El registro conserva la versión del aviso aceptada con el enlace de incorporación."
+        }
       }
     }
   }

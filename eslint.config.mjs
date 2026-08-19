@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     "dist/**",
     "next-env.d.ts",
     "**/*.min.js",
+    // Agent skill templates are reference material, not application source.
+    ".agents/**",
     // Prisma-generated client
     "src/generated/**",
     // Vitest coverage report output

@@ -6,10 +6,11 @@ vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({
   findFirst: vi.fn(),
+  create: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
-  db: { user: { findFirst: mocks.findFirst } },
+  db: { user: { findFirst: mocks.findFirst, create: mocks.create } },
 }));
 
 import {
@@ -19,7 +20,10 @@ import {
 } from "@/modules/login/service";
 
 describe("login service", () => {
-  beforeEach(() => mocks.findFirst.mockReset());
+  beforeEach(() => {
+    mocks.findFirst.mockReset();
+    mocks.create.mockReset();
+  });
 
   it("finds a mixed-case stored email using an insensitive comparison", async () => {
     mocks.findFirst.mockResolvedValue({ email: "Person@Example.com" });
@@ -28,7 +32,25 @@ describe("login service", () => {
       "Person@Example.com",
     );
     expect(mocks.findFirst).toHaveBeenCalledWith({
-      where: { email: { equals: "person@example.com", mode: "insensitive" } },
+      where: {
+        normalizedEmail: "person@example.com",
+        status: "ACTIVE",
+      },
+      select: { email: true },
+    });
+  });
+
+  it("keeps a pending normalized address ineligible for ordinary login", async () => {
+    mocks.findFirst.mockResolvedValue(null);
+
+    await expect(
+      findExistingLoginEmail("pending@example.com"),
+    ).resolves.toBeNull();
+    expect(mocks.findFirst).toHaveBeenCalledWith({
+      where: {
+        normalizedEmail: "pending@example.com",
+        status: "ACTIVE",
+      },
       select: { email: true },
     });
   });
@@ -36,6 +58,7 @@ describe("login service", () => {
   it("returns null without exposing lookup details for an unknown email", async () => {
     mocks.findFirst.mockResolvedValue(null);
     await expect(findExistingLoginEmail("unknown@example.com")).resolves.toBeNull();
+    expect(mocks.create).not.toHaveBeenCalled();
   });
 
   it.each([

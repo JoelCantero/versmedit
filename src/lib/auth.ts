@@ -8,8 +8,10 @@ import { db } from "@/lib/db";
 import {
   classifySmtpError,
   classifySmtpResult,
+  formatEmailSubject,
   getEmailProviderConfig,
 } from "@/lib/email";
+import { getEnv } from "@/lib/env";
 import {
   isProviderWideFailure,
   markProviderUnavailable,
@@ -22,6 +24,24 @@ import { createSignupToken } from "@/modules/signup/token";
 // `AUTH_SECRET` is read from the environment automatically. Add more providers
 // here as features require them (constitution Principle XI).
 const smtp = getEmailProviderConfig();
+const projectName = getEnv().PROJECT_NAME;
+
+function createSignupProvider(config: NonNullable<typeof smtp>) {
+  const provider = Email({
+    maxAge: 15 * 60,
+    generateVerificationToken: () => createSignupToken().raw,
+    sendVerificationRequest: async () => {
+      throw new Error("Signup provider cannot initiate delivery");
+    },
+    server: config.server,
+    from: config.from,
+  });
+  Object.assign(
+    provider as unknown as { id: string; name: string },
+    { id: "signup", name: "Signup" },
+  );
+  return provider;
+}
 
 type SignupLocale = "en" | "es" | "ca";
 function localePath(path: string, locale: SignupLocale) {
@@ -46,15 +66,15 @@ function parseLocaleFromCallbackUrl(callbackUrl: string | null, baseUrl: string)
 
 const emailCopy: Record<SignupLocale, { subject: string; text: string }> = {
   en: {
-    subject: "Your Nextself sign-in link",
+    subject: "Your {projectName} sign-in link",
     text: "Use this link to sign in",
   },
   es: {
-    subject: "Tu enlace de acceso a Nextself",
+    subject: "Tu enlace de acceso a {projectName}",
     text: "Usa este enlace para iniciar sesión",
   },
   ca: {
-    subject: "El teu enllaç d'accés a Nextself",
+    subject: "El teu enllaç d'accés a {projectName}",
     text: "Utilitza aquest enllaç per iniciar sessió",
   },
 };
@@ -144,7 +164,7 @@ export const authOptions: NextAuthOptions = {
               const result = await transport.sendMail({
                 to: identifier,
                 from: provider.from,
-                subject: copy.subject,
+                subject: formatEmailSubject(copy.subject, projectName),
                 text: `${copy.text}: ${url}`,
                 html: `<p>${copy.text}:</p><p><a href="${url}">${url}</a></p>`,
               });
@@ -178,6 +198,7 @@ export const authOptions: NextAuthOptions = {
           server: smtp.server,
           from: smtp.from,
         }),
+        createSignupProvider(smtp),
       ]
     : [],
 };

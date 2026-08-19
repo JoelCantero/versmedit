@@ -18,7 +18,7 @@ type DeliveryFailure = {
 };
 
 export function isProviderWideFailure(outcome: DeliveryFailure) {
-  return outcome.category !== "recipient";
+  return outcome.category === "connection" || outcome.category === "timeout";
 }
 
 export async function markProviderUnavailable(now = new Date()) {

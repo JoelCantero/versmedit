@@ -45,15 +45,29 @@ describe("HomeNavigation", () => {
     mocks.pathname = "/projects";
   });
 
-  it("shows login and a disabled signup item to anonymous visitors", () => {
-    render(<HomeNavigation authenticated={false} locale="en" labels={labels} />);
+  it.each([
+    ["en", "Login", "Sign up"],
+    ["es", "Iniciar sesión", "Registrarse"],
+    ["ca", "Inicia sessió", "Registra't"],
+  ] as const)("shows separate enabled login and signup actions to signed-out %s visitors", (locale, login, signup) => {
+    const localizedLabels = { ...labels, login, signup };
+    render(
+      <HomeNavigation
+        authenticated={false}
+        locale={locale}
+        labels={localizedLabels}
+      />,
+    );
 
     expect(screen.getByRole("navigation", { name: labels.ariaLabel })).toBeVisible();
-    expect(screen.getByRole("link", { name: labels.login })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: login })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(screen.getByRole("button", { name: labels.signup })).toBeDisabled();
+    expect(screen.getByRole("link", { name: signup })).toHaveAttribute(
+      "href",
+      "/signup",
+    );
     expect(screen.queryByRole("button", { name: labels.logout })).not.toBeInTheDocument();
     expect(document.querySelector('[data-slot="separator"]')).toBeInTheDocument();
   });
@@ -64,7 +78,7 @@ describe("HomeNavigation", () => {
     render(<HomeNavigation authenticated locale="es" labels={labels} />);
 
     expect(screen.queryByRole("link", { name: labels.login })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: labels.signup })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: labels.signup })).not.toBeInTheDocument();
     const accountLink = screen.getByRole("link", { name: labels.account });
     expect(accountLink).toHaveAttribute("href", "/account");
     expect(accountLink).toHaveAttribute("aria-current", "page");

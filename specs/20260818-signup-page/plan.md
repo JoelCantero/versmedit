@@ -21,7 +21,7 @@ session.
 
 **Language/Version**: TypeScript 5.x on Node.js 24 LTS
 
-**Package Manager**: pnpm 11.13.0
+**Package Manager**: pnpm 11.22.0
 
 **Primary Dependencies**: Next.js 16.2 App Router + React 19.2, Tailwind CSS 4,
 next-intl 4.13, Prisma 7.8, Zod 4.4, patched NextAuth 4.24.14 with the Prisma adapter,

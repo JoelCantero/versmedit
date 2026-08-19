@@ -34,6 +34,18 @@ function effectivePort(protocol: string, port: string): string {
   return protocol === "https:" ? "443" : "80";
 }
 
+function getCloudflareProtocol(request: Request): string | null {
+  const value = request.headers.get("cf-visitor");
+  if (!value) return null;
+
+  try {
+    const scheme = JSON.parse(value).scheme;
+    return scheme === "http" || scheme === "https" ? `${scheme}:` : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isCanonicalRequestOrigin(
   request: Request,
   canonicalUrl: URL,
@@ -50,7 +62,7 @@ export function isCanonicalRequestOrigin(
     ? request.headers.get("x-forwarded-host")
     : null;
   const forwardedProtocol = trustProxyHeaders
-    ? request.headers.get("x-forwarded-proto")
+    ? getCloudflareProtocol(request) ?? request.headers.get("x-forwarded-proto")
     : null;
   const host = forwardedHost ?? request.headers.get("host") ?? requestUrl.host;
   const protocol = forwardedProtocol ? `${forwardedProtocol}:` : requestUrl.protocol;

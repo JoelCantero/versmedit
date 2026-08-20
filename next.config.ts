@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
   },
   // Emit a minimal standalone server bundle for small Docker images.
   output: "standalone",
+  // Next 16.3 can omit ESM helpers from pnpm's standalone dependency trace.
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/@swc/helpers/**/*"],
+  },
   // Keep Pino (and its optional pretty transport) external at runtime instead of
   // bundling them: Pino resolves transports/workers via dynamic require, which the
   // bundler cannot trace and would break in the standalone output.

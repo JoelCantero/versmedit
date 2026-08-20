@@ -1,10 +1,10 @@
 # Implementation Plan: [FEATURE]
 
-**Branch**: `[YYYYMMDD-english-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/specs/[YYYYMMDD-english-feature-name]/spec.md`
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
 
 ## Summary
 
@@ -13,43 +13,28 @@
 ## Technical Context
 
 <!--
-  These defaults reflect the project's standard stack (see the constitution at
-  .specify/memory/constitution.md). Keep them unless a feature has a justified
-  reason to differ; fill feature-specific values (or mark NEEDS CLARIFICATION)
-  during /speckit.plan.
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
 -->
 
-**Language/Version**: TypeScript 5.x on Node.js 24 LTS
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
 
-**Package Manager**: pnpm
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 
-**Primary Dependencies**: Next.js (App Router) + React, Tailwind CSS, Prisma, Zod, Auth.js (NextAuth), Pino (structured logging) [+ feature-specific dependencies; add Nodemailer/SMTP only when the spec enables email authentication]
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-**Storage**: PostgreSQL (via Prisma)
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
 
-**Testing**: Vitest + jsdom + Testing Library (unit/component); Playwright for production-artifact smoke tests and feature-specific E2E. Authentication features MUST test the selected real provider boundary; the template does not emulate SMTP.
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 
-**Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
 
-**Project Type**: Web application — single Next.js full-stack `app` container (+ `db`, optional `worker`)
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 
-**Deployment**: Docker Compose; networks `traefik_network` (external ingress) + `internal` (private); services use `restart: unless-stopped`
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
 
-**CI/CD**: GitHub Actions on a self-hosted runner
-
-**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file — non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
-
-**Observability**: Healthcheck endpoint + structured logging (Pino → stdout JSON) + Docker logs + log rotation
-
-**Migration Strategy**: [Forward-only schema/application rollout, compatibility window, and corrective migration plan; or N/A]
-
-**Recovery Strategy**: [Verified backup/restore procedure for destructive or incompatible changes; never assume reverting code reverses data]
-
-**Performance Goals**: [domain-specific per feature, e.g., p95 API < 200ms on Raspberry Pi or NEEDS CLARIFICATION]
-
-**Constraints**: Raspberry Pi memory/CPU limits; no host-specific paths/IPs; portable to VPS [+ feature-specific or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific per feature, e.g., expected users/records/screens or NEEDS CLARIFICATION]
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
@@ -62,70 +47,61 @@
 ### Documentation (this feature)
 
 ```text
-specs/[YYYYMMDD-english-feature-name]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/[###-feature]/
+├── plan.md              # This file (/speckit-plan command output)
+├── research.md          # Phase 0 output (/speckit-plan command)
+├── data-model.md        # Phase 1 output (/speckit-plan command)
+├── quickstart.md        # Phase 1 output (/speckit-plan command)
+├── contracts/           # Phase 1 output (/speckit-plan command)
+└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
 ```
 
 ### Source Code (repository root)
 <!--
-  This is the project's standard layout (Next.js App Router + Prisma + Docker),
-  per the constitution. Adjust only the paths a feature actually adds or changes.
-  Do NOT split frontend/backend — Next.js combines them in the `app` container
-  (constitution Principle II). Organize business code by domain under
-  src/modules/<domain>/; shared code stays in app/, components/, lib/, and server/.
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
 -->
 
 ```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
-├── app/                    # Next.js App Router: UI, layouts, pages
-│   ├── api/                # Route handlers (REST/webhooks/health)
-│   └── globals.css         # Tailwind/global styles
-├── components/             # Shared React components (UI primitives)
-├── modules/                # Business domains (<domain>/{components,actions,services,types})
-├── server/                 # Server-only logic (never imported by client)
-│   ├── actions/            # Server Actions
-│   └── services/           # Domain/business logic
-├── lib/                    # Shared utilities
-│   ├── auth.ts             # Auth.js (NextAuth) config
-│   ├── db.ts               # Prisma client singleton (imports @/generated/prisma/client)
-│   └── validation/         # Zod schemas
-└── generated/
-    └── prisma/             # Generated Prisma client (gitignored; run `prisma generate`)
-
-prisma/
-├── schema.prisma          # Data model
-└── migrations/            # Versioned migrations
-prisma.config.ts            # Prisma 7 config: the datasource URL lives here (required)
-
-worker/                     # OPTIONAL: background/scheduled jobs (built as another Dockerfile target)
-└── src/
+├── models/
+├── services/
+├── cli/
+└── lib/
 
 tests/
-├── unit/                  # Vitest unit tests
-├── integration/           # API/route + DB integration tests
-└── e2e/                   # Playwright (optional)
+├── contract/
+├── integration/
+└── unit/
 
-docker/
-└── Dockerfile             # Multi-stage: builds the `app` and `migrate` (migrator) images
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
 
-docker-compose.yml          # Dev: db only (run the app on the host with `pnpm dev`)
-docker-compose.prod.yml     # Prod: app + migrate + db (no public db ports; log rotation)
-.env.example                # Placeholder env vars (dev `.env`; also the prod Variables/Secrets reference)
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Production runs a single Next.js full-stack `app` container (UI + SSR + API
-routes + Server Actions + auth), a one-shot `migrate` service that applies Prisma migrations before
-`app` starts, and a `db` (PostgreSQL) service — wired through Docker Compose on `traefik_network`
-(ingress) + `internal` (private) networks (`worker` optional). In development, `docker-compose.yml`
-runs only the `db`; the app runs on the host via `pnpm dev`. Frontend and backend are intentionally
-NOT split (constitution Principle II). Business behavior is organized in cohesive domain modules
-under `src/modules/<domain>/`; cross-cutting infrastructure remains in `app`/`components`/`server`/
-`lib` and is not duplicated into modules.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 

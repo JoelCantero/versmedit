@@ -1,5 +1,5 @@
 ---
-description: "after_implement hook — verify SpecKit artifact completeness and constitutional compliance."
+description: "after_implement hook - verify Spec Kit artifact completeness and constitutional compliance."
 ---
 
 You are running the mandatory `after_implement` compliance hook.

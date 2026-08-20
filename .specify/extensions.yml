@@ -1,7 +1,7 @@
 # Spec Kit extension hooks.
 #
-# Every speckit.* agent reads this file before running and executes any
-# registered hooks. See .github/agents/speckit.specify.agent.md
+# Every speckit-* skill reads this file before running and executes any
+# registered hooks. See .github/skills/speckit-specify/SKILL.md
 # ("Pre-Execution Checks") for the exact contract.
 #
 # Fields per hook:

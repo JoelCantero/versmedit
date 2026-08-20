@@ -1,6 +1,6 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`
+**Feature Branch**: `[YYYYMMDD-english-feature-name]`
 
 **Created**: [DATE]
 
@@ -129,3 +129,57 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+
+## Non-Goals *(mandatory)*
+
+<!--
+  ACTION REQUIRED (Constitution Principle XI): Explicitly list what is intentionally OUT of scope
+  for this feature so reviewers and implementers do not assume it.
+-->
+
+- [Non-goal, e.g., "This feature does not handle multi-tenant billing"]
+- [Non-goal, e.g., "Offline support is out of scope"]
+
+## Security & Privacy Implications *(mandatory)*
+
+<!--
+  ACTION REQUIRED (Constitution Principles X & XI): Describe authorization, data sensitivity,
+  server-side validation, and any intentional public exposure. Never trust client-provided identity,
+  roles, prices, permissions, or ownership.
+-->
+
+- **Authentication/Authorization**: [Who may access this? Which server-side checks are required?]
+- **Account lifecycle**: [If authentication is in scope, define registration separately, the
+  required profile fields, which existing users may sign in, and the behavior for unknown emails.
+  Authentication MUST NOT implicitly create an account. Otherwise: N/A.]
+- **Authentication provider verification**: [If authentication is enabled, identify the real
+  provider boundary and the integration/E2E strategy. Tests must not substitute an unverified transport.
+  Otherwise: N/A.]
+- **Data sensitivity**: [Any PII, secrets, or regulated data involved? How is it protected?]
+- **Input validation**: [Which inputs MUST be validated on the server?]
+- **Log hygiene**: [Any secrets/PII that MUST be redacted from logs?]
+- **Public exposure**: [Are any endpoints intentionally public? If so, document why.]
+
+## Threats & Abuse Cases *(mandatory for public endpoints or privileged actions)*
+
+<!--
+  ACTION REQUIRED (Constitution Principle X): Identify realistic misuse before implementation.
+  Cover automated abuse, enumeration, privilege escalation, replay/idempotency, resource exhaustion,
+  and the trust boundary for proxy/client identity where applicable.
+-->
+
+- **Abuse scenarios**: [How could this endpoint or action be automated, replayed, or misused?]
+- **Controls**: [Rate limits, authorization, idempotency, quotas, CSRF, validation, or monitoring?]
+- **Residual risk**: [What remains possible, and why is that acceptable?]
+
+## Operational Impact *(include if the feature changes deployment, data, or infrastructure)*
+
+<!--
+  ACTION REQUIRED (Constitution Principles I, VI, VIII): Note Docker/compose, migration, backup,
+  and healthcheck impact so operational readiness is not discovered at deploy time.
+-->
+
+- **Deployment changes**: [New containers, env vars, secrets, networks, or volumes?]
+- **Data & migrations**: [Schema changes, forward migration plan, compatibility window, backup impact?]
+- **Recovery**: [Corrective migration or verified restore procedure if deployment fails?]
+- **Observability**: [New healthcheck, structured logs (Pino) / events to emit, or monitoring needs?]

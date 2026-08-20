@@ -5,11 +5,11 @@ description: "Task list template for feature implementation"
 
 # Tasks: [FEATURE NAME]
 
-**Input**: Design documents from `/specs/[###-feature-name]/`
+**Input**: Design documents from `/specs/[YYYYMMDD-english-feature-name]/`
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Derive automated tests from the verification strategy. Omit them only when plan.md explicitly justifies manual-only verification and provides repeatable steps.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -21,10 +21,10 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Application**: `src/app/` for routes and layouts; `src/modules/<domain>/` for business behavior
+- **Shared infrastructure**: `src/components/`, `src/lib/`, `src/server/`
+- **Tests**: `tests/unit/`, `tests/integration/`, and optional `tests/e2e/`
+- Paths shown below follow this repository's TypeScript/Next.js structure; adjust the domain name from plan.md
 
 <!--
   ============================================================================
@@ -59,7 +59,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**CRITICAL**: No user story work can begin until this phase is complete
 
 Examples of foundational tasks (adjust based on your project):
 
@@ -67,34 +67,35 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T005 [P] Implement authentication/authorization framework
 - [ ] T006 [P] Setup API routing and middleware structure
 - [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T008 Configure structured logging (Pino -> stdout) and error handling infrastructure (src/lib/logger.ts)
 - [ ] T009 Setup environment configuration management
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
 
-## Phase 3: User Story 1 - [Title] (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - [Title] (Priority: P1) MVP
 
 **Goal**: [Brief description of what this story delivers]
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Unit test for [business rule] in tests/unit/[name].test.ts
+- [ ] T011 [P] [US1] Integration test for [endpoint/user journey] in tests/integration/[name].test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T012 [P] [US1] Add [Entity1] to prisma/schema.prisma and create its migration
+- [ ] T013 [P] [US1] Define [Entity2] types in src/modules/[domain]/types.ts
+- [ ] T014 [US1] Implement [Service] in src/modules/[domain]/services/[service].ts (depends on T012, T013)
+- [ ] T015 [US1] Implement [endpoint/feature] in src/app/[location]/route.ts
 - [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T017 [US1] Add structured logging (Pino) for user story 1 operations
+- [ ] T018 [US1] Verify threat/abuse controls for public or privileged operations
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -106,17 +107,17 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T019 [P] [US2] Unit test for [business rule] in tests/unit/[name].test.ts
+- [ ] T020 [P] [US2] Integration test for [user journey] in tests/integration/[name].test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
-- [ ] T021 [US2] Implement [Service] in src/services/[service].py
-- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T021 [P] [US2] Add [Entity] to prisma/schema.prisma and create its migration
+- [ ] T022 [US2] Implement [Service] in src/modules/[domain]/services/[service].ts
+- [ ] T023 [US2] Implement [endpoint/feature] in src/app/[location]/route.ts
+- [ ] T024 [US2] Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -128,16 +129,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T025 [P] [US3] Unit test for [business rule] in tests/unit/[name].test.ts
+- [ ] T026 [P] [US3] Integration test for [user journey] in tests/integration/[name].test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
-- [ ] T027 [US3] Implement [Service] in src/services/[service].py
-- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T027 [P] [US3] Add [Entity] to prisma/schema.prisma and create its migration
+- [ ] T028 [US3] Implement [Service] in src/modules/[domain]/services/[service].ts
+- [ ] T029 [US3] Implement [endpoint/feature] in src/app/[location]/route.ts
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -156,6 +157,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
+- [ ] TXXX Validate forward migration and recovery steps for data changes
 - [ ] TXXX Run quickstart.md validation
 
 ---
@@ -168,7 +170,7 @@ Examples of foundational tasks (adjust based on your project):
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
 - **User Stories (Phase 3+)**: All depend on Foundational phase completion
   - User stories can then proceed in parallel (if staffed)
-  - Or sequentially in priority order (P1 → P2 → P3)
+  - Or sequentially in priority order (P1 -> P2 -> P3)
 - **Polish (Final Phase)**: Depends on all desired user stories being complete
 
 ### User Story Dependencies
@@ -200,12 +202,12 @@ Examples of foundational tasks (adjust based on your project):
 
 ```bash
 # Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
+Task: "Unit test for [business rule] in tests/unit/[name].test.ts"
+Task: "Integration test for [user journey] in tests/integration/[name].test.ts"
 
 # Launch all models for User Story 1 together:
-Task: "Create [Entity1] model in src/models/[entity1].py"
-Task: "Create [Entity2] model in src/models/[entity2].py"
+Task: "Add [Entity1] to prisma/schema.prisma and create its migration"
+Task: "Define [Entity2] types in src/modules/[domain]/types.ts"
 ```
 
 ---
@@ -222,10 +224,10 @@ Task: "Create [Entity2] model in src/models/[entity2].py"
 
 ### Incremental Delivery
 
-1. Complete Setup + Foundational → Foundation ready
-2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
-3. Add User Story 2 → Test independently → Deploy/Demo
-4. Add User Story 3 → Test independently → Deploy/Demo
+1. Complete Setup + Foundational -> Foundation ready
+2. Add User Story 1 -> Test independently -> Deploy/Demo (MVP!)
+3. Add User Story 2 -> Test independently -> Deploy/Demo
+4. Add User Story 3 -> Test independently -> Deploy/Demo
 5. Each story adds value without breaking previous stories
 
 ### Parallel Team Strategy

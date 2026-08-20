@@ -20,7 +20,7 @@ integration, accessibility, responsive, and standalone-production Playwright tes
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x on Node.js 26 (Docker build/runtime)
+**Language/Version**: TypeScript 5.x on Node.js 24 LTS (Docker build/runtime)
 
 **Package Manager**: pnpm
 

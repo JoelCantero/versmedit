@@ -25,7 +25,7 @@ change. Remove Nodemailer and SMTP wiring after development and production smoke
   reason to differ; fill feature-specific values during /speckit.plan.
 -->
 
-**Language/Version**: TypeScript 5.x on Node.js 26
+**Language/Version**: TypeScript 5.x on Node.js 24 LTS
 
 **Package Manager**: pnpm
 

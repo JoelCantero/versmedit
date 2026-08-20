@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 26 and pnpm 11
+- Node.js 24 LTS and pnpm 11
 - Docker with Docker Compose
 - PostgreSQL available through the repository Compose stack
 - For real smoke checks only: one verified sender and valid credentials for the selected provider, plus controlled login/signup mailboxes

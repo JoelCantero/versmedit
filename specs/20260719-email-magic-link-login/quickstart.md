@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 26 and pnpm 11
+- Node.js 24 LTS and pnpm 11
 - Docker Compose
 - Local `.env` with valid development database, `AUTH_SECRET` (32+ characters), canonical
   `NEXTAUTH_URL`, and SMTP settings when manually exercising real delivery

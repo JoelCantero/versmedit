@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 26 and the repository-pinned pnpm version
+- Node.js 24 LTS and the repository-pinned pnpm version
 - Docker Desktop/Engine with Compose
 - Local `.env` populated from `.env.example` with valid development values
 - Current branch: `20260720-account-profile-page`

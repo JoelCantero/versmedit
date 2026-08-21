@@ -1,7 +1,5 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
-
 import { UserStatus } from "@/generated/prisma/client";
 
 import { db } from "@/lib/db";
@@ -26,10 +24,6 @@ export async function findExistingLoginEmail(normalizedEmail: string) {
     select: { email: true },
   });
   return user?.email ?? null;
-}
-
-export function hashLoginEmail(normalizedEmail: string) {
-  return createHash("sha256").update(normalizedEmail).digest("hex");
 }
 
 export function getLoginCallbackPath(locale: LoginLocale) {

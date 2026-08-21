@@ -31,7 +31,8 @@
     "navigation": {
       "profile": "Perfil",
       "profileAriaLabel": "Secciones del perfil",
-      "accountLink": "Cuenta"
+      "accountLink": "Cuenta",
+      "dataAndPrivacy": "Datos y privacidad"
     },
     "avatar": {
       "label": "Avatar del perfil",
@@ -61,6 +62,63 @@
       "tooLong": "El nombre debe tener 80 caracteres o menos.",
       "invalidCharacters": "Usa solo letras, espacios, apóstrofes o guiones.",
       "invalidSubmission": "No hemos podido procesar esta solicitud. Revisa el formulario y vuelve a intentarlo."
+    },
+    "data": {
+      "metadata": {
+        "title": "Datos y privacidad",
+        "description": "Revisa los controles de privacidad de tu cuenta."
+      },
+      "heading": {
+        "title": "Datos y privacidad",
+        "description": "Gestiona el ciclo de vida de los datos personales y de autenticación vinculados a tu cuenta."
+      },
+      "deletion": {
+        "title": "Eliminación permanente de la cuenta",
+        "description": "Elimina permanentemente tu cuenta y todo el acceso asociado a ella."
+      }
+    },
+    "deletion": {
+      "dialog": {
+        "deleteTrigger": "Eliminar cuenta",
+        "title": "¿Eliminar tu cuenta permanentemente?",
+        "description": "Revisa todas las consecuencias antes de continuar.",
+        "irreversible": "Esta acción es permanente y no se puede deshacer.",
+        "signOutEverywhere": "Se cerrará tu sesión en este y en todos los demás dispositivos.",
+        "invalidateLinks": "Los enlaces pendientes de acceso y registro dejarán de funcionar.",
+        "removeData": "Se eliminarán tu perfil, identidades, sesiones y aceptaciones de políticas.",
+        "loseAccess": "Ya no podrás acceder a esta cuenta.",
+        "cancel": "Cancelar",
+        "continue": "Continuar",
+        "sendLink": "Enviar un enlace nuevo",
+        "sendingLink": "Enviando el enlace...",
+        "reauthSent": "Revisa tu correo antes de continuar.",
+        "reauthError": "No hemos podido enviar el enlace. Inténtalo de nuevo.",
+        "confirmTitle": "Confirmación final",
+        "confirmDescription": "La eliminación solo comienza después de la siguiente acción.",
+        "confirmDelete": "Eliminar la cuenta permanentemente",
+        "deleting": "Eliminando la cuenta...",
+        "deletionError": "No hemos podido eliminar la cuenta. Inténtalo de nuevo.",
+        "recovering": "Comprobando si la eliminación ha terminado...",
+        "closeLabel": "Cerrar diálogo"
+      },
+      "states": {
+        "invalidLink": "Este enlace de verificación no es válido. Solicita uno nuevo y vuelve a intentarlo.",
+        "sessionConflict": "Este enlace no se puede usar con la sesión actual. Ciérrala antes de volver a intentarlo."
+      },
+      "email": {
+        "subject": "Confirma la eliminación de tu cuenta de {projectName}",
+        "introduction": "Autentícate con este enlace para seguir revisando la eliminación permanente de la cuenta.",
+        "action": "Continuar con la eliminación de la cuenta"
+      }
+    },
+    "deleted": {
+      "metadata": {
+        "title": "Cuenta eliminada",
+        "description": "Tu cuenta se ha eliminado permanentemente."
+      },
+      "title": "Cuenta eliminada",
+      "description": "Tu cuenta y el acceso asociado se han eliminado permanentemente.",
+      "home": "Volver al inicio"
     }
   },
   "Login": {

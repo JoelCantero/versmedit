@@ -31,7 +31,8 @@
     "navigation": {
       "profile": "Perfil",
       "profileAriaLabel": "Seccions del perfil",
-      "accountLink": "Compte"
+      "accountLink": "Compte",
+      "dataAndPrivacy": "Dades i privacitat"
     },
     "avatar": {
       "label": "Avatar del perfil",
@@ -61,6 +62,63 @@
       "tooLong": "El nom ha de tenir 80 caràcters o menys.",
       "invalidCharacters": "Utilitza només lletres, espais, apòstrofs o guions.",
       "invalidSubmission": "No hem pogut processar aquesta sol·licitud. Revisa el formulari i torna-ho a provar."
+    },
+    "data": {
+      "metadata": {
+        "title": "Dades i privacitat",
+        "description": "Revisa els controls de privacitat del teu compte."
+      },
+      "heading": {
+        "title": "Dades i privacitat",
+        "description": "Gestiona el cicle de vida de les dades personals i d'autenticació vinculades al teu compte."
+      },
+      "deletion": {
+        "title": "Eliminació permanent del compte",
+        "description": "Elimina permanentment el teu compte i tot l'accés que hi està associat."
+      }
+    },
+    "deletion": {
+      "dialog": {
+        "deleteTrigger": "Elimina el compte",
+        "title": "Vols eliminar el compte permanentment?",
+        "description": "Revisa totes les conseqüències abans de continuar.",
+        "irreversible": "Aquesta acció és permanent i no es pot desfer.",
+        "signOutEverywhere": "Es tancarà la sessió en aquest dispositiu i en tots els altres.",
+        "invalidateLinks": "Els enllaços pendents d'accés i registre deixaran de funcionar.",
+        "removeData": "S'eliminaran el perfil, les identitats, les sessions i les acceptacions de polítiques.",
+        "loseAccess": "Ja no podràs accedir a aquest compte.",
+        "cancel": "Cancel·la",
+        "continue": "Continua",
+        "sendLink": "Envia un enllaç nou",
+        "sendingLink": "Enviant l'enllaç...",
+        "reauthSent": "Revisa el correu abans de continuar.",
+        "reauthError": "No hem pogut enviar l'enllaç. Torna-ho a provar.",
+        "confirmTitle": "Confirmació final",
+        "confirmDescription": "L'eliminació només comença després de l'acció següent.",
+        "confirmDelete": "Elimina el compte permanentment",
+        "deleting": "Eliminant el compte...",
+        "deletionError": "No hem pogut eliminar el compte. Torna-ho a provar.",
+        "recovering": "Comprovant si l'eliminació ha acabat...",
+        "closeLabel": "Tanca el diàleg"
+      },
+      "states": {
+        "invalidLink": "Aquest enllaç de verificació no és vàlid. Sol·licita'n un de nou i torna-ho a provar.",
+        "sessionConflict": "Aquest enllaç no es pot utilitzar amb la sessió actual. Tanca-la abans de tornar-ho a provar."
+      },
+      "email": {
+        "subject": "Confirma l'eliminació del teu compte de {projectName}",
+        "introduction": "Autentica't amb aquest enllaç per continuar revisant l'eliminació permanent del compte.",
+        "action": "Continua amb l'eliminació del compte"
+      }
+    },
+    "deleted": {
+      "metadata": {
+        "title": "Compte eliminat",
+        "description": "El teu compte s'ha eliminat permanentment."
+      },
+      "title": "Compte eliminat",
+      "description": "El teu compte i l'accés associat s'han eliminat permanentment.",
+      "home": "Torna a l'inici"
     }
   },
   "Login": {

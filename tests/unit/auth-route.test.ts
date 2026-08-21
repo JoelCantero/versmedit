@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
     Promise.resolve({ available: true, retryAfterSeconds: 0 }),
   ),
   getSignupActivationAuthorization: vi.fn(),
+  getAccountDeletionVerificationAuthorization: vi.fn(),
   env: { MAIL: { enabled: true as boolean } },
 }));
 
@@ -55,6 +56,10 @@ vi.mock("@/modules/login/verification-context", () => ({
 vi.mock("@/modules/signup/verification-context", () => ({
   getSignupActivationAuthorization: mocks.getSignupActivationAuthorization,
 }));
+vi.mock("@/modules/account/deletion/verification-context", () => ({
+  getAccountDeletionVerificationAuthorization:
+    mocks.getAccountDeletionVerificationAuthorization,
+}));
 
 import { GET, POST } from "@/app/api/auth/[...nextauth]/route";
 
@@ -81,6 +86,7 @@ describe("Auth.js route rate limiting", () => {
       retryAfterSeconds: 0,
     });
     mocks.getSignupActivationAuthorization.mockReturnValue(null);
+    mocks.getAccountDeletionVerificationAuthorization.mockReturnValue(null);
     mocks.env.MAIL.enabled = true;
     const counts = new Map<string, number>();
     mocks.consumeSharedRateLimit.mockImplementation(
@@ -226,6 +232,44 @@ describe("Auth.js route rate limiting", () => {
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toContain("/signup?state=invalid_link");
     expect(mocks.nextAuth).not.toHaveBeenCalled();
+  });
+
+  it("rejects direct deletion-provider callbacks and sign-in initiation", async () => {
+    for (const nextauth of [
+      ["callback", "account-deletion"],
+      ["signin", "account-deletion"],
+    ]) {
+      const request = new NextRequest(
+        `https://example.test/api/auth/${nextauth.join("/")}?token=raw`,
+        { method: nextauth[0] === "signin" ? "POST" : "GET" },
+      );
+      const context = { params: Promise.resolve({ nextauth }) };
+      const response = nextauth[0] === "signin"
+        ? await POST(request, context)
+        : await GET(request, context);
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toContain(
+        "/account/data?state=invalid_link",
+      );
+    }
+    expect(mocks.nextAuth).not.toHaveBeenCalled();
+  });
+
+  it("delegates deletion callbacks only inside verification authorization", async () => {
+    mocks.getAccountDeletionVerificationAuthorization.mockReturnValue({
+      identifier: "active@example.test",
+      token: "deletion-hash",
+    });
+    const request = new NextRequest(
+      "https://example.test/api/auth/callback/account-deletion?token=raw",
+    );
+    const context = {
+      params: Promise.resolve({ nextauth: ["callback", "account-deletion"] }),
+    };
+
+    await expect(GET(request, context)).resolves.toHaveProperty("status", 204);
+    expect(mocks.nextAuth).toHaveBeenCalledOnce();
   });
 
   it("rejects invalid CSRF after charging only the client bucket", async () => {

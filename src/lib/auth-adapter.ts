@@ -9,6 +9,7 @@ import {
 } from "@/generated/prisma/client";
 
 import { db } from "@/lib/db";
+import { getAccountDeletionVerificationAuthorization } from "@/modules/account/deletion/verification-context";
 import { publishVerificationToken } from "@/modules/login/verification-context";
 import { getSignupActivationAuthorization } from "@/modules/signup/verification-context";
 
@@ -23,6 +24,16 @@ function isPrismaRecordNotFound(error: unknown): boolean {
 
 export function hardenAdapter(adapter: Adapter): Adapter {
   const originalDeleteSession = adapter.deleteSession?.bind(adapter);
+
+  const createSession = (async (session) =>
+    db.$transaction(async (transaction) => {
+      await transaction.$executeRaw(Prisma.sql`
+        SELECT pg_advisory_xact_lock(hashtextextended(${session.userId}, 0))
+      `);
+      return transaction.session.create({
+        data: { ...session, authenticatedAt: new Date() },
+      });
+    })) as Adapter["createSession"];
 
   const getUserByEmail = (async (email: string) =>
     db.user.findFirst({
@@ -49,9 +60,20 @@ export function hardenAdapter(adapter: Adapter): Adapter {
   }) as Adapter["createUser"];
 
   const createVerificationToken = (async (token) => {
+    const normalizedIdentifier = token.identifier.trim().toLowerCase();
     await db.$transaction(async (transaction) => {
       await transaction.$executeRaw(Prisma.sql`
-        SELECT pg_advisory_xact_lock(hashtextextended(${token.identifier}, 0))
+        SELECT pg_advisory_xact_lock(hashtextextended(${normalizedIdentifier}, 0))
+      `);
+      const user = await transaction.user.findUnique({
+        where: { normalizedEmail: normalizedIdentifier },
+        select: { id: true, status: true },
+      });
+      if (!user || user.status !== UserStatus.ACTIVE) {
+        throw new Error("Authentication account is unavailable");
+      }
+      await transaction.$executeRaw(Prisma.sql`
+        SELECT pg_advisory_xact_lock(hashtextextended(${user.id}, 0))
       `);
       await transaction.verificationToken.deleteMany({
         where: {
@@ -72,6 +94,56 @@ export function hardenAdapter(adapter: Adapter): Adapter {
   }) as Adapter["createVerificationToken"];
 
   const useVerificationToken = (async ({ identifier, token }) => {
+    const deletionAuthorization =
+      getAccountDeletionVerificationAuthorization();
+    if (
+      deletionAuthorization?.identifier === identifier &&
+      deletionAuthorization.token === token
+    ) {
+      return db.$transaction(async (transaction) => {
+        await transaction.$executeRaw(Prisma.sql`
+          SELECT pg_advisory_xact_lock(hashtextextended(${identifier}, 0))
+        `);
+        const storedToken = await transaction.verificationToken.findUnique({
+          where: { token },
+        });
+        if (
+          !storedToken ||
+          storedToken.identifier !== identifier ||
+          storedToken.token !== token ||
+          storedToken.purpose !== VerificationPurpose.ACCOUNT_DELETION ||
+          storedToken.expires.getTime() <= Date.now() ||
+          !storedToken.deliveredAt ||
+          (storedToken.locale !== "en" &&
+            storedToken.locale !== "es" &&
+            storedToken.locale !== "ca")
+        ) {
+          return null;
+        }
+
+        const user = await transaction.user.findUnique({
+          where: { normalizedEmail: identifier },
+          select: { status: true },
+        });
+        if (!user || user.status !== UserStatus.ACTIVE) return null;
+
+        const consumed = await transaction.verificationToken.deleteMany({
+          where: {
+            identifier,
+            token,
+            purpose: VerificationPurpose.ACCOUNT_DELETION,
+          },
+        });
+        if (consumed.count !== 1) return null;
+
+        return {
+          identifier: storedToken.identifier,
+          token: storedToken.token,
+          expires: storedToken.expires,
+        };
+      });
+    }
+
     const authorization = getSignupActivationAuthorization();
     if (
       authorization?.identifier === identifier &&
@@ -160,6 +232,7 @@ export function hardenAdapter(adapter: Adapter): Adapter {
 
   return {
     ...adapter,
+    createSession,
     createUser,
     createVerificationToken,
     deleteSession,

@@ -24,12 +24,23 @@ beforeEach(() => {
 describe("proxy security boundary", () => {
   it("builds a production CSP with a nonce and no unsafe inline scripts", () => {
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
     const policy = contentSecurityPolicy("nonce-value");
 
     expect(policy).toContain("script-src 'self' 'nonce-nonce-value' 'strict-dynamic'");
     expect(policy).toContain("img-src 'self' data: blob: https:");
+    expect(policy).toContain("upgrade-insecure-requests");
     expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
     expect(policy).not.toContain("'unsafe-eval'");
+  });
+
+  it("does not upgrade requests for an HTTP production origin", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXTAUTH_URL", "http://127.0.0.1:3100");
+
+    expect(contentSecurityPolicy("nonce-value")).not.toContain(
+      "upgrade-insecure-requests",
+    );
   });
 
   it("creates a unique nonce", () => {
@@ -64,6 +75,25 @@ describe("proxy security boundary", () => {
 
     expect(response.status).toBe(421);
     expect(response.headers.get("x-request-id")).toBeTruthy();
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "/api/account/deletion",
+    "/api/account/deletion/reauthenticate",
+    "/api/account/deletion/verify?token=fixture",
+  ])("rejects a deletion request to a non-canonical forwarded host for %s", (path) => {
+    vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
+    vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+    const response = proxy(
+      new NextRequest(`https://app.example.test${path}`, {
+        headers: { "x-forwarded-host": "attacker.example" },
+      }),
+    );
+
+    expect(response.status).toBe(421);
+    expect(response.headers.get("x-request-id")).toBeTruthy();
+    expect(response.headers.get("content-security-policy")).toBeTruthy();
     expect(intlMiddlewareMock).not.toHaveBeenCalled();
   });
 

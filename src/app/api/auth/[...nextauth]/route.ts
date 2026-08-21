@@ -3,16 +3,17 @@ import NextAuth from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { validateAuthCsrfToken } from "@/lib/auth-csrf";
+import { getAuthEmailAddressRateLimitKey } from "@/lib/auth-email-rate-limit";
 import { getEnv } from "@/lib/env";
 import { getRequestLogger } from "@/lib/logger";
 import { getProviderAvailability } from "@/lib/provider-availability";
 import { getClientIdentifier } from "@/lib/request-context";
 import { consumeSharedRateLimit } from "@/lib/shared-rate-limit";
+import { getAccountDeletionVerificationAuthorization } from "@/modules/account/deletion/verification-context";
 import { parseLoginEmail } from "@/modules/login/schema";
 import {
 	acceptedLoginResponse,
 	findExistingLoginEmail,
-	hashLoginEmail,
 } from "@/modules/login/service";
 import { runWithVerificationContext } from "@/modules/login/verification-context";
 import { getSignupActivationAuthorization } from "@/modules/signup/verification-context";
@@ -25,23 +26,37 @@ async function authHandler(request: NextRequest, context: AuthRouteContext) {
 	return await NextAuth(request, context, authOptions);
 }
 
-async function rejectUnauthorizedSignupProvider(
+async function rejectUnauthorizedInternalProvider(
 	request: NextRequest,
 	context: AuthRouteContext,
 ) {
 	const { nextauth = [] } = await context.params;
-	if (nextauth[1] !== "signup") return null;
-	if (nextauth[0] === "callback" && getSignupActivationAuthorization()) {
-		return null;
+	if (nextauth[1] === "signup") {
+		if (nextauth[0] === "callback" && getSignupActivationAuthorization()) {
+			return null;
+		}
+		return Response.redirect(
+			new URL("/signup?state=invalid_link", request.url),
+			302,
+		);
 	}
-	return Response.redirect(
-		new URL("/signup?state=invalid_link", request.url),
-		302,
-	);
+	if (nextauth[1] === "account-deletion") {
+		if (
+			nextauth[0] === "callback" &&
+			getAccountDeletionVerificationAuthorization()
+		) {
+			return null;
+		}
+		return Response.redirect(
+			new URL("/account/data?state=invalid_link", request.url),
+			302,
+		);
+	}
+	return null;
 }
 
 export async function GET(request: NextRequest, context: AuthRouteContext) {
-	const rejection = await rejectUnauthorizedSignupProvider(request, context);
+	const rejection = await rejectUnauthorizedInternalProvider(request, context);
 	if (rejection) return rejection;
 	return await authHandler(request, context);
 }
@@ -49,7 +64,7 @@ export async function GET(request: NextRequest, context: AuthRouteContext) {
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1_000;
 
 export async function POST(request: NextRequest, context: AuthRouteContext) {
-	const rejection = await rejectUnauthorizedSignupProvider(request, context);
+	const rejection = await rejectUnauthorizedInternalProvider(request, context);
 	if (rejection) return rejection;
 	const pathname = new URL(request.url).pathname;
 	if (!pathname.endsWith("/signin/email")) {
@@ -90,7 +105,7 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 	}
 
 	const emailResult = await consumeSharedRateLimit({
-		key: `auth:email:address:${hashLoginEmail(normalizedEmail)}`,
+		key: getAuthEmailAddressRateLimitKey(normalizedEmail),
 		limit: 3,
 		windowMs: RATE_LIMIT_WINDOW_MS,
 	});

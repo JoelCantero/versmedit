@@ -837,9 +837,29 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
     const email = `${fixtures.scopeId}-session-failure@example.test`;
     await submit({ name: "Durable Activation", email, locale: "es" });
     const rawToken = rawTokenFor(email);
-    const createSession = vi
-      .spyOn(db.session, "create")
-      .mockRejectedValueOnce(new Error("simulated session failure"));
+    const pending = await db.user.findUniqueOrThrow({
+      where: { normalizedEmail: email },
+      select: { id: true },
+    });
+    if (!/^[A-Za-z0-9_-]+$/u.test(pending.id)) {
+      throw new Error("invalid signup fixture user id");
+    }
+    const suffix = crypto.randomUUID().replaceAll("-", "");
+    const functionName = `signup_session_fail_${suffix}`;
+    const triggerName = `signup_session_trigger_${suffix}`;
+    await db.$executeRawUnsafe(`
+      CREATE FUNCTION "${functionName}"() RETURNS trigger AS $$
+      BEGIN
+        RAISE EXCEPTION 'simulated session failure';
+      END;
+      $$ LANGUAGE plpgsql
+    `);
+    await db.$executeRawUnsafe(`
+      CREATE TRIGGER "${triggerName}"
+      BEFORE INSERT ON "Session"
+      FOR EACH ROW WHEN (NEW."userId" = '${pending.id}')
+      EXECUTE FUNCTION "${functionName}"()
+    `);
 
     try {
       const response = await activateSignup(activationRequest(rawToken));
@@ -847,7 +867,10 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
         "https://app.example.test/es/signup?state=session_failed",
       );
     } finally {
-      createSession.mockRestore();
+      await db.$executeRawUnsafe(
+        `DROP TRIGGER IF EXISTS "${triggerName}" ON "Session"`,
+      );
+      await db.$executeRawUnsafe(`DROP FUNCTION IF EXISTS "${functionName}"()`);
     }
 
     const user = await db.user.findUniqueOrThrow({

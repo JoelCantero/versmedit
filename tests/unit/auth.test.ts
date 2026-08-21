@@ -96,7 +96,7 @@ describe("authOptions", () => {
     expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
   });
 
-  it("registers internal login and callback-only signup providers", async () => {
+  it("registers login plus callback-only signup and deletion providers", async () => {
     mocks.env.MAIL = {
       enabled: true,
       provider: "brevo",
@@ -105,7 +105,7 @@ describe("authOptions", () => {
 
     const providers = await configuredProviders();
 
-    expect(providers).toHaveLength(2);
+    expect(providers).toHaveLength(3);
     expect(providers.map(({ id, type, from, maxAge }) => ({ id, type, from, maxAge })))
       .toEqual([
         {
@@ -120,10 +120,22 @@ describe("authOptions", () => {
           from: "no-reply@example.test",
           maxAge: 15 * 60,
         },
+        {
+          id: "account-deletion",
+          type: "email",
+          from: "no-reply@example.test",
+          maxAge: 15 * 60,
+        },
       ]);
     expect(providers[0]?.generateVerificationToken()).toBe("raw-token");
     await expect(
       providers[1]?.sendVerificationRequest({
+        identifier: "member@example.test",
+        url: "https://app.example.test/unused",
+      }),
+    ).rejects.toThrow(/cannot initiate delivery/i);
+    await expect(
+      providers[2]?.sendVerificationRequest({
         identifier: "member@example.test",
         url: "https://app.example.test/unused",
       }),

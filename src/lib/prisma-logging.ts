@@ -18,9 +18,9 @@ export function registerPrismaLogging(client: PrismaLogEmitter, logger: Logger):
   const log = logger.child({ component: "prisma" });
 
   client.$on("warn", (event) => {
-    log.warn({ target: event.target }, event.message);
+    log.warn({ target: event.target }, "database warning");
   });
   client.$on("error", (event) => {
-    log.error({ target: event.target }, event.message);
+    log.error({ target: event.target }, "database operation failed");
   });
 }

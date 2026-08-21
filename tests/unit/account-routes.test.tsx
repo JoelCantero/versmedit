@@ -19,12 +19,18 @@ vi.mock("@/lib/auth", () => ({ authOptions: {} }));
 vi.mock("next/navigation", () => ({
   redirect: mocks.redirect,
 }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: () => null,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(() => vi.fn((key: string) => key)),
   setRequestLocale: vi.fn(),
 }));
 vi.mock("@/modules/account/service", () => ({
   getCurrentUserProfile: mocks.getCurrentUserProfile,
+}));
+vi.mock("@/modules/account/actions/update-profile", () => ({
+  updateProfile: vi.fn(),
 }));
 
 import AccountPage from "@/app/[locale]/account/page";

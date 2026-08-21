@@ -126,8 +126,8 @@ jobs:
 
       - name: Validate production Docker images
         run: |
-          docker build --target runner --tag versmedit-ci:latest --file docker/Dockerfile .
-          docker build --target migrator --tag versmedit-migrate-ci:latest --file docker/Dockerfile .
+          docker build --target runner --tag "${PROJECT_NAME}-ci:latest" --file docker/Dockerfile .
+          docker build --target migrator --tag "${PROJECT_NAME}-migrate-ci:latest" --file docker/Dockerfile .
 
   warm-playwright-cache:
     name: Warm Playwright cache

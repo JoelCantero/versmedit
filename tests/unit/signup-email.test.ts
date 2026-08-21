@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  projectName: "",
   sendTransactionalEmail: vi.fn(),
 }));
 
@@ -11,7 +12,7 @@ vi.mock("@/lib/email/index", () => ({
   sendTransactionalEmail: mocks.sendTransactionalEmail,
 }));
 vi.mock("@/lib/env", () => ({
-  getEnv: () => ({ PROJECT_NAME: "versmedit" }),
+  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
 }));
 
 import {
@@ -20,8 +21,10 @@ import {
   sendActiveAccountEmail,
   sendOnboardingEmail,
 } from "@/modules/signup/email";
+import { getTestProjectName } from "../helpers/project-name";
 
-const projectName = "versmedit";
+const projectName = getTestProjectName();
+mocks.projectName = projectName;
 
 const localeCopy = {
   en: {

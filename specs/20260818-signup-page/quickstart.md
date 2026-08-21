@@ -239,8 +239,8 @@ pnpm typecheck
 pnpm audit:prod
 RUN_INTEGRATION_TESTS=true pnpm test:coverage
 pnpm test:e2e
-docker build --target runner --tag versmedit-signup:latest --file docker/Dockerfile .
-docker build --target migrator --tag versmedit-signup-migrate:latest --file docker/Dockerfile .
+docker build --target runner --tag "${PROJECT_NAME}-signup:latest" --file docker/Dockerfile .
+docker build --target migrator --tag "${PROJECT_NAME}-signup-migrate:latest" --file docker/Dockerfile .
 ```
 
 After implementation, the mandatory SpecKit compliance and quality hooks must also pass. CI remains

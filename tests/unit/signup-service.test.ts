@@ -278,14 +278,18 @@ describe("signup service", () => {
 
   it("applies the accepted floor relative to request start", async () => {
     const sleep = vi.fn().mockResolvedValue(undefined);
+    const now = vi.fn()
+      .mockReturnValueOnce(1_125)
+      .mockReturnValueOnce(1_549)
+      .mockReturnValue(1_550);
     const response = await acceptedSignupResponse({
       startedAt: 1_000,
-      now: () => 1_125,
+      now,
       random: () => 0.5,
       sleep,
     });
 
-    expect(sleep).toHaveBeenCalledWith(425);
+    expect(sleep.mock.calls).toEqual([[425], [1]]);
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ status: "accepted" });
   });

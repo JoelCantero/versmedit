@@ -2,9 +2,11 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getTestProjectName } from "../helpers/project-name";
+
 const mocks = vi.hoisted(() => ({
   env: {
-    PROJECT_NAME: "versmedit",
+    PROJECT_NAME: "",
     MAIL: { enabled: false } as
       | { enabled: false }
       | {
@@ -18,6 +20,8 @@ const mocks = vi.hoisted(() => ({
   getPublishedVerificationToken: vi.fn(),
   deleteMany: vi.fn(),
 }));
+const projectName = getTestProjectName();
+mocks.env.PROJECT_NAME = projectName;
 
 vi.mock("server-only", () => ({}));
 vi.mock("@next-auth/prisma-adapter", () => ({ PrismaAdapter: () => ({}) }));
@@ -147,19 +151,19 @@ describe("authOptions", () => {
     [
       "en",
       "/",
-      "Your versmedit sign-in link",
+      `Your ${projectName} sign-in link`,
       "Use this link to sign in",
     ],
     [
       "es",
       "/es",
-      "Tu enlace de acceso a versmedit",
+      `Tu enlace de acceso a ${projectName}`,
       "Usa este enlace para iniciar sesión",
     ],
     [
       "ca",
       "/ca",
-      "El teu enllaç d'accés a versmedit",
+      `El teu enllaç d'accés a ${projectName}`,
       "Utilitza aquest enllaç per iniciar sessió",
     ],
   ] as const)(

@@ -42,7 +42,11 @@ export async function acceptedLoginResponse({
     new Promise((resolve) => setTimeout(resolve, milliseconds)),
 }: AcceptedLoginResponseOptions) {
   const jitter = Math.floor(random() * (ACCEPTED_JITTER_MS + 1));
-  const remaining = ACCEPTED_FLOOR_MS + jitter - (now() - startedAt);
-  if (remaining > 0) await sleep(remaining);
+  const targetAt = startedAt + ACCEPTED_FLOOR_MS + jitter;
+  let remaining = targetAt - now();
+  while (remaining > 0) {
+    await sleep(remaining);
+    remaining = targetAt - now();
+  }
   return Response.json({ status: "accepted" });
 }

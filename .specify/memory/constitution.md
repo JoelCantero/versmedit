@@ -1,8 +1,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.6.2 → 1.7.0 (governance change)
-Ratified: 2026-07-10 | Last amended: 2026-07-19
+Version change: 1.7.0 → 1.8.0 (materially expanded Principle I)
+Ratified: 2026-07-10 | Last amended: 2026-08-21
+
+1.8.0 — Made validated `PROJECT_NAME` the sole source of application identity across runtime
+surfaces, tests, automation, and executable documentation. Prohibited hardcoded current or former
+brand names and product-specific fallbacks, and added an explicit pre-merge regression search.
+
+Current amendment impact:
+  - Modified principles: I. Docker-First, Portable by Default
+  - Added sections: none
+  - Removed sections: none
+  - Template updates: none required; Spec Kit workflows read this constitution at runtime
+  - Deferred TODOs: none
 
 1.7.0 — Changed feature identifiers to `YYYYMMDD-english-feature-name`, matching the configured
 date-based workflow. English suffixes must be concise and unique when multiple features are created
@@ -138,6 +149,21 @@ Required:
 - Provide a `docker-compose.yml` for local/development usage when needed.
 - Provide a `docker-compose.prod.yml` or a clearly documented production compose profile.
 - All runtime configuration MUST come from environment variables.
+- `PROJECT_NAME` MUST be the sole authoritative source for the application's project name and
+  display identity. It MUST be required and validated at startup, with no product-specific fallback
+  or default. Local development MAY load it from an ignored `.env`; CI and production MUST inject
+  it as an environment variable rather than depend on a committed or host `.env` file.
+- User-visible branding and operational identity MUST derive from `PROJECT_NAME`. This includes UI
+  text, localized messages through interpolation, email subjects, bodies and sender names, log
+  application fields, and Docker image, container, router, service, and deployment names where they
+  identify the application.
+- Source code, tests, CI/CD, and executable documentation MUST NOT hardcode the current or any former
+  project or brand name. Tests MUST read the configured value or inject a deliberately generic test
+  value. Exact external or legacy identifiers MAY remain only when required for compatibility and
+  documented in the applicable spec or plan.
+- Any pull request touching identity-bearing configuration or surfaces MUST perform a
+  case-insensitive search of tracked files for hardcoded current or former project names and MUST
+  test with a non-production `PROJECT_NAME` value to demonstrate substitution.
 - Persistent data MUST use named volumes or explicitly documented bind mounts.
 - The application MUST be movable to a VPS by copying the repository and compose files, recreating
   its environment variables and secrets on the target host (production injects them at runtime — no
@@ -593,4 +619,4 @@ equivalent, documented exception).
 **Scope**: Self-hosted Docker web applications for Raspberry Pi, VPS, and small production
 deployments.
 
-**Version**: 1.7.0 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-07-19
+**Version**: 1.8.0 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-08-21

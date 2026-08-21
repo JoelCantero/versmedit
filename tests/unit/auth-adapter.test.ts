@@ -15,6 +15,8 @@ const mocks = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
   acceptanceCreate: vi.fn(),
+  sessionCreate: vi.fn(),
+  getAccountDeletionVerificationAuthorization: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -37,6 +39,10 @@ vi.mock("@/modules/login/verification-context", () => ({
 vi.mock("@/modules/signup/verification-context", () => ({
   getSignupActivationAuthorization: mocks.getSignupActivationAuthorization,
 }));
+vi.mock("@/modules/account/deletion/verification-context", () => ({
+  getAccountDeletionVerificationAuthorization:
+    mocks.getAccountDeletionVerificationAuthorization,
+}));
 
 import { hardenAdapter } from "@/lib/auth-adapter";
 
@@ -44,6 +50,7 @@ describe("hardenAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getSignupActivationAuthorization.mockReturnValue(null);
+    mocks.getAccountDeletionVerificationAuthorization.mockReturnValue(null);
     mocks.transaction.mockImplementation((callback) =>
       callback({
         $executeRaw: mocks.executeRaw,
@@ -56,8 +63,30 @@ describe("hardenAdapter", () => {
           findUnique: mocks.tokenFindUnique,
         },
         policyAcceptance: { create: mocks.acceptanceCreate },
+        session: { create: mocks.sessionCreate },
       }),
     );
+  });
+
+  it("serializes session creation and records the authentication time", async () => {
+    const originalCreateSession = vi.fn();
+    const adapter = hardenAdapter({ createSession: originalCreateSession } as Adapter);
+    const session = {
+      sessionToken: "fresh-session",
+      userId: "active-user",
+      expires: new Date("2026-08-22T12:00:00.000Z"),
+    };
+    mocks.sessionCreate.mockImplementation(({ data }) => Promise.resolve(data));
+
+    await expect(adapter.createSession!(session)).resolves.toEqual({
+      ...session,
+      authenticatedAt: expect.any(Date),
+    });
+    expect(mocks.executeRaw).toHaveBeenCalledOnce();
+    expect(mocks.sessionCreate).toHaveBeenCalledWith({
+      data: { ...session, authenticatedAt: expect.any(Date) },
+    });
+    expect(originalCreateSession).not.toHaveBeenCalled();
   });
   it("treats a missing stale session as already deleted", async () => {
     const deleteSession = vi.fn().mockRejectedValue({ code: "P2025" });
@@ -129,16 +158,24 @@ describe("hardenAdapter", () => {
     await expect(hardened.deleteSession!("missing")).resolves.toBeNull();
   });
 
-  it("serializes replacement, deletes predecessors, creates, and publishes the exact token", async () => {
+  it("locks email then user before replacing and publishing the exact login token", async () => {
     const created = {
       identifier: "member@example.test",
       token: "hashed-token",
       expires: new Date("2026-07-19T12:15:00Z"),
     };
     const adapter = hardenAdapter({} as Adapter);
+    mocks.userFindUnique.mockResolvedValue({
+      id: "active-user",
+      status: "ACTIVE",
+    });
 
     await expect(adapter.createVerificationToken!(created)).resolves.toEqual(created);
-    expect(mocks.executeRaw).toHaveBeenCalledTimes(2);
+    expect(mocks.executeRaw).toHaveBeenCalledTimes(3);
+    expect(mocks.userFindUnique).toHaveBeenCalledWith({
+      where: { normalizedEmail: created.identifier },
+      select: { id: true, status: true },
+    });
     expect(mocks.deleteMany).toHaveBeenCalledWith({
       where: { identifier: created.identifier, purpose: "LOGIN" },
     });
@@ -148,10 +185,32 @@ describe("hardenAdapter", () => {
     });
     expect(
       mocks.executeRaw.mock.invocationCallOrder[0],
-    ).toBeLessThan(mocks.deleteMany.mock.invocationCallOrder[0]!);
+    ).toBeLessThan(mocks.userFindUnique.mock.invocationCallOrder[0]!);
     expect(
-      mocks.deleteMany.mock.invocationCallOrder[0],
+      mocks.userFindUnique.mock.invocationCallOrder[0],
     ).toBeLessThan(mocks.executeRaw.mock.invocationCallOrder[1]!);
+    expect(mocks.executeRaw.mock.invocationCallOrder[1]).toBeLessThan(
+      mocks.deleteMany.mock.invocationCallOrder[0]!,
+    );
+    expect(mocks.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.executeRaw.mock.invocationCallOrder[2]!,
+    );
+  });
+
+  it("does not create or publish a login token after its account was deleted", async () => {
+    const token = {
+      identifier: "deleted@example.test",
+      token: "hashed-token",
+      expires: new Date("2026-08-22T12:15:00Z"),
+    };
+    mocks.userFindUnique.mockResolvedValue(null);
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(adapter.createVerificationToken!(token)).rejects.toThrow(
+      /authentication account is unavailable/i,
+    );
+    expect(mocks.deleteMany).not.toHaveBeenCalled();
+    expect(mocks.publishVerificationToken).not.toHaveBeenCalled();
   });
 
   it("atomically consumes only the matching token", async () => {
@@ -239,6 +298,46 @@ describe("hardenAdapter", () => {
       }),
     ).resolves.toBeNull();
     expect(mocks.transaction).not.toHaveBeenCalled();
+  });
+
+  it("consumes a delivered deletion token only in its exact request context", async () => {
+    const token = {
+      identifier: "active@example.test",
+      token: "deletion-hash",
+      expires: new Date(Date.now() + 60_000),
+      purpose: "ACCOUNT_DELETION",
+      locale: "ca",
+      deliveredAt: new Date(),
+    };
+    mocks.getAccountDeletionVerificationAuthorization.mockReturnValue({
+      identifier: token.identifier,
+      token: token.token,
+    });
+    mocks.tokenFindUnique.mockResolvedValue(token);
+    mocks.userFindUnique.mockResolvedValue({
+      id: "active-user",
+      status: "ACTIVE",
+    });
+    mocks.deleteMany.mockResolvedValue({ count: 1 });
+    const adapter = hardenAdapter({} as Adapter);
+
+    await expect(
+      adapter.useVerificationToken!({
+        identifier: token.identifier,
+        token: token.token,
+      }),
+    ).resolves.toEqual({
+      identifier: token.identifier,
+      token: token.token,
+      expires: token.expires,
+    });
+    expect(mocks.deleteMany).toHaveBeenCalledWith({
+      where: {
+        identifier: token.identifier,
+        token: token.token,
+        purpose: "ACCOUNT_DELETION",
+      },
+    });
   });
 
   it("rejects a provisional signup token that was not confirmed delivered", async () => {

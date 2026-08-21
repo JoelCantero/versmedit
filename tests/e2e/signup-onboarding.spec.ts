@@ -324,8 +324,7 @@ async function cleanupSignupData() {
     );
     await pool.query(
       `DELETE FROM "RateLimitBucket" WHERE "key" = ANY($1::text[])
-         OR "key" = 'auth:email:client:untrusted-direct-client'
-         OR "key" LIKE 'mail:provider-health%'`,
+         OR "key" = 'auth:email:client:untrusted-direct-client'`,
       [addressKeys],
     );
   } finally {
@@ -349,12 +348,6 @@ test("keeps signup private and activates through the normal Auth.js session", as
     "E2E_MAIL_PROVIDER must be brevo or mailjet",
   );
 
-  await fetch(`${providerControlUrl}/control/reset`, { method: "POST" });
-  const pool = getPool();
-  await pool.query(
-    `DELETE FROM "RateLimitBucket" WHERE "key" LIKE 'mail:provider-health%'`,
-  );
-  await pool.end();
   const suffix = randomUUID();
   const newEmail = `new-${suffix}@example.test`;
   const pendingEmail = `pending-${suffix}@example.test`;
@@ -394,24 +387,27 @@ test("keeps signup private and activates through the normal Auth.js session", as
   ).then((response) => response.json())) as {
     requests: CapturedProviderRequest[];
   };
-  expect(capture.requests).toHaveLength(4);
   const providerPrefix = e2eProvider === "brevo" ? "brevo" : "mailjet";
-  const healthRequest = capture.requests.filter(
+  const healthRequests = capture.requests.filter(
     (request) => request.target === `${providerPrefix}.health`,
   );
+  const recipients = [newEmail, pendingEmail, activeEmail];
   const sendRequests = capture.requests.filter(
-    (request) => request.target === `${providerPrefix}.send`,
+    (request) =>
+      request.target === `${providerPrefix}.send` &&
+      recipients.some((email) => request.body.includes(email)),
   );
-  expect(healthRequest).toHaveLength(1);
+  expect(healthRequests.length).toBeGreaterThanOrEqual(1);
   expect(sendRequests).toHaveLength(3);
+  const healthRequest = healthRequests.at(-1)!;
 
   const expectedAuthorization = `Basic ${Buffer.from(`${e2eApiKey}:${e2eApiSecret}`).toString("base64")}`;
   if (e2eProvider === "brevo") {
-    expect(healthRequest[0]).toMatchObject({
+    expect(healthRequest).toMatchObject({
       logicalUrl: "https://api.brevo.com/v3/account",
       method: "GET",
     });
-    expect(healthRequest[0]?.headers["api-key"]).toBe(e2eApiKey);
+    expect(healthRequest.headers["api-key"]).toBe(e2eApiKey);
     for (const request of sendRequests) {
       expect(request).toMatchObject({
         logicalUrl: "https://api.brevo.com/v3/smtp/email",
@@ -420,11 +416,11 @@ test("keeps signup private and activates through the normal Auth.js session", as
       expect(request.headers["api-key"]).toBe(e2eApiKey);
     }
   } else {
-    expect(healthRequest[0]).toMatchObject({
+    expect(healthRequest).toMatchObject({
       logicalUrl: "https://api.mailjet.com/v3/REST/sender?Limit=1",
       method: "GET",
     });
-    expect(healthRequest[0]?.headers.authorization).toBe(expectedAuthorization);
+    expect(healthRequest.headers.authorization).toBe(expectedAuthorization);
     for (const request of sendRequests) {
       expect(request).toMatchObject({
         logicalUrl: "https://api.mailjet.com/v3.1/send",

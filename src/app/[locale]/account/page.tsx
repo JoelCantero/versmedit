@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { updateProfile } from "@/modules/account/actions/update-profile";
+import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { ProfileForm } from "@/modules/account/components/profile-form";
 import { getSessionUserId } from "@/modules/account/session";
 import { getCurrentUserProfile } from "@/modules/account/service";
@@ -45,21 +46,14 @@ export default async function AccountPage({ params }: AccountPageProps) {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <section className="grid min-w-0 gap-6 md:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] md:items-start md:gap-8">
-        <nav
-          aria-label={t("navigation.profileAriaLabel")}
-          className="md:sticky md:top-6"
-        >
-          <ul className="flex min-w-0 flex-row gap-2 md:flex-col">
-            <li className="min-w-0">
-              <span
-                aria-current="page"
-                className="inline-flex min-w-0 rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground"
-              >
-                {t("navigation.profile")}
-              </span>
-            </li>
-          </ul>
-        </nav>
+        <AccountNavigation
+          active="profile"
+          messages={{
+            ariaLabel: t("navigation.profileAriaLabel"),
+            profile: t("navigation.profile"),
+            dataAndPrivacy: t("navigation.dataAndPrivacy"),
+          }}
+        />
 
         <ProfileForm
           locale={locale}

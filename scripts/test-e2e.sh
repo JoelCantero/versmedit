@@ -68,4 +68,14 @@ export E2E_APP_PORT="$(node -e 'const server=require("node:net").createServer();
 export NEXTAUTH_URL="http://127.0.0.1:${E2E_APP_PORT}"
 pnpm db:deploy
 pnpm build
-pnpm exec playwright test --project chromium --project chromium-320
+if [[ "${RUN_ACCOUNT_DELETION_PERF:-false}" == "true" ]]; then
+  pnpm exec playwright test \
+    tests/e2e/account-deletion.performance.spec.ts \
+    --project chromium \
+    --workers 1
+else
+  pnpm exec playwright test \
+    --project chromium \
+    --project chromium-320 \
+    --grep-invert @performance
+fi

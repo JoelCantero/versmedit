@@ -163,6 +163,14 @@ describe.skipIf(!runIntegrationTests)("magic-link existing-user boundary", () =>
     const identifier = `${integrationPrefix}-${crypto.randomUUID()}@example.test`;
     const adapter = hardenAdapter(PrismaAdapter(db));
     const expires = new Date(Date.now() + 15 * 60_000);
+    const user = await db.user.create({
+      data: {
+        email: identifier,
+        normalizedEmail: identifier,
+        status: "ACTIVE",
+      },
+    });
+    createdUserIds.push(user.id);
 
     await adapter.createVerificationToken?.({ identifier, token: "older-hash", expires });
     await adapter.createVerificationToken?.({ identifier, token: "newer-hash", expires });

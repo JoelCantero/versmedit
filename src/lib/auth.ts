@@ -24,8 +24,8 @@ function createInternalEmailProvider({
   from,
   sendVerificationRequest,
 }: {
-  id: "email" | "signup";
-  name: "Email" | "Signup";
+  id: "email" | "signup" | "account-deletion";
+  name: "Email" | "Signup" | "Account deletion";
   from: string;
   sendVerificationRequest: (request: VerificationRequest) => Promise<void>;
 }) {
@@ -140,6 +140,17 @@ function createSignupProvider(from: string) {
   });
 }
 
+function createAccountDeletionProvider(from: string) {
+  return createInternalEmailProvider({
+    id: "account-deletion",
+    name: "Account deletion",
+    from,
+    sendVerificationRequest: async () => {
+      throw new Error("Account deletion provider cannot initiate delivery");
+    },
+  });
+}
+
 function localizeAuthRedirect(url: string, baseUrl: string) {
   const base = new URL(baseUrl);
   const target = new URL(url, baseUrl);
@@ -209,6 +220,7 @@ export const authOptions: NextAuthOptions = {
     ? [
         createLoginProvider(env.MAIL.fromEmail),
         createSignupProvider(env.MAIL.fromEmail),
+        createAccountDeletionProvider(env.MAIL.fromEmail),
       ]
     : [],
 };

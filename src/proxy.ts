@@ -20,6 +20,14 @@ export function createNonce(): string {
   return btoa(crypto.randomUUID());
 }
 
+function hasSecureCanonicalOrigin() {
+  try {
+    return new URL(process.env.NEXTAUTH_URL ?? "").protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function contentSecurityPolicy(nonce: string): string {
   const scripts = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"];
   if (process.env.NODE_ENV !== "production") scripts.push("'unsafe-eval'");
@@ -40,7 +48,7 @@ export function contentSecurityPolicy(nonce: string): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    ...(process.env.NODE_ENV === "production"
+    ...(process.env.NODE_ENV === "production" && hasSecureCanonicalOrigin()
       ? ["upgrade-insecure-requests"]
       : []),
   ].join("; ");
@@ -58,6 +66,8 @@ export default function proxy(request: NextRequest) {
 
   const requiresCanonicalOrigin =
     request.nextUrl.pathname.startsWith("/api/auth/") ||
+    request.nextUrl.pathname === "/api/account/deletion" ||
+    request.nextUrl.pathname.startsWith("/api/account/deletion/") ||
     request.nextUrl.pathname === "/api/signup" ||
     request.nextUrl.pathname.startsWith("/api/signup/");
   if (requiresCanonicalOrigin) {

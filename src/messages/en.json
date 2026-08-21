@@ -31,7 +31,8 @@
     "navigation": {
       "profile": "Profile",
       "profileAriaLabel": "Profile sections",
-      "accountLink": "Account"
+      "accountLink": "Account",
+      "dataAndPrivacy": "Data & Privacy"
     },
     "avatar": {
       "label": "Profile avatar",
@@ -61,6 +62,63 @@
       "tooLong": "Name must be 80 characters or fewer.",
       "invalidCharacters": "Use letters, spaces, apostrophes, or hyphens only.",
       "invalidSubmission": "We could not process this submission. Review the form and try again."
+    },
+    "data": {
+      "metadata": {
+        "title": "Data & Privacy",
+        "description": "Review privacy controls for your account."
+      },
+      "heading": {
+        "title": "Data & Privacy",
+        "description": "Manage the lifecycle of the personal and authentication data linked to your account."
+      },
+      "deletion": {
+        "title": "Permanent account deletion",
+        "description": "Permanently remove your account and all access associated with it."
+      }
+    },
+    "deletion": {
+      "dialog": {
+        "deleteTrigger": "Delete account",
+        "title": "Permanently delete your account?",
+        "description": "Review every consequence before you continue.",
+        "irreversible": "This action is permanent and cannot be undone.",
+        "signOutEverywhere": "You will be signed out on this and every other device.",
+        "invalidateLinks": "Pending sign-in and signup links will stop working.",
+        "removeData": "Your profile, identities, sessions, and policy acceptances will be removed.",
+        "loseAccess": "You will no longer be able to access this account.",
+        "cancel": "Cancel",
+        "continue": "Continue",
+        "sendLink": "Send fresh link",
+        "sendingLink": "Sending link...",
+        "reauthSent": "Check your email before continuing.",
+        "reauthError": "We could not send the link. Try again.",
+        "confirmTitle": "Final confirmation",
+        "confirmDescription": "Deletion starts only after the next action.",
+        "confirmDelete": "Permanently delete account",
+        "deleting": "Deleting account...",
+        "deletionError": "We could not delete the account. Try again.",
+        "recovering": "Checking whether deletion completed...",
+        "closeLabel": "Close dialog"
+      },
+      "states": {
+        "invalidLink": "This verification link is not valid. Request a new link and try again.",
+        "sessionConflict": "This link cannot be used with the current session. Sign out before trying again."
+      },
+      "email": {
+        "subject": "Confirm your {projectName} account deletion",
+        "introduction": "Authenticate with this link to continue reviewing permanent account deletion.",
+        "action": "Continue account deletion"
+      }
+    },
+    "deleted": {
+      "metadata": {
+        "title": "Account deleted",
+        "description": "Your account was permanently deleted."
+      },
+      "title": "Account deleted",
+      "description": "Your account and its associated access were permanently deleted.",
+      "home": "Return home"
     }
   },
   "Login": {

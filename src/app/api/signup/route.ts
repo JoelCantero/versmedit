@@ -1,8 +1,7 @@
-import { createHash } from "node:crypto";
-
 import { NextRequest } from "next/server";
 
 import { validateAuthCsrfToken } from "@/lib/auth-csrf";
+import { getAuthEmailAddressRateLimitKey } from "@/lib/auth-email-rate-limit";
 import { getEnv } from "@/lib/env";
 import { getRequestLogger } from "@/lib/logger";
 import { getProviderAvailability } from "@/lib/provider-availability";
@@ -18,10 +17,6 @@ import {
 } from "@/modules/signup/service";
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60_000;
-
-function hashAddress(normalizedEmail: string) {
-  return createHash("sha256").update(normalizedEmail).digest("hex");
-}
 
 function rateLimitResponse(
   request: NextRequest,
@@ -95,7 +90,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return validationResponse(parsed)!;
 
   const addressResult = await consumeSharedRateLimit({
-    key: `auth:email:address:${hashAddress(parsed.data.email)}`,
+    key: getAuthEmailAddressRateLimitKey(parsed.data.email),
     limit: 3,
     windowMs: RATE_LIMIT_WINDOW_MS,
   });

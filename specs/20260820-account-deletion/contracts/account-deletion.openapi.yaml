@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+  title: Permanent Account Deletion Internal API
+  version: 1.0.0
+  description: >-
+    Same-origin application contract for deletion reauthentication and final
+    permanent deletion. It is not a public integration API. No operation accepts
+    a user identifier or email from the client.
+servers:
+  - url: /
+paths:
+  /api/account/deletion/reauthenticate:
+    post:
+      operationId: requestAccountDeletionReauthentication
+      summary: Send a fresh authentication link to the current account holder
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReauthenticationRequest"
+      responses:
+        "202":
+          description: The existing provider accepted the localized message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReauthenticationSent"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/ReauthenticationUnavailable"
+  /api/account/deletion/verify:
+    get:
+      operationId: verifyAccountDeletionReauthentication
+      summary: Consume a delivered single-use link and delegate session creation to Auth.js
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 43
+            maxLength: 43
+      responses:
+        "302":
+          description: >-
+            Redirects to the exact localized Data & Privacy deletion intent on
+            success, or to a generic localized invalid/conflict state on failure.
+            A successful delegated Auth.js callback sets a fresh database-session
+            cookie. Location never contains email or account identity.
+          headers:
+            Location:
+              schema:
+                type: string
+                examples:
+                  - /account/data?intent=delete
+                  - /es/account/data?state=invalid_link
+        "421":
+          description: Request origin does not match the configured canonical origin.
+  /api/account/deletion:
+    post:
+      operationId: permanentlyDeleteCurrentAccount
+      summary: Permanently delete the account established by the exact current session
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PermanentDeletionRequest"
+      responses:
+        "200":
+          description: >-
+            Deletion committed, or this request was already authorized and lost
+            an advisory-lock race to the same deletion. Supported Auth.js session
+            cookies are expired in the response.
+          headers:
+            Set-Cookie:
+              description: Expires supported Auth.js database-session cookie names.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletionCompleted"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: The exact current session lacks authentication within 10 minutes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReauthenticationRequired"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/DeletionFailed"
+components:
+  securitySchemes:
+    developmentSessionCookie:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used without secure-cookie mode. The
+        server never accepts a session token in request JSON.
+    secureSessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Secure-next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used in secure deployments. The server
+        never accepts a session token in request JSON.
+  schemas:
+    Locale:
+      type: string
+      enum: [en, es, ca]
+    ReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale]
+      properties:
+        csrfToken:
+          type: string
+          minLength: 1
+          description: Must match the signed Auth.js CSRF cookie.
+        locale:
+          $ref: "#/components/schemas/Locale"
+    PermanentDeletionRequest:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale, confirmation]
+      properties:
+        csrfToken:
+          type: string
+          minLength: 1
+          description: Must match the signed Auth.js CSRF cookie.
+        locale:
+          $ref: "#/components/schemas/Locale"
+        confirmation:
+          type: string
+          const: permanently_delete
+          description: Exact action marker; not an account identifier.
+    ReauthenticationSent:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: sent
+    DeletionCompleted:
+      type: object
+      additionalProperties: false
+      required: [status, redirectTo]
+      properties:
+        status:
+          type: string
+          const: completed
+        redirectTo:
+          type: string
+          enum: [/account-deleted, /es/account-deleted, /ca/account-deleted]
+    ReauthenticationRequired:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: reauthentication_required
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum:
+            - invalid_request
+            - unauthenticated
+            - forbidden
+            - rate_limited
+            - unavailable
+            - deletion_failed
+        retryAfter:
+          type: integer
+          minimum: 1
+          description: Present only when status is rate_limited or temporarily unavailable.
+        redirectTo:
+          type: string
+          enum: [/login, /es/login, /ca/login]
+          description: Present only for an unauthenticated localized request.
+  responses:
+    InvalidRequest:
+      description: Body or allowed-field validation failed; no data changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthenticated:
+      description: Session is missing, expired, invalid, or revoked; no data changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: CSRF proof or canonical same-origin validation failed; no data changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RateLimited:
+      description: >-
+        The operation-specific client limit, or the additional reauthentication
+        address limit, is exhausted. No email delivery or deletion transaction begins.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ReauthenticationUnavailable:
+      description: >-
+        The existing provider did not accept delivery. Any provisional exact
+        token is compensated, and account/session data is unchanged.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    DeletionFailed:
+      description: The transaction rolled back completely; the account remains usable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+x-security-invariants:
+  - Canonical origin and Auth.js CSRF proof are required for both POST operations.
+  - Each POST uses a separate shared client bucket limited to 5 requests per 15 minutes; reauthentication also uses the shared address bucket limited to 3 requests per 15 minutes.
+  - Rate-limited requests return generic 429 and Retry-After before email delivery or the deletion transaction; client buckets survive account deletion.
+  - User ID, email, session token, token purpose, and ownership are never request-body fields.
+  - Verification failures redirect generically and never reveal account existence.
+  - Responses and logs contain no personal data, token, cookie, or internal error detail.
+  - A direct Auth.js callback for the internal deletion provider is rejected unless request-local authorization exists.
+x-recovery-invariant: >-
+  Browser lost-response recovery calls only the existing Auth.js session endpoint;
+  it never retries POST /api/account/deletion automatically.

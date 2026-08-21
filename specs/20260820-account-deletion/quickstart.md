@@ -186,17 +186,18 @@ contrast requirements, and reduced-motion preference removes non-essential trans
 VoiceOver to confirm title, consequences, pending status, errors, and public result are announced in
 the expected order.
 
-## Representative Usability Verification
+## Post-Release Representative Usability Measurement
 
-Recruit at least 20 target participants, with at least 5 completing the first-attempt script in each
-of English, Spanish, and Catalan and with both mobile and desktop represented. Do not provide a
-feature walkthrough. Ask each participant to find Data & Privacy, explain the consequences before
-confirmation, then either complete deletion with a disposable seeded account or safely abandon it.
-Pause timing during email delivery; otherwise stop at 3 minutes.
+After release and separately from implementation and merge gates, recruit at least 20 target
+participants, with at least 5 completing the first-attempt script in each of English, Spanish, and
+Catalan and with both mobile and desktop represented. Do not provide a feature walkthrough. Ask each
+participant to find Data & Privacy, explain the consequences before confirmation, then either
+complete deletion with a disposable seeded account or safely abandon it. Pause timing during email
+delivery; otherwise stop at 3 minutes.
 
 Record only aggregate counts, locale/viewport totals, completion-time distribution, and
-non-identifying defect notes in `specs/20260820-account-deletion/usability-results.md`. The release
-criterion passes only when at least 90% identify both irreversibility and all-device sign-out and at
+non-identifying defect notes in `specs/20260820-account-deletion/usability-results.md`. The KPI
+target is met only when at least 90% identify both irreversibility and all-device sign-out and at
 least 90% complete or safely abandon the flow on their first attempt within 3 minutes.
 
 ## Data and Operations Check

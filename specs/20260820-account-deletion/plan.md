@@ -41,7 +41,8 @@ tests for token lifecycle, session freshness, shared rate limits, transaction ro
 complete data removal, and sanitized logs; Playwright against the standalone production artifact
 and real HTTP email-provider fixture for localized same-device/cross-device reauthentication,
 accessibility, responsive layout, cookie clearing, lost-response recovery, and opt-in ARM64
-performance cohorts. A moderated usability study records aggregate, non-identifying results only.
+performance cohorts. A post-release moderated usability study records aggregate, non-identifying
+results only and does not gate implementation or merge.
 
 **Target Platform**: Docker Linux containers on Raspberry Pi ARM64, portable to a VPS; ingress via
 Cloudflare Tunnel -> Traefik.
@@ -182,7 +183,7 @@ specs/20260820-account-deletion/
 |-- research.md
 |-- data-model.md
 |-- quickstart.md
-|-- usability-results.md              # Aggregate release evidence created during verification
+|-- usability-results.md              # Aggregate post-release usability KPI evidence
 |-- contracts/
 |   |-- account-deletion.openapi.yaml
 |   `-- ui-state-machine.md

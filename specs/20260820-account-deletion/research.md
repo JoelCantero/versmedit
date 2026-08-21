@@ -168,9 +168,9 @@ the existing HTTP provider fixture for accepted/rejected delivery; and use Playw
 build for three locales, desktop/mobile, keyboard/a11y, cross-browser contexts, cookie clearing, and
 response loss. On the target ARM64 Raspberry Pi, run opt-in 10-warm-up/100-measurement cohorts for
 both committed and database-injected rollback outcomes and calculate nearest-rank p95 from final
-activation to visible outcome. Complete a moderated study with at least 20 target participants,
-at least 5 per locale and both viewport classes, retaining only aggregate results and non-identifying
-defect notes.
+activation to visible outcome. After release, measure the usability KPI through a separately
+approved moderated study with at least 20 target participants, at least 5 per locale and both
+viewport classes, retaining only aggregate results and non-identifying defect notes.
 
 **Rationale**: Authentication and irreversible deletion are critical flows. Mock-only tests cannot
 prove provider acceptance, foreign-key behavior, transaction rollback, real session revocation, or

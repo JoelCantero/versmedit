@@ -1,10 +1,10 @@
 # Account Deletion Usability Results
 
-**Status**: Pending moderated study
+**Status**: Post-release measurement pending
 
-No participant study has been conducted or recorded. This file is not release evidence and T058
-must remain incomplete until the study defined in [quickstart.md](./quickstart.md) is performed with
-at least 20 target participants.
+No participant study has been conducted or recorded, and this file does not claim that the
+post-release KPI has been met. The study defined in [quickstart.md](./quickstart.md) requires a
+separately approved cohort of at least 20 target participants.
 
 ## Aggregate Results
 

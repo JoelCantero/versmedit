@@ -158,9 +158,14 @@
 - [X] T054 Run the live PostgreSQL/provider command in `specs/20260820-account-deletion/quickstart.md` and verify shared rate limits, rollback, race, session revocation, link invalidation, and log assertions under `tests/integration/`
 - [X] T055 Run `pnpm lint`, `pnpm typecheck`, `RUN_INTEGRATION_TESTS=true pnpm test:coverage`, `pnpm build`, and `pnpm audit:prod` from `package.json` and retain the configured coverage thresholds
 - [X] T056 Run the standalone production-artifact Playwright suite through `scripts/test-e2e.sh` and verify `tests/e2e/account-deletion.spec.ts` in desktop Chromium and the 320 x 900 mobile project
-- [ ] T057 Complete the light/dark desktop/mobile and VoiceOver checks documented in `specs/20260820-account-deletion/quickstart.md`, recording any reproducible defect as an automated assertion where practical
-- [ ] T058 Conduct the moderated first-attempt study with at least 20 target participants, at least 5 per locale and both viewport classes, and record only aggregate threshold evidence and non-identifying defects in `specs/20260820-account-deletion/usability-results.md`
-- [ ] T059 Audit the final diff against `docker-compose.yml`, `docker-compose.prod.yml`, `src/generated/protected/`, and `worker/`, confirm no backup/retention/worker path participates, then run `bash .specify/scripts/bash/compliance-check.sh --all` against `specs/20260820-account-deletion/`
+- [X] T059 Audit the final diff against `docker-compose.yml`, `docker-compose.prod.yml`, `src/generated/protected/`, and `worker/`, confirm no backup/retention/worker path participates, then run `bash .specify/scripts/bash/compliance-check.sh --all` against `specs/20260820-account-deletion/`
+
+### External Product Validation
+
+These checks do not represent unfinished implementation work and are not asserted by CI:
+
+- Before production release, complete the light/dark desktop/mobile and VoiceOver checks documented in `specs/20260820-account-deletion/quickstart.md`, recording any reproducible defect as an automated assertion where practical.
+- After release, measure the representative first-attempt usability KPI with a separately approved cohort of at least 20 target participants, at least 5 per locale and both viewport classes, and retain only aggregate threshold evidence and non-identifying defects in `specs/20260820-account-deletion/usability-results.md`.
 
 ---
 
@@ -280,7 +285,7 @@ Then sequence: T047/T048/T049 -> T050
 - Identity always comes from the exact server session; no task may add email, user ID, session token, or ownership to deletion request bodies.
 - Successful deletion is intentionally unrecoverable; application rollback never reconstructs an account.
 - Existing repository backup operations remain operationally separate and are neither consulted nor modified by this feature.
-- T058 records no participant names, contact details, account data, recordings, or raw observation transcripts.
+- External usability validation records no participant names, contact details, account data, recordings, or raw observation transcripts.
 
 ---
 

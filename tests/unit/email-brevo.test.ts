@@ -10,13 +10,15 @@ import {
   type TransactionalEmail,
 } from "@/lib/email/types";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
+const projectName = getTestProjectName();
 const config = {
   enabled: true as const,
   provider: "brevo" as const,
   apiKey: "brevo-private-key",
   fromEmail: "no-reply@example.test",
-  senderName: "Versmedit",
+  senderName: projectName,
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,
@@ -53,7 +55,7 @@ describe("Brevo email provider", () => {
     expect(http.requests[0]?.headers.get("accept")).toBe("application/json");
     expect(http.requests[0]?.headers.get("content-type")).toBe("application/json");
     expect(JSON.parse(http.requests[0]?.body ?? "null")).toEqual({
-      sender: { email: "no-reply@example.test", name: "Versmedit" },
+      sender: { email: "no-reply@example.test", name: projectName },
       to: [{ email: "member@example.test" }],
       subject: "Tu enlace de acceso",
       textContent: "Usa este enlace para iniciar sesion",

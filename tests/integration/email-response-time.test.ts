@@ -7,10 +7,12 @@ import { createHash } from "node:crypto";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 import { createHttpMailProvider, type FakeProviderBehavior } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
 const runIntegrationTests = process.env.RUN_INTEGRATION_TESTS === "true";
+const projectName = getTestProjectName();
 const secret = "email-performance-secret-at-least-32-chars";
 const sampleSize = 20;
 const warmupSize = 2;
@@ -86,7 +88,7 @@ function trackRateLimits(email: string, client: string) {
 
 async function configureProvider(provider: ProviderName) {
   Object.assign(process.env, {
-    PROJECT_NAME: "versmedit-performance-test",
+    PROJECT_NAME: projectName,
     AUTH_SECRET: secret,
     NEXTAUTH_URL: "https://app.example.test",
     MAIL_ENABLED: "true",

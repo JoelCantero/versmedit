@@ -91,30 +91,30 @@ describe("request context", () => {
 
   it("uses Cloudflare's HTTPS scheme when forwarded protocol is HTTP", () => {
     vi.stubEnv("TRUST_PROXY_HEADERS", "true");
-    const request = new Request("http://versmedit.com/api/auth/csrf", {
+    const request = new Request("http://app.example.test/api/auth/csrf", {
       headers: {
         "cf-visitor": '{"scheme":"https"}',
-        "x-forwarded-host": "versmedit.com",
+        "x-forwarded-host": "app.example.test",
         "x-forwarded-proto": "http",
       },
     });
 
-    expect(isCanonicalRequestOrigin(request, new URL("https://versmedit.com"))).toBe(
+    expect(isCanonicalRequestOrigin(request, new URL("https://app.example.test"))).toBe(
       true,
     );
   });
 
   it("rejects an HTTP scheme reported by Cloudflare for an HTTPS origin", () => {
     vi.stubEnv("TRUST_PROXY_HEADERS", "true");
-    const request = new Request("http://versmedit.com/api/auth/csrf", {
+    const request = new Request("http://app.example.test/api/auth/csrf", {
       headers: {
         "cf-visitor": '{"scheme":"http"}',
-        "x-forwarded-host": "versmedit.com",
+        "x-forwarded-host": "app.example.test",
         "x-forwarded-proto": "https",
       },
     });
 
-    expect(isCanonicalRequestOrigin(request, new URL("https://versmedit.com"))).toBe(
+    expect(isCanonicalRequestOrigin(request, new URL("https://app.example.test"))).toBe(
       false,
     );
   });

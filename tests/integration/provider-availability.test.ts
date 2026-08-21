@@ -5,16 +5,18 @@ import "dotenv/config";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
 const runIntegrationTests = process.env.RUN_INTEGRATION_TESTS === "true";
 const keyPrefix = "mail:provider-health";
+const projectName = getTestProjectName();
 const common = {
   enabled: true as const,
   apiKey: "integration-key",
   fromEmail: "no-reply@example.test",
-  senderName: "versmedit",
+  senderName: projectName,
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,

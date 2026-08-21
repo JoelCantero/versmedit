@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
@@ -34,11 +35,12 @@ import type { BrevoMailConfig, MailjetMailConfig } from "@/lib/env";
 import { getProviderAvailability } from "@/lib/provider-availability";
 
 const now = new Date("2026-08-19T12:00:00.000Z");
+const projectName = getTestProjectName();
 const common = {
   enabled: true as const,
   apiKey: "private-provider-key",
   fromEmail: "no-reply@example.test",
-  senderName: "versmedit",
+  senderName: projectName,
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,

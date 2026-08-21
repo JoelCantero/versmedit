@@ -10,10 +10,12 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { createSignupFixtureScope } from "../helpers/signup-fixtures";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
 const runIntegrationTests = process.env.RUN_INTEGRATION_TESTS === "true";
+const projectName = getTestProjectName();
 const secret = "signup-integration-auth-secret-32-characters";
 const originalEnv = new Map<string, string | undefined>();
 const managedEnv = [
@@ -39,7 +41,7 @@ describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
     const http = createHttpMailProvider();
     const env = validateEnv({
       NODE_ENV: "test",
-      PROJECT_NAME: "versmedit",
+      PROJECT_NAME: projectName,
       DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
       AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
       NEXTAUTH_URL: "https://app.example.test",
@@ -87,7 +89,7 @@ describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
       const { validateEnv } = await import("@/lib/env");
       const env = validateEnv({
         NODE_ENV: "test",
-        PROJECT_NAME: "versmedit",
+        PROJECT_NAME: projectName,
         DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
         AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
         NEXTAUTH_URL: "https://app.example.test",
@@ -105,9 +107,9 @@ describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
         origin: "https://app.example.test",
       };
       const messages = [
-        buildOnboardingEmail({ ...base, rawToken: "new-token" }, "versmedit"),
-        buildOnboardingEmail({ ...base, rawToken: "pending-token" }, "versmedit"),
-        buildActiveAccountEmail(base, "versmedit"),
+        buildOnboardingEmail({ ...base, rawToken: "new-token" }, projectName),
+        buildOnboardingEmail({ ...base, rawToken: "pending-token" }, projectName),
+        buildActiveAccountEmail(base, projectName),
       ];
 
       const results = [];
@@ -143,7 +145,7 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
   beforeAll(async () => {
     for (const key of managedEnv) originalEnv.set(key, process.env[key]);
     Object.assign(process.env, {
-      PROJECT_NAME: "versmedit-signup-test",
+      PROJECT_NAME: projectName,
       AUTH_SECRET: secret,
       NEXTAUTH_URL: "https://app.example.test",
       MAIL_ENABLED: "true",

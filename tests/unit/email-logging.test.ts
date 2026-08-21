@@ -6,6 +6,7 @@ import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
@@ -20,12 +21,13 @@ vi.mock("@/lib/logger", () => ({
 import { sendTransactionalEmail } from "@/lib/email/index";
 import type { BrevoMailConfig } from "@/lib/env";
 
+const projectName = getTestProjectName();
 const config: BrevoMailConfig = {
   enabled: true,
   provider: "brevo",
   apiKey: "private-api-key",
   fromEmail: "no-reply@example.test",
-  senderName: "versmedit",
+  senderName: projectName,
   sendTimeoutMs: 2_500,
   healthTimeoutMs: 1_500,
   responseLimitBytes: 65_536,

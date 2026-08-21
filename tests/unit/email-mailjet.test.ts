@@ -7,14 +7,16 @@ vi.mock("server-only", () => ({}));
 import { createMailjetProvider } from "@/lib/email/mailjet";
 import type { TransactionalEmail } from "@/lib/email/types";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
+const projectName = getTestProjectName();
 const config = {
   enabled: true as const,
   provider: "mailjet" as const,
   apiKey: "mailjet-key",
   apiSecret: "mailjet-secret",
   fromEmail: "no-reply@example.test",
-  senderName: "Versmedit",
+  senderName: projectName,
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,
@@ -72,7 +74,7 @@ describe("Mailjet email provider", () => {
     expect(JSON.parse(http.requests[0]?.body ?? "null")).toEqual({
       Messages: [
         {
-          From: { Email: "no-reply@example.test", Name: "Versmedit" },
+          From: { Email: "no-reply@example.test", Name: projectName },
           To: [{ Email: "member@example.test" }],
           Subject: "El teu enllac d'acces",
           TextPart: "Utilitza aquest enllac per iniciar sessio",

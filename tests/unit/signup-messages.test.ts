@@ -12,12 +12,14 @@ import {
   buildOnboardingEmail,
 } from "@/modules/signup/email";
 import { getPolicyDestinations } from "@/modules/signup/policy";
+import { getTestProjectName } from "../helpers/project-name";
 
 const catalogs = {
   en: enMessages,
   es: esMessages,
   ca: caMessages,
 } as const;
+const projectName = getTestProjectName();
 
 function leafKeys(value: unknown, prefix = ""): string[] {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -90,7 +92,6 @@ describe("signup message catalogs", () => {
     "builds %s onboarding and active-account email from that locale only",
     (locale) => {
       const recipient = "person@example.test";
-      const projectName = "versmedit";
       const onboarding = buildOnboardingEmail(
         {
           recipient,

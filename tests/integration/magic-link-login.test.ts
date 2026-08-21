@@ -8,12 +8,14 @@ import type { NextAuthOptions } from "next-auth";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
+import { getTestProjectName } from "../helpers/project-name";
 
 vi.mock("server-only", () => ({}));
 
 const runIntegrationTests = process.env.RUN_INTEGRATION_TESTS === "true";
 const createdUserIds: string[] = [];
 const integrationPrefix = "integration-login";
+const projectName = getTestProjectName();
 type Database = (typeof import("@/lib/db"))["db"];
 type AuthPost = (typeof import("@/app/api/auth/[...nextauth]/route"))["POST"];
 type AuthGet = (typeof import("@/app/api/auth/[...nextauth]/route"))["GET"];
@@ -38,7 +40,7 @@ describe.skipIf(!runIntegrationTests)("magic-link HTTP provider acceptance", () 
     const { validateEnv } = await import("@/lib/env");
     const source = {
       NODE_ENV: "test" as const,
-      PROJECT_NAME: "versmedit",
+      PROJECT_NAME: projectName,
       DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
       AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
       NEXTAUTH_URL: "https://app.example.test",
@@ -77,7 +79,7 @@ describe.skipIf(!runIntegrationTests)("magic-link HTTP provider acceptance", () 
         enabled: true as const,
         apiKey: "integration-key",
         fromEmail: "no-reply@example.test",
-        senderName: "versmedit",
+        senderName: projectName,
         sendTimeoutMs: 2_500 as const,
         healthTimeoutMs: 1_500 as const,
         responseLimitBytes: 65_536 as const,
@@ -95,7 +97,7 @@ describe.skipIf(!runIntegrationTests)("magic-link HTTP provider acceptance", () 
       await expect(provider.send({
         recipient: "known@example.test",
         locale: "en",
-        subject: "Your versmedit sign-in link",
+        subject: `Your ${projectName} sign-in link`,
         text: `Use this link to sign in: ${link}`,
         html: `<p>Use this link to sign in:</p><p><a href="${link}">${link}</a></p>`,
       })).resolves.toEqual({
@@ -319,7 +321,7 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
   beforeAll(async () => {
     for (const key of managedEnv) originalEnv.set(key, process.env[key]);
     Object.assign(process.env, {
-      PROJECT_NAME: "versmedit-login-test",
+      PROJECT_NAME: projectName,
       AUTH_SECRET: secret,
       NEXTAUTH_URL: "https://app.example.test",
       MAIL_ENABLED: "true",

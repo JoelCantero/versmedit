@@ -21,6 +21,7 @@ enum VerificationPurpose {
   LOGIN
   SIGNUP
   ACCOUNT_DELETION
+  ACCOUNT_SECURITY
 }
 
 // Auth.js (NextAuth) models — canonical Prisma adapter schema plus app timestamps.
@@ -64,8 +65,11 @@ model Session {
   sessionToken    String    @unique
   userId          String
   expires         DateTime
+  createdAt       DateTime?
   authenticatedAt DateTime?
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expires])
 }
 
 model VerificationToken {

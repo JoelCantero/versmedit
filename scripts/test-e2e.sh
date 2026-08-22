@@ -1,6 +1,35 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+ACCOUNT_DELETION_PERF_ENABLED="${RUN_ACCOUNT_DELETION_PERF:-false}"
+ACCOUNT_SECURITY_PERF_ENABLED="${RUN_ACCOUNT_SECURITY_PERF:-false}"
+
+if [[ "$ACCOUNT_DELETION_PERF_ENABLED" == "true" && "$ACCOUNT_SECURITY_PERF_ENABLED" == "true" ]]; then
+  printf '%s\n' "RUN_ACCOUNT_DELETION_PERF and RUN_ACCOUNT_SECURITY_PERF cannot both be true" >&2
+  exit 1
+fi
+
+declare -a PLAYWRIGHT_ARGS
+if [[ "$ACCOUNT_DELETION_PERF_ENABLED" == "true" ]]; then
+  PLAYWRIGHT_ARGS=(
+    tests/e2e/account-deletion.performance.spec.ts
+    --project chromium
+    --workers 1
+  )
+elif [[ "$ACCOUNT_SECURITY_PERF_ENABLED" == "true" ]]; then
+  PLAYWRIGHT_ARGS=(
+    tests/e2e/account-security.performance.spec.ts
+    --project chromium
+    --workers 1
+  )
+else
+  PLAYWRIGHT_ARGS=(
+    --project chromium
+    --project chromium-320
+    --grep-invert @performance
+  )
+fi
+
 COMPOSE_FILE="docker-compose.e2e.yml"
 PROJECT="webapp-template-e2e-$$-$RANDOM"
 export NEXT_DIST_DIR="$(mktemp -d .next-e2e-XXXXXX)"
@@ -30,7 +59,7 @@ free_port() {
 
 export PROJECT_NAME="playwright"
 export AUTH_SECRET="playwright-secret-not-used-in-runtime-000"
-export TRUST_PROXY_HEADERS="false"
+export TRUST_PROXY_HEADERS="true"
 export E2E_PROVIDER_HTTP_PORT="$(free_port)"
 export E2E_PROVIDER_HTTP_URL="http://127.0.0.1:${E2E_PROVIDER_HTTP_PORT}"
 export E2E_MAIL_PROVIDER="${E2E_MAIL_PROVIDER:-brevo}"
@@ -68,14 +97,4 @@ export E2E_APP_PORT="$(node -e 'const server=require("node:net").createServer();
 export NEXTAUTH_URL="http://127.0.0.1:${E2E_APP_PORT}"
 pnpm db:deploy
 pnpm build
-if [[ "${RUN_ACCOUNT_DELETION_PERF:-false}" == "true" ]]; then
-  pnpm exec playwright test \
-    tests/e2e/account-deletion.performance.spec.ts \
-    --project chromium \
-    --workers 1
-else
-  pnpm exec playwright test \
-    --project chromium \
-    --project chromium-320 \
-    --grep-invert @performance
-fi
+pnpm exec playwright test "${PLAYWRIGHT_ARGS[@]}"

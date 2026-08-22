@@ -5,15 +5,16 @@ export interface AccountNavigationMessages {
   ariaLabel: string;
   profile: string;
   dataAndPrivacy: string;
+  security: string;
 }
 
 interface AccountNavigationProps {
-  active: "profile" | "data";
+  active: "profile" | "data" | "security";
   messages: AccountNavigationMessages;
 }
 
 const navigationItemClass =
-  "inline-flex min-h-11 min-w-0 items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:bg-muted aria-[current=page]:text-foreground";
+  "inline-flex min-h-11 min-w-0 items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:bg-muted aria-[current=page]:text-foreground motion-reduce:transition-none";
 
 export function AccountNavigation({
   active,
@@ -38,6 +39,15 @@ export function AccountNavigation({
             className={cn(navigationItemClass, "w-full")}
           >
             {messages.dataAndPrivacy}
+          </Link>
+        </li>
+        <li className="min-w-0">
+          <Link
+            href="/account/security"
+            aria-current={active === "security" ? "page" : undefined}
+            className={cn(navigationItemClass, "w-full")}
+          >
+            {messages.security}
           </Link>
         </li>
       </ul>

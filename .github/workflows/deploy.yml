@@ -125,14 +125,19 @@ jobs:
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
         run: |
+          set -Eeuo pipefail
           cd "$DEPLOY_DIR"
           db_user="$(printf '%s\n' "$POSTGRES_USER" | scripts/urlencode.sh)"
           db_password="$(printf '%s\n' "$POSTGRES_PASSWORD" | scripts/urlencode.sh)"
           db_name="$(printf '%s\n' "$POSTGRES_DB" | scripts/urlencode.sh)"
           export DATABASE_URL="postgresql://${db_user}:${db_password}@db:5432/${db_name}?schema=public"
           export NEXTAUTH_URL="https://${APP_DOMAIN}"
-          # depends_on orchestrates the order: db (healthy) -> migrate (deploy, completes) -> app.
-          docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+          docker compose -f docker-compose.prod.yml build app migrate
+          docker compose -f docker-compose.prod.yml up -d --wait db
+          docker compose -f docker-compose.prod.yml stop app
+          docker compose -f docker-compose.prod.yml rm -f migrate
+          docker compose -f docker-compose.prod.yml run --rm --no-deps migrate
+          docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate --remove-orphans app
 
       - name: Verify app health
         # Post-deploy healthcheck validation (constitution Principle XII): wait for

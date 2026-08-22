@@ -32,7 +32,8 @@
       "profile": "Perfil",
       "profileAriaLabel": "Seccions del perfil",
       "accountLink": "Compte",
-      "dataAndPrivacy": "Dades i privacitat"
+      "dataAndPrivacy": "Dades i privacitat",
+      "security": "Seguretat"
     },
     "avatar": {
       "label": "Avatar del perfil",
@@ -75,6 +76,88 @@
       "deletion": {
         "title": "Eliminació permanent del compte",
         "description": "Elimina permanentment el teu compte i tot l'accés que hi està associat."
+      }
+    },
+    "security": {
+      "metadata": {
+        "title": "Seguretat del compte",
+        "description": "Revisa i gestiona les sessions actives del teu compte."
+      },
+      "heading": {
+        "title": "Seguretat",
+        "description": "Revisa les sessions actives del teu compte i tanca les que ja no necessitis."
+      },
+      "list": {
+        "title": "Sessions actives",
+        "description": "Aquestes sessions tenen accés actualment al teu compte.",
+        "ariaLabel": "Sessions actives del compte",
+        "sessionLabel": "Sessió {number}",
+        "current": "Sessió actual",
+        "currentOnly": "Només està activa la teva sessió actual."
+      },
+      "timestamps": {
+        "startedAt": "Inici: {date}",
+        "expiresAt": "Caduca: {date}",
+        "unavailable": "No disponible"
+      },
+      "actions": {
+        "signOut": "Tanca la sessió",
+        "revokeSession": "Revoca la sessió",
+        "revokeOtherSessions": "Revoca totes les altres sessions"
+      },
+      "dialog": {
+        "closeLabel": "Tanca el diàleg",
+        "cancel": "Cancel·la",
+        "close": "Tanca",
+        "individual": {
+          "title": "Vols revocar la sessió {number}?",
+          "description": "Revisa aquesta sessió abans de continuar.",
+          "endSelected": "Només finalitzarà aquesta sessió.",
+          "nextRequest": "La següent sol·licitud protegida requerirà tornar a iniciar sessió.",
+          "keepOthers": "La teva sessió actual i totes les altres sessions continuaran actives.",
+          "confirm": "Revoca la sessió"
+        },
+        "bulk": {
+          "title": "Vols revocar totes les altres sessions?",
+          "description": "Revisa quines sessions finalitzaran abans de continuar.",
+          "endOthers": "Es tancaran totes les sessions excepte la sessió des de la qual confirmis aquesta acció.",
+          "includeNew": "S'inclouen les sessions creades abans de la confirmació, encara que no es mostrin aquí.",
+          "keepCurrent": "La sessió des de la qual confirmis aquesta acció continuarà activa.",
+          "confirm": "Revoca totes les altres sessions"
+        }
+      },
+      "reauthentication": {
+        "title": "Autentica't de nou per continuar",
+        "description": "Per seguretat, utilitza un enllaç nou d'un sol ús enviat per correu abans de confirmar aquesta acció.",
+        "sendLink": "Envia un enllaç nou",
+        "sent": "Revisa el correu per trobar el nou enllaç d'autenticació. Després d'utilitzar-lo, torna a triar l'acció."
+      },
+      "pending": {
+        "revokingSession": "Revocant la sessió...",
+        "revokingOtherSessions": "Revocant les altres sessions...",
+        "sendingLink": "Enviant l'enllaç...",
+        "refreshing": "Actualitzant les sessions actives..."
+      },
+      "recovery": {
+        "recovering": "Actualitzant la llista de sessions actives. La sol·licitud anterior no es tornarà a enviar.",
+        "recovered": "S'ha actualitzat la llista de sessions actives. Revisa-la abans de triar una altra acció."
+      },
+      "success": {
+        "reauthenticated": "S'ha renovat l'autenticació. Revisa la llista actual i torna a triar una acció.",
+        "revocationCompleted": "La sol·licitud ha finalitzat. S'ha actualitzat la llista de sessions actives."
+      },
+      "errors": {
+        "invalidLink": "Aquest enllaç d'autenticació no és vàlid. Tria una acció i sol·licita un enllaç nou.",
+        "sessionConflict": "Aquest enllaç no es pot utilitzar amb la sessió actual. Utilitza una sessió activa del mateix compte.",
+        "sendFailed": "No hem pogut enviar l'enllaç. No ha canviat cap sessió. Torna-ho a provar.",
+        "rateLimited": "Massa intents. No ha canviat cap sessió. Torna-ho a provar més tard.",
+        "revocationFailed": "No hem pogut actualitzar les teves sessions. No ha canviat cap sessió. Revisa la llista i torna-ho a provar.",
+        "refreshFailed": "No hem pogut actualitzar les sessions actives. Torna a carregar la pàgina abans de tornar-ho a provar."
+      },
+      "email": {
+        "subject": "Confirma una acció de seguretat al teu compte de {projectName}",
+        "introduction": "Autentica't amb aquest enllaç per tornar a Seguretat del compte. Hauràs de tornar a triar i confirmar l'acció.",
+        "action": "Ves a Seguretat del compte"
       }
     },
     "deletion": {

@@ -30,8 +30,33 @@ export function hardenAdapter(adapter: Adapter): Adapter {
       await transaction.$executeRaw(Prisma.sql`
         SELECT pg_advisory_xact_lock(hashtextextended(${session.userId}, 0))
       `);
+      const createdAt = new Date();
+      const activeSessions = await transaction.session.findMany({
+        where: {
+          userId: session.userId,
+          expires: { gt: createdAt },
+        },
+        select: { id: true },
+        orderBy: [
+          { createdAt: { sort: "asc", nulls: "first" } },
+          { id: "asc" },
+        ],
+      });
+      const evictionCount = Math.max(0, activeSessions.length - 19);
+      if (evictionCount > 0) {
+        await transaction.session.deleteMany({
+          where: {
+            userId: session.userId,
+            id: {
+              in: activeSessions
+                .slice(0, evictionCount)
+                .map(({ id }) => id),
+            },
+          },
+        });
+      }
       return transaction.session.create({
-        data: { ...session, authenticatedAt: new Date() },
+        data: { ...session, createdAt, authenticatedAt: createdAt },
       });
     })) as Adapter["createSession"];
 

@@ -52,6 +52,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
             ariaLabel: t("navigation.profileAriaLabel"),
             profile: t("navigation.profile"),
             dataAndPrivacy: t("navigation.dataAndPrivacy"),
+            security: t("navigation.security"),
           }}
         />
 

@@ -38,8 +38,11 @@ describe("login schema", () => {
 
   it.each([
     ["en", "/account"],
+    ["en", "/account/security"],
     ["es", "/es/account"],
+    ["es", "/es/account/security"],
     ["ca", "/ca/account"],
+    ["ca", "/ca/account/security"],
   ] as const)("accepts a locale-matched callback path for %s", (locale, callbackPath) => {
     expect(parseLoginCallbackPath(locale, callbackPath)).toBe(callbackPath);
   });
@@ -51,8 +54,20 @@ describe("login schema", () => {
     ["en", "not/a/path"],
     ["en", "/projects"],
     ["en", "/es/account"],
+    ["en", "/es/account/security"],
+    ["en", "/account/security?state=reauthenticated"],
+    ["en", "/account/security#reauthenticated"],
+    ["en", "/account/security/sessions"],
     ["es", "/account"],
+    ["es", "/account/security"],
+    ["es", "/es/account/security?state=reauthenticated"],
+    ["es", "/es/account/security#reauthenticated"],
+    ["es", "/es/account/security/sessions"],
     ["ca", "/es/account"],
+    ["ca", "/es/account/security"],
+    ["ca", "/ca/account/security?state=reauthenticated"],
+    ["ca", "/ca/account/security#reauthenticated"],
+    ["ca", "/ca/account/security/sessions"],
   ] as const)(
     "rejects callback path %s for locale %s",
     (locale, callbackPath) => {

@@ -76,7 +76,7 @@ export default defineConfig({
             NODE_OPTIONS: nodeOptions,
           }
         : {}),
-      TRUST_PROXY_HEADERS: "false",
+      TRUST_PROXY_HEADERS: process.env.TRUST_PROXY_HEADERS ?? "false",
       NEXTAUTH_URL: baseURL,
       NODE_ENV: "production",
       HOSTNAME: "127.0.0.1",

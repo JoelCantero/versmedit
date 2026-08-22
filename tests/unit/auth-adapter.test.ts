@@ -16,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   userUpdate: vi.fn(),
   acceptanceCreate: vi.fn(),
   sessionCreate: vi.fn(),
+  sessionDeleteMany: vi.fn(),
+  sessionFindMany: vi.fn(),
   getAccountDeletionVerificationAuthorization: vi.fn(),
 }));
 
@@ -51,6 +53,8 @@ describe("hardenAdapter", () => {
     vi.clearAllMocks();
     mocks.getSignupActivationAuthorization.mockReturnValue(null);
     mocks.getAccountDeletionVerificationAuthorization.mockReturnValue(null);
+    mocks.sessionFindMany.mockResolvedValue([]);
+    mocks.sessionDeleteMany.mockResolvedValue({ count: 0 });
     mocks.transaction.mockImplementation((callback) =>
       callback({
         $executeRaw: mocks.executeRaw,
@@ -63,12 +67,16 @@ describe("hardenAdapter", () => {
           findUnique: mocks.tokenFindUnique,
         },
         policyAcceptance: { create: mocks.acceptanceCreate },
-        session: { create: mocks.sessionCreate },
+        session: {
+          create: mocks.sessionCreate,
+          deleteMany: mocks.sessionDeleteMany,
+          findMany: mocks.sessionFindMany,
+        },
       }),
     );
   });
 
-  it("serializes session creation and records the authentication time", async () => {
+  it("serializes session creation and records one captured creation time", async () => {
     const originalCreateSession = vi.fn();
     const adapter = hardenAdapter({ createSession: originalCreateSession } as Adapter);
     const session = {
@@ -76,17 +84,153 @@ describe("hardenAdapter", () => {
       userId: "active-user",
       expires: new Date("2026-08-22T12:00:00.000Z"),
     };
+    const capturedAt = new Date("2026-08-22T10:00:00.000Z");
+    mocks.sessionCreate.mockImplementation(({ data }) => Promise.resolve(data));
+    vi.useFakeTimers();
+    vi.setSystemTime(capturedAt);
+
+    try {
+      await expect(adapter.createSession!(session)).resolves.toEqual({
+        ...session,
+        createdAt: capturedAt,
+        authenticatedAt: capturedAt,
+      });
+      expect(mocks.executeRaw).toHaveBeenCalledOnce();
+      expect(mocks.executeRaw.mock.calls[0]?.[0]).toMatchObject({
+        values: [session.userId],
+      });
+      expect(mocks.sessionFindMany).toHaveBeenCalledWith({
+        where: { userId: session.userId, expires: { gt: capturedAt } },
+        select: { id: true },
+        orderBy: [
+          { createdAt: { sort: "asc", nulls: "first" } },
+          { id: "asc" },
+        ],
+      });
+      expect(mocks.sessionCreate).toHaveBeenCalledWith({
+        data: {
+          ...session,
+          createdAt: capturedAt,
+          authenticatedAt: capturedAt,
+        },
+      });
+      expect(mocks.executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
+        mocks.sessionFindMany.mock.invocationCallOrder[0]!,
+      );
+      expect(originalCreateSession).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("evicts the null-first deterministic oldest prior row before inserting at the cap", async () => {
+    const adapter = hardenAdapter({ createSession: vi.fn() } as Adapter);
+    const session = {
+      sessionToken: "new-session",
+      userId: "active-user",
+      expires: new Date("2026-08-23T12:00:00.000Z"),
+    };
+    mocks.sessionFindMany.mockResolvedValue(
+      Array.from({ length: 20 }, (_, index) => ({
+        id: index === 0 ? "legacy-null" : `prior-${index}`,
+      })),
+    );
     mocks.sessionCreate.mockImplementation(({ data }) => Promise.resolve(data));
 
-    await expect(adapter.createSession!(session)).resolves.toEqual({
-      ...session,
-      authenticatedAt: expect.any(Date),
+    await adapter.createSession!(session);
+
+    expect(mocks.sessionDeleteMany).toHaveBeenCalledWith({
+      where: {
+        userId: session.userId,
+        id: { in: ["legacy-null"] },
+      },
     });
-    expect(mocks.executeRaw).toHaveBeenCalledOnce();
-    expect(mocks.sessionCreate).toHaveBeenCalledWith({
-      data: { ...session, authenticatedAt: expect.any(Date) },
+    expect(mocks.sessionDeleteMany.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.sessionCreate.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("defensively reduces an existing over-cap account to 19 prior active rows", async () => {
+    const adapter = hardenAdapter({} as Adapter);
+    const priorRows = Array.from({ length: 23 }, (_, index) => ({
+      id: `prior-${String(index + 1).padStart(2, "0")}`,
+    }));
+    mocks.sessionFindMany.mockResolvedValue(priorRows);
+    mocks.sessionCreate.mockImplementation(({ data }) => Promise.resolve(data));
+
+    await adapter.createSession!({
+      sessionToken: "new-session",
+      userId: "active-user",
+      expires: new Date("2026-08-23T12:00:00.000Z"),
     });
-    expect(originalCreateSession).not.toHaveBeenCalled();
+
+    expect(mocks.sessionDeleteMany).toHaveBeenCalledWith({
+      where: {
+        userId: "active-user",
+        id: {
+          in: ["prior-01", "prior-02", "prior-03", "prior-04"],
+        },
+      },
+    });
+  });
+
+  it("does not evict below the cap", async () => {
+    const adapter = hardenAdapter({} as Adapter);
+    mocks.sessionFindMany.mockResolvedValue(
+      Array.from({ length: 19 }, (_, index) => ({ id: `prior-${index}` })),
+    );
+    mocks.sessionCreate.mockImplementation(({ data }) => Promise.resolve(data));
+
+    await adapter.createSession!({
+      sessionToken: "new-session",
+      userId: "active-user",
+      expires: new Date("2026-08-23T12:00:00.000Z"),
+    });
+
+    expect(mocks.sessionDeleteMany).not.toHaveBeenCalled();
+  });
+
+  it("keeps eviction and insertion in one rollback boundary when insertion fails", async () => {
+    const adapter = hardenAdapter({ createSession: vi.fn() } as Adapter);
+    const originalRows = Array.from({ length: 20 }, (_, index) => `prior-${index}`);
+    const persistedRows = [...originalRows];
+    const insertError = new Error("insert failed");
+    mocks.sessionFindMany.mockResolvedValue(
+      originalRows.map((id) => ({ id })),
+    );
+    mocks.sessionDeleteMany.mockImplementation(({ where }) => {
+      for (const id of where.id.in) {
+        persistedRows.splice(persistedRows.indexOf(id), 1);
+      }
+      return Promise.resolve({ count: where.id.in.length });
+    });
+    mocks.sessionCreate.mockRejectedValue(insertError);
+    mocks.transaction.mockImplementation(async (callback) => {
+      const snapshot = [...persistedRows];
+      try {
+        return await callback({
+          $executeRaw: mocks.executeRaw,
+          session: {
+            create: mocks.sessionCreate,
+            deleteMany: mocks.sessionDeleteMany,
+            findMany: mocks.sessionFindMany,
+          },
+        });
+      } catch (error) {
+        persistedRows.splice(0, persistedRows.length, ...snapshot);
+        throw error;
+      }
+    });
+
+    await expect(
+      adapter.createSession!({
+        sessionToken: "new-session",
+        userId: "active-user",
+        expires: new Date("2026-08-23T12:00:00.000Z"),
+      }),
+    ).rejects.toBe(insertError);
+    expect(mocks.sessionDeleteMany).toHaveBeenCalledOnce();
+    expect(persistedRows).toEqual(originalRows);
   });
   it("treats a missing stale session as already deleted", async () => {
     const deleteSession = vi.fn().mockRejectedValue({ code: "P2025" });

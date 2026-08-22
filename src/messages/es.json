@@ -32,7 +32,8 @@
       "profile": "Perfil",
       "profileAriaLabel": "Secciones del perfil",
       "accountLink": "Cuenta",
-      "dataAndPrivacy": "Datos y privacidad"
+      "dataAndPrivacy": "Datos y privacidad",
+      "security": "Seguridad"
     },
     "avatar": {
       "label": "Avatar del perfil",
@@ -75,6 +76,88 @@
       "deletion": {
         "title": "Eliminación permanente de la cuenta",
         "description": "Elimina permanentemente tu cuenta y todo el acceso asociado a ella."
+      }
+    },
+    "security": {
+      "metadata": {
+        "title": "Seguridad de la cuenta",
+        "description": "Revisa y gestiona las sesiones activas de tu cuenta."
+      },
+      "heading": {
+        "title": "Seguridad",
+        "description": "Revisa las sesiones activas de tu cuenta y cierra las que ya no necesites."
+      },
+      "list": {
+        "title": "Sesiones activas",
+        "description": "Estas sesiones tienen acceso actualmente a tu cuenta.",
+        "ariaLabel": "Sesiones activas de la cuenta",
+        "sessionLabel": "Sesión {number}",
+        "current": "Sesión actual",
+        "currentOnly": "Solo está activa tu sesión actual."
+      },
+      "timestamps": {
+        "startedAt": "Inicio: {date}",
+        "expiresAt": "Caduca: {date}",
+        "unavailable": "No disponible"
+      },
+      "actions": {
+        "signOut": "Cerrar sesión",
+        "revokeSession": "Revocar sesión",
+        "revokeOtherSessions": "Revocar todas las demás sesiones"
+      },
+      "dialog": {
+        "closeLabel": "Cerrar diálogo",
+        "cancel": "Cancelar",
+        "close": "Cerrar",
+        "individual": {
+          "title": "¿Revocar la sesión {number}?",
+          "description": "Revisa esta sesión antes de continuar.",
+          "endSelected": "Solo finalizará esta sesión.",
+          "nextRequest": "Su siguiente solicitud protegida requerirá iniciar sesión de nuevo.",
+          "keepOthers": "Tu sesión actual y todas las demás sesiones permanecerán activas.",
+          "confirm": "Revocar sesión"
+        },
+        "bulk": {
+          "title": "¿Revocar todas las demás sesiones?",
+          "description": "Revisa qué sesiones finalizarán antes de continuar.",
+          "endOthers": "Se cerrarán todas las sesiones excepto la sesión desde la que confirmes esta acción.",
+          "includeNew": "Se incluyen las sesiones creadas antes de la confirmación, aunque no aparezcan aquí.",
+          "keepCurrent": "La sesión desde la que confirmes esta acción permanecerá activa.",
+          "confirm": "Revocar todas las demás sesiones"
+        }
+      },
+      "reauthentication": {
+        "title": "Autentícate de nuevo para continuar",
+        "description": "Por seguridad, utiliza un enlace nuevo de un solo uso enviado por correo antes de confirmar esta acción.",
+        "sendLink": "Enviar un enlace nuevo",
+        "sent": "Revisa tu correo para encontrar el nuevo enlace de autenticación. Después de usarlo, vuelve a elegir la acción."
+      },
+      "pending": {
+        "revokingSession": "Revocando la sesión...",
+        "revokingOtherSessions": "Revocando las demás sesiones...",
+        "sendingLink": "Enviando el enlace...",
+        "refreshing": "Actualizando las sesiones activas..."
+      },
+      "recovery": {
+        "recovering": "Actualizando la lista de sesiones activas. La solicitud anterior no se volverá a enviar.",
+        "recovered": "Se ha actualizado la lista de sesiones activas. Revísala antes de elegir otra acción."
+      },
+      "success": {
+        "reauthenticated": "Se ha renovado la autenticación. Revisa la lista actual y vuelve a elegir una acción.",
+        "revocationCompleted": "La solicitud ha finalizado. Se ha actualizado la lista de sesiones activas."
+      },
+      "errors": {
+        "invalidLink": "Este enlace de autenticación no es válido. Elige una acción y solicita un enlace nuevo.",
+        "sessionConflict": "Este enlace no se puede usar con la sesión actual. Usa una sesión activa de la misma cuenta.",
+        "sendFailed": "No hemos podido enviar el enlace. Ninguna sesión ha cambiado. Inténtalo de nuevo.",
+        "rateLimited": "Demasiados intentos. Ninguna sesión ha cambiado. Vuelve a intentarlo más tarde.",
+        "revocationFailed": "No hemos podido actualizar tus sesiones. Ninguna sesión ha cambiado. Revisa la lista e inténtalo de nuevo.",
+        "refreshFailed": "No hemos podido actualizar tus sesiones activas. Recarga la página antes de volver a intentarlo."
+      },
+      "email": {
+        "subject": "Confirma una acción de seguridad en tu cuenta de {projectName}",
+        "introduction": "Autentícate con este enlace para volver a Seguridad de la cuenta. Tendrás que elegir y confirmar la acción de nuevo.",
+        "action": "Ir a Seguridad de la cuenta"
       }
     },
     "deletion": {

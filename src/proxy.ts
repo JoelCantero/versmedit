@@ -68,6 +68,8 @@ export default function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/api/auth/") ||
     request.nextUrl.pathname === "/api/account/deletion" ||
     request.nextUrl.pathname.startsWith("/api/account/deletion/") ||
+    request.nextUrl.pathname === "/api/account/security" ||
+    request.nextUrl.pathname.startsWith("/api/account/security/") ||
     request.nextUrl.pathname === "/api/signup" ||
     request.nextUrl.pathname.startsWith("/api/signup/");
   if (requiresCanonicalOrigin) {

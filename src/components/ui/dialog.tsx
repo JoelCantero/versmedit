@@ -39,6 +39,7 @@ function DialogBackdrop({
 
 interface DialogContentProps extends DialogPrimitive.Popup.Props {
   closeLabel: string
+  closeDisabled?: boolean
   showCloseButton?: boolean
 }
 
@@ -46,6 +47,7 @@ function DialogContent({
   className,
   children,
   closeLabel,
+  closeDisabled = false,
   showCloseButton = true,
   ...props
 }: DialogContentProps) {
@@ -68,7 +70,8 @@ function DialogContent({
           {showCloseButton ? (
             <DialogClose
               aria-label={closeLabel}
-              className="absolute right-3 top-3 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
+              disabled={closeDisabled}
+              className="absolute right-3 top-3 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none"
             >
               <XIcon className="size-5" aria-hidden="true" />
             </DialogClose>

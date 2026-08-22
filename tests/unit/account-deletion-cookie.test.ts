@@ -50,6 +50,7 @@ describe("account deletion session cookies", () => {
   it("resolves only an active, unexpired, recently authenticated exact session", async () => {
     const now = new Date("2026-08-21T12:00:00.000Z");
     mocks.sessionFindUnique.mockResolvedValue({
+      id: "session-id",
       sessionToken: "exact",
       userId: "owner",
       expires: new Date("2026-08-22T12:00:00.000Z"),
@@ -75,6 +76,7 @@ describe("account deletion session cookies", () => {
     [null, "unauthenticated"],
     [
       {
+        id: "expired",
         expires: new Date("2026-08-21T11:59:59.000Z"),
         authenticatedAt: new Date("2026-08-21T11:59:00.000Z"),
         user: { status: "ACTIVE" },
@@ -83,6 +85,7 @@ describe("account deletion session cookies", () => {
     ],
     [
       {
+        id: "legacy",
         expires: new Date("2026-08-22T12:00:00.000Z"),
         authenticatedAt: null,
         user: { status: "ACTIVE" },
@@ -91,6 +94,7 @@ describe("account deletion session cookies", () => {
     ],
     [
       {
+        id: "stale",
         expires: new Date("2026-08-22T12:00:00.000Z"),
         authenticatedAt: new Date("2026-08-21T11:49:59.999Z"),
         user: { status: "ACTIVE" },
@@ -99,11 +103,21 @@ describe("account deletion session cookies", () => {
     ],
     [
       {
+        id: "pending",
         expires: new Date("2026-08-22T12:00:00.000Z"),
         authenticatedAt: new Date("2026-08-21T11:59:00.000Z"),
         user: { status: "PENDING" },
       },
       "unauthenticated",
+    ],
+    [
+      {
+        id: "future-authentication",
+        expires: new Date("2026-08-22T12:00:00.000Z"),
+        authenticatedAt: new Date("2026-08-21T12:00:00.001Z"),
+        user: { status: "ACTIVE" },
+      },
+      "stale",
     ],
   ])("returns %s without disclosing account state", async (record, expectedStatus) => {
     mocks.sessionFindUnique.mockResolvedValue(record);

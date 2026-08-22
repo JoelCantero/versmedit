@@ -56,11 +56,12 @@ export function parseLoginCallbackPath(
 
   try {
     const parsed = new URL(decoded, CALLBACK_PARSE_BASE);
-    const expected = getAccountPathForLocale(locale);
+    const accountPath = getAccountPathForLocale(locale);
+    const expectedPaths = new Set([accountPath, `${accountPath}/security`]);
     if (parsed.origin !== CALLBACK_PARSE_BASE) return fallback;
-    if (parsed.pathname !== expected) return fallback;
+    if (!expectedPaths.has(parsed.pathname)) return fallback;
     if (parsed.search || parsed.hash) return fallback;
-    return expected;
+    return parsed.pathname;
   } catch {
     return fallback;
   }

@@ -32,7 +32,8 @@
       "profile": "Profile",
       "profileAriaLabel": "Profile sections",
       "accountLink": "Account",
-      "dataAndPrivacy": "Data & Privacy"
+      "dataAndPrivacy": "Data & Privacy",
+      "security": "Security"
     },
     "avatar": {
       "label": "Profile avatar",
@@ -75,6 +76,88 @@
       "deletion": {
         "title": "Permanent account deletion",
         "description": "Permanently remove your account and all access associated with it."
+      }
+    },
+    "security": {
+      "metadata": {
+        "title": "Account security",
+        "description": "Review and manage the active sessions for your account."
+      },
+      "heading": {
+        "title": "Security",
+        "description": "Review your active account sessions and end access you no longer need."
+      },
+      "list": {
+        "title": "Active sessions",
+        "description": "These sessions currently have access to your account.",
+        "ariaLabel": "Active account sessions",
+        "sessionLabel": "Session {number}",
+        "current": "Current session",
+        "currentOnly": "Only your current session is active."
+      },
+      "timestamps": {
+        "startedAt": "Started: {date}",
+        "expiresAt": "Expires: {date}",
+        "unavailable": "Unavailable"
+      },
+      "actions": {
+        "signOut": "Sign out",
+        "revokeSession": "Revoke session",
+        "revokeOtherSessions": "Revoke all other sessions"
+      },
+      "dialog": {
+        "closeLabel": "Close dialog",
+        "cancel": "Cancel",
+        "close": "Close",
+        "individual": {
+          "title": "Revoke session {number}?",
+          "description": "Review this session before you continue.",
+          "endSelected": "Only this session will end.",
+          "nextRequest": "Its next protected request will require signing in again.",
+          "keepOthers": "Your current session and every other session will remain active.",
+          "confirm": "Revoke session"
+        },
+        "bulk": {
+          "title": "Revoke all other sessions?",
+          "description": "Review which sessions will end before you continue.",
+          "endOthers": "Every session except the one confirming this action will end.",
+          "includeNew": "Sessions created before you confirm are included, even if they are not shown here.",
+          "keepCurrent": "The session confirming this action will remain active.",
+          "confirm": "Revoke all other sessions"
+        }
+      },
+      "reauthentication": {
+        "title": "Authenticate again to continue",
+        "description": "For your security, use a new single-use email link before confirming this action.",
+        "sendLink": "Send fresh link",
+        "sent": "Check your email for the fresh authentication link. After using it, choose the action again."
+      },
+      "pending": {
+        "revokingSession": "Revoking session...",
+        "revokingOtherSessions": "Revoking other sessions...",
+        "sendingLink": "Sending link...",
+        "refreshing": "Refreshing active sessions..."
+      },
+      "recovery": {
+        "recovering": "Refreshing the active session list. The previous request will not be sent again.",
+        "recovered": "The active session list was refreshed. Review it before choosing another action."
+      },
+      "success": {
+        "reauthenticated": "Authentication refreshed. Review the current list and choose an action again.",
+        "revocationCompleted": "The request completed. The active session list has been refreshed."
+      },
+      "errors": {
+        "invalidLink": "This authentication link is not valid. Choose an action and request a new link.",
+        "sessionConflict": "This link cannot be used with the current session. Use an active session for the same account.",
+        "sendFailed": "We could not send the link. No sessions changed. Try again.",
+        "rateLimited": "Too many attempts. No sessions changed. Try again later.",
+        "revocationFailed": "We could not update your sessions. No sessions changed. Review the list and try again.",
+        "refreshFailed": "We could not refresh your active sessions. Reload the page before trying again."
+      },
+      "email": {
+        "subject": "Confirm your {projectName} account security action",
+        "introduction": "Authenticate with this link to return to Account Security. You will need to choose and confirm the action again.",
+        "action": "Continue to Account Security"
       }
     },
     "deletion": {

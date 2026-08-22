@@ -19,6 +19,12 @@ interface ProviderBehavior {
   disconnect?: boolean;
 }
 
+interface ProviderBehaviorRule {
+  behavior: ProviderBehavior;
+  bodyIncludes?: string;
+  once?: boolean;
+}
+
 interface CapturedRequest {
   target: ProviderTarget;
   logicalUrl: string;
@@ -40,7 +46,7 @@ const logicalUrlByTarget: Record<ProviderTarget, string> = {
   "mailjet.send": "https://api.mailjet.com/v3.1/send",
 };
 const requests: CapturedRequest[] = [];
-const behaviors = new Map<ProviderTarget, ProviderBehavior>();
+const behaviors = new Map<ProviderTarget, ProviderBehaviorRule>();
 
 function json(response: ServerResponse, status: number, body: unknown) {
   response.statusCode = status;
@@ -121,6 +127,8 @@ async function handleControl(
     const payload = JSON.parse(await readBody(request)) as {
       target?: ProviderTarget;
       behavior?: ProviderBehavior;
+      bodyIncludes?: string;
+      once?: boolean;
     };
     if (!payload.target || !logicalUrlByTarget[payload.target] || !payload.behavior) {
       json(response, 400, { status: "invalid" });
@@ -132,11 +140,20 @@ async function handleControl(
       status < 100 ||
       status > 599 ||
       (delayMs !== undefined && (!Number.isInteger(delayMs) || delayMs < 0))
+      || (payload.bodyIncludes !== undefined &&
+        (typeof payload.bodyIncludes !== "string" ||
+          payload.bodyIncludes.length === 0 ||
+          payload.bodyIncludes.length > 320))
+      || (payload.once !== undefined && typeof payload.once !== "boolean")
     ) {
       json(response, 400, { status: "invalid" });
       return true;
     }
-    behaviors.set(payload.target, payload.behavior);
+    behaviors.set(payload.target, {
+      behavior: payload.behavior,
+      bodyIncludes: payload.bodyIncludes,
+      once: payload.once,
+    });
     json(response, 200, { status: "configured", target: payload.target });
     return true;
   }
@@ -161,7 +178,13 @@ const server = createServer(async (request, response) => {
       headers: request.headers as Record<string, string | string[]>,
       body,
     });
-    const behavior = behaviors.get(target) ?? defaultResponse(target, body);
+    const rule = behaviors.get(target);
+    const ruleMatches =
+      rule && (!rule.bodyIncludes || body.includes(rule.bodyIncludes));
+    const behavior = ruleMatches
+      ? rule.behavior
+      : defaultResponse(target, body);
+    if (ruleMatches && rule.once) behaviors.delete(target);
     if (behavior.delayMs) {
       await new Promise((resolve) => setTimeout(resolve, behavior.delayMs));
     }

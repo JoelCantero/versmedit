@@ -97,6 +97,64 @@ describe("proxy security boundary", () => {
     expect(intlMiddlewareMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    "/api/account/security/reauthenticate",
+    "/api/account/security/sessions/revoke",
+    "/api/account/security/sessions/revoke-others",
+  ])(
+    "rejects an account-security mutation to a non-canonical effective host for %s",
+    (path) => {
+      vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
+      vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+      const response = proxy(
+        new NextRequest(`https://app.example.test${path}`, {
+          method: "POST",
+          headers: {
+            origin: "https://app.example.test",
+            "x-forwarded-host": "attacker.example",
+          },
+        }),
+      );
+
+      expect(response.status).toBe(421);
+      expect(response.headers.get("x-request-id")).toBeTruthy();
+      expect(intlMiddlewareMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it("accepts a canonical top-level security callback without Origin", () => {
+    vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
+    vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+    const response = proxy(
+      new NextRequest(
+        `http://internal:3000/api/account/security/verify?token=${"a".repeat(43)}`,
+        {
+          headers: {
+            "cf-visitor": '{"scheme":"https"}',
+            "x-forwarded-host": "app.example.test",
+          },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a top-level security callback with a mismatched effective URL", () => {
+    vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
+    vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+    const response = proxy(
+      new NextRequest(
+        `https://app.example.test/api/account/security/verify?token=${"a".repeat(43)}`,
+        { headers: { "x-forwarded-host": "attacker.example" } },
+      ),
+    );
+
+    expect(response.status).toBe(421);
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
   it("returns a controlled error when canonical Auth configuration is invalid", () => {
     vi.stubEnv("NEXTAUTH_URL", "not-a-url");
     const response = proxy(

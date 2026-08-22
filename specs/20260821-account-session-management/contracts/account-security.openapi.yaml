@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: Account Security Session Management Internal API
+  version: 1.0.0
+  description: >-
+    Same-origin application contract for account-security reauthentication and
+    revoking active database sessions. It is not a public integration API. The
+    protected Security page renders session summaries server-side; there is no
+    separate list API. No operation accepts a user identifier, email, session
+    token, or ownership decision from the client.
+servers:
+  - url: /
+paths:
+  /api/account/security/reauthenticate:
+    post:
+      operationId: requestAccountSecurityReauthentication
+      summary: Send a fresh authentication link to the current account holder
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReauthenticationRequest"
+      responses:
+        "202":
+          description: The configured provider accepted the localized message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReauthenticationSent"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/ReauthenticationUnavailable"
+  /api/account/security/verify:
+    get:
+      operationId: verifyAccountSecurityReauthentication
+      summary: Consume a delivered link and refresh one existing same-account session
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 43
+            maxLength: 43
+      responses:
+        "302":
+          description: >-
+            On success, the callback atomically consumes the credential and refreshes
+            authenticatedAt on the exact existing active same-account session from
+            the trusted cookie. It creates no session/cookie and redirects to the
+            exact localized Security page with only a generic reauthenticated state.
+            Missing/expired sessions and other failures redirect to a generic
+            localized invalid-link or session-conflict state without consuming an
+            otherwise valid credential. Location never contains the raw token, email,
+            account identity, a selected session, or a revocation action.
+          headers:
+            Location:
+              schema:
+                type: string
+                examples:
+                  - /account/security?state=reauthenticated
+                  - /es/account/security?state=invalid_link
+                  - /ca/account/security?state=session_conflict
+        "421":
+          description: >-
+            The externally effective request URL scheme, host, or port does not
+            match the configured canonical origin. As an expected top-level email
+            navigation, the callback does not require an HTTP Origin header.
+  /api/account/security/sessions/revoke:
+    post:
+      operationId: revokeOtherAccountSession
+      summary: Revoke one untrusted non-current session selection owned by the current account
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IndividualRevocationRequest"
+      responses:
+        "200":
+          description: >-
+            Generic completed outcome for an authorized deletion or a missing,
+            expired, already-revoked, foreign, or current selector no-op. The
+            response never reveals prior target state. The client refreshes the
+            protected server-rendered list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevocationCompleted"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/ReauthenticationRequired"
+        "500":
+          $ref: "#/components/responses/RevocationFailed"
+  /api/account/security/sessions/revoke-others:
+    post:
+      operationId: revokeAllOtherAccountSessions
+      summary: Revoke every session except the exact session confirming this request
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkRevocationRequest"
+      responses:
+        "200":
+          description: >-
+            The current session is the sole remaining session for the account, or
+            no other session existed at commit time. No deleted count is returned.
+            The client refreshes the protected server-rendered list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevocationCompleted"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/ReauthenticationRequired"
+        "500":
+          $ref: "#/components/responses/RevocationFailed"
+components:
+  securitySchemes:
+    developmentSessionCookie:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used without secure-cookie mode. The
+        server never accepts this credential in request JSON.
+    secureSessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Secure-next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used in secure deployments. The server
+        never accepts this credential in request JSON.
+  schemas:
+    Locale:
+      type: string
+      enum: [en, es, ca]
+    CsrfToken:
+      type: string
+      minLength: 1
+      description: Must match the signed Auth.js CSRF cookie.
+    SessionSelector:
+      type: string
+      minLength: 1
+      maxLength: 128
+      description: >-
+        Opaque noncredential Session.id accepted only as an untrusted action
+        selector. It is never placed in a URL, displayed, or logged.
+    ReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale]
+      properties:
+        csrfToken:
+          $ref: "#/components/schemas/CsrfToken"
+        locale:
+          $ref: "#/components/schemas/Locale"
+    IndividualRevocationRequest:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale, confirmation, sessionId]
+      properties:
+        csrfToken:
+          $ref: "#/components/schemas/CsrfToken"
+        locale:
+          $ref: "#/components/schemas/Locale"
+        confirmation:
+          type: string
+          const: revoke_session
+          description: Exact action marker; not identity or authorization.
+        sessionId:
+          $ref: "#/components/schemas/SessionSelector"
+    BulkRevocationRequest:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale, confirmation]
+      properties:
+        csrfToken:
+          $ref: "#/components/schemas/CsrfToken"
+        locale:
+          $ref: "#/components/schemas/Locale"
+        confirmation:
+          type: string
+          const: revoke_other_sessions
+          description: Exact action marker; no target or user identity is accepted.
+    ReauthenticationSent:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: sent
+    RevocationCompleted:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: completed
+    ReauthenticationRequiredProblem:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: reauthentication_required
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum:
+            - invalid_request
+            - unauthenticated
+            - forbidden
+            - rate_limited
+            - unavailable
+            - revocation_failed
+        retryAfter:
+          type: integer
+          minimum: 1
+          description: Present only when status is rate_limited or temporarily unavailable.
+        redirectTo:
+          type: string
+          enum:
+            - "/login?callbackUrl=%2Faccount%2Fsecurity"
+            - "/es/login?callbackUrl=%2Fes%2Faccount%2Fsecurity"
+            - "/ca/login?callbackUrl=%2Fca%2Faccount%2Fsecurity"
+          description: Present only for an unauthenticated localized request.
+  responses:
+    InvalidRequest:
+      description: Body parsing or exact allowed-field validation failed; no session changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthenticated:
+      description: Current session is missing, expired, invalid, or revoked; no session changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: CSRF proof or canonical same-origin validation failed; no session changed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RateLimited:
+      description: >-
+        The security reauthentication client limit or shared address limit is
+        exhausted. No provider delivery begins and no session changes.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ReauthenticationUnavailable:
+      description: >-
+        The configured provider did not accept delivery. The exact provisional
+        credential is compensated, and every session remains unchanged.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ReauthenticationRequired:
+      description: >-
+        The exact current session has no authentication evidence within 10
+        minutes. No session changed; the selected action is not persisted.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ReauthenticationRequiredProblem"
+    RevocationFailed:
+      description: >-
+        The revocation transaction rolled back completely. The browser refreshes
+        the authoritative list and may permit a new explicit attempt.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+x-request-invariants:
+  - All POST operations require the configured canonical origin and valid Auth.js CSRF proof.
+  - JSON parsing rejects unknown fields, duplicate fields, malformed content, and revocation action-marker mismatches; reauthentication issuance has no action marker.
+  - User ID, email, normalized email, session token, token purpose, current flag, ownership, and authorization are never request-body fields.
+x-security-invariants:
+  - The server derives account and exact current session from one supported trusted cookie at each final action boundary.
+  - Individual and bulk services re-read active account, current session, expiry, and 10-minute recent-auth evidence under the same user advisory lock used by session creation.
+  - Individual target ownership and not-current status are checked under that lock; missing, expired, foreign, current, and already-revoked selectors return the same completed no-op.
+  - Bulk revocation deletes every session for the account except the exact current session observed under the lock, including a session created after the dialog opened.
+  - Reauthentication uses a dedicated ACCOUNT_SECURITY purpose and creates no revocation intent, Session, or cookie.
+  - The verification callback requires an existing active session for the credential's same account, then consumes the exact delivered credential and refreshes only that session under normalized-address then user locks.
+  - Signed-out, expired-session, and conflicting-account callback requests change no session and do not consume an otherwise valid credential; a second browser is eligible only when it already has an active same-account session.
+  - Reauthentication at the 20-session boundary leaves the same 20 rows active and invokes no cap eviction.
+  - Reauthentication uses a 5-per-15-minute shared client bucket and the existing 3-per-15-minute normalized-address bucket before provider delivery.
+  - Revocation adds no resource bucket; each operation is recently authenticated, same-origin, bounded to at most 20 rows, serialized, duplicate-disabled while pending, and idempotent on replay.
+  - Responses and logs contain no personal data, session selector, session credential, cookie, authentication link, network metadata, or internal error detail.
+x-credential-transport-invariant: >-
+  The intentionally delivered inbound email URL is the sole credential-bearing URL.
+  Application code does not log or reflect it, every callback response redirects to
+  a credential-free allowlisted localized route, and the raw token is never accepted
+  as a return destination or included in a response body.
+x-callback-navigation-invariant: >-
+  Email-link consumption is an expected top-level cross-site GET and may omit the
+  HTTP Origin header. It validates the externally effective request URL scheme,
+  host, and port through the existing trusted-ingress canonical-origin helper; it
+  does not require or trust Origin, Referer, or a client-provided return URL. POST
+  routes retain canonical request-URL validation plus Auth.js CSRF proof.
+x-recovery-invariant: >-
+  After every received outcome the browser refreshes the protected server-rendered
+  list. If a revocation response is lost, it never retries either POST automatically;
+  it navigates or refreshes Security once and presents the authoritative session set
+  with a generic recovery announcement.

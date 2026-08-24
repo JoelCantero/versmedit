@@ -136,3 +136,9 @@ As a keyboard, screen-reader, mobile, or desktop user, I can identify and use th
 - **Input validation**: The feature accepts no user-provided content; navigation behavior is limited to the supported language set and fixed canonical legal destinations.
 - **Log hygiene**: Footer navigation MUST NOT introduce logs containing personal data, authentication state, secrets, or full browsing histories.
 - **Public exposure**: No new public endpoint is introduced; the footer only makes the existing intentionally public legal pages persistently discoverable.
+
+## Threats & Abuse Cases *(mandatory for public endpoints or privileged actions)*
+
+- **Abuse scenarios**: A compromised or incorrect footer configuration could replace a canonical legal destination with an off-site or wrong-locale address, present misleading link text, hide a legal destination for one authentication state, duplicate navigation to confuse users, or introduce tracking of legal-page visits.
+- **Controls**: Keep destinations in the fixed `POLICY_PATHS` source, pass those canonical paths through the locale-aware `Link`, reuse reviewed policy-title catalogs, render one authentication-independent Server Component from the shared localized layout, expose no user input or custom event handling, and verify exact link names, order, cardinality, locale retention, and destinations in unit and production-artifact tests.
+- **Residual risk**: The existing public legal pages remain available to ordinary automated traffic, and a future source-code or catalog compromise could still alter visible navigation until detected and redeployed. This feature adds no endpoint, privileged action, stored state, credential flow, or meaningful traffic amplification, so existing code review, deployment controls, and public-route protections remain sufficient.

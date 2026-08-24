@@ -91,6 +91,22 @@ describe("transactional email submission logging", () => {
     }
   });
 
+  it("allows a purpose-specific journey to suppress the generic submission event", async () => {
+    const http = createHttpMailProvider([
+      {
+        status: 201,
+        body: JSON.stringify({ messageId: "unused-message-id" }),
+      },
+    ]);
+
+    await sendTransactionalEmail(message, config, http.client, {
+      correlationId: "purpose-specific-request",
+      logAttempt: false,
+    });
+
+    expect(mocks.info).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["rate_limited", { status: 429, body: "private raw response" }, "4xx"],
     ["provider_unavailable", { error: new Error("private network details") }, null],

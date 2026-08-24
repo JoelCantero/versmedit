@@ -71,7 +71,7 @@ type PanelState =
   | "download_error"
   | "rate_limited";
 
-type RetryAction = "request" | "download";
+type RetryAction = "request" | "confirmation" | "download";
 
 const MAX_RETRY_AFTER_SECONDS = 15 * 60;
 
@@ -195,7 +195,12 @@ export function DataExportPanel({
   const [state, setState] = useState(() =>
     initialPanelState(authorizationState, callbackNotice),
   );
-  const [retryAction, setRetryAction] = useState<RetryAction>("request");
+  const [retryAction, setRetryAction] = useState<RetryAction>(() =>
+    callbackNotice?.status === "rate_limited" &&
+    authorizationState.status === "ready"
+      ? "confirmation"
+      : "request",
+  );
   const [retryUntil, setRetryUntil] = useState(() =>
     callbackNotice?.status === "rate_limited"
       ? Date.now() + normalizeRetryAfter(callbackNotice.retryAfter) * 1_000
@@ -287,7 +292,9 @@ export function DataExportPanel({
           current !== "ready" &&
           current !== "downloading" &&
           current !== "downloaded" &&
-          current !== "download_error"
+          current !== "download_error" &&
+          current !== "invalid" &&
+          current !== "rate_limited"
         ) {
           return current;
         }
@@ -311,8 +318,7 @@ export function DataExportPanel({
       setRetryRemaining(remaining);
       if (remaining !== 0) return;
       setState(
-        retryAction === "download" &&
-          authorizationState.status === "ready" &&
+        authorizationState.status === "ready" &&
           secondsUntil(authorizationState.expiresAt) > 0
           ? "ready"
           : "idle",
@@ -337,7 +343,8 @@ export function DataExportPanel({
     state === "downloading" ||
     state === "downloaded" ||
     state === "download_error" ||
-    (state === "rate_limited" && retryAction === "download");
+    ((state === "invalid" || state === "rate_limited") &&
+      authorizationState.status === "ready");
   const status =
     state === "requesting"
       ? messages.requesting
@@ -374,7 +381,8 @@ export function DataExportPanel({
       state === "downloading" ||
       state === "downloaded" ||
       state === "download_error" ||
-      (state === "rate_limited" && retryAction === "download"));
+      state === "invalid" ||
+      state === "rate_limited");
 
   useEffect(() => {
     if (
@@ -461,7 +469,12 @@ export function DataExportPanel({
         <Button
           ref={downloadButtonRef}
           type="button"
-          disabled={pending || (state === "rate_limited" && retryRemaining > 0)}
+          disabled={
+            pending ||
+            (state === "rate_limited" &&
+              retryAction === "download" &&
+              retryRemaining > 0)
+          }
           onClick={download}
           className="min-h-11 w-full min-w-11 whitespace-normal text-center motion-reduce:transition-none sm:w-auto sm:min-w-48"
         >

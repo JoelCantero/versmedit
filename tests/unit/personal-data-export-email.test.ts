@@ -84,6 +84,11 @@ describe("personal data export email", () => {
     expect(message.html).not.toContain("<VersMedit & Co>");
     expect(message.html).toContain("&lt;VersMedit &amp; Co&gt;");
     await sendPersonalDataExportEmail(options);
-    expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(message);
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
+      message,
+      undefined,
+      undefined,
+      { logAttempt: false },
+    );
   });
 });

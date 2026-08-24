@@ -8,6 +8,8 @@ vi.mock("server-only", () => ({}));
 const mocks = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
+  sendTransactionalEmail: vi.fn(),
+  sharedLimit: vi.fn(),
   csrf: vi.fn(() => true),
   canonical: vi.fn(() => true),
   session: vi.fn((): string | null => "opaque-session"),
@@ -33,6 +35,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({
+    PROJECT_NAME: "Observability Test",
     NEXTAUTH_URL: "https://app.example.test",
     AUTH_SECRET: "observability-secret-at-least-32-chars",
     MAIL: { enabled: true },
@@ -40,6 +43,12 @@ vi.mock("@/lib/env", () => ({
 }));
 vi.mock("@/lib/logger", () => ({
   getRequestLogger: () => ({ info: mocks.info, warn: mocks.warn }),
+}));
+vi.mock("@/lib/email/index", () => ({
+  sendTransactionalEmail: mocks.sendTransactionalEmail,
+}));
+vi.mock("@/lib/shared-rate-limit", () => ({
+  consumeSharedRateLimit: mocks.sharedLimit,
 }));
 vi.mock("@/lib/auth-csrf", () => ({ validateAuthCsrfToken: mocks.csrf }));
 vi.mock("@/lib/request-context", () => ({
@@ -81,6 +90,12 @@ function request(path: string, method = "POST") {
 describe("personal data export observability", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.sendTransactionalEmail.mockResolvedValue({ accepted: true });
+    mocks.sharedLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 1,
+      retryAfterSeconds: 900,
+    });
     mocks.issue.mockResolvedValue({ status: "sent" });
     mocks.verify.mockResolvedValue({ status: "ready", locale: "en" });
     mocks.generate.mockResolvedValue({
@@ -217,5 +232,39 @@ describe("personal data export observability", () => {
       { outcome: "generation_rate_limited", durationMs: expect.any(Number) },
       { outcome: "generation_expired", durationMs: expect.any(Number) },
     ]);
+  });
+
+  it("opts composed export dependencies out of non-contract operational logs", async () => {
+    const email = await vi.importActual<
+      typeof import("@/modules/account/data-export/email")
+    >("@/modules/account/data-export/email");
+    await email.sendPersonalDataExportEmail({
+      recipient: "private@example.test",
+      rawToken: Buffer.alloc(32, 9).toString("base64url"),
+      locale: "es",
+      origin: "https://app.example.test",
+    });
+    expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
+      expect.any(Object),
+      undefined,
+      undefined,
+      { logAttempt: false },
+    );
+
+    const limits = await vi.importActual<
+      typeof import("@/modules/account/data-export/rate-limit")
+    >("@/modules/account/data-export/rate-limit");
+    await Promise.all([
+      limits.consumePersonalDataExportRequestClientLimit("client"),
+      limits.consumePersonalDataExportRequestAccountLimit("person@example.test"),
+      limits.consumePersonalDataExportConfirmationClientLimit("client"),
+      limits.consumePersonalDataExportGenerationSessionLimit("session"),
+    ]);
+    expect(mocks.sharedLimit).toHaveBeenCalledTimes(4);
+    for (const [options] of mocks.sharedLimit.mock.calls) {
+      expect(options).toEqual(
+        expect.objectContaining({ logCleanupErrors: false }),
+      );
+    }
   });
 });

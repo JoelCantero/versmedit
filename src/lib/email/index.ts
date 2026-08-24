@@ -43,7 +43,10 @@ export async function sendTransactionalEmail(
   input: TransactionalEmail,
   config: MailConfig = getEnv().MAIL,
   client: ProviderHttpClient = nativeProviderHttpClient,
-  { correlationId }: { correlationId?: string } = {},
+  {
+    correlationId,
+    logAttempt = true,
+  }: { correlationId?: string; logAttempt?: boolean } = {},
 ) {
   const message = validateTransactionalEmail(input);
   let attempt: ProviderAttemptMetadata | null = null;
@@ -54,7 +57,7 @@ export async function sendTransactionalEmail(
       attempt = metadata;
     },
   ).send(message);
-  if (attempt) {
+  if (attempt && logAttempt) {
     const observedAttempt: ProviderAttemptMetadata = attempt;
     const safeCorrelationId =
       correlationId && /^[A-Za-z0-9._:-]{1,128}$/.test(correlationId)

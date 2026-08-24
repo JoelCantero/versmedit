@@ -309,3 +309,9 @@ The representative 20-person usability measurement in `specs/20260823-personal-d
 - Export confirmation is a custom callback and never delegates to Auth.js session creation or authentication-freshness updates.
 - The canonical payload exists only in request memory until the buffered response is sent and is never written to PostgreSQL, disk, cache, logs, or provider metadata.
 - Existing backup and restore operations remain operationally separate and never become an export delivery or retention path.
+
+## Phase 8: Convergence
+
+- [x] T071 Reconcile callback presentation notices with server-derived ready authorization in `src/modules/account/data-export/components/data-export-panel.tsx`, preserving Download data and the remaining window for an exact unexpired grant after invalid, replayed, or confirmation-rate-limited callbacks, and add compound-state unit and E2E replay assertions per FR-016 and US1/AC2 (partial)
+- [x] T072 Constrain composed export observability across `src/modules/account/data-export/email.ts`, `src/lib/email/index.ts`, the shared rate-limit boundary, and `tests/integration/personal-data-export-observability.test.ts` so the journey emits only fixed sanitized outcome-plus-duration records and never provider message identifiers, downstream event metadata, or raw cleanup/internal errors per FR-038, FR-039, and T042 (contradicts)
+- [x] T073 Preserve the validated callback locale as the presentation fallback when token lookup cannot recover a persisted locale for replayed, consumed, superseded, wrong-purpose, or unknown credentials, and add EN/ES/CA integration and browser coverage in `src/modules/account/data-export/service.ts`, `src/app/api/account/data-export/verify/route.ts`, `tests/integration/personal-data-export-authorization.test.ts`, and `tests/e2e/personal-data-export.spec.ts` per FR-036, SC-006, and US4/AC1 (partial)

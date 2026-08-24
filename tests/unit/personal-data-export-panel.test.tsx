@@ -124,6 +124,47 @@ describe("DataExportPanel", () => {
     expect(downloadExport).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [
+      { status: "invalid", locale: "es" } as const,
+      messages.invalid,
+    ],
+    [
+      { status: "rate_limited", locale: "es", retryAfter: 30 } as const,
+      "Too many attempts. Try again in 30 seconds.",
+    ],
+  ])(
+    "keeps an exact ready authorization available with a $status callback notice",
+    (callbackNotice, expectedAlert) => {
+      const requestExport = vi.fn();
+      const downloadExport = vi.fn();
+      render(
+        <DataExportPanel
+          locale="es"
+          authorizationState={{
+            status: "ready",
+            expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+          }}
+          callbackNotice={callbackNotice}
+          messages={messages}
+          requestExport={requestExport}
+          downloadExport={downloadExport}
+        />,
+      );
+
+      expect(screen.getByRole("alert")).toHaveTextContent(expectedAlert);
+      expect(
+        screen.getByRole("button", { name: messages.download }),
+      ).toBeEnabled();
+      expect(screen.getByText(/^Available for /u)).toHaveAttribute(
+        "aria-live",
+        "off",
+      );
+      expect(requestExport).not.toHaveBeenCalled();
+      expect(downloadExport).not.toHaveBeenCalled();
+    },
+  );
+
   it("focuses a generic request error and offers only an explicit retry", async () => {
     const user = userEvent.setup();
     const requestExport = vi.fn().mockResolvedValue({ status: "unavailable" });

@@ -25,6 +25,7 @@ const localeJourneys = [
     ready: "Your export is ready to download.",
     download: "Download data",
     downloaded: "Your data export was downloaded.",
+    invalid: "This confirmation link is not valid. Request a new one.",
     deletion: "Permanent account deletion",
   },
   {
@@ -36,6 +37,7 @@ const localeJourneys = [
     ready: "Tu exportación está lista para descargar.",
     download: "Descargar datos",
     downloaded: "Se ha descargado tu exportación de datos.",
+    invalid: "Este enlace de confirmación no es válido. Solicita uno nuevo.",
     deletion: "Eliminación permanente de la cuenta",
   },
   {
@@ -47,6 +49,7 @@ const localeJourneys = [
     ready: "La teva exportació està a punt per baixar.",
     download: "Descarrega les dades",
     downloaded: "S'ha descarregat l'exportació de dades.",
+    invalid: "Aquest enllaç de confirmació no és vàlid. Sol·licita'n un de nou.",
     deletion: "Eliminació permanent del compte",
   },
 ] as const;
@@ -394,7 +397,7 @@ test("does not authenticate, consume, or download when a signed-out visitor open
   await expect(page.getByRole("button", { name: "Download data" })).toBeVisible();
 });
 
-test("uses one generic outcome for conflicting and replayed confirmation links", async ({
+test("uses one generic outcome for a conflicting confirmation link", async ({
   browser,
   context,
   page,
@@ -443,21 +446,50 @@ test("uses one generic outcome for conflicting and replayed confirmation links",
       conflictingPage.getByRole("button", { name: "Download data" }),
     ).toHaveCount(0);
 
-    await page.goto("/account/data");
-    await expect(page.getByRole("button", { name: "Download data" })).toHaveCount(0);
-    await page.goto(`${appUrl}${confirmation.pathname}${confirmation.search}`);
-    await expect(page).toHaveURL(/\/account\/data\?exportState=ready$/u);
-    await page.goto(`${appUrl}${confirmation.pathname}${confirmation.search}`);
-    await expect(page).toHaveURL(/\/account\/data\?exportState=invalid$/u);
-    await expect(getDataExportPanel(page).getByRole("alert")).toHaveText(
-      conflictCopy ?? "",
-    );
-    expect(page.url()).not.toContain("token=");
     expect(automaticDownloads).toEqual([]);
   } finally {
     await conflictingContext.close();
   }
 });
+
+for (const target of localeJourneys) {
+  test(`keeps a ready ${target.locale} grant usable after replaying its confirmation link`, async ({
+    context,
+    page,
+    baseURL,
+  }) => {
+    const owner = await seedAuthenticatedUser();
+    const appUrl = baseURL ?? "http://127.0.0.1:3100";
+    const automaticDownloads: string[] = [];
+    page.on("download", (download) =>
+      automaticDownloads.push(download.suggestedFilename()),
+    );
+    await installAuthSessionCookie(context, owner.sessionToken, appUrl);
+    await page.goto(target.path);
+    await page.getByRole("button", { name: target.request }).click();
+    await expect(page.getByRole("status")).toHaveText(target.sent);
+    const confirmation = new URL(
+      await getLatestPersonalDataExportConfirmationUrl(owner.email),
+    );
+
+    await page.goto(`${appUrl}${confirmation.pathname}${confirmation.search}`);
+    await expect(page).toHaveURL(
+      new RegExp(`${target.path.replaceAll("/", "\\/")}\\?exportState=ready$`, "u"),
+    );
+    await expect(page.getByRole("button", { name: target.download })).toBeVisible();
+
+    await page.goto(`${appUrl}${confirmation.pathname}${confirmation.search}`);
+    await expect(page).toHaveURL(
+      new RegExp(`${target.path.replaceAll("/", "\\/")}\\?exportState=invalid$`, "u"),
+    );
+    await expect(getDataExportPanel(page).getByRole("alert")).toHaveText(
+      target.invalid,
+    );
+    await expect(page.getByRole("button", { name: target.download })).toBeEnabled();
+    expect(page.url()).not.toContain("token=");
+    expect(automaticDownloads).toEqual([]);
+  });
+}
 
 test("fails closed when the requesting session is revoked before confirmation", async ({
   context,

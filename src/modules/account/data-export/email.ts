@@ -66,5 +66,8 @@ export function sendPersonalDataExportEmail(
 ) {
   return sendTransactionalEmail(
     buildPersonalDataExportEmail(options, getEnv().PROJECT_NAME),
+    undefined,
+    undefined,
+    { logAttempt: false },
   );
 }

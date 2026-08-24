@@ -46,6 +46,7 @@ export function consumePersonalDataExportRequestClientLimit(
     key: getPersonalDataExportRequestClientRateLimitKey(clientIdentifier),
     limit: PERSONAL_DATA_EXPORT_REQUEST_CLIENT_LIMIT,
     windowMs: PERSONAL_DATA_EXPORT_RATE_LIMIT_WINDOW_MS,
+    logCleanupErrors: false,
   });
 }
 
@@ -56,6 +57,7 @@ export function consumePersonalDataExportRequestAccountLimit(
     key: getPersonalDataExportRequestAccountRateLimitKey(normalizedEmail),
     limit: PERSONAL_DATA_EXPORT_REQUEST_ACCOUNT_LIMIT,
     windowMs: PERSONAL_DATA_EXPORT_RATE_LIMIT_WINDOW_MS,
+    logCleanupErrors: false,
   });
 }
 
@@ -66,6 +68,7 @@ export function consumePersonalDataExportConfirmationClientLimit(
     key: getPersonalDataExportConfirmationClientRateLimitKey(clientIdentifier),
     limit: PERSONAL_DATA_EXPORT_CONFIRMATION_CLIENT_LIMIT,
     windowMs: PERSONAL_DATA_EXPORT_RATE_LIMIT_WINDOW_MS,
+    logCleanupErrors: false,
   });
 }
 
@@ -76,5 +79,6 @@ export function consumePersonalDataExportGenerationSessionLimit(
     key: getPersonalDataExportGenerationSessionRateLimitKey(sessionId),
     limit: PERSONAL_DATA_EXPORT_GENERATION_SESSION_LIMIT,
     windowMs: PERSONAL_DATA_EXPORT_RATE_LIMIT_WINDOW_MS,
+    logCleanupErrors: false,
   });
 }

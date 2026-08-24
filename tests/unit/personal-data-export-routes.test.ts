@@ -158,6 +158,7 @@ describe("personal data export routes", () => {
     expect(mocks.verifyPersonalDataExport).toHaveBeenCalledWith({
       rawToken,
       sessionToken: "current-session-token",
+      fallbackLocale: "en",
     });
   });
 

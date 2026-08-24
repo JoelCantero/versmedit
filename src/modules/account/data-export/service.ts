@@ -47,6 +47,7 @@ interface IssuePersonalDataExportOptions {
 interface VerifyPersonalDataExportOptions {
   rawToken: string;
   sessionToken: string | null;
+  fallbackLocale: AccountLocale;
   now?: () => Date;
 }
 
@@ -228,6 +229,7 @@ export async function issuePersonalDataExport({
 export async function verifyPersonalDataExport({
   rawToken,
   sessionToken,
+  fallbackLocale,
   now = () => new Date(),
 }: VerifyPersonalDataExportOptions): Promise<PersonalDataExportVerificationResult> {
   const checkedAt = now();
@@ -237,9 +239,9 @@ export async function verifyPersonalDataExport({
     select: { identifier: true, purpose: true, locale: true },
   });
   if (!preflight || preflight.purpose !== VerificationPurpose.ACCOUNT_DATA_EXPORT) {
-    return { status: "invalid", locale: "en" };
+    return { status: "invalid", locale: fallbackLocale };
   }
-  const preflightLocale = getCredentialLocale(preflight.locale) ?? "en";
+  const preflightLocale = getCredentialLocale(preflight.locale) ?? fallbackLocale;
 
   try {
     return await db.$transaction(async (transaction) => {

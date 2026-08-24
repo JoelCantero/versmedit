@@ -16,6 +16,7 @@ interface SharedRateLimitOptions {
   limit: number;
   windowMs: number;
   database?: Pick<typeof db, "$queryRaw" | "$executeRaw">;
+  logCleanupErrors?: boolean;
 }
 
 interface RateLimitRow {
@@ -30,6 +31,7 @@ export async function consumeSharedRateLimit({
   limit,
   windowMs,
   database = db,
+  logCleanupErrors = true,
 }: SharedRateLimitOptions): Promise<RateLimitResult> {
   if (limit < 1 || windowMs < 1) {
     throw new Error("Rate limit values must be positive integers");
@@ -74,7 +76,9 @@ export async function consumeSharedRateLimit({
         LIMIT 1000
       )
     `).catch((error: unknown) => {
-      logger.warn({ err: error }, "expired rate-limit bucket cleanup failed");
+      if (logCleanupErrors) {
+        logger.warn({ err: error }, "expired rate-limit bucket cleanup failed");
+      }
     });
   }
 

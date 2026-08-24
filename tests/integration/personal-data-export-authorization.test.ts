@@ -208,6 +208,7 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken,
         sessionToken: graph.consuming.sessionToken,
+        fallbackLocale: "ca",
         now: () => confirmedAt,
       }),
     ).resolves.toEqual({ status: "ready", locale: "es" });
@@ -224,9 +225,10 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "es",
         now: () => confirmedAt,
       }),
-    ).resolves.toEqual({ status: "invalid", locale: "en" });
+    ).resolves.toEqual({ status: "invalid", locale: "es" });
 
     const afterSessions = await db.session.findMany({
       where: { userId: graph.owner.id },
@@ -256,9 +258,10 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "ca",
         now: () => graph.scope.now,
       }),
-    ).resolves.toEqual({ status: "invalid", locale: "en" });
+    ).resolves.toEqual({ status: "invalid", locale: "ca" });
     await expect(
       db.verificationToken.count({ where: { token } }),
     ).resolves.toBe(1);
@@ -306,7 +309,7 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
     await expect(
       service.issuePersonalDataExport({
         sessionToken: graph.initiating.sessionToken,
-        locale: "en",
+        locale: "es",
         origin,
         now: () => graph.scope.now,
       }),
@@ -349,13 +352,15 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken: olderRawToken,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "es",
         now: () => new Date(graph.scope.now.getTime() + 2_000),
       }),
-    ).resolves.toEqual({ status: "invalid", locale: "en" });
+    ).resolves.toEqual({ status: "invalid", locale: "es" });
     await expect(
       service.verifyPersonalDataExport({
         rawToken: newerRawToken,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "en",
         now: () => new Date(graph.scope.now.getTime() + 2_000),
       }),
     ).resolves.toEqual({ status: "ready", locale: "ca" });
@@ -373,13 +378,15 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken: "malformed",
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "ca",
         now: () => graph.scope.now,
       }),
-    ).resolves.toEqual({ status: "invalid", locale: "en" });
+    ).resolves.toEqual({ status: "invalid", locale: "ca" });
     await expect(
       service.verifyPersonalDataExport({
         rawToken: expired.raw,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "ca",
         now: () => graph.scope.now,
       }),
     ).resolves.toEqual({
@@ -402,6 +409,7 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken: credential.raw,
         sessionToken: foreign.initiating.sessionToken,
+        fallbackLocale: "ca",
         now: () => graph.scope.now,
       }),
     ).resolves.toEqual({ status: "invalid", locale: "es" });
@@ -410,6 +418,7 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken: credential.raw,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "ca",
         now: () => graph.scope.now,
       }),
     ).resolves.toEqual({ status: "invalid", locale: "es" });
@@ -427,11 +436,13 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
       service.verifyPersonalDataExport({
         rawToken: credential.raw,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "en",
         now: () => graph.scope.now,
       }),
       service.verifyPersonalDataExport({
         rawToken: credential.raw,
         sessionToken: graph.initiating.sessionToken,
+        fallbackLocale: "en",
         now: () => graph.scope.now,
       }),
     ]);
@@ -457,6 +468,7 @@ describe.skipIf(!runIntegrationTests)("personal data export authorization", () =
         service.verifyPersonalDataExport({
           rawToken: credential.raw,
           sessionToken: graph.initiating.sessionToken,
+          fallbackLocale: "en",
           now: () => graph.scope.now,
         }),
       ).resolves.toEqual({ status: "invalid", locale: "ca" });

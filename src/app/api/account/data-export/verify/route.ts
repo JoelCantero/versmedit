@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
   const result: PersonalDataExportVerificationResult = await verifyPersonalDataExport({
     rawToken: callback.rawToken,
     sessionToken: readAccountSessionToken(request.headers.get("cookie")),
+    fallbackLocale: callback.locale,
   }).catch(() => ({ status: "invalid" as const, locale: callback.locale }));
   logOutcome(
     result.status === "ready" ? "info" : "warn",

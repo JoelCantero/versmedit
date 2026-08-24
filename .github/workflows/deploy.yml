@@ -107,6 +107,8 @@ jobs:
           # Compose reads these from the shell environment (no .env file on the host).
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          ACCOUNT_DATA_EXPORT_MAX_BYTES: ${{ vars.ACCOUNT_DATA_EXPORT_MAX_BYTES }}
+          ACCOUNT_DATA_EXPORT_TIMEOUT_MS: ${{ vars.ACCOUNT_DATA_EXPORT_TIMEOUT_MS }}
           # Opt in only when Cloudflare is the exclusive origin path and the
           # ingress overwrites forwarded host and client-address headers.
           TRUST_PROXY_HEADERS: ${{ vars.TRUST_PROXY_HEADERS }}

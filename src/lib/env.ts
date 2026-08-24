@@ -10,6 +10,17 @@ const emptyToUndefined = (value: unknown) => (value === "" ? undefined : value);
 
 const optionalString = z.preprocess(emptyToUndefined, z.string().min(1).optional());
 
+function positiveIntegerSetting(name: string, defaultValue: number) {
+  return z.preprocess(
+    (value) => emptyToUndefined(value) ?? String(defaultValue),
+    z
+      .string()
+      .regex(new RegExp(`^[1-9]\\d*$`), `${name} must be a positive integer`)
+      .transform(Number)
+      .refine(Number.isSafeInteger, `${name} must be a safe integer`),
+  );
+}
+
 export interface DisabledMailConfig {
   enabled: false;
 }
@@ -74,6 +85,14 @@ const rawEnvSchema = z
     MAIL_API_KEY: optionalString,
     MAIL_API_SECRET: optionalString,
     MAIL_FROM: optionalString,
+    ACCOUNT_DATA_EXPORT_MAX_BYTES: positiveIntegerSetting(
+      "ACCOUNT_DATA_EXPORT_MAX_BYTES",
+      26_214_400,
+    ),
+    ACCOUNT_DATA_EXPORT_TIMEOUT_MS: positiveIntegerSetting(
+      "ACCOUNT_DATA_EXPORT_TIMEOUT_MS",
+      30_000,
+    ),
     TRUST_PROXY_HEADERS: z.preprocess(
       emptyToUndefined,
       z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
@@ -140,6 +159,8 @@ export type Env = Pick<
   | "AUTH_SECRET"
   | "NEXTAUTH_URL"
   | "LOG_LEVEL"
+  | "ACCOUNT_DATA_EXPORT_MAX_BYTES"
+  | "ACCOUNT_DATA_EXPORT_TIMEOUT_MS"
   | "TRUST_PROXY_HEADERS"
 > & { MAIL: MailConfig };
 
@@ -150,6 +171,8 @@ const envSchema = rawEnvSchema.transform((env): Env => {
     AUTH_SECRET: env.AUTH_SECRET,
     NEXTAUTH_URL: env.NEXTAUTH_URL,
     LOG_LEVEL: env.LOG_LEVEL,
+    ACCOUNT_DATA_EXPORT_MAX_BYTES: env.ACCOUNT_DATA_EXPORT_MAX_BYTES,
+    ACCOUNT_DATA_EXPORT_TIMEOUT_MS: env.ACCOUNT_DATA_EXPORT_TIMEOUT_MS,
     TRUST_PROXY_HEADERS: env.TRUST_PROXY_HEADERS,
   };
 

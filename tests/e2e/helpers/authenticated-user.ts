@@ -25,12 +25,16 @@ export interface SeededAuthUser {
   addressBucketKey?: string;
   clientBucketKeys?: string[];
   securityClientBucketKeys?: string[];
+  dataExportAccountBucketKey?: string;
+  dataExportClientBucketKeys?: string[];
+  dataExportGenerationBucketKeys?: string[];
 }
 
 const cleanupTokens = new Set<string>();
 const cleanupUsers = new Set<string>();
 const cleanupEmails = new Set<string>();
 const cleanupLimiterKeys = new Set<string>();
+const sessionIdsByToken = new Map<string, string>();
 
 function getPool() {
   const connectionString = process.env.DATABASE_URL;
@@ -66,6 +70,10 @@ export async function seedAuthenticatedUser(overrides?: {
   rateLimitCount?: number;
   withDeletionGraph?: boolean;
   withSecurityFixtures?: boolean;
+  withDataExportFixtures?: boolean;
+  withDataExportAuthorization?: boolean;
+  dataExportAuthorizationExpiresAt?: Date;
+  dataExportClientBucketKeys?: string[];
 }) {
   const additionalSessionCount = overrides?.additionalSessionCount ?? 0;
   if (
@@ -119,6 +127,21 @@ export async function seedAuthenticatedUser(overrides?: {
   const securityClientBucketKeys =
     overrides?.securityClientBucketKeys ??
     [`account:security:reauth:client:${crypto.randomUUID()}`];
+  const dataExportAccountBucketKey = `account:data-export:request:account:${createHash("sha256")
+    .update(normalizedEmail)
+    .digest("hex")}`;
+  const dataExportClientBucketKeys =
+    overrides?.dataExportClientBucketKeys ??
+    [
+      `account:data-export:request:client:${crypto.randomUUID()}`,
+      `account:data-export:verify:client:${crypto.randomUUID()}`,
+    ];
+  const dataExportGenerationBucketKeys = sessions.map(
+    (session) =>
+      `account:data-export:generate:session:${createHash("sha256")
+        .update(session.id)
+        .digest("hex")}`,
+  );
 
   try {
     await pool.query(
@@ -138,7 +161,7 @@ export async function seedAuthenticatedUser(overrides?: {
         ],
       );
     }
-    if (overrides?.withDeletionGraph) {
+    if (overrides?.withDeletionGraph || overrides?.withDataExportFixtures) {
       for (let index = 0; index < (overrides.accountCount ?? 1); index += 1) {
         await pool.query(
           `INSERT INTO "Account" ("id", "userId", "type", "provider", "providerAccountId") VALUES ($1, $2, 'oauth', 'e2e', $3)`,
@@ -149,6 +172,8 @@ export async function seedAuthenticatedUser(overrides?: {
         `INSERT INTO "PolicyAcceptance" ("id", "userId", "termsVersion", "privacyVersion", "acceptedAt", "createdAt") VALUES ($1, $2, '2026-08-18-draft', '2026-08-18-draft', NOW(), NOW())`,
         [`acceptance_${crypto.randomUUID()}`, userId],
       );
+    }
+    if (overrides?.withDeletionGraph) {
       await pool.query(
         `INSERT INTO "VerificationToken" ("identifier", "token", "expires", "purpose", "createdAt") VALUES ($1, $2, NOW() + INTERVAL '15 minutes', 'LOGIN', NOW())`,
         [normalizedEmail, crypto.randomUUID()],
@@ -168,10 +193,33 @@ export async function seedAuthenticatedUser(overrides?: {
         [normalizedEmail, crypto.randomUUID()],
       );
     }
-    if (overrides?.withDeletionGraph || overrides?.withSecurityFixtures) {
+    if (overrides?.withDataExportAuthorization) {
+      await pool.query(
+        `INSERT INTO "DataExportAuthorization" ("sessionId", "confirmedAt", "expiresAt") VALUES ($1, NOW(), $2)`,
+        [
+          sessionId,
+          toDatabaseTimestamp(
+            overrides.dataExportAuthorizationExpiresAt ??
+              new Date(seededAt.getTime() + 15 * 60_000),
+          ),
+        ],
+      );
+    }
+    if (
+      overrides?.withDeletionGraph ||
+      overrides?.withSecurityFixtures ||
+      overrides?.withDataExportFixtures
+    ) {
       const selectedClientBucketKeys = [
         ...(overrides.withDeletionGraph ? clientBucketKeys : []),
         ...(overrides.withSecurityFixtures ? securityClientBucketKeys : []),
+        ...(overrides.withDataExportFixtures
+          ? [
+              dataExportAccountBucketKey,
+              ...dataExportClientBucketKeys,
+              ...dataExportGenerationBucketKeys,
+            ]
+          : []),
       ];
       await pool.query(
         `INSERT INTO "RateLimitBucket" ("key", "count", "resetAt", "updatedAt")
@@ -187,6 +235,9 @@ export async function seedAuthenticatedUser(overrides?: {
     }
 
     sessionTokens.forEach((token) => cleanupTokens.add(token));
+    sessions.forEach((session) =>
+      sessionIdsByToken.set(session.sessionToken, session.id),
+    );
     cleanupUsers.add(userId);
     cleanupEmails.add(normalizedEmail);
     cleanupLimiterKeys.add(addressBucketKey);
@@ -210,6 +261,13 @@ export async function seedAuthenticatedUser(overrides?: {
         : {}),
       ...(overrides?.withSecurityFixtures
         ? { securityClientBucketKeys }
+        : {}),
+      ...(overrides?.withDataExportFixtures
+        ? {
+            dataExportAccountBucketKey,
+            dataExportClientBucketKeys,
+            dataExportGenerationBucketKeys,
+          }
         : {}),
     } satisfies SeededAuthUser;
   } finally {
@@ -250,6 +308,7 @@ export async function seedAdditionalAuthSession({
       ],
     );
     cleanupTokens.add(session.sessionToken);
+    sessionIdsByToken.set(session.sessionToken, session.id);
     cleanupUsers.add(userId);
     return session;
   } finally {
@@ -285,6 +344,29 @@ export async function installAuthSessionCookie(
   cleanupLimiterKeys.add(`account:deletion:reauth:client:${clientAddress}`);
   cleanupLimiterKeys.add(`account:deletion:final:client:${clientAddress}`);
   cleanupLimiterKeys.add(`account:security:reauth:client:${clientAddress}`);
+  cleanupLimiterKeys.add(
+    `account:data-export:request:client:${clientAddress}`,
+  );
+  cleanupLimiterKeys.add(
+    `account:data-export:verify:client:${clientAddress}`,
+  );
+  const sessionId = sessionIdsByToken.get(sessionToken);
+  if (sessionId) {
+    cleanupLimiterKeys.add(
+      `account:data-export:generate:session:${createHash("sha256")
+        .update(sessionId)
+        .digest("hex")}`,
+    );
+  }
+}
+
+export async function revokeAuthenticatedSession(sessionId: string) {
+  const pool = getPool();
+  try {
+    await pool.query(`DELETE FROM "Session" WHERE "id" = $1`, [sessionId]);
+  } finally {
+    await pool.end();
+  }
 }
 
 export async function cleanupAuthenticatedUsers() {
@@ -320,6 +402,7 @@ export async function cleanupAuthenticatedUsers() {
   } finally {
     cleanupUsers.clear();
     cleanupTokens.clear();
+    sessionIdsByToken.clear();
     cleanupEmails.clear();
     cleanupLimiterKeys.clear();
     await pool.end();

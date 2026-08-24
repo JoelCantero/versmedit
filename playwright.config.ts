@@ -69,6 +69,10 @@ export default defineConfig({
         "postgresql://playwright:playwright@127.0.0.1:5432/playwright?schema=public",
       AUTH_SECRET:
         process.env.AUTH_SECRET ?? "playwright-secret-not-used-in-runtime-000",
+      ACCOUNT_DATA_EXPORT_MAX_BYTES:
+        process.env.ACCOUNT_DATA_EXPORT_MAX_BYTES ?? "26214400",
+      ACCOUNT_DATA_EXPORT_TIMEOUT_MS:
+        process.env.ACCOUNT_DATA_EXPORT_TIMEOUT_MS ?? "30000",
       ...providerEnv,
       ...(providerFixtureUrl
         ? {

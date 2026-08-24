@@ -78,6 +78,35 @@
         "description": "Elimina permanentemente tu cuenta y todo el acceso asociado a ella."
       }
     },
+    "dataExport": {
+      "panel": {
+        "title": "Descarga tus datos",
+        "description": "Crea una instantánea JSON de los datos personales vinculados a tu cuenta.",
+        "sensitiveWarning": "Este archivo puede contener información sensible. Guárdalo de forma segura.",
+        "request": "Solicitar exportación de datos",
+        "requesting": "Enviando confirmación...",
+        "sent": "Consulta tu correo para abrir el enlace de confirmación.",
+        "ready": "Tu exportación está lista para descargar.",
+        "expiringSoon": "La autorización de descarga caduca pronto.",
+        "download": "Descargar datos",
+        "downloading": "Preparando descarga...",
+        "downloaded": "Se ha descargado tu exportación de datos.",
+        "expired": "La autorización de descarga ha caducado.",
+        "requestNew": "Solicitar una nueva confirmación",
+        "invalid": "Este enlace de confirmación no es válido. Solicita uno nuevo.",
+        "requestError": "No hemos podido enviar la confirmación. Inténtalo de nuevo.",
+        "downloadError": "No hemos podido preparar tu exportación. Inténtalo de nuevo.",
+        "rateLimited": "Demasiados intentos. Inténtalo de nuevo en {seconds} segundos.",
+        "availableFor": "Disponible durante {time}."
+      },
+      "email": {
+        "subject": "Confirma la exportación de tus datos personales de {projectName}",
+        "introduction": "Has solicitado una exportación de datos personales de {projectName}.",
+        "sessionRequirement": "Abre este enlace en una sesión activa de la misma cuenta. El enlace no iniciará sesión.",
+        "expiry": "El enlace caduca 15 minutos después de solicitarlo.",
+        "action": "Confirmar la exportación de datos"
+      }
+    },
     "security": {
       "metadata": {
         "title": "Seguridad de la cuenta",

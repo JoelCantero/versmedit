@@ -155,6 +155,24 @@ describe("proxy security boundary", () => {
     expect(intlMiddlewareMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    "/api/account/data-export/request",
+    "/api/account/data-export/verify",
+    "/api/account/data-export/download",
+  ])("rejects personal data export route %s at a mismatched effective URL", (path) => {
+    vi.stubEnv("NEXTAUTH_URL", "https://app.example.test");
+    vi.stubEnv("TRUST_PROXY_HEADERS", "true");
+
+    const response = proxy(
+      new NextRequest(`https://app.example.test${path}`, {
+        headers: { "x-forwarded-host": "attacker.example" },
+      }),
+    );
+
+    expect(response.status).toBe(421);
+    expect(intlMiddlewareMock).not.toHaveBeenCalled();
+  });
+
   it("returns a controlled error when canonical Auth configuration is invalid", () => {
     vi.stubEnv("NEXTAUTH_URL", "not-a-url");
     const response = proxy(

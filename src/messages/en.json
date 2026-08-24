@@ -78,6 +78,35 @@
         "description": "Permanently remove your account and all access associated with it."
       }
     },
+    "dataExport": {
+      "panel": {
+        "title": "Download your data",
+        "description": "Create a JSON snapshot of personal data linked to your account.",
+        "sensitiveWarning": "This file may contain sensitive information. Store it securely.",
+        "request": "Request data export",
+        "requesting": "Sending confirmation...",
+        "sent": "Check your email for a confirmation link.",
+        "ready": "Your export is ready to download.",
+        "expiringSoon": "Your download authorization expires soon.",
+        "download": "Download data",
+        "downloading": "Preparing download...",
+        "downloaded": "Your data export was downloaded.",
+        "expired": "Your download authorization expired.",
+        "requestNew": "Request new confirmation",
+        "invalid": "This confirmation link is not valid. Request a new one.",
+        "requestError": "We could not send the confirmation. Try again.",
+        "downloadError": "We could not prepare your export. Try again.",
+        "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+        "availableFor": "Available for {time}."
+      },
+      "email": {
+        "subject": "Confirm your {projectName} personal data export",
+        "introduction": "You requested a personal data export from {projectName}.",
+        "sessionRequirement": "Open this link in an active session for the same account. It will not sign you in.",
+        "expiry": "The link expires 15 minutes after it was requested.",
+        "action": "Confirm data export"
+      }
+    },
     "security": {
       "metadata": {
         "title": "Account security",

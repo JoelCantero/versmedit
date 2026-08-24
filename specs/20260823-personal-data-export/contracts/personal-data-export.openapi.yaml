@@ -1,0 +1,347 @@
+openapi: 3.1.0
+info:
+  title: Personal Data Export Internal API
+  version: 1.0.0
+  description: >-
+    Same-origin application contract for requesting, confirming, and directly
+    downloading the current account's personal-data export. It is not a public
+    integration API. No operation accepts user identity, Session identity,
+    contributor selection, authorization, or filename from the client.
+servers:
+  - url: /
+paths:
+  /api/account/data-export/request:
+    post:
+      operationId: requestPersonalDataExport
+      summary: Send a localized export-only confirmation link to the current account email
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportCommand"
+      responses:
+        "202":
+          description: The configured provider accepted the localized message.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestSent"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/RequestUnavailable"
+  /api/account/data-export/verify:
+    get:
+      operationId: verifyPersonalDataExport
+      summary: Consume one delivered credential and grant one exact existing Session export access
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9_-]{43}$"
+        - name: locale
+          in: query
+          required: true
+          description: >-
+            Non-authoritative presentation fallback used only before token lookup.
+            The persisted token locale becomes authoritative after lookup.
+          schema:
+            $ref: "#/components/schemas/Locale"
+      responses:
+        "302":
+          description: >-
+            Redirects immediately to an allowlisted credential-free localized
+            Data & Privacy URL. A valid callback atomically consumes only the
+            ACCOUNT_DATA_EXPORT credential and upserts authorization for the exact
+            active same-account Session until the credential's original expiry.
+            It creates no Session/cookie and never changes authenticatedAt. Invalid,
+            expired, signed-out, conflicting, replayed, and internal failures use
+            one generic invalid state. Rate limiting uses a clean localized wait
+            state without inspecting the credential.
+          headers:
+            Location:
+              schema:
+                type: string
+                examples:
+                  - /account/data?exportState=ready
+                  - /es/account/data?exportState=invalid
+                  - /ca/account/data?exportState=rate_limited&retryAfter=300
+            Referrer-Policy:
+              schema:
+                type: string
+                const: no-referrer
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+            Retry-After:
+              description: Present only for a confirmation-client rate-limit redirect.
+              schema:
+                type: integer
+                minimum: 1
+        "421":
+          description: >-
+            The externally effective request scheme, host, or port does not match
+            the canonical application origin. No credential is inspected.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+  /api/account/data-export/download:
+    post:
+      operationId: downloadPersonalDataExport
+      summary: Generate and return one immutable snapshot for the exact authorized Session
+      security:
+        - developmentSessionCookie: []
+        - secureSessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportCommand"
+      responses:
+        "200":
+          description: >-
+            A complete canonical UTF-8 JSON snapshot generated from one read-only
+            committed database view. The response starts only after all contributors,
+            validation, canonical serialization, active timeout, and active size limit
+            pass. No server-side copy remains.
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                const: application/json; charset=utf-8
+            Content-Disposition:
+              description: >-
+                Attachment with an ASCII non-identifying filename matching
+                personal-data-export-YYYYMMDDTHHMMSSZ.json.
+              schema:
+                type: string
+                pattern: '^attachment; filename="personal-data-export-[0-9]{8}T[0-9]{6}Z\.json"$'
+            Content-Length:
+              description: >-
+                Exact completed UTF-8 byte length. It cannot exceed the active
+                validated application limit, which defaults to 26214400.
+              schema:
+                type: integer
+                minimum: 1
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store, private
+            Pragma:
+              schema:
+                type: string
+                const: no-cache
+            X-Content-Type-Options:
+              schema:
+                type: string
+                const: nosniff
+          content:
+            application/json:
+              schema:
+                $ref: "./personal-data-export.schema.json"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/AuthorizationRequired"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/GenerationUnavailable"
+components:
+  securitySchemes:
+    developmentSessionCookie:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used without secure-cookie mode. The
+        server never accepts this credential in JSON or query parameters.
+    secureSessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Secure-next-auth.session-token
+      description: >-
+        Auth.js database-session cookie used in secure deployments. The server
+        never accepts this credential in JSON or query parameters.
+  headers:
+    NoStore:
+      schema:
+        type: string
+        const: no-store
+  schemas:
+    Locale:
+      type: string
+      enum: [en, es, ca]
+    CsrfToken:
+      type: string
+      minLength: 1
+      description: Must match the signed Auth.js CSRF cookie.
+    ExportCommand:
+      type: object
+      additionalProperties: false
+      required: [csrfToken, locale]
+      properties:
+        csrfToken:
+          $ref: "#/components/schemas/CsrfToken"
+        locale:
+          $ref: "#/components/schemas/Locale"
+    RequestSent:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: sent
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum:
+            - invalid_request
+            - unauthenticated
+            - forbidden
+            - rate_limited
+            - unavailable
+            - not_ready
+        retryAfter:
+          type: integer
+          minimum: 1
+          description: Present only when status is rate_limited.
+        redirectTo:
+          type: string
+          enum:
+            - "/login?callbackUrl=%2Faccount%2Fdata"
+            - "/es/login?callbackUrl=%2Fes%2Faccount%2Fdata"
+            - "/ca/login?callbackUrl=%2Fca%2Faccount%2Fdata"
+          description: Present only for an unauthenticated localized POST.
+  responses:
+    InvalidRequest:
+      description: Body or exact allowed-field validation failed; no protected work occurred.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthenticated:
+      description: Session is missing, expired, invalid, revoked, or not ACTIVE.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: Canonical-origin or Auth.js CSRF validation failed.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RateLimited:
+      description: >-
+        The applicable operation-specific shared limit is exhausted. No email,
+        credential inspection/consume, contributor invocation, or generation
+        occurs beyond the operation boundary described by the security invariants.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RequestUnavailable:
+      description: >-
+        The provider did not accept delivery or issuance failed. The exact
+        provisional token is compensated and a prior delivered export token
+        remains valid.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    AuthorizationRequired:
+      description: >-
+        The exact Session has no unexpired export authorization. No contributor
+        runs and no account state is disclosed.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    GenerationUnavailable:
+      description: >-
+        Snapshot consistency, contributor validation, active timeout, active
+        size limit, or canonical serialization failed. No attachment byte was
+        returned and no export copy was retained.
+      headers:
+        Cache-Control:
+          $ref: "#/components/headers/NoStore"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+x-request-invariants:
+  - Both POST operations require canonical request URL, valid Auth.js CSRF proof, strict JSON parsing, and one exact active database Session.
+  - JSON bodies contain only csrfToken and locale; duplicate/unknown fields reject.
+  - User ID, email, normalized email, Session ID/token, purpose, grant, contributors, size/time limits, filename, scope, and ownership are never client fields.
+x-rate-limit-invariants:
+  - Request uses 5 per trusted client and 3 per normalized account in each 15-minute window.
+  - Confirmation uses 5 per trusted client per 15 minutes before token hashing or lookup.
+  - Generation uses 3 per exact active Session per 15 minutes before any contributor is invoked.
+  - Every limit uses shared PostgreSQL state and returns a generic remaining wait without logging its key.
+x-credential-transport-invariant: >-
+  The intentionally delivered inbound email URL is the sole credential-bearing
+  URL. The callback sets Referrer-Policy no-referrer, never renders/logs/reflects
+  the token, and redirects immediately to an allowlisted credential-free route.
+x-confirmation-invariants:
+  - Credential consume and exact-Session grant upsert commit atomically under normalized-email then User advisory locks.
+  - The grant expires at the credential's original expiry and is deleted with its Session.
+  - Confirmation creates no Session/cookie and never writes authenticatedAt or authorizes another operation.
+  - Signed-out, revoked, expired, wrong-account, malformed, expired, wrong-purpose, superseded, and replayed attempts grant nothing and use a generic state.
+x-snapshot-invariants:
+  - All contributor reads use one read-only PostgreSQL REPEATABLE READ transaction and one database transaction timestamp.
+  - Default generation limits are 30 seconds and 26214400 UTF-8 bytes; validated application configuration may replace both.
+  - Runtime contributor errors abort the complete export; only declared non-error conditions become unavailable manifest entries.
+  - The complete canonical payload is buffered and validated before response construction; partial attachments are impossible by contract.
+x-data-exclusion-invariants:
+  - No database/internal ID, normalized email, provider account ID, credential, cookie, token, rate-limit state, grant, IP, geolocation, user agent, fingerprint, inferred device/location, request data, or diagnostic detail is exported.
+  - Responses and logs never contain export content, identity, token, cookie, Session selector, rate-limit key, contributor payload, or internal error detail.

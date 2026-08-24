@@ -78,6 +78,35 @@
         "description": "Elimina permanentment el teu compte i tot l'accés que hi està associat."
       }
     },
+    "dataExport": {
+      "panel": {
+        "title": "Descarrega les teves dades",
+        "description": "Crea una instantània JSON de les dades personals vinculades al teu compte.",
+        "sensitiveWarning": "Aquest fitxer pot contenir informació sensible. Desa'l de manera segura.",
+        "request": "Sol·licita l'exportació de dades",
+        "requesting": "S'està enviant la confirmació...",
+        "sent": "Consulta el teu correu per obrir l'enllaç de confirmació.",
+        "ready": "La teva exportació està a punt per baixar.",
+        "expiringSoon": "L'autorització de baixada caduca aviat.",
+        "download": "Descarrega les dades",
+        "downloading": "S'està preparant la baixada...",
+        "downloaded": "S'ha descarregat l'exportació de dades.",
+        "expired": "L'autorització de baixada ha caducat.",
+        "requestNew": "Sol·licita una confirmació nova",
+        "invalid": "Aquest enllaç de confirmació no és vàlid. Sol·licita'n un de nou.",
+        "requestError": "No hem pogut enviar la confirmació. Torna-ho a provar.",
+        "downloadError": "No hem pogut preparar l'exportació. Torna-ho a provar.",
+        "rateLimited": "Massa intents. Torna-ho a provar d'aquí a {seconds} segons.",
+        "availableFor": "Disponible durant {time}."
+      },
+      "email": {
+        "subject": "Confirma l'exportació de les teves dades personals de {projectName}",
+        "introduction": "Has sol·licitat una exportació de dades personals de {projectName}.",
+        "sessionRequirement": "Obre aquest enllaç en una sessió activa del mateix compte. L'enllaç no iniciarà cap sessió.",
+        "expiry": "L'enllaç caduca 15 minuts després de sol·licitar-lo.",
+        "action": "Confirma l'exportació de dades"
+      }
+    },
     "security": {
       "metadata": {
         "title": "Seguretat del compte",

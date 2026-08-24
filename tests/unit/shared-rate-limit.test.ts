@@ -55,6 +55,23 @@ describe("consumeSharedRateLimit", () => {
     await vi.waitFor(() => expect(mocks.logWarn).toHaveBeenCalledOnce());
   });
 
+  it("suppresses cleanup failure logs for a fixed-vocabulary journey", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    mocks.queryRaw.mockResolvedValue([{ count: 1, retryAfterSeconds: 60 }]);
+    mocks.executeRaw.mockRejectedValue(new Error("private cleanup detail"));
+
+    await expect(
+      consumeSharedRateLimit({
+        key: "private-journey",
+        limit: 3,
+        windowMs: 60_000,
+        logCleanupErrors: false,
+      }),
+    ).resolves.toMatchObject({ allowed: true });
+    await vi.waitFor(() => expect(mocks.executeRaw).toHaveBeenCalledOnce());
+    expect(mocks.logWarn).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid limits and missing database results", async () => {
     await expect(
       consumeSharedRateLimit({ key: "client", limit: 0, windowMs: 1 }),

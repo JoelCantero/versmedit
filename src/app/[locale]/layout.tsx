@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
@@ -77,6 +78,7 @@ export default async function LocaleLayout({
             <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
               {children}
             </div>
+            <AppFooter locale={locale} />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

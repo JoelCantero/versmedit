@@ -378,6 +378,9 @@
       }
     }
   },
+  "Footer": {
+    "navigationLabel": "Legal information"
+  },
   "Policies": {
     "draftNotice": "Unreviewed development draft. This sample content is provided for testing and is not legal advice.",
     "versionLabel": "Version: {version}",

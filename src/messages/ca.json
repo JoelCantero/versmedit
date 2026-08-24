@@ -378,6 +378,9 @@
       }
     }
   },
+  "Footer": {
+    "navigationLabel": "Informació legal"
+  },
   "Policies": {
     "draftNotice": "Esborrany de desenvolupament sense revisar. Aquest contingut d'exemple s'ofereix per a proves i no constitueix assessorament jurídic.",
     "versionLabel": "Versió: {version}",

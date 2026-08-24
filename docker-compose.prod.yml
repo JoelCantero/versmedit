@@ -24,6 +24,8 @@ services:
       - NEXTAUTH_URL
       - TRUST_PROXY_HEADERS
       - LOG_LEVEL
+      - ACCOUNT_DATA_EXPORT_MAX_BYTES
+      - ACCOUNT_DATA_EXPORT_TIMEOUT_MS
       # Transactional email through the selected provider's fixed HTTP API.
       - MAIL_ENABLED
       - MAIL_PROVIDER

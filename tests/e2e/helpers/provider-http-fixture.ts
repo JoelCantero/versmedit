@@ -20,6 +20,7 @@ interface ProviderBehavior {
 }
 
 interface ProviderBehaviorRule {
+  target: ProviderTarget;
   behavior: ProviderBehavior;
   bodyIncludes?: string;
   once?: boolean;
@@ -46,7 +47,7 @@ const logicalUrlByTarget: Record<ProviderTarget, string> = {
   "mailjet.send": "https://api.mailjet.com/v3.1/send",
 };
 const requests: CapturedRequest[] = [];
-const behaviors = new Map<ProviderTarget, ProviderBehaviorRule>();
+const behaviors: ProviderBehaviorRule[] = [];
 
 function json(response: ServerResponse, status: number, body: unknown) {
   response.statusCode = status;
@@ -115,7 +116,7 @@ async function handleControl(
   }
   if (request.method === "POST" && pathname === "/control/reset") {
     requests.splice(0);
-    behaviors.clear();
+    behaviors.splice(0);
     json(response, 200, { status: "reset" });
     return true;
   }
@@ -149,7 +150,14 @@ async function handleControl(
       json(response, 400, { status: "invalid" });
       return true;
     }
-    behaviors.set(payload.target, {
+    const existingRule = behaviors.findIndex(
+      (rule) =>
+        rule.target === payload.target &&
+        rule.bodyIncludes === payload.bodyIncludes,
+    );
+    if (existingRule >= 0) behaviors.splice(existingRule, 1);
+    behaviors.push({
+      target: payload.target,
       behavior: payload.behavior,
       bodyIncludes: payload.bodyIncludes,
       once: payload.once,
@@ -178,13 +186,16 @@ const server = createServer(async (request, response) => {
       headers: request.headers as Record<string, string | string[]>,
       body,
     });
-    const rule = behaviors.get(target);
-    const ruleMatches =
-      rule && (!rule.bodyIncludes || body.includes(rule.bodyIncludes));
-    const behavior = ruleMatches
+    const ruleIndex = behaviors.findIndex(
+      (rule) =>
+        rule.target === target &&
+        (!rule.bodyIncludes || body.includes(rule.bodyIncludes)),
+    );
+    const rule = ruleIndex >= 0 ? behaviors[ruleIndex] : undefined;
+    const behavior = rule
       ? rule.behavior
       : defaultResponse(target, body);
-    if (ruleMatches && rule.once) behaviors.delete(target);
+    if (rule?.once) behaviors.splice(ruleIndex, 1);
     if (behavior.delayMs) {
       await new Promise((resolve) => setTimeout(resolve, behavior.delayMs));
     }

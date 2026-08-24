@@ -61,6 +61,32 @@ const accountSecurityMessageKeys = [
   "Account.security.email.action",
 ] as const;
 
+const personalDataExportMessageKeys = [
+  "Account.dataExport.panel.title",
+  "Account.dataExport.panel.description",
+  "Account.dataExport.panel.sensitiveWarning",
+  "Account.dataExport.panel.request",
+  "Account.dataExport.panel.requesting",
+  "Account.dataExport.panel.sent",
+  "Account.dataExport.panel.ready",
+  "Account.dataExport.panel.expiringSoon",
+  "Account.dataExport.panel.download",
+  "Account.dataExport.panel.downloading",
+  "Account.dataExport.panel.downloaded",
+  "Account.dataExport.panel.expired",
+  "Account.dataExport.panel.requestNew",
+  "Account.dataExport.panel.invalid",
+  "Account.dataExport.panel.requestError",
+  "Account.dataExport.panel.downloadError",
+  "Account.dataExport.panel.rateLimited",
+  "Account.dataExport.panel.availableFor",
+  "Account.dataExport.email.subject",
+  "Account.dataExport.email.introduction",
+  "Account.dataExport.email.sessionRequirement",
+  "Account.dataExport.email.expiry",
+  "Account.dataExport.email.action",
+] as const;
+
 const catalogs = { en, es, ca } as const;
 const allowedPlaceholders = new Set(["date", "number", "projectName", "seconds"]);
 const forbiddenMetadataTerms = [
@@ -133,6 +159,12 @@ describe("account message catalogs", () => {
     );
   });
 
+  it("declares the complete personal data export message contract", () => {
+    expect(accountMessageKeys).toEqual(
+      expect.arrayContaining([...personalDataExportMessageKeys]),
+    );
+  });
+
   it.each(accountMessageKeys)("contains key %s in all locales", (key) => {
     const enValue = getByPath(en as unknown as Record<string, unknown>, key);
     const esValue = getByPath(es as unknown as Record<string, unknown>, key);
@@ -159,6 +191,39 @@ describe("account message catalogs", () => {
       }
     },
   );
+
+  it.each(personalDataExportMessageKeys)(
+    "keeps export key %s non-empty and behaviorally equivalent",
+    (key) => {
+      const values = Object.values(catalogs).map((catalog) =>
+        String(
+          getByPath(catalog as unknown as Record<string, unknown>, key) ?? "",
+        ),
+      );
+      expect(values.every((value) => value.trim().length > 0)).toBe(true);
+      expect(values.map(getPlaceholders)).toEqual([
+        getPlaceholders(values[0]!),
+        getPlaceholders(values[0]!),
+        getPlaceholders(values[0]!),
+      ]);
+      for (const placeholder of getPlaceholders(values[0]!)) {
+        expect(["projectName", "seconds", "time"]).toContain(placeholder);
+      }
+    },
+  );
+
+  it("uses no sensitive export placeholders", () => {
+    const serialized = personalDataExportMessageKeys
+      .flatMap((key) =>
+        Object.values(catalogs).map((catalog) =>
+          String(getByPath(catalog as unknown as Record<string, unknown>, key)),
+        ),
+      )
+      .join(" ");
+    expect(serialized).not.toMatch(
+      /\{(?:email|userId|sessionId|sessionToken|token|digest|filename|namespace|bytes|sections|url)\}/iu,
+    );
+  });
 
   it("keeps locale catalog objects structurally identical", () => {
     expect(getShape(es)).toEqual(getShape(en));

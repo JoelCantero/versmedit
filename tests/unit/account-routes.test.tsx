@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   setRequestLocale: vi.fn(),
   getCurrentUserProfile: vi.fn(),
   resolveActiveAccountSession: vi.fn(),
+  readPersonalDataExportAuthorization: vi.fn(),
   listActiveAccountSessions: vi.fn(),
   locale: "en",
 }));
@@ -85,6 +86,10 @@ vi.mock("@/modules/account/deletion/session", () => ({
   readAccountSessionToken: () => "trusted-session-token",
   resolveActiveAccountSession: mocks.resolveActiveAccountSession,
 }));
+vi.mock("@/modules/account/data-export/service", () => ({
+  readPersonalDataExportAuthorization:
+    mocks.readPersonalDataExportAuthorization,
+}));
 vi.mock("@/modules/account/security/service", () => ({
   listActiveAccountSessions: mocks.listActiveAccountSessions,
 }));
@@ -113,8 +118,15 @@ describe("account route authentication", () => {
       image: null,
     });
     mocks.resolveActiveAccountSession.mockResolvedValue({
+      sessionId: "trusted-session-id",
+      sessionToken: "trusted-session-token",
       userId: "account-user-id",
+      email: "account@example.test",
+      normalizedEmail: "account@example.test",
       recentlyAuthenticated: true,
+    });
+    mocks.readPersonalDataExportAuthorization.mockResolvedValue({
+      status: "not_ready",
     });
     mocks.listActiveAccountSessions.mockResolvedValue([
       {

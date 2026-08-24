@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "personal-data-export.schema.json",
+  "title": "Personal Data Export Envelope",
+  "description": "Version 1 canonical envelope. Cross-field manifest/section equality and deterministic ordering are enforced by the contributor contract and canonical serializer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "manifest", "sections"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "manifest": {
+      "$ref": "#/$defs/Manifest"
+    },
+    "sections": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Namespace"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Section"
+      }
+    }
+  },
+  "$defs": {
+    "Namespace": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)*$",
+      "maxLength": 128
+    },
+    "SchemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "IncludedSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "schemaVersion"],
+      "properties": {
+        "namespace": {
+          "$ref": "#/$defs/Namespace"
+        },
+        "schemaVersion": {
+          "$ref": "#/$defs/SchemaVersion"
+        }
+      }
+    },
+    "UnavailableReason": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 64,
+      "description": "Fixed non-sensitive reason allowlisted by the module declaration, such as not_applicable or feature_disabled."
+    },
+    "UnavailableSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "schemaVersion", "reason"],
+      "properties": {
+        "namespace": {
+          "$ref": "#/$defs/Namespace"
+        },
+        "schemaVersion": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "reason": {
+          "$ref": "#/$defs/UnavailableReason"
+        }
+      }
+    },
+    "Manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["includedSections", "unavailableSections"],
+      "properties": {
+        "includedSections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IncludedSection"
+          }
+        },
+        "unavailableSections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UnavailableSection"
+          }
+        }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "data"],
+      "properties": {
+        "schemaVersion": {
+          "$ref": "#/$defs/SchemaVersion"
+        },
+        "data": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      }
+    },
+    "JsonValue": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          }
+        }
+      ]
+    }
+  }
+}

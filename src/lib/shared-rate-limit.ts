@@ -15,6 +15,7 @@ interface SharedRateLimitOptions {
   key: string;
   limit: number;
   windowMs: number;
+  database?: Pick<typeof db, "$queryRaw" | "$executeRaw">;
 }
 
 interface RateLimitRow {
@@ -28,13 +29,14 @@ export async function consumeSharedRateLimit({
   key,
   limit,
   windowMs,
+  database = db,
 }: SharedRateLimitOptions): Promise<RateLimitResult> {
   if (limit < 1 || windowMs < 1) {
     throw new Error("Rate limit values must be positive integers");
   }
 
   const windowSeconds = windowMs / 1_000;
-  const [row] = await db.$queryRaw<RateLimitRow[]>(Prisma.sql`
+  const [row] = await database.$queryRaw<RateLimitRow[]>(Prisma.sql`
     INSERT INTO "RateLimitBucket" ("key", "count", "resetAt", "updatedAt")
     VALUES (
       ${key},
@@ -64,7 +66,7 @@ export async function consumeSharedRateLimit({
   if (!row) throw new Error("Rate limit counter did not return a result");
 
   if (Math.random() < CLEANUP_PROBABILITY) {
-    void db.$executeRaw(Prisma.sql`
+    void database.$executeRaw(Prisma.sql`
       DELETE FROM "RateLimitBucket"
       WHERE ctid IN (
         SELECT ctid FROM "RateLimitBucket"

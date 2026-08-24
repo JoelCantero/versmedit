@@ -22,6 +22,7 @@ enum VerificationPurpose {
   SIGNUP
   ACCOUNT_DELETION
   ACCOUNT_SECURITY
+  ACCOUNT_DATA_EXPORT
 }
 
 // Auth.js (NextAuth) models — canonical Prisma adapter schema plus app timestamps.
@@ -61,15 +62,25 @@ model Account {
 }
 
 model Session {
-  id              String    @id @default(cuid())
-  sessionToken    String    @unique
-  userId          String
-  expires         DateTime
-  createdAt       DateTime?
-  authenticatedAt DateTime?
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                      String                   @id @default(cuid())
+  sessionToken            String                   @unique
+  userId                  String
+  expires                 DateTime
+  createdAt               DateTime?
+  authenticatedAt         DateTime?
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dataExportAuthorization DataExportAuthorization?
 
   @@index([userId, expires])
+}
+
+model DataExportAuthorization {
+  sessionId   String   @id
+  confirmedAt DateTime
+  expiresAt   DateTime
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
 
 model VerificationToken {

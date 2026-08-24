@@ -6,6 +6,11 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
+import { DataExportPanel } from "@/modules/account/data-export/components/data-export-panel";
+import {
+  parsePersonalDataExportCallbackNotice,
+} from "@/modules/account/data-export/schema";
+import { readPersonalDataExportAuthorization } from "@/modules/account/data-export/service";
 import { DeleteAccountDialog } from "@/modules/account/deletion/components/delete-account-dialog";
 import { getAccountDeletionLoginPath } from "@/modules/account/deletion/schema";
 import {
@@ -48,6 +53,20 @@ export default async function AccountDataPage({
   const query = await searchParams;
   const intent = query.intent === "delete";
   const invalidState = query.state === "invalid_link" || query.state === "session_conflict";
+  const exportSearchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (typeof value === "string") exportSearchParams.append(key, value);
+    else value?.forEach((item) => exportSearchParams.append(key, item));
+  }
+  const parsedExportNotice = parsePersonalDataExportCallbackNotice(
+    exportSearchParams,
+  );
+  const callbackNotice = parsedExportNotice
+    ? { ...parsedExportNotice, locale }
+    : null;
+  const authorizationState = await readPersonalDataExportAuthorization({
+    sessionToken: activeSession.sessionToken,
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -79,6 +98,33 @@ export default async function AccountDataPage({
                 : t("deletion.states.invalidLink")}
             </p>
           ) : null}
+
+          <DataExportPanel
+            key={callbackNotice?.status ?? authorizationState.status}
+            locale={locale}
+            authorizationState={authorizationState}
+            callbackNotice={callbackNotice}
+            messages={{
+              title: t("dataExport.panel.title"),
+              description: t("dataExport.panel.description"),
+              sensitiveWarning: t("dataExport.panel.sensitiveWarning"),
+              request: t("dataExport.panel.request"),
+              requesting: t("dataExport.panel.requesting"),
+              sent: t("dataExport.panel.sent"),
+              ready: t("dataExport.panel.ready"),
+              expiringSoon: t("dataExport.panel.expiringSoon"),
+              download: t("dataExport.panel.download"),
+              downloading: t("dataExport.panel.downloading"),
+              downloaded: t("dataExport.panel.downloaded"),
+              expired: t("dataExport.panel.expired"),
+              requestNew: t("dataExport.panel.requestNew"),
+              invalid: t("dataExport.panel.invalid"),
+              requestError: t("dataExport.panel.requestError"),
+              downloadError: t("dataExport.panel.downloadError"),
+              rateLimited: t.raw("dataExport.panel.rateLimited") as string,
+              availableFor: t.raw("dataExport.panel.availableFor") as string,
+            }}
+          />
 
           <section
             aria-labelledby="delete-account-heading"

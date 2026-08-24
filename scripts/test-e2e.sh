@@ -3,9 +3,20 @@ set -Eeuo pipefail
 
 ACCOUNT_DELETION_PERF_ENABLED="${RUN_ACCOUNT_DELETION_PERF:-false}"
 ACCOUNT_SECURITY_PERF_ENABLED="${RUN_ACCOUNT_SECURITY_PERF:-false}"
+PERSONAL_DATA_EXPORT_PERF_ENABLED="${RUN_PERSONAL_DATA_EXPORT_PERF:-false}"
 
-if [[ "$ACCOUNT_DELETION_PERF_ENABLED" == "true" && "$ACCOUNT_SECURITY_PERF_ENABLED" == "true" ]]; then
-  printf '%s\n' "RUN_ACCOUNT_DELETION_PERF and RUN_ACCOUNT_SECURITY_PERF cannot both be true" >&2
+PERF_COHORT_COUNT=0
+for perf_enabled in \
+  "$ACCOUNT_DELETION_PERF_ENABLED" \
+  "$ACCOUNT_SECURITY_PERF_ENABLED" \
+  "$PERSONAL_DATA_EXPORT_PERF_ENABLED"; do
+  if [[ "$perf_enabled" == "true" ]]; then
+    ((PERF_COHORT_COUNT += 1))
+  fi
+done
+
+if ((PERF_COHORT_COUNT > 1)); then
+  printf '%s\n' "Only one RUN_*_PERF cohort may be true" >&2
   exit 1
 fi
 
@@ -19,6 +30,12 @@ if [[ "$ACCOUNT_DELETION_PERF_ENABLED" == "true" ]]; then
 elif [[ "$ACCOUNT_SECURITY_PERF_ENABLED" == "true" ]]; then
   PLAYWRIGHT_ARGS=(
     tests/e2e/account-security.performance.spec.ts
+    --project chromium
+    --workers 1
+  )
+elif [[ "$PERSONAL_DATA_EXPORT_PERF_ENABLED" == "true" ]]; then
+  PLAYWRIGHT_ARGS=(
+    tests/e2e/personal-data-export.performance.spec.ts
     --project chromium
     --workers 1
   )

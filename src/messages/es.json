@@ -378,6 +378,9 @@
       }
     }
   },
+  "Footer": {
+    "navigationLabel": "Información legal"
+  },
   "Policies": {
     "draftNotice": "Borrador de desarrollo sin revisar. Este contenido de ejemplo se ofrece para pruebas y no constituye asesoramiento jurídico.",
     "versionLabel": "Versión: {version}",

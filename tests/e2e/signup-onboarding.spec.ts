@@ -498,11 +498,12 @@ test("renders every locale accessibly and submits by keyboard", async ({ page })
   for (const target of localizedSignupTargets) {
     await page.goto(target.path);
     await expect(page.locator("html")).toHaveAttribute("lang", target.locale);
-    await expect(page.getByRole("link", { name: target.terms })).toHaveAttribute(
+    const main = page.getByRole("main");
+    await expect(main.getByRole("link", { name: target.terms })).toHaveAttribute(
       "href",
       target.termsPath,
     );
-    await expect(page.getByRole("link", { name: target.privacy })).toHaveAttribute(
+    await expect(main.getByRole("link", { name: target.privacy })).toHaveAttribute(
       "href",
       target.privacyPath,
     );
@@ -546,8 +547,9 @@ for (const viewport of signupViewports) {
         const name = page.getByRole("textbox", { name: responsiveTarget.name });
         const email = page.getByRole("textbox", { name: responsiveTarget.email });
         const checkbox = page.getByRole("checkbox");
-        const terms = page.getByRole("link", { name: responsiveTarget.terms });
-        const privacy = page.getByRole("link", { name: responsiveTarget.privacy });
+        const main = page.getByRole("main");
+        const terms = main.getByRole("link", { name: responsiveTarget.terms });
+        const privacy = main.getByRole("link", { name: responsiveTarget.privacy });
         const submit = page.getByRole("button", { name: responsiveTarget.submit });
         const nameError = page.locator("#signup-name-error");
         const emailError = page.locator("#signup-email-error");

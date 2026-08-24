@@ -527,3 +527,30 @@ test("focuses and activates both legal links in document order", async ({ page }
   await page.keyboard.press("Enter");
   await expect.poll(() => new URL(page.url()).pathname).toBe("/privacy");
 });
+
+test("keeps the focused legal link visible in forced-colors mode", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto("/");
+
+  const firstLink = page
+    .getByRole("contentinfo")
+    .getByRole("navigation", { name: "Legal information" })
+    .getByRole("link")
+    .first();
+  await tabTo(page, firstLink);
+
+  const focusStyle = await firstLink.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      forcedColorsActive: matchMedia("(forced-colors: active)").matches,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+    };
+  });
+
+  expect(focusStyle.forcedColorsActive).toBe(true);
+  expect(focusStyle.outlineStyle).toBe("solid");
+  expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(2);
+});

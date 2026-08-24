@@ -95,7 +95,7 @@ destinations, valid public and authenticated states, and representative 320 x 56
 - **XI - Specs before implementation**: The dated branch and feature directory align and the spec
   defines scope, non-goals, accessibility, privacy, edge cases, and measurable outcomes.
 - **XII - Verification**: The design requires automated component/catalog and production E2E
-  coverage plus repeatable manual accessibility and usability checks.
+  coverage plus repeatable manual accessibility and extension checks.
 - **Internationalization**: All new user-facing copy comes from the English, Spanish, and Catalan
   catalogs, and navigation uses the locale-aware project helper.
 

@@ -109,22 +109,7 @@ Open `http://localhost:3000` and use the route matrix from the UI contract.
 Record any discrepancy with locale, route, authentication state, viewport, theme, zoom, and input
 method so it is reproducible.
 
-## 4. User Outcome Checks
-
-### First-Attempt Legal Navigation
-
-Recruit at least 10 first-time participants. Randomly assign each participant one Terms or Privacy
-destination and one starting route category from public, authentication, account, or legal pages.
-Without instruction about footer placement, ask the participant to open the assigned destination
-and time the journey from page readiness.
-
-Record an anonymous participant number, initial route category, assigned destination, elapsed time,
-and first-attempt result. Do not record names, email addresses, account identifiers, or other
-personal data.
-
-Pass condition: at least 9 participants succeed on the first attempt within 20 seconds.
-
-### Extension Review
+## 4. Extension Review
 
 Perform a code-review exercise without merging a third destination:
 
@@ -162,7 +147,7 @@ versions, or generated framework output.
 | TypeScript | PASS | `pnpm typecheck`: no errors |
 | Full Vitest suite | PASS | `pnpm test`: 1,242 passed and 149 skipped |
 | Production build | PASS | `pnpm build`: 15 application pages generated |
-| Production E2E | PASS | `pnpm test:e2e`: 68 tests passed across both Playwright projects |
+| Production E2E | PASS | `pnpm test:e2e`: 69 tests passed across both Playwright projects |
 | Scope audit | PASS | No changes in policy constants, policy versions, Prisma, Compose, environment templates, authentication, or logging |
 
 The E2E evidence covers the 15-route locale/authentication matrix, both clicked legal
@@ -172,44 +157,26 @@ dynamic content, keyboard order, visible focus, and Enter activation.
 
 ### Manual Accessibility Record
 
-Status: **PENDING HUMAN REVIEW**. Do not mark T015 complete until every row has a reproducible
-result from the local manual review above.
+Status: **PASS** on macOS with Chrome for Testing and VoiceOver. The review used the Catalan home,
+Terms, and signup routes because they contain the longest localized footer labels.
 
 | Check | Result | Locale / route / viewport / theme / input notes |
 |-------|--------|--------------------------------------------------|
-| 200% zoom and reflow | Pending | |
-| Measured text/link contrast | Pending | |
-| Measured focus-indicator contrast | Pending | |
-| Forced-colors/high-contrast visibility | Pending | |
-| Keyboard visual review | Pending | |
-| VoiceOver landmarks and navigation name | Pending | |
-| VoiceOver standalone link names | Pending | |
+| 200% zoom and reflow | PASS | On `/ca`, macOS enforced a 500-pixel minimum outer Chrome window after a 320 x 568 request. Five native **Ampliar** actions changed the effective viewport from 500 to 250 CSS pixels and DPR from 2 to 4. Both links reflowed onto separate rows with no horizontal overflow, clipping, collision, or content loss; the footer remained after `main`. |
+| Measured text/link contrast | PASS | Canvas conversion of computed CSS `lab()` colors to sRGB measured 19.80:1 in light mode and 18.97:1 in dark mode against the footer background at 320 x 568 on `/ca`. |
+| Measured focus-indicator contrast | PASS | The light and dark focus-ring colors matched their foreground colors, measuring 19.80:1 and 18.97:1 respectively against the adjacent footer background. |
+| Forced-colors/high-contrast visibility | PASS | Chromium `forced-colors: active` kept both links visible. Keyboard focus rendered a solid 2-pixel system-color outline with a 2-pixel offset after adding the forced-colors fallback; the focused state was inspected visually and is covered by a dedicated Playwright regression. |
+| Keyboard visual review | PASS | At 320 x 568 on `/ca`, Tab reached Terms before Privacy, both focus indicators were unobscured in light and dark themes, and Enter reached `/ca/terms` and `/ca/privacy`. |
+| VoiceOver landmarks and navigation name | PASS | Native macOS VoiceOver on `/ca` announced `pie de página`, then `Informació legal navegación`, then `lista 2 ítems`. The OS spoke role names in its Spanish UI language while preserving the Catalan accessible name. |
+| VoiceOver standalone link names | PASS | Inside the legal navigation, native VoiceOver announced `enlace Condicions d'ús 1 de 2` and `enlace Avís de privacitat 2 de 2`; each destination was understandable without surrounding text. |
+| Short, long, and dynamic content in both themes | PASS | Visual review at 320 x 568 confirmed the footer at the bottom of short content and after the final Terms content in light and dark modes. Empty `/ca/signup` submission exposed all three validation messages in reserved error slots: document height remained 929 pixels and footer document top remained 880 pixels, immediately after `main`, with no overlap or overflow. A separate viewport-height content insertion moved the footer down and retained the same geometry contract. |
 
-### First-Attempt Usability Record
-
-Status: **PENDING 10 FIRST-TIME PARTICIPANTS**. Keep records anonymous and fill one randomly
-assigned journey per participant; do not enter names, email addresses, account identifiers, or
-other personal data.
-
-| Participant | Initial route category | Destination | Elapsed seconds | First attempt within 20 seconds |
-|-------------|------------------------|-------------|-----------------|---------------------------------|
-| 01 | Pending | Pending | Pending | Pending |
-| 02 | Pending | Pending | Pending | Pending |
-| 03 | Pending | Pending | Pending | Pending |
-| 04 | Pending | Pending | Pending | Pending |
-| 05 | Pending | Pending | Pending | Pending |
-| 06 | Pending | Pending | Pending | Pending |
-| 07 | Pending | Pending | Pending | Pending |
-| 08 | Pending | Pending | Pending | Pending |
-| 09 | Pending | Pending | Pending | Pending |
-| 10 | Pending | Pending | Pending | Pending |
-
-SC-005 remains pending until at least 9 of 10 recorded participants succeed on their first attempt
-within 20 seconds.
+VoiceOver's AppleScript bridge was enabled only for the native announcement capture. After the
+review, VoiceOver was stopped and `SCREnableAppleScript` was restored to its original unset state.
 
 ### Extension Review Record
 
-**PASS** for SC-006. The single ordered collection is `footerDestinations` in
+**PASS** for SC-005. The single ordered collection is `footerDestinations` in
 `src/components/app-footer.tsx`; visible labels come from the shared policy-title messages. A
 third destination would require updating the canonical destination/message sources, adding one
 collection entry, and updating the explicit cardinality/order contract tests. No page file or

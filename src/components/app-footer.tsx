@@ -41,7 +41,7 @@ export async function AppFooter({ locale }: AppFooterProps) {
           {footerDestinations.map((destination) => (
             <li className="min-w-0" key={destination.id}>
               <Link
-                className="inline-flex min-h-6 max-w-full items-center whitespace-normal rounded-sm px-1 underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex min-h-6 max-w-full items-center whitespace-normal rounded-sm px-1 underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background forced-colors:focus-visible:outline-2 forced-colors:focus-visible:outline-solid forced-colors:focus-visible:outline-offset-2"
                 href={destination.path}
               >
                 {policyTranslations(destination.labelKey)}

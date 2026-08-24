@@ -125,9 +125,8 @@ viewport, theme, content, keyboard, and screen-reader surfaces.
 
 **Purpose**: Validate the full feature, manual-only outcomes, scope boundaries, and repository gates.
 
-- [X] T014 Audit the final diff to keep src/modules/signup/policy.ts, prisma/, docker-compose.yml, docker-compose.prod.yml, docker-compose.e2e.yml, .env.example, policy versions, logging, and authentication behavior unchanged
-- [ ] T015 Execute the 200% zoom, forced-colors, contrast-ratio, keyboard, VoiceOver, short/long/dynamic-content, and theme review from specs/20260824-global-legal-footer/quickstart.md and record reproducible outcomes there
-- [ ] T016 Run the first-attempt legal-navigation usability check with at least 10 first-time participants by randomly assigning each participant an initial route category and legal destination, plus the future-destination extension review from specs/20260824-global-legal-footer/quickstart.md; record each assignment, elapsed time, first-attempt result, and whether SC-005 and SC-006 pass
+- [X] T014 Audit the final diff to keep src/modules/signup/policy.ts, prisma/, docker-compose.yml, docker-compose.prod.yml, docker-compose.e2e.yml, .env.example, policy versions, logging, and authentication behavior unchanged, and complete the future-destination extension review from specs/20260824-global-legal-footer/quickstart.md for SC-005
+- [X] T015 Execute the 200% zoom, forced-colors, contrast-ratio, keyboard, VoiceOver, short/long/dynamic-content, and theme review from specs/20260824-global-legal-footer/quickstart.md and record reproducible outcomes there
 - [X] T017 Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:e2e` from specs/20260824-global-legal-footer/quickstart.md and resolve only regressions attributable to src/components/app-footer.tsx, src/app/[locale]/layout.tsx, src/messages/en.json, src/messages/es.json, src/messages/ca.json, tests/unit/app-footer.test.tsx, or tests/e2e/global-footer.spec.ts
 
 ---

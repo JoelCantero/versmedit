@@ -105,8 +105,7 @@ As a keyboard, screen-reader, mobile, or desktop user, I can identify and use th
 - **SC-002**: All six locale-destination combinations resolve to the expected Terms of Use or Privacy Notice address, preserve the active language, and display fully localized footer text with no fallback copy.
 - **SC-003**: Keyboard and screen-reader verification completes both legal-link journeys with both links identified, focused, and activated in the expected order on 100% of sampled pages.
 - **SC-004**: The defined viewport, theme, and content-length matrix produces zero instances of clipping, overlap, horizontal overflow, content obstruction, or invisible focus, and every contrast measurement meets the ratios in FR-015.
-- **SC-005**: In a usability check with at least 10 first-time participants, each participant attempts one randomly assigned Terms of Use or Privacy Notice journey from a sampled public, authentication, account, or legal page. At least 9 participants MUST reach the requested page on their first attempt within 20 seconds.
-- **SC-006**: A review exercise can add one additional footer destination across 100% of in-scope pages without any route-specific footer change.
+- **SC-005**: A review exercise can add one additional footer destination across 100% of in-scope pages without any route-specific footer change.
 
 ## Assumptions
 

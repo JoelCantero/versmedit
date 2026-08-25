@@ -93,10 +93,8 @@ const rawEnvSchema = z
     MAIL_API_KEY: optionalString,
     MAIL_API_SECRET: optionalString,
     MAIL_FROM: optionalString,
-    MAIL_BRAND_COLOR: optionalString,
-    MAIL_SUPPORT_EMAIL: optionalString,
-    MAIL_LEGAL_NAME: optionalString,
-    MAIL_LEGAL_ADDRESS: optionalString,
+    BRAND_COLOR: optionalString,
+    SUPPORT_EMAIL: optionalString,
     MAIL_LOGO_URL: optionalString,
     ACCOUNT_DATA_EXPORT_MAX_BYTES: positiveIntegerSetting(
       "ACCOUNT_DATA_EXPORT_MAX_BYTES",
@@ -112,6 +110,81 @@ const rawEnvSchema = z
     ),
   })
   .superRefine((env, context) => {
+    const senderName = env.PROJECT_NAME.trim();
+    if (
+      senderName.length === 0 ||
+      senderName.length > 70 ||
+      /[\u0000-\u001f\u007f]/u.test(senderName)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["PROJECT_NAME"],
+        message: "PROJECT_NAME must be a safe sender name of 1-70 characters",
+      });
+    }
+
+    const validationBrand = {
+      productName: "Example Workspace",
+      canonicalOrigin: "https://app.example.test",
+      primaryColor: "#0057B8",
+      supportEmail: "support@example.test",
+      logoUrl: null,
+    } as const;
+    const brandFields = [
+      {
+        envField: "BRAND_COLOR",
+        brandField: "primaryColor",
+        value: env.BRAND_COLOR,
+        required: true,
+        rule: "must be a six-digit #RRGGBB color",
+      },
+      {
+        envField: "SUPPORT_EMAIL",
+        brandField: "supportEmail",
+        value: env.SUPPORT_EMAIL,
+        required: true,
+        rule: "must be one bare email address",
+      },
+      {
+        envField: "MAIL_LOGO_URL",
+        brandField: "logoUrl",
+        value: env.MAIL_LOGO_URL,
+        required: false,
+        rule: "must be an absolute HTTPS URL without credentials or a fragment",
+      },
+    ] as const;
+
+    for (const field of brandFields) {
+      if (field.envField === "MAIL_LOGO_URL" && !env.MAIL_ENABLED) continue;
+
+      if (field.value === undefined && field.required) {
+        context.addIssue({
+          code: "custom",
+          path: [field.envField],
+          message: `${field.envField} is required`,
+        });
+        continue;
+      }
+      if (field.value === undefined) continue;
+
+      try {
+        validateEmailBrand({
+          ...validationBrand,
+          [field.brandField]: field.value,
+        });
+      } catch (error) {
+        if (error instanceof EmailBrandValidationError) {
+          context.addIssue({
+            code: "custom",
+            path: [field.envField],
+            message: `${field.envField} ${field.rule}`,
+          });
+          continue;
+        }
+        throw error;
+      }
+    }
+
     if (!env.MAIL_ENABLED) return;
 
     if (env.MAIL_PROVIDER !== "brevo" && env.MAIL_PROVIDER !== "mailjet") {
@@ -148,95 +221,6 @@ const rawEnvSchema = z
         message: "MAIL_FROM must be one bare email address",
       });
     }
-
-    const senderName = env.PROJECT_NAME.trim();
-    if (
-      senderName.length === 0 ||
-      senderName.length > 70 ||
-      /[\u0000-\u001f\u007f]/u.test(senderName)
-    ) {
-      context.addIssue({
-        code: "custom",
-        path: ["PROJECT_NAME"],
-        message: "PROJECT_NAME must be a safe sender name of 1-70 characters",
-      });
-    }
-
-    const validationBrand = {
-      productName: "Example Workspace",
-      canonicalOrigin: "https://app.example.test",
-      primaryColor: "#0057B8",
-      supportEmail: "support@example.test",
-      legalName: "Example Workspace, S.L.",
-      legalAddress: "Example Street 1",
-      logoUrl: null,
-    } as const;
-    const brandFields = [
-      {
-        envField: "MAIL_BRAND_COLOR",
-        brandField: "primaryColor",
-        value: env.MAIL_BRAND_COLOR,
-        required: true,
-        rule: "must be a six-digit #RRGGBB color",
-      },
-      {
-        envField: "MAIL_SUPPORT_EMAIL",
-        brandField: "supportEmail",
-        value: env.MAIL_SUPPORT_EMAIL,
-        required: true,
-        rule: "must be one bare email address",
-      },
-      {
-        envField: "MAIL_LEGAL_NAME",
-        brandField: "legalName",
-        value: env.MAIL_LEGAL_NAME,
-        required: true,
-        rule: "must be a safe single-line value of 1-200 characters",
-      },
-      {
-        envField: "MAIL_LEGAL_ADDRESS",
-        brandField: "legalAddress",
-        value: env.MAIL_LEGAL_ADDRESS,
-        required: true,
-        rule: "must be a safe single-line value of 1-500 characters",
-      },
-      {
-        envField: "MAIL_LOGO_URL",
-        brandField: "logoUrl",
-        value: env.MAIL_LOGO_URL,
-        required: false,
-        rule: "must be an absolute HTTPS URL without credentials or a fragment",
-      },
-    ] as const;
-
-    for (const field of brandFields) {
-      if (field.value === undefined && field.required) {
-        context.addIssue({
-          code: "custom",
-          path: [field.envField],
-          message: `${field.envField} is required when mail is enabled`,
-        });
-        continue;
-      }
-      if (field.value === undefined) continue;
-
-      try {
-        validateEmailBrand({
-          ...validationBrand,
-          [field.brandField]: field.value,
-        });
-      } catch (error) {
-        if (error instanceof EmailBrandValidationError) {
-          context.addIssue({
-            code: "custom",
-            path: [field.envField],
-            message: `${field.envField} ${field.rule}`,
-          });
-          continue;
-        }
-        throw error;
-      }
-    }
   });
 
 type RawEnv = z.infer<typeof rawEnvSchema>;
@@ -251,9 +235,16 @@ export type Env = Pick<
   | "ACCOUNT_DATA_EXPORT_MAX_BYTES"
   | "ACCOUNT_DATA_EXPORT_TIMEOUT_MS"
   | "TRUST_PROXY_HEADERS"
-> & { MAIL: MailConfig };
+> & { BRAND: EmailBrand; MAIL: MailConfig };
 
 const envSchema = rawEnvSchema.transform((env): Env => {
+  const brand = validateEmailBrand({
+    productName: env.PROJECT_NAME,
+    canonicalOrigin: env.NEXTAUTH_URL,
+    primaryColor: env.BRAND_COLOR,
+    supportEmail: env.SUPPORT_EMAIL,
+    logoUrl: env.MAIL_ENABLED ? env.MAIL_LOGO_URL : undefined,
+  });
   const base = {
     PROJECT_NAME: env.PROJECT_NAME,
     DATABASE_URL: env.DATABASE_URL,
@@ -263,6 +254,7 @@ const envSchema = rawEnvSchema.transform((env): Env => {
     ACCOUNT_DATA_EXPORT_MAX_BYTES: env.ACCOUNT_DATA_EXPORT_MAX_BYTES,
     ACCOUNT_DATA_EXPORT_TIMEOUT_MS: env.ACCOUNT_DATA_EXPORT_TIMEOUT_MS,
     TRUST_PROXY_HEADERS: env.TRUST_PROXY_HEADERS,
+    BRAND: brand,
   };
 
   if (!env.MAIL_ENABLED) {
@@ -274,15 +266,7 @@ const envSchema = rawEnvSchema.transform((env): Env => {
     apiKey: env.MAIL_API_KEY!,
     fromEmail: env.MAIL_FROM!,
     senderName: env.PROJECT_NAME.trim(),
-    brand: validateEmailBrand({
-      productName: env.PROJECT_NAME,
-      canonicalOrigin: env.NEXTAUTH_URL,
-      primaryColor: env.MAIL_BRAND_COLOR,
-      supportEmail: env.MAIL_SUPPORT_EMAIL,
-      legalName: env.MAIL_LEGAL_NAME,
-      legalAddress: env.MAIL_LEGAL_ADDRESS,
-      logoUrl: env.MAIL_LOGO_URL,
-    }),
+    brand,
     sendTimeoutMs: EMAIL_SEND_TIMEOUT_MS,
     healthTimeoutMs: EMAIL_HEALTH_TIMEOUT_MS,
     responseLimitBytes: EMAIL_RESPONSE_LIMIT_BYTES,

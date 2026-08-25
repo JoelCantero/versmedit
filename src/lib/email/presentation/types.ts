@@ -10,8 +10,6 @@ export type EmailBrand = {
   readonly primaryColor: string;
   readonly actionForeground: "#000000" | "#FFFFFF";
   readonly supportEmail: string;
-  readonly legalName: string;
-  readonly legalAddress: string;
   readonly logoUrl: string | null;
 };
 

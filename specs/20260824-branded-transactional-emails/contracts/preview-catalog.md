@@ -89,7 +89,6 @@ All 36 requests share one immutable fictional brand:
 | Canonical origin | HTTPS URL under a `.test` host |
 | Primary color | Fixed valid color whose selected foreground passes 4.5:1 contrast |
 | Support address | Address under `example.com`, `example.org`, or `example.net` |
-| Legal identity/address | Clearly fictional organization and postal address |
 | Logo | `null`, so offline review makes no asset request; logo cases remain automated render tests |
 
 Variant values obey these rules:

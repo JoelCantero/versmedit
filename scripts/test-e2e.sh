@@ -87,10 +87,8 @@ export MAIL_PROVIDER="$E2E_MAIL_PROVIDER"
 export MAIL_API_KEY="$E2E_MAIL_API_KEY"
 export MAIL_API_SECRET="$E2E_MAIL_API_SECRET"
 export MAIL_FROM="no-reply@example.test"
-export MAIL_BRAND_COLOR="#0057B8"
-export MAIL_SUPPORT_EMAIL="support@example.test"
-export MAIL_LEGAL_NAME="Example Workspace, S.L."
-export MAIL_LEGAL_ADDRESS="123 Example Street, Example City"
+export BRAND_COLOR="#0057B8"
+export SUPPORT_EMAIL="support@example.test"
 export MAIL_LOGO_URL="https://assets.example.test/mail/logo.png"
 
 if [[ "$E2E_MAIL_PROVIDER" != "brevo" && "$E2E_MAIL_PROVIDER" != "mailjet" ]]; then

@@ -101,7 +101,8 @@ For one valid request, `renderEmailPresentation`:
 1. Runtime-validates the discriminated request without mutating it.
 2. Selects exactly one localized catalogue entry.
 3. Builds one shared React Email document tree with product identity, preview text, body, support,
-   legal identity/address, and localized policy links.
+   sender identity, and localized policy links. The sender identity is the same `productName`; no
+   separate legal name or postal address is rendered.
 4. Renders that same tree once as complete HTML and once with React Email plain-text rendering.
 5. Returns only `subject`, `html`, and `text`.
 

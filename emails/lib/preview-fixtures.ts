@@ -11,8 +11,6 @@ export const PREVIEW_BRAND: EmailBrand = Object.freeze({
   primaryColor: "#0057B8",
   actionForeground: "#FFFFFF",
   supportEmail: "support@example.test",
-  legalName: "Versmedit Preview, S.L.",
-  legalAddress: "123 Example Street, Example City",
   logoUrl: null,
 });
 

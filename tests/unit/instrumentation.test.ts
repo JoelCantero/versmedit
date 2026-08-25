@@ -21,15 +21,15 @@ describe("Next.js startup registration", () => {
     expect(getEnvMock).toHaveBeenCalledWith();
   });
 
-  it("propagates malformed enabled-brand failure without exposing a value", () => {
+  it("propagates malformed global-brand failure without exposing a value", () => {
     const suppliedValue = "private-invalid-brand-value";
     getEnvMock.mockImplementation(() => {
       throw new Error(
-        "Invalid environment configuration:\nMAIL_BRAND_COLOR: must be #RRGGBB",
+        "Invalid environment configuration:\nBRAND_COLOR: must be #RRGGBB",
       );
     });
 
-    expect(() => register()).toThrow(/MAIL_BRAND_COLOR/);
+    expect(() => register()).toThrow(/BRAND_COLOR/);
     try {
       register();
     } catch (error) {

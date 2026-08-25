@@ -7,8 +7,6 @@ const BRAND_INPUT_KEYS = [
   "canonicalOrigin",
   "primaryColor",
   "supportEmail",
-  "legalName",
-  "legalAddress",
   "logoUrl",
 ] as const;
 
@@ -20,8 +18,6 @@ export type EmailBrandInput = {
   readonly canonicalOrigin: unknown;
   readonly primaryColor: unknown;
   readonly supportEmail: unknown;
-  readonly legalName: unknown;
-  readonly legalAddress: unknown;
   readonly logoUrl?: unknown;
 };
 
@@ -174,12 +170,6 @@ export function validateEmailBrand(input: unknown): EmailBrand {
     primaryColor,
     actionForeground: selectActionForeground(primaryColor),
     supportEmail: normalizeSupportEmail(input.supportEmail),
-    legalName: normalizedSingleLine(input.legalName, "legalName", 200),
-    legalAddress: normalizedSingleLine(
-      input.legalAddress,
-      "legalAddress",
-      500,
-    ),
     logoUrl: normalizeLogoUrl(input.logoUrl),
   });
 }

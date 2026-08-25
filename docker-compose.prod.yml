@@ -24,6 +24,8 @@ services:
       - NEXTAUTH_URL
       - TRUST_PROXY_HEADERS
       - LOG_LEVEL
+      - BRAND_COLOR
+      - SUPPORT_EMAIL
       - ACCOUNT_DATA_EXPORT_MAX_BYTES
       - ACCOUNT_DATA_EXPORT_TIMEOUT_MS
       # Transactional email through the selected provider's fixed HTTP API.
@@ -32,10 +34,6 @@ services:
       - MAIL_API_KEY
       - MAIL_API_SECRET
       - MAIL_FROM
-      - MAIL_BRAND_COLOR
-      - MAIL_SUPPORT_EMAIL
-      - MAIL_LEGAL_NAME
-      - MAIL_LEGAL_ADDRESS
       - MAIL_LOGO_URL
     depends_on:
       db:

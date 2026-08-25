@@ -28,38 +28,38 @@
 
 **CRITICAL**: Complete this phase before implementing any user story.
 
-- [x] T002 Create failing shared-contract coverage for exact `subject`/`html`/`text` output, strict structured inputs, URL validation, escaping, HTML/text parity, and side-effect freedom in tests/unit/email-presentation.test.tsx
+- [x] T002 Create failing shared-contract coverage for exact `subject`/`html`/`text` output, strict structured inputs that reject legacy legal-name/postal-address fields, URL validation, escaping, HTML/text parity, and side-effect freedom in tests/unit/email-presentation.test.tsx
 - [x] T003 Define `EmailLocale`, the closed 12-member `EmailVariant` union, discriminated variant value types, `EmailBrand`, `LocalizedEmailCopy`, `EmailPresentationRequest`, and `RenderedEmailContent` in src/lib/email/presentation/types.ts and src/lib/email/presentation/constants.ts
-- [x] T004 [P] Implement trusted brand validation for product identity, canonical origin, contrast-safe primary color, support address, legal identity/address, and one optional deployment-wide absolute HTTPS logo URL that cannot vary by recipient in src/lib/email/presentation/brand.ts
-- [x] T005 [P] Build the table-based shared React Email document, primary action, explicit copy/paste fallback, support block, and legal footer with Terms and Privacy links in src/lib/email/presentation/components/email-document.tsx and src/lib/email/presentation/components/email-action.tsx
+- [x] T004 [P] Implement trusted brand validation for product identity, canonical origin, contrast-safe primary color, support address, and one optional deployment-wide absolute HTTPS logo URL that cannot vary by recipient in src/lib/email/presentation/brand.ts
+- [x] T005 [P] Build the table-based shared React Email document, primary action, explicit copy/paste fallback, support block, and sender/policy footer using `productName` with no separate legal name or postal address in src/lib/email/presentation/components/email-document.tsx and src/lib/email/presentation/components/email-action.tsx
 - [x] T006 Implement the pure React Email render pipeline, deterministic plain-text generation, allowlisted presentation errors, and presentation-only exports in src/lib/email/presentation/render.tsx and src/lib/email/presentation/index.ts
 
 **Checkpoint**: A caller can supply validated brand, locale, copy, and structured values to a pure renderer without importing delivery, environment, recipient, persistence, or business-flow code.
 
 ---
 
-## Phase 3: User Story 2 - Configure One Trusted Email Brand (Priority: P1)
+## Phase 3: User Story 2 - Configure One Trusted Application Brand (Priority: P1)
 
-**Goal**: Validate one deployment-wide brand before an enabled-mail process becomes ready and propagate only its five non-secret variables to the application service.
+**Goal**: Validate one deployment-wide brand before the application becomes ready, expose it to the web and enabled email paths, and propagate only public `BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL` to the application service.
 
-**Independent Test**: Validate disabled and enabled configurations directly, launch startup registration with complete and malformed fictional brands, and inspect static deployment configuration to prove the values are required only when mail is enabled, safely redacted, and forwarded only to `app`.
+**Independent Test**: Validate disabled and enabled mail configurations directly, launch startup registration with complete and malformed fictional brands, and inspect static deployment configuration to prove global values are always required, safely redacted, and forwarded only to `app`.
 
 ### Tests for User Story 2
 
-- [x] T007 [P] [US2] Add failing conditional configuration cases for `MAIL_BRAND_COLOR`, `MAIL_SUPPORT_EMAIL`, `MAIL_LEGAL_NAME`, `MAIL_LEGAL_ADDRESS`, optional HTTPS-only `MAIL_LOGO_URL`, disabled-mail tolerance, normalization, URL/color constraints, and redacted errors in tests/unit/env.test.ts
-- [x] T008 [P] [US2] Add failing startup-registration tests proving `register()` calls `getEnv()` and rejects malformed enabled-mail branding before readiness without exposing values in tests/unit/instrumentation.test.ts
-- [x] T009 [P] [US2] Add failing static checks for five GitHub Variables, required-value preflight, app-only Compose forwarding, and absence from secrets, build arguments, `migrate`, and `db` in tests/unit/email-runtime-configuration.test.ts
+- [x] T007 [P] [US2] Add failing configuration cases for missing or malformed global `BRAND_COLOR` and `SUPPORT_EMAIL` in both mail states, enabled-mail HTTPS validation and disabled-mail discarding of optional `MAIL_LOGO_URL`, normalization, URL/color constraints, and redacted errors in tests/unit/env.test.ts
+- [x] T008 [P] [US2] Add failing startup-registration tests proving `register()` calls `getEnv()` and rejects malformed global branding before readiness without exposing values in tests/unit/instrumentation.test.ts
+- [x] T009 [P] [US2] Add failing static checks for GitHub Variables `BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL`, required global-value preflight, app-only Compose forwarding, and absence from secrets, production build arguments, `migrate`, and `db` in tests/unit/email-runtime-configuration.test.ts
 
 ### Implementation for User Story 2
 
-- [x] T010 [US2] Extend conditional Zod environment validation and normalized enabled-mail configuration with one validated `EmailBrand` assembled from `PROJECT_NAME`, `NEXTAUTH_URL`, and the five brand variables in src/lib/env.ts
+- [x] T010 [US2] Extend Zod environment validation with one global `EmailBrand` assembled in src/lib/env.ts, expose it to the web through src/app/[locale]/layout.tsx, apply its color tokens, and render its support contact through src/components/app-footer.tsx with coverage in tests/unit/app-footer.test.tsx
 - [x] T011 [US2] Add Next.js startup validation whose `register()` awaits no side effects and invokes `getEnv()` before readiness in src/instrumentation.ts
-- [x] T012 [P] [US2] Document safe fictional brand placeholders, conditional requirements, GitHub Variable classification, and startup failure behavior in .env.example and README.md
-- [x] T013 [P] [US2] Forward the five brand variables only into the existing `app` service, without adding services, ports, volumes, networks, or build arguments, in ./docker-compose.prod.yml
-- [x] T014 [P] [US2] Read the five values from GitHub `vars`, fail before deployment when enabled mail lacks a required value, and pass them only to the app runtime in .github/workflows/deploy.yml
+- [x] T012 [P] [US2] Document safe public build placeholders, global requirements, GitHub Variable classification, and startup failure behavior in .env.example and README.md
+- [x] T013 [P] [US2] Forward `BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL` only into the existing `app` service, without adding services, ports, volumes, networks, or production build arguments, in ./docker-compose.prod.yml
+- [x] T014 [P] [US2] Read `BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL` from GitHub `vars`, fail before deployment when a global value is absent, and pass them only to the app runtime in .github/workflows/deploy.yml
 - [x] T015 [US2] Supply complete fictional enabled-mail branding to standalone E2E startup while keeping values out of command output and provider payload assertions in scripts/test-e2e.sh and playwright.config.ts
 
-**Checkpoint**: Disabled mail accepts absent or malformed brand variables; enabled mail cannot become ready without the four required values, and no brand value is treated as a secret or propagated outside `app`.
+**Checkpoint**: Both mail states require valid global branding, enabled mail shares that brand, and no brand value is treated as a secret or propagated outside `app`.
 
 ---
 

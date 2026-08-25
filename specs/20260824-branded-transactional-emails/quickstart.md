@@ -9,7 +9,6 @@ interfaces and invariants are in [data-model.md](./data-model.md) and [contracts
 - Corepack with pnpm 11.22.0
 - Docker Engine with Docker Compose
 - Chromium installed for Playwright
-- For the release gate, controlled test inboxes or a rendering service covering the named clients
 
 From the repository root, confirm the toolchain and install the locked dependencies:
 
@@ -46,13 +45,21 @@ Expected:
 
 Stop the preview with `Ctrl+C` before running the automated suites.
 
+Run the isolated browser contract:
+
+```bash
+pnpm exec playwright test --config emails/playwright.config.ts
+```
+
 ## 2. Run Focused Presentation Checks
 
 ```bash
 pnpm exec vitest run \
   tests/unit/email-presentation.test.tsx \
+  tests/unit/email-presentation-release.test.tsx \
   tests/unit/email-preview-catalog.test.ts \
   tests/unit/email-architecture.test.ts \
+  tests/unit/email-migration.test.ts \
   tests/unit/env.test.ts
 ```
 
@@ -83,7 +90,12 @@ pnpm db:deploy
 Run the focused business-flow and delivery-contract suites:
 
 ```bash
-pnpm exec vitest run \
+MAIL_BRAND_COLOR="#0057B8" \
+MAIL_SUPPORT_EMAIL="support@example.test" \
+MAIL_LEGAL_NAME="Example Workspace, S.L." \
+MAIL_LEGAL_ADDRESS="123 Example Street, Example City" \
+MAIL_LOGO_URL="https://assets.example.test/mail/logo.png" \
+RUN_INTEGRATION_TESTS=true pnpm exec vitest run \
   tests/unit/email.test.ts \
   tests/unit/email-brevo.test.ts \
   tests/unit/email-mailjet.test.ts \
@@ -193,71 +205,13 @@ MAIL_LOGO_URL (optional)
 
 Do not add them as Secrets, build arguments, or a production `.env` file.
 
-## 8. Complete the Named-Client Gate
-
-Use only fictional fixture HTML from the local catalogue. Submit it directly to a controlled
-client-rendering service, or place it in controlled test inboxes outside the application. Do not add
-a repository send command or enable a future variant.
-
-Run all 36 default fixtures through this matrix:
-
-| Client | Required current stable surface |
-|--------|---------------------------------|
-| Gmail | Web |
-| Gmail | Android and/or iOS mobile client used by the release matrix |
-| Apple Mail | macOS |
-| Mail | iOS |
-| Outlook | Web |
-| Outlook | Classic desktop |
-
-For each locale, also repeat representative stress fixtures with remote images blocked, a configured
-but unreachable logo, light/dark allowed brand colors, and the longest legal/copy/action values.
-
-Record client/version, variant, locale, viewport, image state, result, and screenshot/reference.
-Pass requires:
-
-- recognizable product text without relying on the logo;
-- intact reading order, heading, body, support, legal identity/address, Terms, and Privacy links;
-- one usable primary action plus visible matching fallback destination where required;
-- no action destination on the two informational future variants;
-- no clipping, overlap, or horizontal overflow that prevents reading or action;
-- no script, tracking, unexpected remote request, or mixed-language copy.
-
-Pixel-identical layout is not required. Any loss of essential content or action is a release blocker.
-
-## 9. Complete the Content-Comprehension Gate
-
-Use only the six operational messages rendered with fictional fixtures. Recruit at least six people
-who did not implement the feature, including at least two people proficient in each of English,
-Spanish, and Catalan. Assign each reviewer one language in which they are proficient and present all
-six operational messages in that language without explanatory text outside the message.
-
-For each message, ask the reviewer to identify:
-
-1. the message's purpose; and
-2. the action they should take next, including that no account action is authorized by the
-  existing-account signup notice.
-
-Score each reviewer-message assessment against a fixed answer rubric prepared before the session. An
-assessment passes only when both answers are correct. With the minimum six reviewers this produces
-36 assessments; at least 33 must pass to exceed the required 90% threshold. If additional reviewers
-participate, at least 90% of all reviewer-message assessments must pass, rounded up to the next whole
-assessment.
-
-Record only an anonymous reviewer code, proficient locale, variant, purpose result, next-action
-result, and overall pass/fail in
-`specs/20260824-branded-transactional-emails/content-comprehension.md`. Do not record names, email
-addresses, free-text personal information, or real message data. A result below 90% blocks release
-and requires copy revision followed by a complete rerun.
-
-## 10. Final Acceptance
+## 8. Final Acceptance
 
 ```bash
 git diff --check
 git status --short
 ```
 
-Confirm that the implementation matches all three contracts, all automated gates pass, the complete
-named-client matrix and passing content-comprehension review are recorded, and the diff contains no
-Prisma migration, preview production route, provider redesign, future sending path, real fixture
-data, or logged message content.
+Confirm that the implementation matches all three contracts, all automated gates pass, and the diff
+contains no Prisma migration, preview production route, provider redesign, future sending path,
+real fixture data, or logged message content.

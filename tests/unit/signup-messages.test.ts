@@ -12,6 +12,7 @@ import {
   buildOnboardingEmail,
 } from "@/modules/signup/email";
 import { getPolicyDestinations } from "@/modules/signup/policy";
+import { createTestEmailBrand } from "../helpers/email-brand";
 import { getTestProjectName } from "../helpers/project-name";
 
 const catalogs = {
@@ -20,6 +21,7 @@ const catalogs = {
   ca: caMessages,
 } as const;
 const projectName = getTestProjectName();
+const brand = createTestEmailBrand(projectName);
 
 function leafKeys(value: unknown, prefix = ""): string[] {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -90,24 +92,24 @@ describe("signup message catalogs", () => {
 
   it.each(["en", "es", "ca"] as const)(
     "builds %s onboarding and active-account email from that locale only",
-    (locale) => {
+    async (locale) => {
       const recipient = "person@example.test";
-      const onboarding = buildOnboardingEmail(
+      const onboarding = await buildOnboardingEmail(
         {
           recipient,
           rawToken: "abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
           locale,
           origin: "https://app.example.test",
         },
-        projectName,
+        brand,
       );
-      const active = buildActiveAccountEmail(
+      const active = await buildActiveAccountEmail(
         {
           recipient,
           locale,
           origin: "https://app.example.test",
         },
-        projectName,
+        brand,
       );
       const copy = catalogs[locale].Signup.email;
 

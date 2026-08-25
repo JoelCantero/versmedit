@@ -2,6 +2,8 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { EmailBrand } from "@/lib/email/presentation";
+import { createTestEmailBrand } from "../helpers/email-brand";
 import { getTestProjectName } from "../helpers/project-name";
 
 const mocks = vi.hoisted(() => ({
@@ -13,6 +15,7 @@ const mocks = vi.hoisted(() => ({
           enabled: true;
           provider: "brevo";
           fromEmail: string;
+          brand: EmailBrand;
         },
   },
   sendTransactionalEmail: vi.fn(),
@@ -21,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   deleteMany: vi.fn(),
 }));
 const projectName = getTestProjectName();
+const brand = createTestEmailBrand(projectName);
 mocks.env.PROJECT_NAME = projectName;
 
 vi.mock("server-only", () => ({}));
@@ -105,6 +109,7 @@ describe("authOptions", () => {
       enabled: true,
       provider: "brevo",
       fromEmail: "no-reply@example.test",
+      brand,
     };
 
     const providers = await configuredProviders();
@@ -173,6 +178,7 @@ describe("authOptions", () => {
         enabled: true,
         provider: "brevo",
         fromEmail: "no-reply@example.test",
+        brand,
       };
       const [provider] = await configuredProviders();
       const url =
@@ -184,17 +190,22 @@ describe("authOptions", () => {
         url,
       });
 
-      expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith({
-        recipient: "member@example.test",
-        locale,
-        subject,
-        text: `${copy}: ${url}`,
-        html: expect.stringContaining(copy),
-      });
+      expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipient: "member@example.test",
+          locale,
+          subject,
+          text: expect.stringContaining(copy),
+          html: expect.stringMatching(/<!doctype html/i),
+        }),
+      );
       const sent = mocks.sendTransactionalEmail.mock.calls[0]?.[0] as {
         html: string;
+        text: string;
       };
       expect(sent.html).toContain(url.replaceAll("&", "&amp;"));
+      expect(sent.text).toContain(url);
+      expect(sent.html).toContain("support@example.test");
       expect(mocks.deleteMany).not.toHaveBeenCalled();
     },
   );
@@ -211,6 +222,7 @@ describe("authOptions", () => {
       enabled: true,
       provider: "brevo",
       fromEmail: "no-reply@example.test",
+      brand,
     };
     mocks.sendTransactionalEmail.mockResolvedValue({
       accepted: false,
@@ -242,6 +254,7 @@ describe("authOptions", () => {
       enabled: true,
       provider: "brevo",
       fromEmail: "no-reply@example.test",
+      brand,
     };
     mocks.sendTransactionalEmail.mockRejectedValue(
       new Error("private provider response"),

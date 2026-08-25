@@ -592,7 +592,7 @@ export function SecuritySessionDialog({
             ref={cancelRef}
             type="button"
             variant="outline"
-            className="min-h-11 min-w-11 whitespace-normal text-center motion-reduce:transition-none"
+            className="min-h-11 min-w-11 whitespace-normal text-center transition-none"
             disabled={pending}
             onClick={() => onOpenChange(false)}
           >
@@ -615,7 +615,7 @@ export function SecuritySessionDialog({
           {showReauthenticationAction ? (
             <Button
               type="button"
-              className="min-h-11 min-w-11 whitespace-normal text-center motion-reduce:transition-none"
+              className="min-h-11 min-w-11 whitespace-normal text-center transition-none"
               disabled={pending}
               onClick={sendReauthentication}
             >

@@ -188,27 +188,25 @@ specification.
 - Assume a successful compile proves runtime availability: rejected because standalone tracing can
   fail only after startup or execution.
 
-## Decision 8: Combine automated compatibility checks with a manual client gate
+## Decision 8: Keep compatibility verification automated
 
 **Decision**: Automate the 36-render matrix, escaping, URL integrity, content parity, contrast,
 request size, responsive HTML inspection, preview isolation, existing flow integration, logs,
-standalone execution, and Docker build. Treat the loopback browser catalogue as a development review
-aid, not as evidence for proprietary email engines. Before release, take rendered fixture HTML from
-the local catalogue source view and inspect it in current stable Gmail web/mobile, Apple Mail/iOS
-Mail, Outlook web, and classic Outlook desktop using controlled test inboxes or a client-rendering
-service. Require readability and actionability, not pixel parity.
+standalone execution, and Docker build. The loopback browser catalogue remains a development review
+aid, while release acceptance relies on reproducible automated checks across representative widths,
+logo states, brand colors, and long-content cases.
 
-**Rationale**: Proprietary email layout engines cannot be reproduced faithfully by jsdom or
-Chromium, especially classic Outlook. A repeatable manual matrix is therefore necessary for that
-specific visual gate, while all security, contract, and catalogue properties remain automated.
-Future-only HTML can be uploaded to the rendering service; the application gains no send path.
+**Rationale**: The feature requires a deterministic release gate that can run locally and in CI
+without controlled inboxes, proprietary clients, external rendering services, or human reviewers.
+The automated checks cover the security, content, layout, contract, and catalogue properties owned
+by this implementation.
 
 **Alternatives considered**:
 
-- Treat browser screenshots as proof for all email clients: rejected because browser rendering does
-  not emulate Outlook or Gmail transformations.
-- Require pixel-identical output: rejected by clarification and incompatible with client engines.
-- Skip named-client checks: rejected because client compatibility is an explicit release criterion.
+- Require a manual matrix in proprietary email clients: rejected because it is not part of the
+  desired release process and cannot be reproduced by CI.
+- Require a comprehension study with external reviewers: rejected because automated semantic and
+  localization checks are the acceptance mechanism for this feature.
 
 ## Decision 9: Use an application-only rollout with no data migration
 

@@ -38,7 +38,19 @@ vi.mock("@/lib/env", () => ({
     PROJECT_NAME: "Observability Test",
     NEXTAUTH_URL: "https://app.example.test",
     AUTH_SECRET: "observability-secret-at-least-32-chars",
-    MAIL: { enabled: true },
+    MAIL: {
+      enabled: true,
+      brand: {
+        productName: "Observability Test",
+        canonicalOrigin: "https://app.example.test",
+        primaryColor: "#0057B8",
+        actionForeground: "#FFFFFF",
+        supportEmail: "support@example.test",
+        legalName: "Example Workspace, S.L.",
+        legalAddress: "123 Example Street, Example City",
+        logoUrl: "https://assets.example.test/mail/logo.png",
+      },
+    },
   }),
 }));
 vi.mock("@/lib/logger", () => ({

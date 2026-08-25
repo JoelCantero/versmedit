@@ -1,4 +1,183 @@
 {
+  "Email": {
+    "loginMagicLink": {
+      "subject": "Tu enlace de acceso a {productName}",
+      "previewText": "Usa este enlace seguro para iniciar sesión en {productName}.",
+      "heading": "Inicia sesión en {productName}",
+      "paragraphs": [
+        "Usa este enlace para iniciar sesión. Solo se puede usar una vez y caduca en 15 minutos.",
+        "Si no has solicitado este enlace, puedes ignorar este correo."
+      ],
+      "actionLabel": "Iniciar sesión",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "signupActivation": {
+      "subject": "Completa tu registro en {productName}",
+      "previewText": "Termina de crear tu cuenta en un plazo de 15 minutos.",
+      "heading": "Completa tu registro",
+      "paragraphs": [
+        "Termina de crear tu cuenta en un plazo de 15 minutos.",
+        "Este enlace de activación solo se puede usar una vez."
+      ],
+      "actionLabel": "Completar registro",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "existingAccountSignupNotice": {
+      "subject": "Ya existe una cuenta de {productName}",
+      "previewText": "Ya existe una cuenta para esta dirección de correo.",
+      "heading": "Ya existe una cuenta",
+      "paragraphs": [
+        "Ya existe una cuenta para esta dirección de correo. Inicia sesión.",
+        "No se ha creado ninguna cuenta ni enlace de activación nuevos."
+      ],
+      "actionLabel": "Iniciar sesión",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "accountDeletionReauthentication": {
+      "subject": "Confirma la eliminación de tu cuenta de {productName}",
+      "previewText": "Autentícate antes de continuar con la eliminación de la cuenta.",
+      "heading": "Continúa con la eliminación de la cuenta",
+      "paragraphs": [
+        "Autentícate con este enlace para seguir revisando la eliminación permanente de la cuenta.",
+        "Este enlace de un solo uso caduca en 10 minutos. Aún tendrás que confirmar la eliminación permanente."
+      ],
+      "actionLabel": "Continuar con la eliminación de la cuenta",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "accountSecurityReauthentication": {
+      "subject": "Confirma una acción de seguridad en tu cuenta de {productName}",
+      "previewText": "Autentícate antes de volver a Seguridad de la cuenta.",
+      "heading": "Vuelve a Seguridad de la cuenta",
+      "paragraphs": [
+        "Autentícate con este enlace para volver a Seguridad de la cuenta. Tendrás que elegir y confirmar la acción de nuevo.",
+        "Este enlace de un solo uso caduca en 10 minutos."
+      ],
+      "actionLabel": "Ir a Seguridad de la cuenta",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "personalDataExportConfirmation": {
+      "subject": "Confirma la exportación de tus datos personales de {productName}",
+      "previewText": "Confirma tu solicitud de exportación de datos personales.",
+      "heading": "Confirma tu exportación de datos",
+      "paragraphs": [
+        "Has solicitado una exportación de datos personales de {productName}.",
+        "Abre este enlace en una sesión activa de la misma cuenta. El enlace no iniciará sesión.",
+        "El enlace caduca 15 minutos después de solicitarlo."
+      ],
+      "actionLabel": "Confirmar la exportación de datos",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "personalDataExportReady": {
+      "subject": "Tu exportación de datos personales de {productName} está lista",
+      "previewText": "Tu exportación de datos personales está lista para descargar.",
+      "heading": "Tu exportación de datos está lista",
+      "paragraphs": [
+        "Tu exportación de datos personales está lista para descargar.",
+        "Abre la descarga desde una sesión activa de la misma cuenta y guarda el archivo de forma segura."
+      ],
+      "actionLabel": "Descargar la exportación de datos",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "accountDeleted": {
+      "subject": "Tu cuenta de {productName} se ha eliminado",
+      "previewText": "Tu cuenta y su acceso se han eliminado permanentemente.",
+      "heading": "Tu cuenta se ha eliminado",
+      "paragraphs": [
+        "Tu cuenta y el acceso asociado se han eliminado permanentemente.",
+        "No necesitas hacer nada más."
+      ],
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "emailChangeRequested": {
+      "subject": "Confirma el cambio de correo de {productName}",
+      "previewText": "Confirma el cambio solicitado a {newEmail}.",
+      "heading": "Confirma el cambio de correo",
+      "paragraphs": [
+        "Se ha solicitado cambiar el correo de tu cuenta a {newEmail}.",
+        "Confirma la solicitud sólo si la has iniciado tú."
+      ],
+      "actionLabel": "Confirmar cambio de correo",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "emailChanged": {
+      "subject": "El correo de tu cuenta de {productName} ha cambiado",
+      "previewText": "El correo de tu cuenta ahora es {newEmail}.",
+      "heading": "Tu correo ha cambiado",
+      "paragraphs": [
+        "El correo de tu cuenta ahora es {newEmail}.",
+        "Si no has realizado este cambio, contacta con soporte inmediatamente."
+      ],
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "securityAlert": {
+      "subject": "Revisa una alerta de seguridad de tu cuenta de {productName}",
+      "previewText": "Revisa un evento reciente relacionado con la seguridad de la cuenta.",
+      "heading": "Revisa una alerta de seguridad",
+      "paragraphs": [
+        "Se ha registrado un evento relacionado con la seguridad de la cuenta a las {occurredAt}.",
+        "Revisa Seguridad de la cuenta y finaliza cualquier acceso que no reconozcas."
+      ],
+      "actionLabel": "Revisar Seguridad de la cuenta",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    },
+    "genericConfirmation": {
+      "subject": "Confirma tu solicitud de {productName}",
+      "previewText": "Revisa la solicitud de confirmación {reference}.",
+      "heading": "Confirma tu solicitud",
+      "paragraphs": [
+        "Hemos recibido la solicitud {reference}.",
+        "Usa la confirmación sólo si has iniciado esta solicitud."
+      ],
+      "actionLabel": "Confirmar solicitud",
+      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "supportLabel": "¿Tienes preguntas? Contacta con",
+      "termsLabel": "Términos de uso",
+      "privacyLabel": "Aviso de privacidad",
+      "legalLabel": "Enviado por"
+    }
+  },
   "Metadata": {
     "title": "Aplicación web",
     "description": "Plantilla de Next.js autoalojada y dockerizada"

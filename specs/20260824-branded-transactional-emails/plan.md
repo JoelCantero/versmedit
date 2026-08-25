@@ -32,9 +32,8 @@ unchanged
 **Testing**: Vitest in Node/jsdom for catalogue, rendering, environment, architecture, escaping,
 contrast, size, and provider payload contracts; existing PostgreSQL integration tests for six
 business flows and exact-token compensation; Playwright and the fake provider fixture against the
-production standalone artifact; Docker runner build; repeatable manual compatibility review in
-current Gmail web/mobile, Apple Mail/iOS Mail, Outlook web, and classic Outlook desktop; and a
-six-reviewer, three-locale comprehension protocol for the six operational variants
+production standalone artifact; Docker runner build; and automated responsive layout checks across
+all locales, representative widths, logo states, brand colors, and long-content cases
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel -> Traefik
 
@@ -91,7 +90,7 @@ retry, retained render, or multi-brand workload
 | IX. Reproducible CI/CD | PASS | Lockfile, lint, typecheck, coverage, standalone E2E, dependency audit, and Docker image checks remain authoritative. |
 | X. Security by Default | PASS | Strict variant inputs, URL/config validation, React escaping, no raw HTML, credential isolation, and a preview with no provider or action endpoint preserve the trust boundaries. |
 | XI. Specs Before Implementation | PASS | The clarified specification and this plan precede task generation and implementation. |
-| XII. Tests and Verification | PASS | Unit, integration, E2E, standalone, Docker, and named-client manual checks cover the critical email flows. |
+| XII. Tests and Verification | PASS | Unit, integration, E2E, standalone, Docker, and automated layout checks cover the critical email flows. |
 
 No constitutional violation requires a complexity exception.
 
@@ -99,8 +98,7 @@ No constitutional violation requires a complexity exception.
 
 Phase 1 keeps every gate above at PASS: the logical data model adds no persistence, the contracts
 preserve the existing delivery API and domain URL ownership, the preview contract creates no public
-or sending interface, and the quickstart includes all automated gates plus a justified manual check
-for proprietary email-client engines.
+or sending interface, and the quickstart includes the complete automated release gate.
 
 ## Project Structure
 

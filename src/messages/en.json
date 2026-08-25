@@ -1,4 +1,183 @@
 {
+  "Email": {
+    "loginMagicLink": {
+      "subject": "Your {productName} sign-in link",
+      "previewText": "Use this secure link to sign in to {productName}.",
+      "heading": "Sign in to {productName}",
+      "paragraphs": [
+        "Use this link to sign in. It can be used once and expires in 15 minutes.",
+        "If you did not request this link, you can ignore this email."
+      ],
+      "actionLabel": "Sign in",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "signupActivation": {
+      "subject": "Complete your {productName} signup",
+      "previewText": "Finish creating your account within 15 minutes.",
+      "heading": "Complete your signup",
+      "paragraphs": [
+        "Finish creating your account within 15 minutes.",
+        "This activation link can be used once."
+      ],
+      "actionLabel": "Complete signup",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "existingAccountSignupNotice": {
+      "subject": "A {productName} account already exists",
+      "previewText": "An account already exists for this email address.",
+      "heading": "An account already exists",
+      "paragraphs": [
+        "An account already exists for this email address. Sign in instead.",
+        "No new account or activation link was created."
+      ],
+      "actionLabel": "Sign in",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "accountDeletionReauthentication": {
+      "subject": "Confirm your {productName} account deletion",
+      "previewText": "Authenticate before continuing account deletion.",
+      "heading": "Continue account deletion",
+      "paragraphs": [
+        "Authenticate with this link to continue reviewing permanent account deletion.",
+        "This single-use link expires in 10 minutes. You will still need to confirm permanent deletion."
+      ],
+      "actionLabel": "Continue account deletion",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "accountSecurityReauthentication": {
+      "subject": "Confirm your {productName} account security action",
+      "previewText": "Authenticate before returning to Account Security.",
+      "heading": "Return to Account Security",
+      "paragraphs": [
+        "Authenticate with this link to return to Account Security. You will need to choose and confirm the action again.",
+        "This single-use link expires in 10 minutes."
+      ],
+      "actionLabel": "Continue to Account Security",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "personalDataExportConfirmation": {
+      "subject": "Confirm your {productName} personal data export",
+      "previewText": "Confirm your personal data export request.",
+      "heading": "Confirm your data export",
+      "paragraphs": [
+        "You requested a personal data export from {productName}.",
+        "Open this link in an active session for the same account. It will not sign you in.",
+        "The link expires 15 minutes after it was requested."
+      ],
+      "actionLabel": "Confirm data export",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "personalDataExportReady": {
+      "subject": "Your {productName} personal data export is ready",
+      "previewText": "Your personal data export is ready to download.",
+      "heading": "Your data export is ready",
+      "paragraphs": [
+        "Your personal data export is ready to download.",
+        "Open the download from an active session for the same account and store the file securely."
+      ],
+      "actionLabel": "Download data export",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "accountDeleted": {
+      "subject": "Your {productName} account was deleted",
+      "previewText": "Your account and its access were permanently removed.",
+      "heading": "Your account was deleted",
+      "paragraphs": [
+        "Your account and its associated access were permanently deleted.",
+        "No further action is required."
+      ],
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "emailChangeRequested": {
+      "subject": "Confirm your {productName} email change",
+      "previewText": "Confirm the requested change to {newEmail}.",
+      "heading": "Confirm your email change",
+      "paragraphs": [
+        "A change to {newEmail} was requested for your account.",
+        "Confirm the request only if you started it."
+      ],
+      "actionLabel": "Confirm email change",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "emailChanged": {
+      "subject": "Your {productName} email was changed",
+      "previewText": "Your account email is now {newEmail}.",
+      "heading": "Your email was changed",
+      "paragraphs": [
+        "Your account email is now {newEmail}.",
+        "If you did not make this change, contact support immediately."
+      ],
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "securityAlert": {
+      "subject": "Review a security alert for your {productName} account",
+      "previewText": "Review a recent security-sensitive account event.",
+      "heading": "Review a security alert",
+      "paragraphs": [
+        "A security-sensitive account event was recorded at {occurredAt}.",
+        "Review Account Security and end any access you do not recognize."
+      ],
+      "actionLabel": "Review Account Security",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    },
+    "genericConfirmation": {
+      "subject": "Confirm your {productName} request",
+      "previewText": "Review confirmation request {reference}.",
+      "heading": "Confirm your request",
+      "paragraphs": [
+        "We received request {reference}.",
+        "Use the confirmation below only if you initiated this request."
+      ],
+      "actionLabel": "Confirm request",
+      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "supportLabel": "Questions? Contact",
+      "termsLabel": "Terms of Use",
+      "privacyLabel": "Privacy Notice",
+      "legalLabel": "Sent by"
+    }
+  },
   "Metadata": {
     "title": "Web app",
     "description": "Self-hosted, Dockerized Next.js starter"

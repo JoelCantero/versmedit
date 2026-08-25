@@ -25,6 +25,11 @@ const managedEnv = [
   "MAIL_API_KEY",
   "MAIL_API_SECRET",
   "MAIL_FROM",
+  "MAIL_BRAND_COLOR",
+  "MAIL_SUPPORT_EMAIL",
+  "MAIL_LEGAL_NAME",
+  "MAIL_LEGAL_ADDRESS",
+  "MAIL_LOGO_URL",
   "TRUST_PROXY_HEADERS",
 ] as const;
 const originalEnv = new Map(
@@ -96,6 +101,11 @@ async function configureProvider(provider: ProviderName) {
     MAIL_API_KEY: "performance-key",
     MAIL_API_SECRET: provider === "mailjet" ? "performance-secret" : "",
     MAIL_FROM: "no-reply@example.test",
+    MAIL_BRAND_COLOR: "#0057B8",
+    MAIL_SUPPORT_EMAIL: "support@example.test",
+    MAIL_LEGAL_NAME: "Example Workspace, S.L.",
+    MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+    MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
     TRUST_PROXY_HEADERS: "true",
   });
   vi.resetModules();

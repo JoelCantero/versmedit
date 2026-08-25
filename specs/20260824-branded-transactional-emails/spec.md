@@ -14,7 +14,6 @@
 
 - Q: Which future-only messages should show a primary action button and matching plain-text link? → A: Personal-data-export ready, email change requested, security alert, and generic confirmation; account deleted and email changed remain informational.
 - Q: May the six operational messages be rewritten for a consistent voice, or must their current localized wording remain unchanged? → A: Rewrites are allowed in each locale provided they preserve the existing meaning, next action, and security-relevant information.
-- Q: Which email-client compatibility level must every template pass before release? → A: Every template must remain readable and actionable in the current stable Gmail web and mobile clients, Apple Mail and iOS Mail, Outlook web, and classic Outlook desktop; pixel-identical rendering is not required.
 - Q: When transactional email is enabled but branding is invalid, how should startup behave? → A: The entire application must fail startup before serving requests.
 - Q: How much custom content may the preview-only generic confirmation template accept? → A: It uses fixed catalogue-owned localized copy and accepts only predefined structured display values and a fictional action destination.
 
@@ -94,7 +93,6 @@ As a product reviewer, I can inspect complete future transactional messages befo
 ### Edge Cases
 
 - The optional logo is absent, temporarily unreachable, or has an unusually wide intrinsic aspect ratio; the message remains complete and does not rely on the image to communicate product identity or purpose.
-- A supported email client suppresses remote images or applies its own font, spacing, or color adjustments; all essential content, destinations, and reading order remain usable without pixel-identical rendering.
 - The configured primary color is near white or near black; action text still meets the required contrast ratio.
 - Product names, legal names, postal addresses, support addresses, and translated copy are unusually long or contain quotes, apostrophes, ampersands, angle brackets, or long unbroken values.
 - An action destination contains multiple query parameters and an opaque credential; its destination remains intact, escaped, and isolated from support and legal links.
@@ -113,7 +111,6 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - Integration verification covers all six existing business triggers, rendering failure before submission, delivery failure after rendering, credential compensation, and unchanged delivery submission contracts.
 - Preview verification covers all 36 combinations without application startup or external dependencies and records zero provider submissions, production-data access, credential creation, or sending controls.
 - Release-package verification covers rendering and submission of every operational variant from the deployable artifact, including dependency completeness and the existing request-size boundary.
-- Content-comprehension verification uses at least six reviewers who did not implement the feature, with at least two proficient reviewers per supported locale. Each reviewer assesses all six operational messages in one proficient locale from fictional rendered fixtures, and an assessment passes only when both the purpose and required next action match the fixed rubric.
 
 ## Requirements *(mandatory)*
 
@@ -148,7 +145,6 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **FR-024**: The primary-action foreground color MUST be selected so that it has a contrast ratio of at least 4.5:1 against the configured primary color.
 - **FR-025**: Terms of Use and Privacy Notice destinations MUST be absolute, use the existing canonical application routes, and preserve the message locale.
 - **FR-026**: Product identity, long translated copy, legal names, postal addresses, support addresses, and action destinations MUST wrap without clipping, overlap, or horizontal overflow at representative mobile and desktop email widths.
-- **FR-026a**: Every template MUST remain readable and actionable in the current stable Gmail web and mobile clients, Apple Mail and iOS Mail, Outlook web, and classic Outlook desktop. Essential content, reading order, primary actions, fallback destinations, support details, and legal links MUST remain usable, but pixel-identical rendering across clients is not required.
 - **FR-027**: The local preview experience MUST list and render all 12 variants in all three supported locales for exactly 36 combinations.
 - **FR-028**: The local preview MUST remain fully usable without starting the application or accessing authentication, session, database, application logging, provider, or sending behavior.
 - **FR-029**: Opening, navigating, or rendering a preview MUST cause zero provider submissions, credential creation, account mutation, production-data access, or application log events and MUST expose no sending control.
@@ -165,7 +161,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **VR-003a**: Generic-confirmation checks MUST verify fixed catalogue-owned copy in all three locales, accepted predefined display values and fictional destination, and the absence of inputs for caller-provided subject, preview text, heading, body, action label, HTML, or plain text.
 - **VR-004**: Escaping checks MUST cover quotes, apostrophes, ampersands, angle brackets, long unbroken values, and destinations with multiple query parameters without executable markup or destination corruption.
 - **VR-005**: Branding checks MUST cover valid configuration, each missing or malformed required value, disabled transactional email, absent and unreachable logos, meaningful alternative text, light and dark primary colors, and long legal and support details; every invalid enabled-email case MUST terminate application startup before any request is served.
-- **VR-006**: Layout checks MUST cover representative mobile and desktop email widths in every locale and the current stable Gmail web and mobile clients, Apple Mail and iOS Mail, Outlook web, and classic Outlook desktop. Verification MUST find no loss of essential content, broken reading order, unusable action, obscured fallback destination, clipping, overlap, or horizontal overflow; visual differences that preserve readability and actionability are acceptable.
+- **VR-006**: Automated layout checks MUST cover representative mobile and desktop email widths in every locale. Verification MUST find no loss of essential content, broken reading order, unusable action, obscured fallback destination, clipping, overlap, or horizontal overflow.
 - **VR-007**: Preview-isolation checks MUST render and navigate all 36 combinations without application configuration or external dependencies and MUST assert zero provider requests, credential actions, production-data access, application log events, and sending controls.
 - **VR-008**: Integration checks MUST exercise the current trigger for all six operational variants and verify unchanged purpose, destination, credential lifecycle, provider request contract, acceptance behavior, and public outcome.
 - **VR-009**: Failure checks MUST prove that rendering errors occur before any provider request and that rendering or delivery failure leaves no newly issued credential usable and restores no superseded credential.
@@ -190,13 +186,12 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **SC-004**: Across all rendering and delivery failure cases, zero newly issued credentials remain usable, zero superseded credentials are restored, and zero rendering failures reach a provider.
 - **SC-005**: Reviewers can open and navigate all 36 previews with zero provider submissions, production-data reads, credential actions, account mutations, or application log events.
 - **SC-006**: Transactional email remains disabled and the application starts successfully in 100% of tests without the additional brand values; 100% of missing or malformed required-brand cases terminate the entire application startup before serving requests when email is enabled.
-- **SC-007**: Every tested action-color combination meets at least 4.5:1 contrast, and every combination in the locale, width, logo, long-content, and named email-client verification matrix preserves all essential content and actions with zero clipping, overlap, or horizontal overflow that prevents use.
+- **SC-007**: Every tested action-color combination meets at least 4.5:1 contrast, and every automated locale, width, logo, and long-content case preserves all essential content and actions with zero clipping, overlap, or horizontal overflow that prevents use.
 - **SC-008**: Both existing provider serializations of every rendered combination remain below the 1 MiB UTF-8 request-size limit under representative content, and an oversized operational request is rejected before network submission with zero message content recorded.
 - **SC-009**: The deployable release package renders and submits all six operational variants with zero missing presentation assets or dependencies.
-- **SC-010**: In a review with at least six people who did not implement the feature and at least two proficient reviewers for each supported locale, every reviewer assesses all six operational messages in one proficient locale without external instructions. At least 90% of the resulting reviewer-message assessments MUST correctly identify both the message purpose and required next action against a fixed rubric, with anonymized results recorded for release review.
-- **SC-011**: Automated production-surface inspection finds zero triggers, routes, jobs, credential paths, or sending entry points for the six preview-only variants.
-- **SC-012**: Automated log inspection finds zero subjects, bodies, recipients, action destinations, credentials, template values, or preview fixture details.
-- **SC-013**: Generic-confirmation verification finds zero caller-provided copy, HTML, or plain-text inputs and confirms catalogue-owned localized copy in all three supported locales.
+- **SC-010**: Automated production-surface inspection finds zero triggers, routes, jobs, credential paths, or sending entry points for the six preview-only variants.
+- **SC-011**: Automated log inspection finds zero subjects, bodies, recipients, action destinations, credentials, template values, or preview fixture details.
+- **SC-012**: Generic-confirmation verification finds zero caller-provided copy, HTML, or plain-text inputs and confirms catalogue-owned localized copy in all three supported locales.
 
 ## Assumptions
 

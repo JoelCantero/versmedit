@@ -1,10 +1,10 @@
 import "server-only";
 
-import caMessages from "@/messages/ca.json";
-import enMessages from "@/messages/en.json";
-import esMessages from "@/messages/es.json";
-
 import { sendTransactionalEmail } from "@/lib/email/index";
+import {
+  renderEmailPresentation,
+  type EmailBrand,
+} from "@/lib/email/presentation";
 import { getEnv } from "@/lib/env";
 import type { AccountLocale } from "@/modules/account/types";
 
@@ -15,44 +15,27 @@ interface AccountSecurityEmailOptions {
   origin: string;
 }
 
-const emailCopy = {
-  en: enMessages.Account.security.email,
-  es: esMessages.Account.security.email,
-  ca: caMessages.Account.security.email,
-} satisfies Record<
-  AccountLocale,
-  { subject: string; introduction: string; action: string }
->;
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 export function buildAccountSecurityEmail(
   { recipient, rawToken, locale, origin }: AccountSecurityEmailOptions,
-  projectName: string,
+  brand: EmailBrand,
 ) {
-  const copy = emailCopy[locale];
   const verificationUrl = new URL("/api/account/security/verify", origin);
   verificationUrl.searchParams.set("token", rawToken);
-  const url = verificationUrl.toString();
 
-  return {
-    recipient,
+  return renderEmailPresentation({
+    variant: "accountSecurityReauthentication",
     locale,
-    subject: copy.subject.replaceAll("{projectName}", projectName),
-    text: `${copy.introduction}\n\n${copy.action}: ${url}`,
-    html: `<p>${escapeHtml(copy.introduction)}</p><p><a href="${escapeHtml(url)}">${escapeHtml(copy.action)}</a></p>`,
-  };
+    brand,
+    actionUrl: verificationUrl.toString(),
+  }).then((content) => ({ recipient, locale, ...content }));
 }
 
-export function sendAccountSecurityEmail(options: AccountSecurityEmailOptions) {
+export async function sendAccountSecurityEmail(
+  options: AccountSecurityEmailOptions,
+) {
+  const mail = getEnv().MAIL;
+  if (!mail.enabled) throw new Error("Transactional email is disabled");
   return sendTransactionalEmail(
-    buildAccountSecurityEmail(options, getEnv().PROJECT_NAME),
+    await buildAccountSecurityEmail(options, mail.brand),
   );
 }

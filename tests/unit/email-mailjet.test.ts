@@ -6,6 +6,7 @@ vi.mock("server-only", () => ({}));
 
 import { createMailjetProvider } from "@/lib/email/mailjet";
 import type { TransactionalEmail } from "@/lib/email/types";
+import { createTestEmailBrand } from "../helpers/email-brand";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
 import { getTestProjectName } from "../helpers/project-name";
 
@@ -17,6 +18,7 @@ const config = {
   apiSecret: "mailjet-secret",
   fromEmail: "no-reply@example.test",
   senderName: projectName,
+  brand: createTestEmailBrand(projectName),
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,

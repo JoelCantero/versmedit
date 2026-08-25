@@ -32,6 +32,11 @@ services:
       - MAIL_API_KEY
       - MAIL_API_SECRET
       - MAIL_FROM
+      - MAIL_BRAND_COLOR
+      - MAIL_SUPPORT_EMAIL
+      - MAIL_LEGAL_NAME
+      - MAIL_LEGAL_ADDRESS
+      - MAIL_LOGO_URL
     depends_on:
       db:
         condition: service_healthy

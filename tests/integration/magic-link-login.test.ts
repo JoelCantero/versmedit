@@ -74,12 +74,14 @@ describe.skipIf(!runIntegrationTests)("magic-link HTTP provider acceptance", () 
     "submits known-user login content through %s with a nullable identifier",
     async (providerName, behavior, providerMessageId) => {
       const { createTransactionalEmailProvider } = await import("@/lib/email/index");
+      const { createTestEmailBrand } = await import("../helpers/email-brand");
       const http = createHttpMailProvider([behavior]);
       const common = {
         enabled: true as const,
         apiKey: "integration-key",
         fromEmail: "no-reply@example.test",
         senderName: projectName,
+        brand: createTestEmailBrand(projectName),
         sendTimeoutMs: 2_500 as const,
         healthTimeoutMs: 1_500 as const,
         responseLimitBytes: 65_536 as const,
@@ -304,6 +306,11 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
     "MAIL_API_KEY",
     "MAIL_API_SECRET",
     "MAIL_FROM",
+    "MAIL_BRAND_COLOR",
+    "MAIL_SUPPORT_EMAIL",
+    "MAIL_LEGAL_NAME",
+    "MAIL_LEGAL_ADDRESS",
+    "MAIL_LOGO_URL",
     "TRUST_PROXY_HEADERS",
   ] as const;
   const routeContext = {
@@ -329,6 +336,11 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
       MAIL_API_KEY: "login-integration-key",
       MAIL_API_SECRET: "",
       MAIL_FROM: "no-reply@example.test",
+      MAIL_BRAND_COLOR: "#0057B8",
+      MAIL_SUPPORT_EMAIL: "support@example.test",
+      MAIL_LEGAL_NAME: "Example Workspace, S.L.",
+      MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+      MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
       TRUST_PROXY_HEADERS: "true",
     });
     vi.resetModules();
@@ -500,7 +512,32 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
 
     const first = await submitLogin(email, "/es");
     expect(first.response.status).toBe(200);
+    await expect(first.response.clone().json()).resolves.toEqual({
+      status: "accepted",
+    });
     const firstToken = capturedRawTokens(email)[0];
+    const firstSubmission = http.requests.find(
+      (request) => request.method === "POST" && request.body?.includes(email),
+    );
+    const firstPayload = JSON.parse(firstSubmission?.body ?? "{}") as {
+      subject?: string;
+      textContent?: string;
+      htmlContent?: string;
+    };
+    expect(firstPayload.subject).toBe(`Tu enlace de acceso a ${projectName}`);
+    expect(firstPayload.htmlContent).toMatch(/<!doctype html/i);
+    expect(firstPayload.htmlContent).toContain(projectName);
+    expect(firstPayload.htmlContent).toContain("support@example.test");
+    expect(firstPayload.textContent).toContain(
+      "https://app.example.test/api/auth/callback/email",
+    );
+    expect(firstPayload.textContent).toContain(`token=${firstToken}`);
+    expect(`${firstPayload.textContent}${firstPayload.htmlContent}`).not.toMatch(
+      /signup\/activate|account\/deletion|account\/security/i,
+    );
+    expect(
+      http.requests.filter((request) => request.method === "POST"),
+    ).toHaveLength(1);
     const firstPersisted = await db.verificationToken.findFirstOrThrow({
       where: { identifier: email },
     });

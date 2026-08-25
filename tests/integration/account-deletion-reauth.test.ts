@@ -186,6 +186,37 @@ describe.skipIf(!runIntegrationTests)("account deletion reauthentication integra
     expect(mocks.sendAccountDeletionEmail).toHaveBeenCalledTimes(2);
   });
 
+  it("compensates an exceptional presentation failure after one wrapper attempt", async () => {
+    const { db } = await import("@/lib/db");
+    const { issueAccountDeletionReauthentication } = await import(
+      "@/modules/account/deletion/service"
+    );
+    const scope = createAccountDeletionFixtureScope();
+    scopes.push(scope);
+    const graph = await scope.seedFullGraph(db);
+    mocks.sendAccountDeletionEmail.mockRejectedValueOnce(
+      new Error("simulated presentation failure"),
+    );
+
+    await expect(
+      issueAccountDeletionReauthentication({
+        sessionToken: graph.sessions[0]!.sessionToken,
+        locale: "en",
+        origin: "https://app.example.test",
+      }),
+    ).resolves.toEqual({ status: "unavailable" });
+
+    expect(mocks.sendAccountDeletionEmail).toHaveBeenCalledOnce();
+    await expect(
+      db.verificationToken.count({
+        where: {
+          identifier: graph.owner.normalizedEmail,
+          purpose: "ACCOUNT_DELETION",
+        },
+      }),
+    ).resolves.toBe(0);
+  });
+
   it.each([
     ["expired", "ACCOUNT_DELETION", new Date(Date.now() - 1), new Date(), true],
     ["provisional", "ACCOUNT_DELETION", new Date(Date.now() + 60_000), null, true],

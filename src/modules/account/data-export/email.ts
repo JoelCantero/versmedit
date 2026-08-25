@@ -1,10 +1,10 @@
 import "server-only";
 
-import caMessages from "@/messages/ca.json";
-import enMessages from "@/messages/en.json";
-import esMessages from "@/messages/es.json";
-
 import { sendTransactionalEmail } from "@/lib/email/index";
+import {
+  renderEmailPresentation,
+  type EmailBrand,
+} from "@/lib/email/presentation";
 import { getEnv } from "@/lib/env";
 import { getPersonalDataExportVerificationUrl } from "@/modules/account/data-export/schema";
 import type { AccountLocale } from "@/modules/account/types";
@@ -16,58 +16,28 @@ interface PersonalDataExportEmailOptions {
   origin: string;
 }
 
-const emailCopy = {
-  en: enMessages.Account.dataExport.email,
-  es: esMessages.Account.dataExport.email,
-  ca: caMessages.Account.dataExport.email,
-} satisfies Record<
-  AccountLocale,
-  {
-    subject: string;
-    introduction: string;
-    sessionRequirement: string;
-    expiry: string;
-    action: string;
-  }
->;
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 export function buildPersonalDataExportEmail(
   { recipient, rawToken, locale, origin }: PersonalDataExportEmailOptions,
-  projectName: string,
+  brand: EmailBrand,
 ) {
-  const copy = emailCopy[locale];
   const url = getPersonalDataExportVerificationUrl({ origin, rawToken, locale });
-  const introduction = copy.introduction.replaceAll(
-    "{projectName}",
-    projectName,
-  );
-  const subject = copy.subject.replaceAll("{projectName}", projectName);
 
-  return {
-    recipient,
+  return renderEmailPresentation({
+    variant: "personalDataExportConfirmation",
     locale,
-    subject,
-    text: `${introduction}\n\n${copy.sessionRequirement}\n${copy.expiry}\n\n${copy.action}: ${url}`,
-    html: `<p>${escapeHtml(introduction)}</p><p>${escapeHtml(copy.sessionRequirement)}</p><p>${escapeHtml(copy.expiry)}</p><p><a href="${escapeHtml(url)}">${escapeHtml(copy.action)}</a></p>`,
-  };
+    brand,
+    actionUrl: url,
+  }).then((content) => ({ recipient, locale, ...content }));
 }
 
 export function sendPersonalDataExportEmail(
   options: PersonalDataExportEmailOptions,
 ) {
-  return sendTransactionalEmail(
-    buildPersonalDataExportEmail(options, getEnv().PROJECT_NAME),
-    undefined,
-    undefined,
-    { logAttempt: false },
+  const mail = getEnv().MAIL;
+  if (!mail.enabled) throw new Error("Transactional email is disabled");
+  return buildPersonalDataExportEmail(options, mail.brand).then((message) =>
+    sendTransactionalEmail(message, undefined, undefined, {
+      logAttempt: false,
+    }),
   );
 }

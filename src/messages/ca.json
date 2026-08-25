@@ -1,4 +1,183 @@
 {
+  "Email": {
+    "loginMagicLink": {
+      "subject": "El teu enllaç d'accés a {productName}",
+      "previewText": "Utilitza aquest enllaç segur per iniciar sessió a {productName}.",
+      "heading": "Inicia sessió a {productName}",
+      "paragraphs": [
+        "Utilitza aquest enllaç per iniciar sessió. Només es pot utilitzar una vegada i caduca en 15 minuts.",
+        "Si no has sol·licitat aquest enllaç, pots ignorar aquest correu."
+      ],
+      "actionLabel": "Inicia sessió",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "signupActivation": {
+      "subject": "Completa el teu registre a {productName}",
+      "previewText": "Acaba de crear el teu compte en un termini de 15 minuts.",
+      "heading": "Completa el teu registre",
+      "paragraphs": [
+        "Acaba de crear el teu compte en un termini de 15 minuts.",
+        "Aquest enllaç d'activació només es pot utilitzar una vegada."
+      ],
+      "actionLabel": "Completa el registre",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "existingAccountSignupNotice": {
+      "subject": "Ja existeix un compte de {productName}",
+      "previewText": "Ja existeix un compte per a aquesta adreça electrònica.",
+      "heading": "Ja existeix un compte",
+      "paragraphs": [
+        "Ja existeix un compte per a aquesta adreça electrònica. Inicia la sessió.",
+        "No s'ha creat cap compte ni enllaç d'activació nous."
+      ],
+      "actionLabel": "Inicia sessió",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "accountDeletionReauthentication": {
+      "subject": "Confirma l'eliminació del teu compte de {productName}",
+      "previewText": "Autentica't abans de continuar amb l'eliminació del compte.",
+      "heading": "Continua amb l'eliminació del compte",
+      "paragraphs": [
+        "Autentica't amb aquest enllaç per continuar revisant l'eliminació permanent del compte.",
+        "Aquest enllaç d'un sol ús caduca en 10 minuts. Encara hauràs de confirmar l'eliminació permanent."
+      ],
+      "actionLabel": "Continua amb l'eliminació del compte",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "accountSecurityReauthentication": {
+      "subject": "Confirma una acció de seguretat al teu compte de {productName}",
+      "previewText": "Autentica't abans de tornar a Seguretat del compte.",
+      "heading": "Torna a Seguretat del compte",
+      "paragraphs": [
+        "Autentica't amb aquest enllaç per tornar a Seguretat del compte. Hauràs de tornar a triar i confirmar l'acció.",
+        "Aquest enllaç d'un sol ús caduca en 10 minuts."
+      ],
+      "actionLabel": "Ves a Seguretat del compte",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "personalDataExportConfirmation": {
+      "subject": "Confirma l'exportació de les teves dades personals de {productName}",
+      "previewText": "Confirma la teva sol·licitud d'exportació de dades personals.",
+      "heading": "Confirma l'exportació de dades",
+      "paragraphs": [
+        "Has sol·licitat una exportació de dades personals de {productName}.",
+        "Obre aquest enllaç en una sessió activa del mateix compte. L'enllaç no iniciarà cap sessió.",
+        "L'enllaç caduca 15 minuts després de sol·licitar-lo."
+      ],
+      "actionLabel": "Confirma l'exportació de dades",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "personalDataExportReady": {
+      "subject": "La teva exportació de dades personals de {productName} està a punt",
+      "previewText": "La teva exportació de dades personals està a punt per baixar.",
+      "heading": "La teva exportació de dades està a punt",
+      "paragraphs": [
+        "La teva exportació de dades personals està a punt per baixar.",
+        "Obre la baixada des d'una sessió activa del mateix compte i desa el fitxer de manera segura."
+      ],
+      "actionLabel": "Descarrega l'exportació de dades",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "accountDeleted": {
+      "subject": "El teu compte de {productName} s'ha eliminat",
+      "previewText": "El teu compte i el seu accés s'han eliminat permanentment.",
+      "heading": "El teu compte s'ha eliminat",
+      "paragraphs": [
+        "El teu compte i l'accés associat s'han eliminat permanentment.",
+        "No cal que facis res més."
+      ],
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "emailChangeRequested": {
+      "subject": "Confirma el canvi de correu de {productName}",
+      "previewText": "Confirma el canvi sol·licitat a {newEmail}.",
+      "heading": "Confirma el canvi de correu",
+      "paragraphs": [
+        "S'ha sol·licitat canviar el correu del teu compte a {newEmail}.",
+        "Confirma la sol·licitud només si l'has iniciat tu."
+      ],
+      "actionLabel": "Confirma el canvi de correu",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "emailChanged": {
+      "subject": "El correu del teu compte de {productName} ha canviat",
+      "previewText": "El correu del teu compte ara és {newEmail}.",
+      "heading": "El teu correu ha canviat",
+      "paragraphs": [
+        "El correu del teu compte ara és {newEmail}.",
+        "Si no has fet aquest canvi, contacta amb suport immediatament."
+      ],
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "securityAlert": {
+      "subject": "Revisa una alerta de seguretat del teu compte de {productName}",
+      "previewText": "Revisa un esdeveniment recent relacionat amb la seguretat del compte.",
+      "heading": "Revisa una alerta de seguretat",
+      "paragraphs": [
+        "S'ha registrat un esdeveniment relacionat amb la seguretat del compte a les {occurredAt}.",
+        "Revisa Seguretat del compte i finalitza qualsevol accés que no reconeguis."
+      ],
+      "actionLabel": "Revisa Seguretat del compte",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    },
+    "genericConfirmation": {
+      "subject": "Confirma la teva sol·licitud de {productName}",
+      "previewText": "Revisa la sol·licitud de confirmació {reference}.",
+      "heading": "Confirma la teva sol·licitud",
+      "paragraphs": [
+        "Hem rebut la sol·licitud {reference}.",
+        "Utilitza la confirmació només si has iniciat aquesta sol·licitud."
+      ],
+      "actionLabel": "Confirma la sol·licitud",
+      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "supportLabel": "Tens preguntes? Contacta amb",
+      "termsLabel": "Condicions d'ús",
+      "privacyLabel": "Avís de privacitat",
+      "legalLabel": "Enviat per"
+    }
+  },
   "Metadata": {
     "title": "Aplicació web",
     "description": "Plantilla de Next.js autoallotjada i dockeritzada"

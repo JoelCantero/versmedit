@@ -2,8 +2,13 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createTestEmailBrand } from "../helpers/email-brand";
+
 const mocks = vi.hoisted(() => ({
   projectName: "VersMedit",
+  brand: undefined as ReturnType<
+    typeof import("../helpers/email-brand").createTestEmailBrand
+  > | undefined,
   sendTransactionalEmail: vi.fn(),
 }));
 
@@ -12,13 +17,19 @@ vi.mock("@/lib/email/index", () => ({
   sendTransactionalEmail: mocks.sendTransactionalEmail,
 }));
 vi.mock("@/lib/env", () => ({
-  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
+  getEnv: () => ({
+    PROJECT_NAME: mocks.projectName,
+    MAIL: { enabled: true, brand: mocks.brand },
+  }),
 }));
 
 import {
   buildAccountSecurityEmail,
   sendAccountSecurityEmail,
 } from "@/modules/account/security/email";
+
+const brand = createTestEmailBrand("VersMedit");
+mocks.brand = brand;
 
 const localeCopy = {
   en: {
@@ -55,15 +66,15 @@ describe("account security email", () => {
 
   it.each(Object.entries(localeCopy))(
     "builds one intended credential-bearing %s verification link",
-    (locale, copy) => {
-      const message = buildAccountSecurityEmail(
+    async (locale, copy) => {
+      const message = await buildAccountSecurityEmail(
         {
           recipient: "person@example.test",
           rawToken: "raw_security_token",
           locale: locale as keyof typeof localeCopy,
           origin: "https://app.example.test",
         },
-        mocks.projectName,
+        brand,
       );
       const expectedUrl =
         "https://app.example.test/api/account/security/verify?token=raw_security_token";
@@ -73,27 +84,30 @@ describe("account security email", () => {
         locale,
         subject: copy.subject,
       });
-      expect(message.text).toBe(`${copy.introduction}\n\n${copy.action}: ${expectedUrl}`);
-      expect(message.html.match(/<a\s/gu)).toHaveLength(1);
-      expect(message.html.match(/href=/gu)).toHaveLength(1);
+      expect(message.text).toContain(copy.introduction);
+      expect(message.text).toContain(expectedUrl);
+      expect(message.html).toMatch(/<!doctype html/i);
+      expect(message.html).toContain("VersMedit");
+      expect(message.html).toContain("support@example.test");
       expect(message.html).toContain(`href="${expectedUrl}"`);
       expect(message.text).not.toContain("person@example.test");
     },
   );
 
-  it("escapes localized HTML content and never interpolates the recipient", () => {
-    const message = buildAccountSecurityEmail(
+  it("escapes branded HTML content and never interpolates the recipient", async () => {
+    const unsafeBrand = createTestEmailBrand("<VersMedit & Co>");
+    const message = await buildAccountSecurityEmail(
       {
         recipient: "person@example.test",
         rawToken: "raw_security_token",
         locale: "ca",
         origin: "https://app.example.test",
       },
-      "<VersMedit & Co>",
+      unsafeBrand,
     );
 
     expect(message.subject).toContain("<VersMedit & Co>");
-    expect(message.html).toContain("Autentica&#39;t");
+    expect(message.html).toContain("Autentica&#x27;t");
     expect(message.html).not.toContain("Autentica't");
     expect(message.html).not.toContain("person@example.test");
     expect(message.html).not.toContain("<VersMedit & Co>");
@@ -114,7 +128,7 @@ describe("account security email", () => {
       );
 
       expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
-        buildAccountSecurityEmail(options, mocks.projectName),
+        await buildAccountSecurityEmail(options, brand),
       );
       expect(mocks.sendTransactionalEmail.mock.calls[0]?.[0]).not.toHaveProperty(
         "from",

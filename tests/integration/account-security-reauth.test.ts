@@ -58,6 +58,11 @@ const managedEnv = [
   "MAIL_API_KEY",
   "MAIL_API_SECRET",
   "MAIL_FROM",
+  "MAIL_BRAND_COLOR",
+  "MAIL_SUPPORT_EMAIL",
+  "MAIL_LEGAL_NAME",
+  "MAIL_LEGAL_ADDRESS",
+  "MAIL_LOGO_URL",
   "TRUST_PROXY_HEADERS",
 ] as const;
 
@@ -132,6 +137,11 @@ describe.skipIf(!runIntegrationTests)(
         MAIL_API_KEY: "account-security-integration-key",
         MAIL_API_SECRET: "",
         MAIL_FROM: "no-reply@example.test",
+        MAIL_BRAND_COLOR: "#0057B8",
+        MAIL_SUPPORT_EMAIL: "support@example.test",
+        MAIL_LEGAL_NAME: "Example Workspace, S.L.",
+        MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+        MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
         TRUST_PROXY_HEADERS: "false",
       });
       vi.resetModules();

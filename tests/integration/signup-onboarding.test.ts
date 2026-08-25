@@ -27,6 +27,11 @@ const managedEnv = [
   "MAIL_API_KEY",
   "MAIL_API_SECRET",
   "MAIL_FROM",
+  "MAIL_BRAND_COLOR",
+  "MAIL_SUPPORT_EMAIL",
+  "MAIL_LEGAL_NAME",
+  "MAIL_LEGAL_ADDRESS",
+  "MAIL_LOGO_URL",
   "TRUST_PROXY_HEADERS",
 ] as const;
 
@@ -98,6 +103,11 @@ describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
         MAIL_API_KEY: "integration-key",
         MAIL_API_SECRET: providerName === "mailjet" ? "integration-secret" : undefined,
         MAIL_FROM: "no-reply@example.test",
+        MAIL_BRAND_COLOR: "#0057B8",
+        MAIL_SUPPORT_EMAIL: "support@example.test",
+        MAIL_LEGAL_NAME: "Example Workspace, S.L.",
+        MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+        MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
       });
       if (!env.MAIL.enabled) throw new Error("mail must be enabled for this test");
       const provider = createTransactionalEmailProvider(env.MAIL, http.client);
@@ -106,11 +116,17 @@ describe.skipIf(!runIntegrationTests)("signup HTTP provider acceptance", () => {
         locale: "es" as const,
         origin: "https://app.example.test",
       };
-      const messages = [
-        buildOnboardingEmail({ ...base, rawToken: "new-token" }, projectName),
-        buildOnboardingEmail({ ...base, rawToken: "pending-token" }, projectName),
-        buildActiveAccountEmail(base, projectName),
-      ];
+      const messages = await Promise.all([
+        buildOnboardingEmail(
+          { ...base, rawToken: "new-token" },
+          env.MAIL.brand,
+        ),
+        buildOnboardingEmail(
+          { ...base, rawToken: "pending-token" },
+          env.MAIL.brand,
+        ),
+        buildActiveAccountEmail(base, env.MAIL.brand),
+      ]);
 
       const results = [];
       for (const message of messages) results.push(await provider.send(message));
@@ -153,6 +169,11 @@ describe.skipIf(!runIntegrationTests)("signup onboarding integration", () => {
       MAIL_API_KEY: "signup-integration-key",
       MAIL_API_SECRET: "",
       MAIL_FROM: "no-reply@example.test",
+      MAIL_BRAND_COLOR: "#0057B8",
+      MAIL_SUPPORT_EMAIL: "support@example.test",
+      MAIL_LEGAL_NAME: "Example Workspace, S.L.",
+      MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+      MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
       TRUST_PROXY_HEADERS: "true",
     });
     vi.resetModules();

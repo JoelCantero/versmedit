@@ -9,6 +9,7 @@ import {
   EMAIL_RESPONSE_LIMIT_BYTES,
   type TransactionalEmail,
 } from "@/lib/email/types";
+import { createTestEmailBrand } from "../helpers/email-brand";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
 import { getTestProjectName } from "../helpers/project-name";
 
@@ -19,6 +20,7 @@ const config = {
   apiKey: "brevo-private-key",
   fromEmail: "no-reply@example.test",
   senderName: projectName,
+  brand: createTestEmailBrand(projectName),
   sendTimeoutMs: 2_500 as const,
   healthTimeoutMs: 1_500 as const,
   responseLimitBytes: 65_536 as const,

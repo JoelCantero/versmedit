@@ -16,6 +16,16 @@ const providerEnv: Record<string, string> = providerFixtureUrl
       MAIL_API_SECRET:
         process.env.E2E_MAIL_API_SECRET ?? "e2e-provider-secret",
       MAIL_FROM: "no-reply@example.test",
+      MAIL_BRAND_COLOR: process.env.MAIL_BRAND_COLOR ?? "#0057B8",
+      MAIL_SUPPORT_EMAIL:
+        process.env.MAIL_SUPPORT_EMAIL ?? "support@example.test",
+      MAIL_LEGAL_NAME:
+        process.env.MAIL_LEGAL_NAME ?? "Example Workspace, S.L.",
+      MAIL_LEGAL_ADDRESS:
+        process.env.MAIL_LEGAL_ADDRESS ?? "123 Example Street, Example City",
+      MAIL_LOGO_URL:
+        process.env.MAIL_LOGO_URL ??
+        "https://assets.example.test/mail/logo.png",
     }
   : { MAIL_ENABLED: "false" };
 const preloadUrl = pathToFileURL(
@@ -36,6 +46,7 @@ const standaloneStaticAssetsCommand = [
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  testIgnore: "email-preview-catalog.spec.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,

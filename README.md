@@ -87,7 +87,7 @@ All runtime configuration comes from environment variables.
 | GitHub **Variables** (non-sensitive) | GitHub **Secrets** (sensitive) |
 |---|---|
 | `PROJECT_NAME`, `APP_DOMAIN`, `DEPLOY_BASE_DIR`, `RUNNER_NAME`, `LOG_LEVEL`, `TRUST_PROXY_HEADERS` _(optional)_ | `POSTGRES_PASSWORD`, `AUTH_SECRET` |
-| `MAIL_ENABLED`, `MAIL_PROVIDER`, `MAIL_FROM` | `MAIL_API_KEY`, `MAIL_API_SECRET` _(Mailjet only)_ |
+| `MAIL_ENABLED`, `MAIL_PROVIDER`, `MAIL_FROM`, `MAIL_BRAND_COLOR`, `MAIL_SUPPORT_EMAIL`, `MAIL_LEGAL_NAME`, `MAIL_LEGAL_ADDRESS`, `MAIL_LOGO_URL` _(optional)_ | `MAIL_API_KEY`, `MAIL_API_SECRET` _(Mailjet only)_ |
 
 `POSTGRES_USER`, `POSTGRES_DB`, `DATABASE_URL` and the image/router names are **derived**
 from `PROJECT_NAME` / `APP_DOMAIN`. Production percent-encodes database credentials when it builds
@@ -99,6 +99,11 @@ single explicit gate for login, signup activation, and existing-account notices.
 `MAIL_API_KEY` must be set. Mailjet also requires `MAIL_API_SECRET`. Provider endpoints are fixed in
 application code; no runtime endpoint override is supported. Each operation makes one bounded HTTP
 submission attempt with no retry or provider fallback.
+When mail is enabled, `MAIL_BRAND_COLOR`, `MAIL_SUPPORT_EMAIL`, `MAIL_LEGAL_NAME`, and
+`MAIL_LEGAL_ADDRESS` are also required; `MAIL_LOGO_URL` is optional and must be absolute HTTPS when
+set. These recipient-visible values are GitHub Variables, never Secrets. Next.js validates the
+complete provider and brand configuration during startup, and any malformed enabled-mail value
+prevents the application from becoming ready rather than serving a partially configured instance.
 The hardened auth adapter refuses to create unknown users; registration remains a separate product
 flow that validates the application's required fields.
 Keep `TRUST_PROXY_HEADERS=false` unless Cloudflare is the exclusive route to the origin and the
@@ -198,8 +203,10 @@ part of forward recovery and must remain reusable by later valid submissions.
   `APP_DOMAIN`, `DEPLOY_BASE_DIR`, and `RUNNER_NAME`; optionally configure `LOG_LEVEL`. Set
   `TRUST_PROXY_HEADERS=true` only after enforcing the exclusive Cloudflare ingress contract above.
 4. Create `POSTGRES_PASSWORD`, `AUTH_SECRET`, and `MAIL_API_KEY` as GitHub Secrets. For Mailjet also
-  create `MAIL_API_SECRET`. Configure `MAIL_ENABLED`, `MAIL_PROVIDER`, and `MAIL_FROM` as GitHub
-  Variables after verifying the sender and the login/signup lifecycle tests.
+  create `MAIL_API_SECRET`. Configure `MAIL_ENABLED`, `MAIL_PROVIDER`, `MAIL_FROM`,
+  `MAIL_BRAND_COLOR`, `MAIL_SUPPORT_EMAIL`, `MAIL_LEGAL_NAME`, and `MAIL_LEGAL_ADDRESS` as GitHub
+  Variables after verifying the sender and the login/signup lifecycle tests. Add the optional
+  `MAIL_LOGO_URL` Variable only for a shared absolute HTTPS brand asset.
 5. Confirm the `traefik_network` exists on the target host and that the named ARM64 runner is online.
 6. Adapt locales, message catalogs, Auth.js providers, Prisma models, resource limits, retention,
    availability, and monitoring to the derived application's requirements.

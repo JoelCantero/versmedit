@@ -41,6 +41,11 @@ jobs:
           MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
           MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_BRAND_COLOR: ${{ vars.MAIL_BRAND_COLOR }}
+          MAIL_SUPPORT_EMAIL: ${{ vars.MAIL_SUPPORT_EMAIL }}
+          MAIL_LEGAL_NAME: ${{ vars.MAIL_LEGAL_NAME }}
+          MAIL_LEGAL_ADDRESS: ${{ vars.MAIL_LEGAL_ADDRESS }}
+          MAIL_LOGO_URL: ${{ vars.MAIL_LOGO_URL }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
         run: |
@@ -55,6 +60,10 @@ jobs:
           if [ "$MAIL_ENABLED" = "true" ]; then
             [ -n "$MAIL_PROVIDER" ] || missing+=("MAIL_PROVIDER (Variable)")
             [ -n "$MAIL_FROM" ] || missing+=("MAIL_FROM (Variable)")
+            [ -n "$MAIL_BRAND_COLOR" ] || missing+=("MAIL_BRAND_COLOR (Variable)")
+            [ -n "$MAIL_SUPPORT_EMAIL" ] || missing+=("MAIL_SUPPORT_EMAIL (Variable)")
+            [ -n "$MAIL_LEGAL_NAME" ] || missing+=("MAIL_LEGAL_NAME (Variable)")
+            [ -n "$MAIL_LEGAL_ADDRESS" ] || missing+=("MAIL_LEGAL_ADDRESS (Variable)")
             [ -n "$MAIL_API_KEY" ] || missing+=("MAIL_API_KEY (Secret)")
             if [ "$MAIL_PROVIDER" = "mailjet" ]; then
               [ -n "$MAIL_API_SECRET" ] || missing+=("MAIL_API_SECRET (Secret)")
@@ -124,6 +133,11 @@ jobs:
           MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
           MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_BRAND_COLOR: ${{ vars.MAIL_BRAND_COLOR }}
+          MAIL_SUPPORT_EMAIL: ${{ vars.MAIL_SUPPORT_EMAIL }}
+          MAIL_LEGAL_NAME: ${{ vars.MAIL_LEGAL_NAME }}
+          MAIL_LEGAL_ADDRESS: ${{ vars.MAIL_LEGAL_ADDRESS }}
+          MAIL_LOGO_URL: ${{ vars.MAIL_LOGO_URL }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
         run: |

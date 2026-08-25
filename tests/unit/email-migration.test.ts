@@ -27,6 +27,38 @@ async function combinedContents(files: string[]) {
 }
 
 describe("completed HTTP email migration", () => {
+  it("adds no Prisma migration for presentation, previews, or delivery storage", async () => {
+    const migrationsRoot = path.join(root, "prisma/migrations");
+    const migrationDirectories = (await readdir(migrationsRoot, {
+      withFileTypes: true,
+    }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .toSorted();
+
+    expect(migrationDirectories).toEqual([
+      "20260710195219_init",
+      "20260711073537_add_authjs_models",
+      "20260714143000_add_rate_limit_buckets",
+      "20260818000000_add_signup_lifecycle",
+      "20260819000000_add_signup_delivery_confirmation",
+      "20260821000000_add_account_deletion_auth",
+      "20260821010000_add_account_session_management",
+      "20260823000000_add_personal_data_export",
+    ]);
+
+    const migrationSource = await combinedContents(
+      await Promise.all(
+        migrationDirectories.map((directory) =>
+          filesUnder(path.join(migrationsRoot, directory)),
+        ),
+      ).then((files) => files.flat()),
+    );
+    expect(migrationSource).not.toMatch(
+      /EmailBrand|EmailTemplate|EmailMessage|emailVariant|emailSubject|emailHtml|emailText|providerMessageId/u,
+    );
+  });
+
   it("contains no application or E2E SMTP/Nodemailer path", async () => {
     const sourceFiles = (await filesUnder(path.join(root, "src"))).filter((file) =>
       /\.(?:ts|tsx)$/.test(file),

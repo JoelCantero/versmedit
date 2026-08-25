@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createTestEmailBrand } from "../helpers/email-brand";
 import { createHttpMailProvider } from "../helpers/http-mail-provider";
 import { getTestProjectName } from "../helpers/project-name";
 
@@ -28,10 +29,23 @@ const config: BrevoMailConfig = {
   apiKey: "private-api-key",
   fromEmail: "no-reply@example.test",
   senderName: projectName,
+  brand: createTestEmailBrand(projectName),
   sendTimeoutMs: 2_500,
   healthTimeoutMs: 1_500,
   responseLimitBytes: 65_536,
 };
+const oversizeConfigs = [
+  { name: "brevo", config },
+  {
+    name: "mailjet",
+    config: {
+      ...config,
+      provider: "mailjet" as const,
+      apiKey: "private-mailjet-api-key",
+      apiSecret: "private-mailjet-api-secret",
+    },
+  },
+] as const;
 const message = {
   recipient: "private.person@example.test",
   locale: "en" as const,
@@ -86,6 +100,12 @@ describe("transactional email submission logging", () => {
       message.text,
       message.html,
       "raw-private-token",
+      "loginMagicLink",
+      config.brand.primaryColor,
+      config.brand.supportEmail,
+      config.brand.legalName,
+      config.brand.legalAddress,
+      config.brand.logoUrl!,
     ]) {
       expect(serialized).not.toContain(privateValue);
     }
@@ -106,6 +126,27 @@ describe("transactional email submission logging", () => {
 
     expect(mocks.info).not.toHaveBeenCalled();
   });
+
+  it.each(oversizeConfigs)(
+    "rejects oversized $name content before network submission or logging",
+    async ({ config: oversizeConfig }) => {
+      const http = createHttpMailProvider();
+      const privateContent = `private-oversize-token-${"x".repeat(1_048_576)}`;
+
+      await expect(
+        sendTransactionalEmail(
+          { ...message, html: `<p>${privateContent}</p>` },
+          oversizeConfig,
+          http.client,
+          { correlationId: "oversize-request" },
+        ),
+      ).rejects.toThrow("Email provider request exceeds size limit");
+
+      expect(http.requests).toHaveLength(0);
+      expect(mocks.info).not.toHaveBeenCalled();
+      expect(JSON.stringify(mocks.info.mock.calls)).not.toContain(privateContent);
+    },
+  );
 
   it.each([
     ["rate_limited", { status: 429, body: "private raw response" }, "4xx"],

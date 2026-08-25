@@ -25,13 +25,16 @@
     "db:backup": "bash scripts/db-backup.sh",
     "db:restore": "bash scripts/db-restore.sh",
     "db:backup:dev": "COMPOSE_FILE=docker-compose.yml bash scripts/db-backup.sh",
-    "db:restore:dev": "COMPOSE_FILE=docker-compose.yml bash scripts/db-restore.sh"
+    "db:restore:dev": "COMPOSE_FILE=docker-compose.yml bash scripts/db-restore.sh",
+    "email:dev": "NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@next-auth/prisma-adapter": "1.0.7",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@react-email/components": "1.0.12",
+    "@react-email/render": "2.1.0",
     "@swc/helpers": "0.5.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

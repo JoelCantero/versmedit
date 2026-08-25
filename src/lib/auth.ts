@@ -4,12 +4,15 @@ import type { NextAuthOptions } from "next-auth";
 import { hardenAdapter } from "@/lib/auth-adapter";
 import { db } from "@/lib/db";
 import { sendTransactionalEmail } from "@/lib/email/index";
+import {
+  renderEmailPresentation,
+  type EmailBrand,
+} from "@/lib/email/presentation";
 import { getEnv } from "@/lib/env";
 import { getPublishedVerificationToken } from "@/modules/login/verification-context";
 import { createSignupToken } from "@/modules/signup/token";
 
 const env = getEnv();
-const projectName = env.PROJECT_NAME;
 
 type SignupLocale = "en" | "es" | "ca";
 
@@ -65,31 +68,7 @@ function parseLocaleFromCallbackUrl(callbackUrl: string | null, baseUrl: string)
   }
 }
 
-const emailCopy: Record<SignupLocale, { subject: string; text: string }> = {
-  en: {
-    subject: "Your {projectName} sign-in link",
-    text: "Use this link to sign in",
-  },
-  es: {
-    subject: "Tu enlace de acceso a {projectName}",
-    text: "Usa este enlace para iniciar sesión",
-  },
-  ca: {
-    subject: "El teu enllaç d'accés a {projectName}",
-    text: "Utilitza aquest enllaç per iniciar sessió",
-  },
-};
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function createLoginProvider(from: string) {
+function createLoginProvider(from: string, brand: EmailBrand) {
   return createInternalEmailProvider({
     id: "email",
     name: "Email",
@@ -100,15 +79,18 @@ function createLoginProvider(from: string) {
         verificationUrl.searchParams.get("callbackUrl"),
         verificationUrl.origin,
       );
-      const copy = emailCopy[locale];
 
       try {
+        const content = await renderEmailPresentation({
+          variant: "loginMagicLink",
+          locale,
+          brand,
+          actionUrl: url,
+        });
         const result = await sendTransactionalEmail({
           recipient: identifier,
           locale,
-          subject: copy.subject.replaceAll("{projectName}", projectName),
-          text: `${copy.text}: ${url}`,
-          html: `<p>${escapeHtml(copy.text)}:</p><p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`,
+          ...content,
         });
         if (result.accepted) return;
       } catch {
@@ -218,7 +200,7 @@ export const authOptions: NextAuthOptions = {
   // Host values cannot control callback or verification URLs.
   providers: env.MAIL.enabled
     ? [
-        createLoginProvider(env.MAIL.fromEmail),
+        createLoginProvider(env.MAIL.fromEmail, env.MAIL.brand),
         createSignupProvider(env.MAIL.fromEmail),
         createAccountDeletionProvider(env.MAIL.fromEmail),
       ]

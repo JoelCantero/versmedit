@@ -2,8 +2,14 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as emailPresentation from "@/lib/email/presentation";
+import { createTestEmailBrand } from "../helpers/email-brand";
+
 const mocks = vi.hoisted(() => ({
   projectName: "",
+  brand: undefined as ReturnType<
+    typeof import("../helpers/email-brand").createTestEmailBrand
+  > | undefined,
   sendTransactionalEmail: vi.fn(),
 }));
 
@@ -12,7 +18,10 @@ vi.mock("@/lib/email/index", () => ({
   sendTransactionalEmail: mocks.sendTransactionalEmail,
 }));
 vi.mock("@/lib/env", () => ({
-  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
+  getEnv: () => ({
+    PROJECT_NAME: mocks.projectName,
+    MAIL: { enabled: true, brand: mocks.brand },
+  }),
 }));
 
 import {
@@ -25,6 +34,8 @@ import { getTestProjectName } from "../helpers/project-name";
 
 const projectName = getTestProjectName();
 mocks.projectName = projectName;
+const brand = createTestEmailBrand(projectName);
+mocks.brand = brand;
 
 const localeCopy = {
   en: {
@@ -63,15 +74,15 @@ describe("signup email", () => {
 
   it.each(Object.entries(localeCopy))(
     "builds a credential-bearing %s onboarding email",
-    (locale, copy) => {
-      const message = buildOnboardingEmail(
+    async (locale, copy) => {
+      const message = await buildOnboardingEmail(
         {
           recipient: "person@example.test",
           rawToken: "raw_signup_token",
           locale: locale as keyof typeof localeCopy,
           origin: "https://app.example.test",
         },
-        projectName,
+        brand,
       );
 
       expect(message).toMatchObject({
@@ -83,6 +94,10 @@ describe("signup email", () => {
       expect(message.text).toContain(
         "https://app.example.test/api/signup/activate?token=raw_signup_token",
       );
+      expect(message.html).toMatch(/<!doctype html/i);
+      expect(message.html).toContain(projectName);
+      expect(message.html).toContain("support@example.test");
+      expect(message.html).toContain("Example Workspace, S.L.");
       expect(message.html).toContain("raw_signup_token");
       expect(message.text).not.toContain("person@example.test");
     },
@@ -90,14 +105,14 @@ describe("signup email", () => {
 
   it.each(Object.entries(localeCopy))(
     "builds a credential-free %s active-account notice",
-    (locale, copy) => {
-      const message = buildActiveAccountEmail(
+    async (locale, copy) => {
+      const message = await buildActiveAccountEmail(
         {
           recipient: "person@example.test",
           locale: locale as keyof typeof localeCopy,
           origin: "https://app.example.test",
         },
-        projectName,
+        brand,
       );
 
       expect(message).toMatchObject({
@@ -107,6 +122,9 @@ describe("signup email", () => {
       });
       expect(message.text).toContain(copy.activeText);
       expect(message.text).toContain(`https://app.example.test${copy.loginPath}`);
+      expect(message.html).toMatch(/<!doctype html/i);
+      expect(message.html).toContain(projectName);
+      expect(message.html).toContain("support@example.test");
       expect(`${message.text}${message.html}`).not.toMatch(
         /token=|\/api\/signup\/activate/i,
       );
@@ -128,7 +146,7 @@ describe("signup email", () => {
       );
 
       expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
-        buildOnboardingEmail(options, projectName),
+        await buildOnboardingEmail(options, brand),
       );
       expect(mocks.sendTransactionalEmail.mock.calls[0]?.[0]).not.toHaveProperty(
         "from",
@@ -149,11 +167,27 @@ describe("signup email", () => {
         expect.objectContaining({ accepted: true }),
       );
 
-      const message = buildActiveAccountEmail(options, projectName);
+      const message = await buildActiveAccountEmail(options, brand);
       expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(message);
       expect(`${message.text}${message.html}`).not.toMatch(
         /token=|\/api\/signup\/activate/i,
       );
     },
   );
+
+  it("finishes presentation before making a delivery attempt", async () => {
+    vi.spyOn(emailPresentation, "renderEmailPresentation").mockRejectedValueOnce(
+      new Error("simulated presentation failure"),
+    );
+
+    await expect(
+      sendOnboardingEmail({
+        recipient: "person@example.test",
+        rawToken: "raw_signup_token",
+        locale: "en",
+        origin: "https://app.example.test",
+      }),
+    ).rejects.toThrow("simulated presentation failure");
+    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+  });
 });

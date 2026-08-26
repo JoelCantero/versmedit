@@ -1,17 +1,50 @@
 import type {
-  EmailBrand,
   EmailLocale,
   EmailPresentationRequest,
   EmailVariant,
 } from "../../src/lib/email/presentation";
+import { validateEmailBrand } from "../../src/lib/email/presentation";
 
-export const PREVIEW_BRAND: EmailBrand = Object.freeze({
+const fictionalPreviewBrand = validateEmailBrand({
   productName: "Versmedit",
   canonicalOrigin: "https://app.example.test",
   primaryColor: "#0057B8",
-  actionForeground: "#FFFFFF",
   supportEmail: "support@example.test",
   logoUrl: null,
+});
+
+const previewBrandFields = [
+  "EMAIL_PREVIEW_PROJECT_NAME",
+  "EMAIL_PREVIEW_BRAND_COLOR",
+  "EMAIL_PREVIEW_SUPPORT_EMAIL",
+  "EMAIL_PREVIEW_LOGO_URL",
+] as const;
+
+export function createPreviewBrand(
+  envSource: Readonly<Record<string, string | undefined>> = process.env,
+) {
+  if (!previewBrandFields.some((field) => envSource[field]?.trim())) {
+    return fictionalPreviewBrand;
+  }
+
+  return validateEmailBrand({
+    productName:
+      envSource.EMAIL_PREVIEW_PROJECT_NAME ?? fictionalPreviewBrand.productName,
+    canonicalOrigin: fictionalPreviewBrand.canonicalOrigin,
+    primaryColor:
+      envSource.EMAIL_PREVIEW_BRAND_COLOR ?? fictionalPreviewBrand.primaryColor,
+    supportEmail:
+      envSource.EMAIL_PREVIEW_SUPPORT_EMAIL ??
+      fictionalPreviewBrand.supportEmail,
+    logoUrl: envSource.EMAIL_PREVIEW_LOGO_URL || null,
+  });
+}
+
+export const PREVIEW_BRAND = createPreviewBrand({
+  EMAIL_PREVIEW_PROJECT_NAME: process.env.EMAIL_PREVIEW_PROJECT_NAME,
+  EMAIL_PREVIEW_BRAND_COLOR: process.env.EMAIL_PREVIEW_BRAND_COLOR,
+  EMAIL_PREVIEW_SUPPORT_EMAIL: process.env.EMAIL_PREVIEW_SUPPORT_EMAIL,
+  EMAIL_PREVIEW_LOGO_URL: process.env.EMAIL_PREVIEW_LOGO_URL,
 });
 
 function actionUrl(path: string) {

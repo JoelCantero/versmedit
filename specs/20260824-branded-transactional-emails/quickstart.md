@@ -37,11 +37,13 @@ Expected:
 - the index lists exactly 36 links: 12 variants in each of `en`, `es`, and `ca`;
 - every detail page shows a subject plus display, HTML source, and plain-text views;
 - desktop/mobile width controls do not clip or overlap essential content;
-- the product remains identified with the fixture logo absent;
+- name, color, support address, and optional logo match valid public branding in the repository
+  `.env`, or use the fictional fallback when that file is absent;
 - action variants show one unique fictional destination and informational variants show none;
 - there is no recipient field, form, send/test-send button, provider/upload control, or credential
   setup;
-- the main application, Docker, database, `.env`, and provider fixture remain stopped.
+- the main application, Docker, database, and provider fixture remain stopped, and no secret
+  configuration is exposed to the preview.
 
 Stop the preview with `Ctrl+C` before running the automated suites.
 

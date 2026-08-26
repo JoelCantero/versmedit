@@ -11,9 +11,9 @@
   --coral: #d94f35;
   --yellow: #f0b429;
   --code: #1c252d;
-  --display-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-  --ui-font: "Avenir Next", "Trebuchet MS", sans-serif;
-  --mono-font: "SFMono-Regular", "Cascadia Code", "Liberation Mono", monospace;
+  --display-font: var(--font-geist-sans), sans-serif;
+  --ui-font: var(--font-geist-sans), sans-serif;
+  --mono-font: var(--font-geist-mono), monospace;
 }
 
 * {

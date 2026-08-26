@@ -138,7 +138,7 @@ emails/
 |   |-- preview-inspector.tsx
 |   `-- viewport-control.tsx
 |-- lib/
-|   |-- preview-fixtures.ts      # One immutable fictional brand and typed fixture values
+|   |-- preview-fixtures.ts      # Immutable public-brand overlay and fictional fixture values
 |   `-- preview-manifest.ts      # Exact deterministic 36-entry manifest
 |-- next-env.d.ts
 |-- next.config.ts

@@ -391,6 +391,14 @@ describe("email presentation shared contract", () => {
     expect(rendered.text).toMatch(/Confirm your request/i);
     expect(rendered.html).not.toContain("undefined");
     expect(rendered.text).not.toMatch(/\{[^}]+\}/);
+    for (const declaration of [
+      "border-radius:10px",
+      "font-size:14px",
+      "font-weight:500",
+      "line-height:20px",
+    ]) {
+      expect(rendered.html).toContain(declaration);
+    }
   });
 
   it("accepts only the structured values declared by the discriminated variant", () => {

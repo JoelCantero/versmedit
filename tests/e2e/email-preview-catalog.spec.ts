@@ -31,8 +31,12 @@ test.describe("isolated email preview catalogue", () => {
     const response = await page.goto("/");
 
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Email proofs",
+    const heading = page.getByRole("heading", { level: 1 });
+    await expect(heading).toContainText("Email proofs");
+    await expect(heading).toHaveCSS("font-family", /Geist/u);
+    await expect(page.locator(".eyebrow").first()).toHaveCSS(
+      "font-family",
+      /Geist Mono/u,
     );
     await expect(page.getByTestId("preview-link")).toHaveCount(36);
     await expect(page.getByRole("heading", { level: 2 })).toHaveCount(3);

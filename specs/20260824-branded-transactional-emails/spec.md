@@ -69,7 +69,7 @@ As a developer or reviewer, I can inspect every message variant in every support
 1. **Given** the local preview experience, **When** a reviewer opens its catalogue, **Then** all 12 variants in English, Spanish, and Catalan are listed and renderable for a total of 36 previews.
 2. **Given** no application environment, database, authenticated session, or provider credential, **When** the preview is opened and navigated, **Then** every combination remains available.
 3. **Given** any preview interaction, **When** the reviewer opens or changes a message, **Then** no provider request, credential creation, account action, or application log event occurs and no sending control is offered.
-4. **Given** any preview fixture, **When** its content is inspected, **Then** all identities, addresses, destinations, credentials, devices, sessions, and network details are obviously fictional and use reserved example domains where applicable.
+4. **Given** any preview fixture, **When** its content is inspected, **Then** only explicitly configured public product branding may be local, while all people, action destinations, credentials, devices, sessions, references, and network details are obviously fictional and use reserved example domains where applicable.
 
 ---
 
@@ -201,7 +201,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - The existing delivery service continues to accept a fully prepared recipient, subject, HTML body, and plain-text body and remains the sole owner of provider submission.
 - The six listed operational variants are the only currently sent transactional messages in scope.
 - The six future variants remain presentation assets until separate product specifications define their triggers, authorization, credentials, and lifecycle semantics.
-- Deployment configuration remains the source of real branding, while local previews use an isolated fictional brand and fixtures.
+- Deployment configuration remains the source of production branding; `pnpm email:dev` may reuse only its local public name, color, support address, and email logo, while direct automated previews and all business fixtures remain isolated and fictional.
 - Existing delivery timeout, request-size, one-attempt, response-classification, acceptance, and safe-logging rules remain authoritative.
 
 ## Non-Goals *(mandatory)*

@@ -127,9 +127,10 @@ SUPPORT_EMAIL=login@versmedit.com
 MAIL_LOGO_URL=
 ```
 
-These examples are documentation only. The local preview project ignores `.env` and uses its own
-fictional brand. Normal application development requires the global values even when
-`MAIL_ENABLED=false`.
+`pnpm email:dev` reads only these public brand values plus `PROJECT_NAME` from the repository
+`.env`; all other configuration, including provider and application secrets, remains unavailable to
+the preview. Without `.env`, direct preview execution uses its deterministic fictional fallback.
+Normal application development requires the global values even when `MAIL_ENABLED=false`.
 
 ## Docker Build and Runtime
 

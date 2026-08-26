@@ -16,7 +16,7 @@ delivery boundary.
 
 ```json
 {
-  "email:dev": "NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
+  "email:dev": "EMAIL_PREVIEW_USE_APP_BRAND=true NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
 }
 ```
 
@@ -24,8 +24,10 @@ Expected behavior:
 
 - starts the separate `emails/` Next.js project, not the application project;
 - listens on loopback only at `http://127.0.0.1:3001`;
-- requires no `.env`, Docker service, database, authentication, provider credential, or Internet
-  connection;
+- starts without `.env`, Docker, database, authentication, provider credentials, or Internet;
+- when the repository `.env` exists, reads only `PROJECT_NAME`, `BRAND_COLOR`, `SUPPORT_EMAIL`,
+  and `MAIL_LOGO_URL`, validates them through the production brand contract, and exposes them under
+  preview-only names;
 - performs no seed, migration, application startup, or production build step;
 - supports ordinary development refresh when presentation or fixture source changes.
 
@@ -81,15 +83,21 @@ additional example, draft, folder, or hidden template is counted.
 
 ## Fixture Contract
 
-All 36 requests share one immutable fictional brand:
+All 36 requests share one immutable preview brand. Direct preview launches, including automation,
+omit the opt-in flag and use the deterministic fictional fallback. `pnpm email:dev` may replace only
+the four public presentation fields from local configuration:
 
 | Field | Fixture rule |
 |-------|--------------|
-| Product | Clearly fictional name, never copied from deployment configuration |
-| Canonical origin | HTTPS URL under a `.test` host |
-| Primary color | Fixed valid color whose selected foreground passes 4.5:1 contrast |
-| Support address | Address under `example.com`, `example.org`, or `example.net` |
-| Logo | `null`, so offline review makes no asset request; logo cases remain automated render tests |
+| Product | Valid local `PROJECT_NAME`, otherwise the fixed fictional name |
+| Canonical origin | Always an HTTPS URL under a `.test` host |
+| Primary color | Valid local `BRAND_COLOR`, otherwise the fixed accessible color |
+| Support address | Valid local `SUPPORT_EMAIL`, otherwise an address under a reserved example domain |
+| Logo | Valid local HTTPS `MAIL_LOGO_URL`, otherwise `null` |
+
+Action destinations and all variant-specific people, credentials, devices, sessions, references,
+and network details remain fictional in both modes. The preview config does not inspect or forward
+any other environment field.
 
 Variant values obey these rules:
 

@@ -19,7 +19,7 @@
   during /speckit-plan.
 -->
 
-**Language/Version**: TypeScript 5.x on Node.js 24 LTS
+**Language/Version**: TypeScript 6.0.x on Node.js 24 LTS
 
 **Package Manager**: pnpm
 

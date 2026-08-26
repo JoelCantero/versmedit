@@ -264,6 +264,7 @@ async function tabTo(page: Page, target: Locator) {
 }
 
 async function expectNoSeriousAxeViolations(page: Page) {
+  await expect(page).toHaveTitle(/\S/u);
   const openDialog = page.locator('[data-slot="dialog-content"][data-open]');
   if ((await openDialog.count()) > 0) {
     await expect(openDialog).toHaveCSS("opacity", "1");

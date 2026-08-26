@@ -34,6 +34,7 @@ describe("email runtime configuration", () => {
       EMAIL_PREVIEW_LOGO_URL: "MAIL_LOGO_URL",
     })) {
       expect(previewConfig).toContain(`\"${appField}\"`);
+      expect(previewConfig).toContain(`process.env.${appField}`);
       expect(previewFixtures).toContain(`process.env.${previewField}`);
     }
     for (const field of [

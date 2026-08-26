@@ -22,11 +22,17 @@ function loadPreviewBrandEnv(): Record<string, string> {
     EMAIL_PREVIEW_SUPPORT_EMAIL: "SUPPORT_EMAIL",
     EMAIL_PREVIEW_LOGO_URL: "MAIL_LOGO_URL",
   } as const;
+  const shellBrand = {
+    PROJECT_NAME: process.env.PROJECT_NAME,
+    BRAND_COLOR: process.env.BRAND_COLOR,
+    SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
+    MAIL_LOGO_URL: process.env.MAIL_LOGO_URL,
+  } as const;
 
   return Object.fromEntries(
     Object.entries(publicBrandFields).map(([previewField, appField]) => [
       previewField,
-      process.env[appField] ?? appEnv[appField] ?? "",
+      shellBrand[appField] ?? appEnv[appField] ?? "",
     ]),
   );
 }

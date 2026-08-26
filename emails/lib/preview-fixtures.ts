@@ -21,7 +21,7 @@ const previewBrandFields = [
 ] as const;
 
 export function createPreviewBrand(
-  envSource: Readonly<Record<string, string | undefined>> = process.env,
+  envSource: Readonly<Record<string, string | undefined>>,
 ) {
   if (!previewBrandFields.some((field) => envSource[field]?.trim())) {
     return fictionalPreviewBrand;

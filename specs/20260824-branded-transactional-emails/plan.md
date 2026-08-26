@@ -47,11 +47,12 @@ all locales, representative widths, logo states, brand colors, and long-content 
 
 **Observability**: Healthcheck endpoint + structured logging (Pino -> stdout JSON) + Docker logs + log rotation
 
-**Migration Strategy**: Application-only forward rollout. Configure the five non-secret brand
-Variables before deploying when `MAIL_ENABLED=true`; old code ignores them. No Prisma migration,
-data rewrite, compatibility window, or backup change is required.
+**Migration Strategy**: Application-only forward rollout. Configure global `BRAND_COLOR` and
+`SUPPORT_EMAIL` Variables before deploying; `PROJECT_NAME` remains the shared product/legal
+identity and `MAIL_LOGO_URL` remains optional. No Prisma migration, data rewrite, compatibility
+window, or backup change is required.
 
-**Recovery Strategy**: Invalid enabled-email branding fails application startup. Correct Variables
+**Recovery Strategy**: Invalid global branding fails application startup. Correct Variables
 and restart, or roll back to the previous image; extra brand Variables are harmless to the old
 release. Existing provisional credentials retain their current expiry and compensation behavior.
 
@@ -137,7 +138,7 @@ emails/
 |   |-- preview-inspector.tsx
 |   `-- viewport-control.tsx
 |-- lib/
-|   |-- preview-fixtures.ts      # One immutable fictional brand and typed fixture values
+|   |-- preview-fixtures.ts      # Immutable public-brand overlay and fictional fixture values
 |   `-- preview-manifest.ts      # Exact deterministic 36-entry manifest
 |-- next-env.d.ts
 |-- next.config.ts
@@ -148,7 +149,7 @@ src/
 |-- instrumentation.ts             # Validates runtime environment before serving requests
 |-- lib/
 |   |-- auth.ts                  # Login URL/recipient ownership; invokes presentation + delivery
-|   |-- env.ts                   # Conditional brand and provider startup validation
+|   |-- env.ts                   # Global brand and conditional provider startup validation
 |   `-- email/
 |       |-- index.ts             # Existing provider-neutral delivery boundary (contract unchanged)
 |       |-- types.ts             # Existing TransactionalEmail and 1 MiB request bound
@@ -185,7 +186,7 @@ tests/
 
 package.json                       # Runtime/dev dependency split and email:dev script
 pnpm-lock.yaml                     # Exact dependency resolution
-.env.example                       # Conditional non-secret brand settings
+.env.example                       # Required global and optional email brand settings
 docker-compose.prod.yml            # Forwards brand settings to app only
 .github/workflows/deploy.yml       # Validates/injects GitHub Variables
 next.config.ts                     # Changed only if standalone evidence requires a narrow trace include

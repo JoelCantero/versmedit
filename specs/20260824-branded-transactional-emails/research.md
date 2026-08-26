@@ -102,21 +102,20 @@ logo does not remove identity.
 - Depend on the logo or web fonts for identity: rejected because email clients commonly block
   remote assets.
 
-## Decision 5: Validate deployment-wide branding in the existing environment boundary
+## Decision 5: Validate one deployment-wide application brand in the existing environment boundary
 
 **Decision**: Reuse `PROJECT_NAME` and `NEXTAUTH_URL`, and add these non-secret settings:
 
-- `MAIL_BRAND_COLOR`: required six-digit CSS hex color (`#RRGGBB`).
-- `MAIL_SUPPORT_EMAIL`: required bare support email address.
-- `MAIL_LEGAL_NAME`: required single-line legal organization name.
-- `MAIL_LEGAL_ADDRESS`: required single-line postal address.
+- `BRAND_COLOR`: required six-digit CSS hex color (`#RRGGBB`) shared by the web UI and email.
+- `SUPPORT_EMAIL`: required bare support email address shared by the web UI and email.
 - `MAIL_LOGO_URL`: optional absolute HTTPS URL with no user information or fragment.
 
-When `MAIL_ENABLED=true`, `validateEnv` validates all required brand fields during startup and puts a
-normalized `brand` object inside enabled mail configuration. Any failure aborts the whole
-application before requests are served and reports field names only. When email is disabled, these
-additional values are optional and discarded even if present. The Docker build keeps email disabled,
-so build placeholders do not need production branding.
+`validateEnv` validates the global name, color, support contact, and origin during every startup and
+exposes the normalized object as `Env.BRAND`. Enabled mail validates the optional logo and references
+that same object. Disabled mail discards the email-only logo setting. Any applicable failure aborts
+the whole application before requests are served and reports field names only. The Docker build uses
+fixed public color and support placeholders because Next.js evaluates server modules while
+collecting metadata; real production values are injected only when the container starts.
 
 Add `src/instrumentation.ts` and call `getEnv()` from its Node.js `register()` path. The installed
 Next.js 16.3 documentation guarantees that `register()` runs once for each new server instance and
@@ -124,10 +123,10 @@ must complete before the server is ready to handle requests. Route-level validat
 in depth; startup failure no longer depends on which route module is imported first.
 
 **Rationale**: Environment validation already implements conditional fail-fast provider settings.
-Extending the same discriminated configuration keeps one validation boundary and prevents templates
-or callers from reading raw environment values. The documented instrumentation lifecycle makes that
-boundary a real process-start gate. All five additions are GitHub Variables, not Secrets, and must
-be forwarded through deployment validation and Compose.
+Extending the same boundary with unconditional global brand validation prevents templates or callers
+from reading raw environment values. The documented instrumentation lifecycle makes that boundary a
+real process-start gate. `BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL` are GitHub
+Variables, not Secrets, and must be forwarded through deployment validation and Compose.
 
 **Alternatives considered**:
 
@@ -211,9 +210,9 @@ by this implementation.
 ## Decision 9: Use an application-only rollout with no data migration
 
 **Decision**: No Prisma schema, migration, worker, queue, container, public endpoint, or persisted
-message record is added. Configure brand Variables before deploying the new image when email is
-enabled. Extra Variables are harmless to the old version, so rollback remains an application-image
-rollback. Invalid configuration keeps the new app unhealthy until corrected and restarted.
+message record is added. Configure `BRAND_COLOR` and `SUPPORT_EMAIL` before deploying the new image.
+Extra Variables are harmless to the old version, so rollback remains an application-image rollback.
+Invalid configuration keeps the new app unhealthy until corrected and restarted.
 
 **Rationale**: All new state is immutable runtime configuration or ephemeral render input. Existing
 credential records and compensation transactions remain unchanged. This gives a forward-only,

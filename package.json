@@ -26,7 +26,7 @@
     "db:restore": "bash scripts/db-restore.sh",
     "db:backup:dev": "COMPOSE_FILE=docker-compose.yml bash scripts/db-backup.sh",
     "db:restore:dev": "COMPOSE_FILE=docker-compose.yml bash scripts/db-restore.sh",
-    "email:dev": "NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
+    "email:dev": "EMAIL_PREVIEW_USE_APP_BRAND=true NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

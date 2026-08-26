@@ -7,8 +7,6 @@ export function createTestEmailBrand(productName: string): EmailBrand {
     primaryColor: "#0057B8",
     actionForeground: "#FFFFFF",
     supportEmail: "support@example.test",
-    legalName: "Example Workspace, S.L.",
-    legalAddress: "123 Example Street, Example City",
     logoUrl: "https://assets.example.test/mail/logo.png",
   });
 }

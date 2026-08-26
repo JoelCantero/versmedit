@@ -8,26 +8,24 @@ const baseURL = `http://127.0.0.1:${appPort}`;
 const distDir = process.env.NEXT_DIST_DIR ?? ".next";
 const providerFixtureUrl = process.env.E2E_PROVIDER_HTTP_URL;
 const mailProvider = process.env.E2E_MAIL_PROVIDER ?? "brevo";
+const brandEnv = {
+  BRAND_COLOR: process.env.BRAND_COLOR ?? "#0057B8",
+  SUPPORT_EMAIL: process.env.SUPPORT_EMAIL ?? "support@example.test",
+};
 const providerEnv: Record<string, string> = providerFixtureUrl
   ? {
+      ...brandEnv,
       MAIL_ENABLED: "true",
       MAIL_PROVIDER: mailProvider,
       MAIL_API_KEY: process.env.E2E_MAIL_API_KEY ?? "e2e-provider-key",
       MAIL_API_SECRET:
         process.env.E2E_MAIL_API_SECRET ?? "e2e-provider-secret",
       MAIL_FROM: "no-reply@example.test",
-      MAIL_BRAND_COLOR: process.env.MAIL_BRAND_COLOR ?? "#0057B8",
-      MAIL_SUPPORT_EMAIL:
-        process.env.MAIL_SUPPORT_EMAIL ?? "support@example.test",
-      MAIL_LEGAL_NAME:
-        process.env.MAIL_LEGAL_NAME ?? "Example Workspace, S.L.",
-      MAIL_LEGAL_ADDRESS:
-        process.env.MAIL_LEGAL_ADDRESS ?? "123 Example Street, Example City",
       MAIL_LOGO_URL:
         process.env.MAIL_LOGO_URL ??
         "https://assets.example.test/mail/logo.png",
     }
-  : { MAIL_ENABLED: "false" };
+  : { ...brandEnv, MAIL_ENABLED: "false" };
 const preloadUrl = pathToFileURL(
   path.resolve("tests/e2e/helpers/provider-fetch-preload.mjs"),
 ).href;

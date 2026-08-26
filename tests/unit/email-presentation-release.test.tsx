@@ -23,8 +23,6 @@ const longBrand = validateEmailBrand({
   canonicalOrigin: "https://app.example.test",
   primaryColor: "#0057B8",
   supportEmail: "support@example.test",
-  legalName: "L".repeat(200),
-  legalAddress: "A".repeat(500),
   logoUrl: `https://assets.example.test/mail/${"i".repeat(1_900)}.png`,
 });
 

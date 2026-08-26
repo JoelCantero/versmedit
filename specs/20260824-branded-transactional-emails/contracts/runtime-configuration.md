@@ -1,4 +1,4 @@
-# Contract: Runtime Email Brand Configuration
+# Contract: Runtime Application Brand Configuration
 
 **Interface kind**: Process environment and deployment contract
 
@@ -7,33 +7,39 @@
 **Deployment consumers**: `.env.example`, `docker-compose.prod.yml`, and
 `.github/workflows/deploy.yml`
 
-This extends the existing discriminated `MAIL` configuration. Provider secrets, provider selection,
-fixed endpoints, and delivery behavior remain unchanged.
+This adds one global `BRAND` configuration shared by the web experience and the existing
+discriminated `MAIL` configuration. Provider secrets, provider selection, fixed endpoints, and
+delivery behavior remain unchanged.
 
 ## Variables
 
-| Variable | GitHub source | Required when `MAIL_ENABLED=true` | Validation | Normalized `EmailBrand` field |
-|----------|---------------|-----------------------------------|------------|-------------------------------|
-| `PROJECT_NAME` | Existing Variable | Existing global requirement | Trimmed safe sender/product name, 1-70 characters, no ASCII controls | `productName` |
-| `NEXTAUTH_URL` | Existing value derived from `APP_DOMAIN` | Existing global requirement | Absolute HTTP(S) origin; no path beyond `/`, query, fragment, or user information | `canonicalOrigin` |
-| `MAIL_BRAND_COLOR` | New Variable | yes | `/^#[0-9A-Fa-f]{6}$/` | `primaryColor`, uppercase |
-| `MAIL_SUPPORT_EMAIL` | New Variable | yes | Trimmed bare email address, 1-320 characters | `supportEmail` |
-| `MAIL_LEGAL_NAME` | New Variable | yes | Trimmed single line, 1-200 characters, no ASCII controls | `legalName` |
-| `MAIL_LEGAL_ADDRESS` | New Variable | yes | Trimmed single line, 1-500 characters, no ASCII controls | `legalAddress` |
-| `MAIL_LOGO_URL` | New Variable | no | Empty means absent; otherwise absolute HTTPS, at most 2,048 characters, no user information or fragment | `logoUrl` or `null` |
+| Variable | GitHub source | Required at startup | Validation | Normalized `EmailBrand` field |
+|----------|---------------|---------------------|------------|-------------------------------|
+| `PROJECT_NAME` | Existing Variable | yes | Trimmed safe sender/product name, 1-70 characters, no ASCII controls | `productName` |
+| `NEXTAUTH_URL` | Existing value derived from `APP_DOMAIN` | yes | Absolute HTTP(S) origin; no path beyond `/`, query, fragment, or user information | `canonicalOrigin` |
+| `BRAND_COLOR` | New Variable | yes | `/^#[0-9A-Fa-f]{6}$/` | `primaryColor`, uppercase |
+| `SUPPORT_EMAIL` | New Variable | yes | Trimmed bare email address, 1-320 characters | `supportEmail` |
+| `MAIL_LOGO_URL` | New Variable | no | Ignored when mail is disabled; otherwise empty means absent or the value must be absolute HTTPS, at most 2,048 characters, with no user information or fragment | `logoUrl` or `null` |
 
-The five `MAIL_*` brand values are non-secret because they are intentionally visible to recipients.
-They are GitHub Actions Variables, not Secrets. None is prefixed with `NEXT_PUBLIC_`, exposed through
-an application endpoint, or read by browser code.
+`BRAND_COLOR`, `SUPPORT_EMAIL`, and `MAIL_LOGO_URL` are non-secret because they are intentionally
+visible to site visitors or recipients. They are GitHub Actions Variables, not Secrets. None is
+prefixed with `NEXT_PUBLIC_` or exposed through an application endpoint; the server layout applies
+the validated color and support contact directly.
 
 Static logo query parameters are permitted, but the configured URL is shared deployment-wide and
 must not contain a recipient, credential, or per-message identifier. Presentation never appends one.
 
 ## Runtime Shape
 
-The enabled branch gains one immutable field while retaining every existing provider field:
+The normalized environment gains one immutable global field. The enabled mail branch references
+that same object while retaining every existing provider field:
 
 ```ts
+interface Env {
+  readonly BRAND: EmailBrand;
+  readonly MAIL: MailConfig;
+}
+
 interface EnabledMailConfigBase {
   readonly enabled: true;
   readonly apiKey: string;
@@ -51,7 +57,7 @@ interface DisabledMailConfig {
 ```
 
 `BrevoMailConfig` and `MailjetMailConfig` continue to extend the enabled base exactly as today. The
-disabled branch has no `brand`, provider, or credential field.
+disabled `MAIL` branch has no provider or credential field; global `Env.BRAND` remains available.
 
 The normalized brand guarantees:
 
@@ -60,21 +66,23 @@ The normalized brand guarantees:
 - `primaryColor` uses uppercase hex digits;
 - `actionForeground` is the black or white value with the greater WCAG contrast ratio and passes
   4.5:1;
-- support/legal strings contain no leading/trailing whitespace or line break;
+- `supportEmail` contains no leading/trailing whitespace and is one bare address;
 - `logoUrl` is one normalized HTTPS string or `null`.
+
+The email footer renders `productName` as its identity and accepts no separate legal name or postal
+address.
 
 Only `src/lib/env.ts` reads these environment variables. Presentation receives `EmailBrand` as a
 value and never reads process state.
 
-## Conditional Validation
+## Validation
 
-| `MAIL_ENABLED` | Brand inputs | Result |
-|----------------|--------------|--------|
-| unset or `false` | absent | Startup succeeds with `{ MAIL: { enabled: false } }` |
-| unset or `false` | present, including malformed values | Values are discarded; startup still succeeds |
-| `true` | all required values valid, optional logo absent or valid | Startup succeeds with normalized `MAIL.brand` |
-| `true` | any required value absent/empty | Entire application startup fails |
-| `true` | any supplied brand value malformed | Entire application startup fails |
+| `MAIL_ENABLED` | Global brand inputs | Result |
+|----------------|---------------------|--------|
+| unset or `false` | required values valid, logo absent, valid, or malformed | Startup succeeds with normalized `BRAND.logoUrl = null` and `{ MAIL: { enabled: false } }` |
+| unset or `false` | required global value absent/empty or malformed | Entire application startup fails |
+| `true` | required values valid, optional logo absent or valid | Startup succeeds and `MAIL.brand` references normalized `BRAND` |
+| `true` | required value absent/empty or any supplied value malformed | Entire application startup fails |
 | any other value | any | Existing `MAIL_ENABLED` validation fails startup |
 
 Provider and brand issues are accumulated into one validation result so an operator can correct all
@@ -110,27 +118,27 @@ preflight follows the same field-name-only rule. Neither path enables shell trac
 
 ## Local Development
 
-`.env.example` documents all five new values beside the existing mail settings and states their
-conditional requirement. A representative non-secret setup is:
+`.env.example` documents the two required global values beside `PROJECT_NAME` and the optional email
+logo beside provider settings. A representative non-secret setup is:
 
 ```dotenv
-MAIL_BRAND_COLOR=#0F766E
-MAIL_SUPPORT_EMAIL=support@example.com
-MAIL_LEGAL_NAME=Example Organization
-MAIL_LEGAL_ADDRESS=123 Example Street, Example City
+BRAND_COLOR="#0E79B2"
+SUPPORT_EMAIL=login@versmedit.com
 MAIL_LOGO_URL=
 ```
 
-These examples are documentation only. The local preview project ignores `.env` and uses its own
-fictional brand. Normal application development with `MAIL_ENABLED=false` requires no brand values.
+`pnpm email:dev` reads only these public brand values plus `PROJECT_NAME` from the repository
+`.env`; all other configuration, including provider and application secrets, remains unavailable to
+the preview. Without `.env`, direct preview execution uses its deterministic fictional fallback.
+Normal application development requires the global values even when `MAIL_ENABLED=false`.
 
 ## Docker Build and Runtime
 
-- The existing Docker build continues without `MAIL_ENABLED=true`; therefore its explicit non-secret
-  placeholders do not need brand placeholders.
+- The Docker build uses fixed non-secret `BRAND_COLOR` and `SUPPORT_EMAIL` placeholders while
+  collecting Next.js metadata; production values are not accepted as build arguments.
 - Both React Email runtime packages are installed in the dependency stage and included by the
   application standalone build.
-- `docker-compose.prod.yml` forwards all five new variables to the `app` service only.
+- `docker-compose.prod.yml` forwards the two global variables and optional email logo to `app` only.
 - The `migrate` and `db` services receive none of them.
 - No value is written to a host `.env` file, image layer, build argument, Compose label, healthcheck,
   or command line.
@@ -145,27 +153,24 @@ The deploy workflow performs two distinct duties.
 
 ### Preflight
 
-The existing `Validate required variables and secrets` step maps all five GitHub Variables into its
-step environment. When `MAIL_ENABLED=true`, it reports each empty required brand field by name.
+The existing `Validate required variables and secrets` step maps all three GitHub Variables into its
+step environment. It always reports an empty `BRAND_COLOR` or `SUPPORT_EMAIL` by name.
 `MAIL_LOGO_URL` may be empty. The application schema remains authoritative for complete format and
 normalization checks at container startup.
 
-When mail is disabled, preflight does not require or validate the brand fields. It still validates
-the existing global and provider gates exactly as before.
+Mail state affects only provider requirements; it never weakens the global brand gate.
 
 ### Deployment environment
 
-The `Build and deploy with Docker Compose` step maps all five Variables into its environment, and
+The `Build and deploy with Docker Compose` step maps all three Variables into its environment, and
 Compose forwards them to `app`. `NEXTAUTH_URL` continues to be derived from `APP_DOMAIN`; no new
 origin setting is introduced. Workflow commands never echo the values.
 
-Required repository configuration before an enabled-email rollout:
+Required repository configuration before any rollout:
 
 ```text
-MAIL_BRAND_COLOR
-MAIL_SUPPORT_EMAIL
-MAIL_LEGAL_NAME
-MAIL_LEGAL_ADDRESS
+BRAND_COLOR
+SUPPORT_EMAIL
 MAIL_LOGO_URL (optional)
 ```
 
@@ -176,15 +181,15 @@ ordinary image rollback.
 
 Automated checks cover:
 
-1. Every missing required brand field and representative malformed value with mail enabled.
+1. Every missing required global brand field and representative malformed value in both mail states.
 2. Valid brands with no logo, a valid logo, long allowed values, very light color, and very dark
    color.
-3. Disabled mail with absent and malformed brand fields, proving the values are discarded.
+3. Disabled mail with valid global branding and a malformed logo, proving the web identity remains
+  available and the email-only setting is discarded without enabling delivery.
 4. Safe error messages by asserting forbidden supplied values never occur in errors or logs.
-5. `instrumentation.register()` startup of the standalone artifact: valid enabled configuration
-   becomes ready; invalid enabled configuration exits before a health request can succeed; disabled
-   configuration starts without brand values.
-6. Compose interpolation showing all five values on `app` and none on `migrate` or `db`, without
+5. `instrumentation.register()` startup of the standalone artifact: valid configuration becomes
+  ready in both mail states; invalid global configuration exits before a health request can succeed.
+6. Compose interpolation showing all three values on `app` and none on `migrate` or `db`, without
    printing values in test output.
-7. Workflow structure showing conditional preflight and deployment mapping for all five Variables.
-8. Docker build with mail disabled and no brand placeholders.
+7. Workflow structure showing unconditional global preflight and deployment mapping for all three Variables.
+8. Docker build with fixed public brand placeholders and no production brand build arguments.

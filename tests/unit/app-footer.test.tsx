@@ -69,7 +69,9 @@ function installTranslations() {
 }
 
 async function renderFooter(locale: Locale) {
-  document.body.innerHTML = renderToStaticMarkup(await AppFooter({ locale }));
+  document.body.innerHTML = renderToStaticMarkup(
+    await AppFooter({ locale, supportEmail: "login@versmedit.com" }),
+  );
 }
 
 describe("AppFooter", () => {
@@ -86,12 +88,17 @@ describe("AppFooter", () => {
       name: "Legal information",
     });
     const links = within(navigation).getAllByRole("link");
+    const supportLink = within(footer).getByRole("link", {
+      name: "login@versmedit.com",
+    });
 
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
     expect(within(footer).getAllByRole("navigation")).toHaveLength(1);
     expect(within(navigation).getByRole("list")).toBeInTheDocument();
     expect(within(navigation).getAllByRole("listitem")).toHaveLength(2);
     expect(links).toHaveLength(2);
+    expect(supportLink).toHaveAttribute("href", "mailto:login@versmedit.com");
+    expect(within(navigation).queryByRole("link", { name: "login@versmedit.com" })).not.toBeInTheDocument();
     expect(links[0]).toHaveAccessibleName("Terms of Use");
     expect(links[0]).toHaveAttribute("href", POLICY_PATHS.terms);
     expect(links[1]).toHaveAccessibleName("Privacy Notice");
@@ -118,7 +125,11 @@ describe("AppFooter", () => {
         name: catalogs[locale].Footer.navigationLabel,
       });
       const links = within(navigation).getAllByRole("link");
+      const supportLink = screen.getByRole("link", {
+        name: "login@versmedit.com",
+      });
 
+      expect(supportLink).toHaveAttribute("href", "mailto:login@versmedit.com");
       expect(links[0]).toHaveAccessibleName(catalogs[locale].Policies.terms.title);
       expect(links[0]).toHaveAttribute("href", POLICY_PATHS.terms);
       expect(links[1]).toHaveAccessibleName(
@@ -161,6 +172,10 @@ describe("AppFooter", () => {
     expect(list.tagName).toBe("UL");
     expect(items.every((item) => item.tagName === "LI")).toBe(true);
     expect(links.every((link) => link.tagName === "A")).toBe(true);
+    expect(screen.getByRole("link", { name: "login@versmedit.com" })).toHaveAttribute(
+      "href",
+      "mailto:login@versmedit.com",
+    );
     expect(links[0]).toHaveAccessibleName(catalogs.ca.Policies.terms.title);
     expect(links[1]).toHaveAccessibleName(catalogs.ca.Policies.privacy.title);
     expect(footer.querySelectorAll("[role]")).toHaveLength(0);

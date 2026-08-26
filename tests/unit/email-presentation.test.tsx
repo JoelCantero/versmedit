@@ -29,8 +29,6 @@ const brand: EmailBrand = Object.freeze({
   primaryColor: "#0057B8",
   actionForeground: "#FFFFFF",
   supportEmail: "support@example.test",
-  legalName: "Example Workspace, S.L.",
-  legalAddress: "Carrer de la Prova 12, 08001 Barcelona",
   logoUrl: null,
 });
 
@@ -127,8 +125,6 @@ function createOperationalBrand(logoUrl: string | null): EmailBrand {
     canonicalOrigin: "https://app.example.test",
     primaryColor: "#0057B8",
     supportEmail: "support@example.test",
-    legalName: `Example "Workspace" & <Partners> ${"L".repeat(90)}`,
-    legalAddress: `L'avinguda Example & <District>, ${"A".repeat(180)}`,
     logoUrl,
   });
 }
@@ -300,8 +296,6 @@ describe("email brand validation", () => {
     canonicalOrigin: "https://app.example.test/",
     primaryColor: "#0057b8",
     supportEmail: "  support@example.test  ",
-    legalName: "  Example Workspace, S.L.  ",
-    legalAddress: "  Carrer de la Prova 12, 08001 Barcelona  ",
     logoUrl: "  https://assets.example.test/mail/logo.png?v=1  ",
   };
 
@@ -314,8 +308,6 @@ describe("email brand validation", () => {
       primaryColor: "#0057B8",
       actionForeground: "#FFFFFF",
       supportEmail: "support@example.test",
-      legalName: "Example Workspace, S.L.",
-      legalAddress: "Carrer de la Prova 12, 08001 Barcelona",
       logoUrl: "https://assets.example.test/mail/logo.png?v=1",
     });
     expect(Object.isFrozen(validated)).toBe(true);
@@ -338,10 +330,9 @@ describe("email brand validation", () => {
     ["canonicalOrigin", { canonicalOrigin: "https://app.example.test/path" }],
     ["primaryColor", { primaryColor: "#123" }],
     ["supportEmail", { supportEmail: "Display <support@example.test>" }],
-    ["legalName", { legalName: "" }],
-    ["legalAddress", { legalAddress: "unsafe\raddress" }],
     ["logoUrl", { logoUrl: "http://assets.example.test/logo.png" }],
     ["logoUrl", { logoUrl: "https://assets.example.test/logo.png#fragment" }],
+    ["brand", { legalAddress: "Legacy postal address" }],
     ["brand", { recipient: "person@example.test" }],
   ])("rejects invalid %s without exposing its value", (field, replacement) => {
     const invalid = { ...brandInput, ...replacement };
@@ -400,6 +391,14 @@ describe("email presentation shared contract", () => {
     expect(rendered.text).toMatch(/Confirm your request/i);
     expect(rendered.html).not.toContain("undefined");
     expect(rendered.text).not.toMatch(/\{[^}]+\}/);
+    for (const declaration of [
+      "border-radius:10px",
+      "font-size:14px",
+      "font-weight:500",
+      "line-height:20px",
+    ]) {
+      expect(rendered.html).toContain(declaration);
+    }
   });
 
   it("accepts only the structured values declared by the discriminated variant", () => {
@@ -568,8 +567,6 @@ describe("email presentation shared contract", () => {
       expect(rendered.text.match(new RegExp(escapeRegExp(actionUrl), "gu"))).toHaveLength(1);
       expect(rendered.html).toContain("Example &amp; &lt;Workspace&gt;");
       expect(rendered.html).not.toContain("<Workspace>");
-      expect(rendered.html).toContain("&lt;Partners&gt;");
-      expect(rendered.html).not.toContain("<Partners>");
       expect(rendered.text).toContain(caseBrand.productName);
 
       if (caseBrand.logoUrl) {

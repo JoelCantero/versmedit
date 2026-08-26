@@ -17,6 +17,8 @@ function validEnv(
     DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
     AUTH_SECRET: "test-auth-secret-at-least-32-chars-long",
     NEXTAUTH_URL: "https://app.example.test",
+    BRAND_COLOR: "#0057B8",
+    SUPPORT_EMAIL: "support@example.test",
     ...overrides,
   };
 }

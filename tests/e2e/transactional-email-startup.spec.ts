@@ -73,7 +73,7 @@ test("exits before health with a redacted malformed-brand diagnostic", async () 
       PORT: String(port),
       NEXTAUTH_URL: `http://127.0.0.1:${port}`,
       MAIL_ENABLED: "true",
-      MAIL_BRAND_COLOR: invalidValue,
+      BRAND_COLOR: invalidValue,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -104,7 +104,7 @@ test("exits before health with a redacted malformed-brand diagnostic", async () 
 
     expect(result.code).not.toBe(0);
     expect(healthSucceeded).toBe(false);
-    expect(output).toContain("MAIL_BRAND_COLOR");
+    expect(output).toContain("BRAND_COLOR");
     expect(output).not.toContain(invalidValue);
   } finally {
     if (child.exitCode === null && child.signalCode === null) {

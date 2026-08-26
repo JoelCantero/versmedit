@@ -97,7 +97,8 @@ describe("signup email", () => {
       expect(message.html).toMatch(/<!doctype html/i);
       expect(message.html).toContain(projectName);
       expect(message.html).toContain("support@example.test");
-      expect(message.html).toContain("Example Workspace, S.L.");
+      expect(message.html).not.toContain("Example Workspace, S.L.");
+      expect(message.html).not.toContain("123 Example Street");
       expect(message.html).toContain("raw_signup_token");
       expect(message.text).not.toContain("person@example.test");
     },

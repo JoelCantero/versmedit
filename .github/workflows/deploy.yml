@@ -36,15 +36,13 @@ jobs:
           APP_DOMAIN: ${{ vars.APP_DOMAIN }}
           DEPLOY_BASE_DIR: ${{ vars.DEPLOY_BASE_DIR }}
           RUNNER_NAME: ${{ vars.RUNNER_NAME }}
+          BRAND_COLOR: ${{ vars.BRAND_COLOR }}
+          SUPPORT_EMAIL: ${{ vars.SUPPORT_EMAIL }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
           MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
-          MAIL_BRAND_COLOR: ${{ vars.MAIL_BRAND_COLOR }}
-          MAIL_SUPPORT_EMAIL: ${{ vars.MAIL_SUPPORT_EMAIL }}
-          MAIL_LEGAL_NAME: ${{ vars.MAIL_LEGAL_NAME }}
-          MAIL_LEGAL_ADDRESS: ${{ vars.MAIL_LEGAL_ADDRESS }}
           MAIL_LOGO_URL: ${{ vars.MAIL_LOGO_URL }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}
@@ -54,16 +52,14 @@ jobs:
           [ -n "$APP_DOMAIN" ] || missing+=("APP_DOMAIN (Variable)")
           [ -n "$DEPLOY_BASE_DIR" ] || missing+=("DEPLOY_BASE_DIR (Variable)")
           [ -n "$RUNNER_NAME" ] || missing+=("RUNNER_NAME (Variable)")
+          [ -n "$BRAND_COLOR" ] || missing+=("BRAND_COLOR (Variable)")
+          [ -n "$SUPPORT_EMAIL" ] || missing+=("SUPPORT_EMAIL (Variable)")
           [ -n "$POSTGRES_PASSWORD" ] || missing+=("POSTGRES_PASSWORD (Secret)")
           [ -n "$AUTH_SECRET" ] || missing+=("AUTH_SECRET (Secret)")
           [ -n "$MAIL_ENABLED" ] || missing+=("MAIL_ENABLED (Variable)")
           if [ "$MAIL_ENABLED" = "true" ]; then
             [ -n "$MAIL_PROVIDER" ] || missing+=("MAIL_PROVIDER (Variable)")
             [ -n "$MAIL_FROM" ] || missing+=("MAIL_FROM (Variable)")
-            [ -n "$MAIL_BRAND_COLOR" ] || missing+=("MAIL_BRAND_COLOR (Variable)")
-            [ -n "$MAIL_SUPPORT_EMAIL" ] || missing+=("MAIL_SUPPORT_EMAIL (Variable)")
-            [ -n "$MAIL_LEGAL_NAME" ] || missing+=("MAIL_LEGAL_NAME (Variable)")
-            [ -n "$MAIL_LEGAL_ADDRESS" ] || missing+=("MAIL_LEGAL_ADDRESS (Variable)")
             [ -n "$MAIL_API_KEY" ] || missing+=("MAIL_API_KEY (Secret)")
             if [ "$MAIL_PROVIDER" = "mailjet" ]; then
               [ -n "$MAIL_API_SECRET" ] || missing+=("MAIL_API_SECRET (Secret)")
@@ -115,6 +111,8 @@ jobs:
           # Non-sensitive config -> GitHub Variables; secrets -> GitHub Secrets.
           # Compose reads these from the shell environment (no .env file on the host).
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BRAND_COLOR: ${{ vars.BRAND_COLOR }}
+          SUPPORT_EMAIL: ${{ vars.SUPPORT_EMAIL }}
           LOG_LEVEL: ${{ vars.LOG_LEVEL }}
           ACCOUNT_DATA_EXPORT_MAX_BYTES: ${{ vars.ACCOUNT_DATA_EXPORT_MAX_BYTES }}
           ACCOUNT_DATA_EXPORT_TIMEOUT_MS: ${{ vars.ACCOUNT_DATA_EXPORT_TIMEOUT_MS }}
@@ -133,10 +131,6 @@ jobs:
           MAIL_ENABLED: ${{ vars.MAIL_ENABLED }}
           MAIL_PROVIDER: ${{ vars.MAIL_PROVIDER }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
-          MAIL_BRAND_COLOR: ${{ vars.MAIL_BRAND_COLOR }}
-          MAIL_SUPPORT_EMAIL: ${{ vars.MAIL_SUPPORT_EMAIL }}
-          MAIL_LEGAL_NAME: ${{ vars.MAIL_LEGAL_NAME }}
-          MAIL_LEGAL_ADDRESS: ${{ vars.MAIL_LEGAL_ADDRESS }}
           MAIL_LOGO_URL: ${{ vars.MAIL_LOGO_URL }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_API_SECRET: ${{ secrets.MAIL_API_SECRET }}

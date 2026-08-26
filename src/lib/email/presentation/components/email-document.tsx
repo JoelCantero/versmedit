@@ -114,9 +114,7 @@ export function EmailDocument({
           <Hr style={dividerStyle} />
           <Section style={footerStyle}>
             <Text style={legalTextStyle}>
-              {legalLabel} {brand.legalName}
-              <br />
-              {brand.legalAddress}
+              {legalLabel} {brand.productName}
             </Text>
             <Text style={policyTextStyle}>
               <Link href={termsUrl} style={footerLinkStyle}>

@@ -43,8 +43,6 @@ const BRAND_KEYS = [
   "primaryColor",
   "actionForeground",
   "supportEmail",
-  "legalName",
-  "legalAddress",
   "logoUrl",
 ] as const;
 const BASE_COPY_KEYS = [
@@ -235,8 +233,6 @@ function validateNormalizedBrand(value: unknown): EmailBrand {
       canonicalOrigin: value.canonicalOrigin,
       primaryColor: value.primaryColor,
       supportEmail: value.supportEmail,
-      legalName: value.legalName,
-      legalAddress: value.legalAddress,
       logoUrl: value.logoUrl,
     });
   } catch (error) {
@@ -410,8 +406,6 @@ function resolveCopy(
   const placeholders: Record<string, string> = {
     productName: request.brand.productName,
     supportEmail: request.brand.supportEmail,
-    legalName: request.brand.legalName,
-    legalAddress: request.brand.legalAddress,
   };
   for (const key of EMAIL_VARIANT_DEFINITIONS[request.variant].valueKeys) {
     const value = requestValues[key];

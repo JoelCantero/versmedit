@@ -5,10 +5,8 @@ import { validateEnv } from "@/lib/env";
 describe("validateEnv", () => {
   const originalEnv = process.env;
   const validBrandEnv = {
-    MAIL_BRAND_COLOR: "#0057b8",
-    MAIL_SUPPORT_EMAIL: "support@example.test",
-    MAIL_LEGAL_NAME: "Example Workspace, S.L.",
-    MAIL_LEGAL_ADDRESS: "Carrer de la Prova 12, 08001 Barcelona",
+    BRAND_COLOR: "#0057b8",
+    SUPPORT_EMAIL: "support@example.test",
     MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png?v=1",
   };
   const normalizedBrand = {
@@ -17,8 +15,6 @@ describe("validateEnv", () => {
     primaryColor: "#0057B8",
     actionForeground: "#FFFFFF",
     supportEmail: "support@example.test",
-    legalName: "Example Workspace, S.L.",
-    legalAddress: "Carrer de la Prova 12, 08001 Barcelona",
     logoUrl: "https://assets.example.test/mail/logo.png?v=1",
   };
 
@@ -34,10 +30,8 @@ describe("validateEnv", () => {
     delete process.env.MAIL_API_KEY;
     delete process.env.MAIL_API_SECRET;
     delete process.env.MAIL_FROM;
-    delete process.env.MAIL_BRAND_COLOR;
-    delete process.env.MAIL_SUPPORT_EMAIL;
-    delete process.env.MAIL_LEGAL_NAME;
-    delete process.env.MAIL_LEGAL_ADDRESS;
+    delete process.env.BRAND_COLOR;
+    delete process.env.SUPPORT_EMAIL;
     delete process.env.MAIL_LOGO_URL;
     delete process.env.MAIL_API_BASE_URL;
     delete process.env.MAIL_FROM_NAME;
@@ -143,21 +137,32 @@ describe("validateEnv", () => {
     expect(validateEnv(process.env).MAIL).toEqual({ enabled: false });
   });
 
-  it("discards absent or malformed brand settings while mail is disabled", () => {
+  it("requires valid global brand settings while mail is disabled", () => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
     process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
     process.env.NEXTAUTH_URL = "https://app.example.com";
     for (const field of Object.keys(validBrandEnv)) delete process.env[field];
 
-    expect(validateEnv(process.env).MAIL).toEqual({ enabled: false });
+    expect(() => validateEnv(process.env)).toThrow(/BRAND_COLOR/);
 
-    process.env.MAIL_BRAND_COLOR = "not-a-color";
-    process.env.MAIL_SUPPORT_EMAIL = "not-an-email";
-    process.env.MAIL_LEGAL_NAME = "unsafe\nname";
-    process.env.MAIL_LEGAL_ADDRESS = "";
-    process.env.MAIL_LOGO_URL = "javascript:alert(1)";
-    expect(validateEnv(process.env).MAIL).toEqual({ enabled: false });
+    Object.assign(process.env, validBrandEnv, {
+      BRAND_COLOR: "not-a-color",
+    });
+    expect(() => validateEnv(process.env)).toThrow(/BRAND_COLOR/);
+  });
+
+  it("ignores the email logo setting while mail is disabled", () => {
+    process.env.PROJECT_NAME = "test-app";
+    process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
+    process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
+    process.env.NEXTAUTH_URL = "https://app.example.com";
+    process.env.MAIL_LOGO_URL = "http://invalid.example.test/logo.png";
+
+    expect(validateEnv(process.env)).toMatchObject({
+      BRAND: { ...normalizedBrand, logoUrl: null },
+      MAIL: { enabled: false },
+    });
   });
 
   it("normalizes complete Brevo configuration and drops a Mailjet secret", () => {
@@ -255,35 +260,27 @@ describe("validateEnv", () => {
     expect(() => validateEnv(process.env)).toThrow(new RegExp(field));
   });
 
-  it.each([
-    "MAIL_BRAND_COLOR",
-    "MAIL_SUPPORT_EMAIL",
-    "MAIL_LEGAL_NAME",
-    "MAIL_LEGAL_ADDRESS",
-  ])("requires enabled brand setting %s", (field) => {
+  it.each(["BRAND_COLOR", "SUPPORT_EMAIL"])(
+    "requires global brand setting %s",
+    (field) => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
     process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";
     process.env.NEXTAUTH_URL = "https://app.example.com";
-    process.env.MAIL_ENABLED = "true";
-    process.env.MAIL_PROVIDER = "brevo";
-    process.env.MAIL_API_KEY = "provider-key";
-    process.env.MAIL_FROM = "no-reply@example.test";
     delete process.env[field];
 
     expect(() => validateEnv(process.env)).toThrow(new RegExp(field));
-  });
+    },
+  );
 
   it.each([
-    ["MAIL_BRAND_COLOR", "#123"],
-    ["MAIL_BRAND_COLOR", "0057B8"],
-    ["MAIL_SUPPORT_EMAIL", "Support <support@example.test>"],
-    ["MAIL_LEGAL_NAME", "unsafe\nname"],
-    ["MAIL_LEGAL_ADDRESS", "unsafe\raddress"],
+    ["BRAND_COLOR", "#123"],
+    ["BRAND_COLOR", "0057B8"],
+    ["SUPPORT_EMAIL", "Support <support@example.test>"],
     ["MAIL_LOGO_URL", "http://assets.example.test/logo.png"],
     ["MAIL_LOGO_URL", "https://user@assets.example.test/logo.png"],
     ["MAIL_LOGO_URL", "https://assets.example.test/logo.png#tracking"],
-  ])("rejects malformed enabled brand setting %s", (field, value) => {
+  ])("rejects malformed applicable brand setting %s", (field, value) => {
     process.env.PROJECT_NAME = "test-app";
     process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/app";
     process.env.AUTH_SECRET = "test-auth-secret-at-least-32-chars-long";

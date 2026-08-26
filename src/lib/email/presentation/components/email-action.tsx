@@ -1,5 +1,7 @@
 import { Button, Link, Section, Text } from "@react-email/components";
 
+import { BRAND_ACTION_APPEARANCE } from "../../../brand-action-appearance";
+
 import type { EmailBrand } from "../types";
 
 export type EmailActionProps = {
@@ -44,11 +46,8 @@ const actionSectionStyle = {
 };
 
 const buttonStyle = {
-  borderRadius: "6px",
+  ...BRAND_ACTION_APPEARANCE.emailStyle,
   display: "inline-block",
-  fontSize: "16px",
-  fontWeight: "700",
-  lineHeight: "24px",
   padding: "12px 20px",
   textDecoration: "none",
 };

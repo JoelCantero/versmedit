@@ -44,6 +44,8 @@ describe.skipIf(!runIntegrationTests)("magic-link HTTP provider acceptance", () 
       DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
       AUTH_SECRET: "integration-auth-secret-at-least-32-chars",
       NEXTAUTH_URL: "https://app.example.test",
+      BRAND_COLOR: "#0057B8",
+      SUPPORT_EMAIL: "support@example.test",
       ...mail,
     };
 
@@ -306,10 +308,8 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
     "MAIL_API_KEY",
     "MAIL_API_SECRET",
     "MAIL_FROM",
-    "MAIL_BRAND_COLOR",
-    "MAIL_SUPPORT_EMAIL",
-    "MAIL_LEGAL_NAME",
-    "MAIL_LEGAL_ADDRESS",
+    "BRAND_COLOR",
+    "SUPPORT_EMAIL",
     "MAIL_LOGO_URL",
     "TRUST_PROXY_HEADERS",
   ] as const;
@@ -336,10 +336,8 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
       MAIL_API_KEY: "login-integration-key",
       MAIL_API_SECRET: "",
       MAIL_FROM: "no-reply@example.test",
-      MAIL_BRAND_COLOR: "#0057B8",
-      MAIL_SUPPORT_EMAIL: "support@example.test",
-      MAIL_LEGAL_NAME: "Example Workspace, S.L.",
-      MAIL_LEGAL_ADDRESS: "123 Example Street, Example City",
+      BRAND_COLOR: "#0057B8",
+      SUPPORT_EMAIL: "support@example.test",
       MAIL_LOGO_URL: "https://assets.example.test/mail/logo.png",
       TRUST_PROXY_HEADERS: "true",
     });

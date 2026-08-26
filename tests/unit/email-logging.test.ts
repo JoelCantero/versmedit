@@ -103,8 +103,6 @@ describe("transactional email submission logging", () => {
       "loginMagicLink",
       config.brand.primaryColor,
       config.brand.supportEmail,
-      config.brand.legalName,
-      config.brand.legalAddress,
       config.brand.logoUrl!,
     ]) {
       expect(serialized).not.toContain(privateValue);

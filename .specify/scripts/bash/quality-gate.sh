@@ -23,6 +23,8 @@ export PROJECT_NAME="${PROJECT_NAME:-quality-gate}"
 export DATABASE_URL="${DATABASE_URL:-postgresql://quality:quality@127.0.0.1:5432/quality?schema=public}"
 export AUTH_SECRET="${AUTH_SECRET:-quality-gate-secret-not-used-in-runtime}"
 export NEXTAUTH_URL="${NEXTAUTH_URL:-http://localhost:3100}"
+export BRAND_COLOR="${BRAND_COLOR:-#18181B}"
+export SUPPORT_EMAIL="${SUPPORT_EMAIL:-support@example.test}"
 
 echo "[quality-gate] Running lint, typecheck and coverage before PR ..." >&2
 

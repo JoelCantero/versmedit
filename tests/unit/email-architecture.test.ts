@@ -203,6 +203,27 @@ describe("transactional email architecture", () => {
     const previewFiles = await filesUnder(previewRoot);
     const sourceFiles = previewFiles.filter((file) => /\.(?:ts|tsx)$/u.test(file));
     const relativePaths = sourceFiles.map((file) => path.relative(previewRoot, file));
+    const allowedEnvironmentReads = new Map<string, readonly string[]>([
+      [
+        "next.config.ts",
+        [
+          "BRAND_COLOR",
+          "EMAIL_PREVIEW_USE_APP_BRAND",
+          "MAIL_LOGO_URL",
+          "PROJECT_NAME",
+          "SUPPORT_EMAIL",
+        ],
+      ],
+      [
+        "lib/preview-fixtures.ts",
+        [
+          "EMAIL_PREVIEW_BRAND_COLOR",
+          "EMAIL_PREVIEW_LOGO_URL",
+          "EMAIL_PREVIEW_PROJECT_NAME",
+          "EMAIL_PREVIEW_SUPPORT_EMAIL",
+        ],
+      ],
+    ]);
 
     expect(relativePaths).not.toEqual([]);
     expect(
@@ -214,6 +235,7 @@ describe("transactional email architecture", () => {
 
     for (const file of sourceFiles) {
       const source = await readFile(file, "utf8");
+      const relativePath = path.relative(previewRoot, file);
       const applicationImports = [
         ...source.matchAll(
           /(?:from\s+|import\s*\()\s*["']([^"']*(?:src\/|@\/)[^"']*)["']/gu,
@@ -225,8 +247,20 @@ describe("transactional email architecture", () => {
           /(?:^@\/lib\/email\/presentation(?:\/|$)|src\/lib\/email\/presentation(?:\/|$))/u,
         );
       }
+      const environmentReads = [
+        ...source.matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/gu),
+      ]
+        .map((match) => match[1])
+        .sort();
+      expect(environmentReads, path.relative(root, file)).toEqual(
+        [...(allowedEnvironmentReads.get(relativePath) ?? [])].sort(),
+      );
+      expect(
+        source.replaceAll(/process\.env\.[A-Z][A-Z0-9_]*/gu, ""),
+        path.relative(root, file),
+      ).not.toContain("process.env");
       expect(source, path.relative(root, file)).not.toMatch(
-        /process\.env|@\/lib\/(?:env|db|auth|logger|email\/index)|@prisma|next-auth|["']use server["']/u,
+        /@\/lib\/(?:env|db|auth|logger|email\/index)|@prisma|next-auth|["']use server["']/u,
       );
       expect(source, path.relative(root, file)).not.toMatch(
         /\b(?:sendTransactionalEmail|createTransactionalEmailProvider|getEnv|logger|recipient|upload)\b|<form\b|<input\b|type=["']file["']/iu,

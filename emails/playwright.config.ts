@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = "http://127.0.0.1:3001";
+const previewPort = 3101;
+const baseURL = `http://127.0.0.1:${previewPort}`;
 
 export default defineConfig({
   testDir: "../tests/e2e",
@@ -22,11 +23,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command:
-      "NEXT_TELEMETRY_DISABLED=1 pnpm exec next dev emails --hostname 127.0.0.1 --port 3001",
+    command: `NEXT_TELEMETRY_DISABLED=1 pnpm exec next dev emails --hostname 127.0.0.1 --port ${previewPort}`,
     cwd: "..",
     url: baseURL,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

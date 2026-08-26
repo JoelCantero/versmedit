@@ -38,21 +38,21 @@ As a recipient, I receive a recognizable, localized transactional message with a
 
 ---
 
-### User Story 2 - Configure One Trusted Email Brand (Priority: P1)
+### User Story 2 - Configure One Trusted Application Brand (Priority: P1)
 
-As an operator, I configure one deployment-wide email brand so that every transactional message identifies the same product and provides accurate support and legal information.
+As an operator, I configure one deployment-wide application brand so that the web experience and every transactional message use the same product identity, color, and support contact.
 
 **Why this priority**: Shared presentation is only trustworthy when identity, support, legal details, and action colors are complete and valid in every operational message.
 
-**Independent Test**: Validate and render the full catalogue with a complete brand, with no logo, and with representative light and dark brand colors, then verify startup behavior when transactional email is enabled and disabled.
+**Independent Test**: Validate the global brand, render the web shell and full email catalogue with no logo and representative light and dark colors, then verify startup behavior when transactional email is enabled and disabled.
 
 **Acceptance Scenarios**:
 
-1. **Given** transactional email is enabled with complete valid branding, **When** any message is prepared, **Then** it uses the configured product identity, primary color, support address, legal organization, postal address, and optional logo consistently.
+1. **Given** complete valid branding, **When** the web shell or any message is rendered, **Then** it uses `PROJECT_NAME`, the configured primary color, and support address consistently.
 2. **Given** no logo is configured, **When** a message is rendered, **Then** the product name provides a complete text-brand fallback with no empty image or broken layout.
 3. **Given** a very light or very dark primary color, **When** a primary action is rendered, **Then** its foreground is selected to maintain at least a 4.5:1 contrast ratio.
-4. **Given** transactional email is enabled with missing or malformed required branding, **When** application configuration is validated, **Then** the entire application fails startup before serving requests and does not expose supplied values.
-5. **Given** transactional email is disabled, **When** the application starts without the additional branding values, **Then** startup succeeds and no email-dependent action becomes available.
+4. **Given** missing or malformed required global branding, **When** application configuration is validated, **Then** the entire application fails startup before serving requests and does not expose supplied values.
+5. **Given** transactional email is disabled with valid global branding, **When** the application starts, **Then** the web experience remains branded and no email-dependent action becomes available.
 
 ---
 
@@ -69,7 +69,7 @@ As a developer or reviewer, I can inspect every message variant in every support
 1. **Given** the local preview experience, **When** a reviewer opens its catalogue, **Then** all 12 variants in English, Spanish, and Catalan are listed and renderable for a total of 36 previews.
 2. **Given** no application environment, database, authenticated session, or provider credential, **When** the preview is opened and navigated, **Then** every combination remains available.
 3. **Given** any preview interaction, **When** the reviewer opens or changes a message, **Then** no provider request, credential creation, account action, or application log event occurs and no sending control is offered.
-4. **Given** any preview fixture, **When** its content is inspected, **Then** all identities, addresses, destinations, credentials, devices, sessions, and network details are obviously fictional and use reserved example domains where applicable.
+4. **Given** any preview fixture, **When** its content is inspected, **Then** only explicitly configured public product branding may be local, while all people, action destinations, credentials, devices, sessions, references, and network details are obviously fictional and use reserved example domains where applicable.
 
 ---
 
@@ -94,7 +94,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 
 - The optional logo is absent, temporarily unreachable, or has an unusually wide intrinsic aspect ratio; the message remains complete and does not rely on the image to communicate product identity or purpose.
 - The configured primary color is near white or near black; action text still meets the required contrast ratio.
-- Product names, legal names, postal addresses, support addresses, and translated copy are unusually long or contain quotes, apostrophes, ampersands, angle brackets, or long unbroken values.
+- Product names, support addresses, and translated copy are unusually long or contain quotes, apostrophes, ampersands, angle brackets, or long unbroken values.
 - An action destination contains multiple query parameters and an opaque credential; its destination remains intact, escaped, and isolated from support and legal links.
 - Rendering fails after credential issuance but before any provider request; the owning flow applies its established failed-submission compensation behavior.
 - Delivery is rejected or acceptance cannot be determined after rendering; the existing one-attempt classification and compensation behavior remains authoritative.
@@ -121,7 +121,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **FR-003**: The six preview-only variants MUST be personal-data-export ready, account deleted, email change requested, email changed, security alert, and generic confirmation.
 - **FR-003a**: The generic confirmation variant MUST use catalogue-owned localized subject, preview text, heading, body, and action label. It MAY accept only predefined escaped display values and a fictional action destination and MUST NOT accept caller-provided message copy, HTML, or plain text.
 - **FR-004**: Every successful render MUST produce a non-empty localized subject, a complete HTML document, and a non-empty plain-text alternative with the same essential purpose and primary destination.
-- **FR-005**: Every variant MUST use a shared message structure containing localized inbox preview text, product identity, heading, body, support contact, legal identity, postal address, and localized Terms of Use and Privacy Notice links.
+- **FR-005**: Every variant MUST use a shared message structure containing localized inbox preview text, product identity, heading, body, support contact, and localized Terms of Use and Privacy Notice links.
 - **FR-006**: Every message MUST support English, Spanish, and Catalan, use only its requested locale, and contain no silent fallback copy from another language.
 - **FR-007**: A message that requires an account action MUST present exactly one business-action destination as its clear primary action and MUST expose that same destination visibly in its plain-text alternative.
 - **FR-007a**: Among the preview-only variants, personal-data-export ready, email change requested, security alert, and generic confirmation MUST require one primary action with a matching fictional plain-text destination; account deleted and email changed MUST remain informational with no business-action destination.
@@ -137,14 +137,14 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **FR-016**: No rendered output MUST contain `undefined`, an unresolved placeholder, missing required copy, or an empty required field.
 - **FR-017**: Messages MUST contain no remote script, executable content, tracking pixel, open tracking, click tracking, or recipient-specific logo destination.
 - **FR-018**: Branding MUST be deployment-wide and MUST NOT vary by recipient, account, tenant, message, or application area.
-- **FR-019**: The configurable brand MUST include the existing product name and canonical application origin, a primary color, support email address, legal organization name, legal postal address, and an optional absolute HTTPS logo destination.
-- **FR-020**: When transactional email is enabled, every required brand value MUST be validated during application startup before any request is served; when it is disabled, the additional brand values MUST NOT be required for startup.
-- **FR-021**: Missing or malformed required branding while transactional email is enabled MUST fail the entire application startup without serving a partially available application or exposing any supplied brand, provider, recipient, or credential value.
+- **FR-019**: The configurable application brand MUST include the existing `PROJECT_NAME` and canonical application origin, a global primary color, a global support email address, and an optional absolute HTTPS email logo destination when mail is enabled. `PROJECT_NAME` MUST also supply the email footer identity; no separate legal name or postal address is accepted or rendered. The email-only logo setting MUST be ignored when mail is disabled.
+- **FR-020**: Every required global brand value MUST be validated during application startup before any request is served, regardless of whether transactional email is enabled.
+- **FR-021**: Missing or malformed required global branding MUST fail the entire application startup without serving a partially available application or exposing any supplied brand, provider, recipient, or credential value.
 - **FR-022**: When a logo is configured, it MUST have meaningful alternative text based on the product name; when it is omitted or unavailable, the product-name fallback MUST remain complete without an empty image or broken layout.
 - **FR-023**: The logo destination MUST be shared across recipients, contain no recipient or credential identifiers, and MUST NOT function as a tracking pixel.
 - **FR-024**: The primary-action foreground color MUST be selected so that it has a contrast ratio of at least 4.5:1 against the configured primary color.
 - **FR-025**: Terms of Use and Privacy Notice destinations MUST be absolute, use the existing canonical application routes, and preserve the message locale.
-- **FR-026**: Product identity, long translated copy, legal names, postal addresses, support addresses, and action destinations MUST wrap without clipping, overlap, or horizontal overflow at representative mobile and desktop email widths.
+- **FR-026**: Product identity, long translated copy, support addresses, and action destinations MUST wrap without clipping, overlap, or horizontal overflow at representative mobile and desktop email widths.
 - **FR-027**: The local preview experience MUST list and render all 12 variants in all three supported locales for exactly 36 combinations.
 - **FR-028**: The local preview MUST remain fully usable without starting the application or accessing authentication, session, database, application logging, provider, or sending behavior.
 - **FR-029**: Opening, navigating, or rendering a preview MUST cause zero provider submissions, credential creation, account mutation, production-data access, or application log events and MUST expose no sending control.
@@ -173,7 +173,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 
 - **Message Variant**: One named transactional communication with a purpose, operational or preview-only status, action requirement, and localized content in each supported language.
 - **Rendered Transactional Message**: The presentation result containing locale, subject, HTML, plain text, product identity, support and legal details, and at most one business-action destination.
-- **Email Brand**: The one deployment-wide identity used by every variant, consisting of product identity, canonical origin, primary color, support address, legal identity, postal address, and optional shared logo destination.
+- **Application Brand**: The one deployment-wide identity used by the web experience and every variant, consisting of `PROJECT_NAME`, canonical origin, primary color, support address, and optional shared email logo destination.
 - **Preview Fixture**: A complete set of obviously fictional values used only to inspect a variant locally and incapable of authorizing or initiating any business action.
 
 ## Success Criteria *(mandatory)*
@@ -185,7 +185,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **SC-003**: All six existing business events produce messages with their established purpose, destination, credential scope, expiry, acceptance behavior, compensation, and provider submission contract unchanged.
 - **SC-004**: Across all rendering and delivery failure cases, zero newly issued credentials remain usable, zero superseded credentials are restored, and zero rendering failures reach a provider.
 - **SC-005**: Reviewers can open and navigate all 36 previews with zero provider submissions, production-data reads, credential actions, account mutations, or application log events.
-- **SC-006**: Transactional email remains disabled and the application starts successfully in 100% of tests without the additional brand values; 100% of missing or malformed required-brand cases terminate the entire application startup before serving requests when email is enabled.
+- **SC-006**: The application starts successfully in 100% of tests with valid global branding regardless of email state; 100% of missing or malformed `BRAND_COLOR` or `SUPPORT_EMAIL` cases terminate startup before serving requests.
 - **SC-007**: Every tested action-color combination meets at least 4.5:1 contrast, and every automated locale, width, logo, and long-content case preserves all essential content and actions with zero clipping, overlap, or horizontal overflow that prevents use.
 - **SC-008**: Both existing provider serializations of every rendered combination remain below the 1 MiB UTF-8 request-size limit under representative content, and an oversized operational request is rejected before network submission with zero message content recorded.
 - **SC-009**: The deployable release package renders and submits all six operational variants with zero missing presentation assets or dependencies.
@@ -201,7 +201,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - The existing delivery service continues to accept a fully prepared recipient, subject, HTML body, and plain-text body and remains the sole owner of provider submission.
 - The six listed operational variants are the only currently sent transactional messages in scope.
 - The six future variants remain presentation assets until separate product specifications define their triggers, authorization, credentials, and lifecycle semantics.
-- Deployment configuration remains the source of real branding, while local previews use an isolated fictional brand and fixtures.
+- Deployment configuration remains the source of production branding; `pnpm email:dev` may reuse only its local public name, color, support address, and email logo, while direct automated previews and all business fixtures remain isolated and fictional.
 - Existing delivery timeout, request-size, one-attempt, response-classification, acceptance, and safe-logging rules remain authoritative.
 
 ## Non-Goals *(mandatory)*
@@ -222,7 +222,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 - **Account lifecycle**: Registration, sign-in eligibility, account activation, reauthentication, deletion, security, and export rules remain owned by their existing flows. Message presentation cannot create an account, session, or credential, and the existing-account signup notice remains credential-free.
 - **Authentication provider verification**: Existing authentication and delivery boundaries remain unchanged. Integration verification must cross the real delivery contract for all authentication-related operational messages, while local preview checks remain deliberately isolated from it.
 - **Data sensitivity**: Recipient addresses, names, action destinations, credentials, subjects, and message bodies are sensitive. They remain confined to the owning flow and delivery operation and are never copied into preview fixtures, logs, or future preview-only behavior.
-- **Input validation**: Required branding, support email, legal identity, postal address, primary color, optional logo destination, locale, message variant, dynamic values, and action destinations require trusted validation before submission. Configuration cannot override provider endpoints or create arbitrary sending destinations, and generic confirmation cannot accept arbitrary message copy or rendered content.
+- **Input validation**: Required product identity, support email, primary color, optional logo destination, locale, message variant, dynamic values, and action destinations require trusted validation before submission. Configuration cannot override provider endpoints or create arbitrary sending destinations, and generic confirmation cannot accept arbitrary message copy or rendered content.
 - **Log hygiene**: Logs must exclude recipients, subjects, rendered content, action destinations, credentials, template values, branding values supplied during failed validation, and preview fixture details, including nested errors and test output.
 - **Public exposure**: This feature adds no public endpoint, callback, preview route, webhook, or sending control. Existing public authentication and signup surfaces remain unchanged.
 
@@ -234,7 +234,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 
 ## Operational Impact *(include if the feature changes deployment, data, or infrastructure)*
 
-- **Deployment changes**: Deployment configuration gains the required non-secret brand color, support email, legal organization, legal postal address, and optional shared logo destination when transactional email is enabled. No new container, worker, network, volume, public route, provider endpoint setting, or sending service is required. The deployable package must include the complete presentation capability.
+- **Deployment changes**: Deployment configuration gains required global non-secret brand color and support email Variables plus an optional shared email logo destination. No new container, worker, network, volume, public route, provider endpoint setting, or sending service is required. The deployable package must include the complete presentation capability.
 - **Data & migrations**: No database model, retained message, preview record, delivery history, or migration is introduced. Existing credentials and account data remain owned by their current flows.
-- **Recovery**: Invalid enabled-email branding prevents the entire application from starting or serving requests. Recovery consists of correcting configuration or deploying a compatible presentation fix and then restarting normally; there is no data migration to reverse, and outstanding credentials continue to follow their existing expiry and compensation rules.
+- **Recovery**: Invalid global branding prevents the entire application from starting or serving requests in either mail state. Recovery consists of correcting configuration or deploying a compatible presentation fix and then restarting normally; there is no data migration to reverse, and outstanding credentials continue to follow their existing expiry and compensation rules.
 - **Observability**: Existing redacted delivery outcome events remain authoritative. Presentation failures may be identified only by fixed non-sensitive categories and timing; no recipient, subject, body, destination, credential, template value, or branding value may enter logs. Preview activity produces no application operational event.

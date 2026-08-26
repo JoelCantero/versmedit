@@ -61,11 +61,9 @@ One normalized deployment-wide identity shared by every operational render.
 |-------|------|--------|------------|
 | `productName` | string | `PROJECT_NAME` | Trimmed safe sender name, 1-70 characters, no ASCII controls |
 | `canonicalOrigin` | URL origin | `NEXTAUTH_URL` | HTTP(S), no path beyond `/`, query, fragment, or user information |
-| `primaryColor` | string | `MAIL_BRAND_COLOR` | Exactly `#RRGGBB`, normalized consistently |
+| `primaryColor` | string | `BRAND_COLOR` | Exactly `#RRGGBB`, normalized consistently |
 | `actionForeground` | `#000000` or `#FFFFFF` | Derived | At least 4.5:1 contrast against `primaryColor` |
-| `supportEmail` | string | `MAIL_SUPPORT_EMAIL` | Trimmed bare email address, at most 320 characters |
-| `legalName` | string | `MAIL_LEGAL_NAME` | Trimmed single line, 1-200 characters, no ASCII controls |
-| `legalAddress` | string | `MAIL_LEGAL_ADDRESS` | Trimmed single line, 1-500 characters, no ASCII controls |
+| `supportEmail` | string | `SUPPORT_EMAIL` | Trimmed bare email address, at most 320 characters |
 | `logoUrl` | HTTPS URL or null | `MAIL_LOGO_URL` | Optional, absolute HTTPS, at most 2,048 characters, no user information or fragment |
 
 **Derived values**:
@@ -90,7 +88,7 @@ Catalogue-owned copy selected by `(EmailVariant, EmailLocale)`.
 | `supportLabel` | yes | Introduces the support address |
 | `termsLabel` | yes | Terms of Use link label |
 | `privacyLabel` | yes | Privacy Notice link label |
-| `legalLabel` | yes | Introduces legal identity/address where grammar requires it |
+| `legalLabel` | yes | Introduces `productName` as the sender identity where grammar requires it |
 
 **Validation**:
 

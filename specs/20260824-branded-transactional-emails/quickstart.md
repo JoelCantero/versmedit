@@ -37,11 +37,13 @@ Expected:
 - the index lists exactly 36 links: 12 variants in each of `en`, `es`, and `ca`;
 - every detail page shows a subject plus display, HTML source, and plain-text views;
 - desktop/mobile width controls do not clip or overlap essential content;
-- the product remains identified with the fixture logo absent;
+- name, color, support address, and optional logo match valid public branding in the repository
+  `.env`, or use the fictional fallback when that file is absent;
 - action variants show one unique fictional destination and informational variants show none;
 - there is no recipient field, form, send/test-send button, provider/upload control, or credential
   setup;
-- the main application, Docker, database, `.env`, and provider fixture remain stopped.
+- the main application, Docker, database, and provider fixture remain stopped, and no secret
+  configuration is exposed to the preview.
 
 Stop the preview with `Ctrl+C` before running the automated suites.
 
@@ -74,7 +76,7 @@ Expected:
 - architecture checks find no preview send surface, provider/application import, production trigger,
   or log-content path;
 - enabled mail accepts valid branding and rejects each invalid field safely;
-- disabled mail starts with absent or malformed brand settings;
+- disabled mail retains the same valid global brand without enabling delivery;
 - warm ARM64-target rendering p95 remains below 100 ms, and the 36-fixture render completes within
   5 seconds in CI.
 
@@ -90,10 +92,8 @@ pnpm db:deploy
 Run the focused business-flow and delivery-contract suites:
 
 ```bash
-MAIL_BRAND_COLOR="#0057B8" \
-MAIL_SUPPORT_EMAIL="support@example.test" \
-MAIL_LEGAL_NAME="Example Workspace, S.L." \
-MAIL_LEGAL_ADDRESS="123 Example Street, Example City" \
+BRAND_COLOR="#0057B8" \
+SUPPORT_EMAIL="support@example.test" \
 MAIL_LOGO_URL="https://assets.example.test/mail/logo.png" \
 RUN_INTEGRATION_TESTS=true pnpm exec vitest run \
   tests/unit/email.test.ts \
@@ -137,7 +137,7 @@ Expected:
 
 - lint and type checking report no errors;
 - coverage meets the repository thresholds;
-- the production build succeeds without branding because build-time mail remains disabled;
+- the production build succeeds with fixed non-secret global-brand placeholders;
 - the production dependency audit reports no high-or-higher vulnerability;
 - no Prisma migration or generated database model appears for this feature.
 
@@ -182,24 +182,23 @@ Expected:
 
 ## 7. Verify Deployment Configuration
 
-In a non-production shell, provide fictional values for the existing deployment variables and the
-five brand Variables, then inspect Compose without printing resolved environment values:
+In a non-production shell, provide fictional values for the existing deployment variables plus
+`BRAND_COLOR`, `SUPPORT_EMAIL`, and optional `MAIL_LOGO_URL`, then inspect Compose without printing
+resolved environment values:
 
 ```bash
 docker compose -f docker-compose.prod.yml config --services
 ```
 
 Expected: only the existing `app`, `migrate`, and `db` services appear. Automated configuration tests
-must additionally prove that all five brand names are forwarded only to `app`, the workflow requires
-the four non-optional values when mail is enabled, and neither path prints their values.
+must additionally prove that all three brand names are forwarded only to `app`, the workflow always
+requires the two global values, and neither path prints their values.
 
-Before an enabled-email deployment, set these GitHub Actions Variables:
+Before deployment, set these GitHub Actions Variables:
 
 ```text
-MAIL_BRAND_COLOR
-MAIL_SUPPORT_EMAIL
-MAIL_LEGAL_NAME
-MAIL_LEGAL_ADDRESS
+BRAND_COLOR
+SUPPORT_EMAIL
 MAIL_LOGO_URL (optional)
 ```
 

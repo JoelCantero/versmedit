@@ -41,6 +41,8 @@ RUN PROJECT_NAME=build \
 	DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build \
 	AUTH_SECRET=build-only-secret-not-used-at-runtime-000000 \
 	NEXTAUTH_URL=http://localhost:3000 \
+	BRAND_COLOR=#18181B \
+	SUPPORT_EMAIL=support@example.test \
 	pnpm run build
 
 # --- Migrator (applies Prisma migrations at deploy time; no app build needed) ---

@@ -10,6 +10,7 @@ import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
+import { getEnv } from "@/lib/env";
 
 import "../globals.css";
 
@@ -57,6 +58,8 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
+  const { BRAND } = getEnv();
+  const brandCss = `:root{--primary:${BRAND.primaryColor};--primary-foreground:${BRAND.actionForeground};--ring:${BRAND.primaryColor};--sidebar-primary:${BRAND.primaryColor};--sidebar-primary-foreground:${BRAND.actionForeground}}`;
 
   return (
     <html
@@ -64,6 +67,9 @@ export default async function LocaleLayout({
       className={`${geistSans.className} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <style nonce={nonce}>{brandCss}</style>
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"
@@ -78,7 +84,7 @@ export default async function LocaleLayout({
             <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
               {children}
             </div>
-            <AppFooter locale={locale} />
+            <AppFooter locale={locale} supportEmail={BRAND.supportEmail} />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

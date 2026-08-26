@@ -242,7 +242,7 @@ async function expectMinimumTargetHeight(page: Page) {
       links.map((link) => link.getBoundingClientRect().height),
     );
 
-  expect(targetHeights).toHaveLength(2);
+  expect(targetHeights).toHaveLength(3);
   for (const height of targetHeights) expect(height).toBeGreaterThanOrEqual(24);
 }
 
@@ -481,19 +481,24 @@ test("keeps both localized links usable when their labels wrap", async ({ page }
   await page.goto("/ca");
 
   const footer = page.getByRole("contentinfo");
-  await footer.getByRole("listitem").evaluateAll((items) => {
+  const legalNavigation = footer.getByRole("navigation", {
+    name: "Informació legal",
+  });
+  await legalNavigation.getByRole("listitem").evaluateAll((items) => {
     for (const item of items) item.style.width = "5rem";
   });
-  const wrappedTargets = await footer.getByRole("link").evaluateAll((links) =>
-    links.map((link) => {
-      const range = document.createRange();
-      range.selectNodeContents(link);
-      return {
-        height: link.getBoundingClientRect().height,
-        lineCount: range.getClientRects().length,
-      };
-    }),
-  );
+  const wrappedTargets = await legalNavigation
+    .getByRole("link")
+    .evaluateAll((links) =>
+      links.map((link) => {
+        const range = document.createRange();
+        range.selectNodeContents(link);
+        return {
+          height: link.getBoundingClientRect().height,
+          lineCount: range.getClientRects().length,
+        };
+      }),
+    );
 
   expect(wrappedTargets).toHaveLength(2);
   for (const target of wrappedTargets) {

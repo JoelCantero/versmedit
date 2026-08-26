@@ -6,11 +6,41 @@ import {
   EMAIL_LOCALES,
   EMAIL_VARIANTS,
 } from "@/lib/email/presentation";
+import { createPreviewBrand } from "../../emails/lib/preview-fixtures";
 import { previewManifest } from "../../emails/lib/preview-manifest";
 
 const reservedHostPattern = /(?:^|\.)example\.(?:com|net|org|test)$/u;
 
 describe("email preview catalogue", () => {
+  it("accepts only validated, explicitly forwarded public brand values", () => {
+    const configured = createPreviewBrand({
+      EMAIL_PREVIEW_PROJECT_NAME: "Versmedit Local",
+      EMAIL_PREVIEW_BRAND_COLOR: "#0e79b2",
+      EMAIL_PREVIEW_SUPPORT_EMAIL: "login@versmedit.com",
+      EMAIL_PREVIEW_LOGO_URL: "",
+      AUTH_SECRET: "must-not-be-read",
+      MAIL_API_KEY: "must-not-be-read",
+    });
+
+    expect(configured).toEqual({
+      productName: "Versmedit Local",
+      canonicalOrigin: "https://app.example.test",
+      primaryColor: "#0E79B2",
+      actionForeground: "#FFFFFF",
+      supportEmail: "login@versmedit.com",
+      logoUrl: null,
+    });
+    expect(Object.isFrozen(configured)).toBe(true);
+
+    expect(
+      createPreviewBrand({
+        PROJECT_NAME: "Ignored deployment name",
+        BRAND_COLOR: "#FFFFFF",
+        SUPPORT_EMAIL: "ignored@example.test",
+      }),
+    ).toEqual(previewManifest[0]!.request.brand);
+  });
+
   it("contains the exact stable 12-by-3 Cartesian product", () => {
     const expected = EMAIL_LOCALES.flatMap((locale) =>
       EMAIL_VARIANTS.map((variant) => ({

@@ -35,3 +35,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Dependabot cannot identify the Node.js LTS channel. Keep major runtime
+    # upgrades coordinated with package engines, CI, and deployment targets.
+    ignore:
+      - dependency-name: node
+        update-types:
+          - version-update:semver-major

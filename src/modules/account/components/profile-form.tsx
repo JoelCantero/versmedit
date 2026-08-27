@@ -4,7 +4,13 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getProfileInitials } from "@/modules/account/initials";
 import type {
@@ -195,16 +201,22 @@ export function ProfileForm({ locale, initialProfile, messages, action }: Profil
               value={draftName}
               onChange={(event) => setDraftName(event.currentTarget.value)}
               aria-invalid={Boolean(nameErrorMessage)}
-              aria-describedby="account-name-description account-name-error"
+              aria-describedby={
+                nameErrorMessage
+                  ? "account-name-description account-name-error"
+                  : "account-name-description"
+              }
               disabled={!hydrated || pending}
               required
             />
             <FieldDescription id="account-name-description">
               {messages.nameDescription}
             </FieldDescription>
-            <p id="account-name-error" className="min-h-5 text-sm text-destructive" role="alert">
-              {nameErrorMessage}
-            </p>
+            <div className="min-h-5">
+              {nameErrorMessage ? (
+                <FieldError id="account-name-error">{nameErrorMessage}</FieldError>
+              ) : null}
+            </div>
           </Field>
 
           <Field>

@@ -283,6 +283,9 @@ describe("Account Security protected page", () => {
       const rows = within(list).getAllByRole("listitem");
       expect(rows).toHaveLength(2);
       expect(rows.every((row) => row.tagName === "LI")).toBe(true);
+      expect([...list.children].every((child) => child.tagName === "LI")).toBe(true);
+      expect(within(list).queryByRole("separator")).not.toBeInTheDocument();
+      expect(list.querySelector('[data-slot="item"]')).not.toBeInTheDocument();
       expect(rows[0]).toHaveAttribute("aria-current", "true");
       expect(rows[1]).not.toHaveAttribute("aria-current");
       expect(within(rows[0]!).getByRole("heading")).toHaveTextContent(
@@ -291,6 +294,7 @@ describe("Account Security protected page", () => {
       const currentLabel = within(rows[0]!).getByText(
         catalog.security.list.current,
       );
+      expect(currentLabel).toHaveAttribute("data-slot", "badge");
       expect(currentLabel).toHaveAttribute("id");
       expect(rows[0]!.getAttribute("aria-describedby")).toContain(
         currentLabel.id,
@@ -444,6 +448,7 @@ describe("Account Security protected page", () => {
       );
 
       expect(screen.getByRole(role)).toHaveTextContent(notice);
+      expect(screen.getByRole(role)).toHaveAttribute("data-slot", "alert");
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     },
   );

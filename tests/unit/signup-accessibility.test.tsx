@@ -80,12 +80,16 @@ describe("SignupForm accessibility", () => {
     const email = screen.getByRole("textbox", { name: messages.emailLabel });
     const policy = screen.getByRole("checkbox");
 
-    expect(name).toHaveAccessibleDescription(`${messages.nameDescription} `);
-    expect(email).toHaveAccessibleDescription(`${messages.emailDescription} `);
-    expect(policy.tagName).toBe("INPUT");
-    expect(policy).toHaveAttribute("type", "checkbox");
+    expect(name).toHaveAccessibleDescription(messages.nameDescription);
+    expect(email).toHaveAccessibleDescription(messages.emailDescription);
+    const nativePolicy = container.querySelector<HTMLInputElement>(
+      'input[name="policyAccepted"]',
+    );
+    expect(policy).toHaveAttribute("data-slot", "checkbox");
+    expect(nativePolicy).toHaveAttribute("type", "checkbox");
     expect(policy).not.toBeChecked();
-    expect(policy).toHaveAccessibleDescription(`${messages.policyDescription} `);
+    expect(policy).toHaveAccessibleDescription(messages.policyDescription);
+    expect(policy).toHaveAttribute("aria-describedby", "signup-policy-description");
     await expectNoSeriousAxeViolations(container);
   });
 
@@ -93,12 +97,14 @@ describe("SignupForm accessibility", () => {
     renderForm();
     const name = screen.getByRole("textbox", { name: messages.nameLabel });
     const email = screen.getByRole("textbox", { name: messages.emailLabel });
-    const policy = screen.getByRole("checkbox");
     const submit = screen.getByRole("button", { name: messages.submitIdle });
 
     expect(name).toHaveClass("h-8", "focus-visible:ring-3");
     expect(email).toHaveClass("h-8", "focus-visible:ring-3");
-    expect(policy).toHaveClass("size-6", "focus-visible:ring-[3px]");
+    expect(document.querySelector('[data-slot="checkbox"]')).toHaveClass(
+      "size-6",
+      "focus-visible:ring-3",
+    );
     expect(submit).toHaveClass("h-8", "focus-visible:ring-3");
   });
 

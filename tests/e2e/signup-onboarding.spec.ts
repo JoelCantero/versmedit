@@ -554,19 +554,22 @@ for (const viewport of signupViewports) {
         const nameError = page.locator("#signup-name-error");
         const emailError = page.locator("#signup-email-error");
         const policyError = page.locator("#signup-policy-error");
+        const nameErrorSpace = page.locator("#signup-name-description + div");
+        const emailErrorSpace = page.locator("#signup-email-description + div");
+        const policyErrorSpace = page.locator("#signup-policy-description + div");
         const statusRegion = page.locator("form > p[aria-live]");
         await expect(checkbox).not.toBeChecked();
         await expect(terms).toHaveAttribute("href", responsiveTarget.termsPath);
         await expect(privacy).toHaveAttribute("href", responsiveTarget.privacyPath);
 
         const initialErrorHeights = {
-          name: await nameError.evaluate(
+          name: await nameErrorSpace.evaluate(
             (element) => element.getBoundingClientRect().height,
           ),
-          email: await emailError.evaluate(
+          email: await emailErrorSpace.evaluate(
             (element) => element.getBoundingClientRect().height,
           ),
-          policy: await policyError.evaluate(
+          policy: await policyErrorSpace.evaluate(
             (element) => element.getBoundingClientRect().height,
           ),
         };
@@ -578,7 +581,7 @@ for (const viewport of signupViewports) {
           await submit.click();
           await expect(name).toBeFocused();
           await expect(nameError).not.toHaveText("");
-          await expectStableHeight(nameError, initialErrorHeights.name);
+          await expectStableHeight(nameErrorSpace, initialErrorHeights.name);
           await expectResponsiveState(page);
           await expectNoSeriousAxeViolations(page);
         });
@@ -590,7 +593,7 @@ for (const viewport of signupViewports) {
           await submit.click();
           await expect(email).toBeFocused();
           await expect(emailError).toHaveText(responsiveTarget.invalidEmail);
-          await expectStableHeight(emailError, initialErrorHeights.email);
+          await expectStableHeight(emailErrorSpace, initialErrorHeights.email);
           await expectResponsiveState(page);
         });
 
@@ -600,7 +603,7 @@ for (const viewport of signupViewports) {
           await submit.click();
           await expect(checkbox).toBeFocused();
           await expect(policyError).toHaveText(responsiveTarget.invalidPolicy);
-          await expectStableHeight(policyError, initialErrorHeights.policy);
+          await expectStableHeight(policyErrorSpace, initialErrorHeights.policy);
           await expectResponsiveState(page);
         });
 

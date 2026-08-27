@@ -98,7 +98,7 @@ describe("account profile accessibility", () => {
     await userEvent.click(screen.getByRole("button", { name: messages.saveIdle }));
     const validationMessage = await screen.findByText(messages.required);
     expect(validationMessage).toBeVisible();
-    expect(validationMessage.closest("p")).toHaveAttribute("role", "alert");
+    expect(validationMessage.closest('[role="alert"]')).toHaveAttribute("role", "alert");
 
     await userEvent.type(screen.getByRole("textbox", { name: messages.nameLabel }), "Retry Name");
     await userEvent.click(screen.getByRole("button", { name: messages.saveIdle }));

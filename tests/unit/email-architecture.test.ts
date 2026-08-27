@@ -115,6 +115,20 @@ describe("transactional email architecture", () => {
     ]);
   });
 
+  it("keeps application UI primitives out of transactional email markup", async () => {
+    const presentationFiles = (
+      await filesUnder(path.join(root, "src/lib/email/presentation"))
+    ).filter((file) => /\.(?:ts|tsx)$/u.test(file));
+    const presentationSource = (
+      await Promise.all(presentationFiles.map((file) => readFile(file, "utf8")))
+    ).join("\n");
+
+    expect(presentationSource).not.toMatch(/@\/components\/ui/u);
+    expect(presentationSource).not.toMatch(
+      /<(?:Checkbox|Alert|Badge|Separator|Spinner|Tooltip|Empty|Tabs|Sidebar)\b/u,
+    );
+  });
+
   it("keeps future variants inside presentation with no production trigger or sender", async () => {
     const futureTemplates = [
       "personal-data-export-ready.tsx",

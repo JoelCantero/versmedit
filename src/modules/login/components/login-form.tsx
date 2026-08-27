@@ -13,6 +13,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -144,16 +145,22 @@ export function LoginForm({
                 autoComplete="email"
                 placeholder={messages.emailPlaceholder}
                 aria-invalid={invalid}
-                aria-describedby="login-email-description login-email-error"
+                aria-describedby={
+                  invalid
+                    ? "login-email-description login-email-error"
+                    : "login-email-description"
+                }
                 disabled={state === "pending"}
                 required
               />
               <FieldDescription id="login-email-description">
                 {messages.emailDescription}
               </FieldDescription>
-              <p id="login-email-error" className="min-h-5 text-sm text-destructive">
-                {invalid ? messages.invalidEmail : ""}
-              </p>
+              <div className="min-h-5">
+                {invalid ? (
+                  <FieldError id="login-email-error">{messages.invalidEmail}</FieldError>
+                ) : null}
+              </div>
             </Field>
             <Field>
               <Button type="submit" disabled={state === "pending"}>

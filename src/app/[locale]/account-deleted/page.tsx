@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { parseLoginLocale } from "@/modules/login/schema";
 
@@ -34,7 +35,7 @@ export default async function AccountDeletedPage({ params }: AccountDeletedPageP
       <Link
         href="/"
         locale={locale}
-        className="inline-flex min-h-11 w-fit items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50"
+        className={buttonVariants({ size: "lg", className: "w-fit" })}
       >
         {t("home")}
       </Link>

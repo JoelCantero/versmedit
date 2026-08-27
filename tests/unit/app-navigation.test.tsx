@@ -102,6 +102,7 @@ describe("AppNavigation", () => {
     expect(accountLink).toHaveClass("w-full", "justify-start");
 
     const logoutButton = screen.getByRole("button", { name: labels.logout });
+    expect(logoutButton).toHaveAttribute("data-slot", "navigation-menu-link");
     expect(logoutButton).toHaveClass("w-full", "justify-start");
     await userEvent.click(logoutButton);
     expect(mocks.signOut).toHaveBeenCalledWith({ callbackUrl: "/es" });
@@ -110,7 +111,11 @@ describe("AppNavigation", () => {
   it("switches from the resolved light theme to dark mode", async () => {
     render(<AppNavigation authenticated={false} locale="en" labels={labels} />);
 
-    await userEvent.click(screen.getByRole("button", { name: labels.toggleTheme }));
+    const themeButton = screen.getByRole("button", { name: labels.toggleTheme });
+    expect(themeButton).toHaveAttribute("data-slot", "navigation-menu-link");
+    expect(themeButton).toHaveAttribute("title", labels.toggleTheme);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    await userEvent.click(themeButton);
 
     expect(mocks.setTheme).toHaveBeenCalledWith("dark");
   });

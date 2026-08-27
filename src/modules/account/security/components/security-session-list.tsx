@@ -3,6 +3,7 @@
 import { LogOutIcon, ShieldCheckIcon, ShieldXIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   SecuritySessionDialog,
@@ -110,13 +111,14 @@ export function SecuritySessionList({
                     {sessionLabel(messages.sessionLabel, session.ordinal)}
                   </h3>
                   {session.current ? (
-                    <span
+                    <Badge
                       id={currentId}
-                      className="inline-flex min-w-0 items-center gap-1 break-words text-sm font-medium text-foreground"
+                      variant="secondary"
+                      className="h-auto min-w-0 whitespace-normal break-words"
                     >
-                      <ShieldCheckIcon aria-hidden="true" />
+                      <ShieldCheckIcon data-icon="inline-start" aria-hidden="true" />
                       {messages.current}
-                    </span>
+                    </Badge>
                   ) : null}
                 </div>
                 <div

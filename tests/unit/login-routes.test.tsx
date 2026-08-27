@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   callbackUrl: "",
+  projectName: "Configured Project",
 }));
 
 const translations: Record<string, Record<string, string>> = {
@@ -26,6 +27,9 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
+}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
   getTranslations: vi.fn(({ locale, namespace }: { locale: string; namespace: string }) =>
@@ -72,6 +76,8 @@ describe("localized login routes", () => {
       await LoginErrorPage({ params: Promise.resolve({ locale }) }),
     );
     expect(loginHtml).toContain(translations[locale]["Login.heading.title"]);
+    expect(loginHtml).toContain(mocks.projectName);
+    expect(errorHtml).toContain(mocks.projectName);
     expect(errorHtml.replaceAll("&#x27;", "'")).toContain(
       translations[locale]["Login.recovery.invalidLink.title"],
     );

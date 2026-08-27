@@ -6,10 +6,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
   appNavigation: vi.fn(),
+  projectName: "Configured Project",
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: mocks.getServerSession }));
 vi.mock("@/lib/auth", () => ({ authOptions: {} }));
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async () => (key: string) => `navigation.${key}`),
 }));
@@ -47,7 +51,7 @@ describe("AppHeader", () => {
     const markup = renderToStaticMarkup(await AppHeader({ locale: "es" }));
 
     expect(markup).toContain('<a href="/"');
-    expect(markup).toContain(">Nextself</a>");
+    expect(markup).toContain(`>${mocks.projectName}</a>`);
 
     expect(mocks.appNavigation).toHaveBeenCalledWith(
       expect.objectContaining({

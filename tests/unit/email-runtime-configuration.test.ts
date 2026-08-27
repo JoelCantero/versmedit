@@ -28,7 +28,7 @@ describe("email runtime configuration", () => {
 
     expect(packageJson).toContain("EMAIL_PREVIEW_USE_APP_BRAND=true");
     for (const [previewField, appField] of Object.entries({
-      EMAIL_PREVIEW_PROJECT_NAME: "PROJECT_NAME",
+      PROJECT_NAME: "PROJECT_NAME",
       EMAIL_PREVIEW_BRAND_COLOR: "BRAND_COLOR",
       EMAIL_PREVIEW_SUPPORT_EMAIL: "SUPPORT_EMAIL",
       EMAIL_PREVIEW_LOGO_URL: "MAIL_LOGO_URL",

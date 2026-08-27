@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getServerSession: vi.fn(),
+  projectName: "Configured Project",
   redirect: vi.fn((path: string) => {
     throw new Error(`REDIRECT:${path}`);
   }),
@@ -12,6 +13,9 @@ vi.mock("next-auth", () => ({
   getServerSession: mocks.getServerSession,
 }));
 vi.mock("@/lib/auth", () => ({ authOptions: {} }));
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ PROJECT_NAME: mocks.projectName }),
+}));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 
 vi.mock("next-intl/server", () => ({
@@ -77,6 +81,7 @@ describe("localized signup routes", () => {
       expect(form).toHaveAttribute("data-terms", terms);
       expect(form).toHaveAttribute("data-privacy", privacy);
       expect(form).toHaveAttribute("data-login", login);
+      expect(screen.getByRole("link", { name: mocks.projectName })).toBeVisible();
     },
   );
 
@@ -112,6 +117,7 @@ describe("localized signup routes", () => {
     expect(notice).toHaveAttribute("data-slot", "alert");
     expect(notice).toHaveTextContent("es:Policies:draftNotice");
     expect(screen.getByText(/2026-08-18-draft/)).toBeVisible();
+    expect(screen.getByRole("link", { name: mocks.projectName })).toBeVisible();
   });
 
   it.each([

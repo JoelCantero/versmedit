@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { getTestProjectName } from "../helpers/project-name";
+
 test("serves localized pages with strict CSP and request correlation", async ({
   page,
 }) => {
@@ -31,7 +33,9 @@ test("serves localized pages with strict CSP and request correlation", async ({
 
   await page.goto("/es");
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
-  const brandBox = await page.getByText("Nextself", { exact: true }).boundingBox();
+  const brandBox = await page
+    .getByText(getTestProjectName(), { exact: true })
+    .boundingBox();
   const navigationBox = await page
     .getByRole("navigation", { name: "Navegación de cuenta" })
     .boundingBox();

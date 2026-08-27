@@ -233,8 +233,8 @@ describe("transactional email architecture", () => {
         [
           "EMAIL_PREVIEW_BRAND_COLOR",
           "EMAIL_PREVIEW_LOGO_URL",
-          "EMAIL_PREVIEW_PROJECT_NAME",
           "EMAIL_PREVIEW_SUPPORT_EMAIL",
+          "PROJECT_NAME",
         ],
       ],
     ]);

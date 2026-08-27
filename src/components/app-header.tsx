@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { AppNavigation } from "@/components/app-navigation";
 import { Link } from "@/i18n/navigation";
 import { authOptions } from "@/lib/auth";
+import { getEnv } from "@/lib/env";
 import { getProfileInitials } from "@/modules/account/initials";
 import { parseLoginLocale } from "@/modules/login/schema";
 
@@ -15,6 +16,7 @@ export async function AppHeader({ locale: localeInput }: AppHeaderProps) {
   const locale = parseLoginLocale(localeInput);
   const t = await getTranslations({ locale, namespace: "HomePage.navigation" });
   const session = await getServerSession(authOptions);
+  const projectName = getEnv().PROJECT_NAME;
 
   return (
     <header className="border-b border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-950 sm:px-6">
@@ -23,7 +25,7 @@ export async function AppHeader({ locale: localeInput }: AppHeaderProps) {
           href="/"
           className="shrink-0 text-sm font-semibold text-zinc-950 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 dark:text-zinc-50"
         >
-          Nextself
+          {projectName}
         </Link>
         <AppNavigation
           authenticated={Boolean(session?.user)}

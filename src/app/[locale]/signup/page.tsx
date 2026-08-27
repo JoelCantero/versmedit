@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 import { Link } from "@/i18n/navigation";
 import { authOptions } from "@/lib/auth";
+import { getEnv } from "@/lib/env";
 import { getSessionUserId } from "@/modules/account/session";
 import {
   SignupForm,
@@ -42,6 +43,7 @@ export default async function SignupPage({ params, searchParams }: SignupPagePro
     redirect(locale === "en" ? "/" : `/${locale}`);
   }
   const t = await getTranslations({ locale, namespace: "Signup" });
+  const projectName = getEnv().PROJECT_NAME;
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -50,7 +52,7 @@ export default async function SignupPage({ params, searchParams }: SignupPagePro
           <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEndIcon className="size-4" aria-hidden="true" />
           </span>
-          Nextself
+          {projectName}
         </Link>
         <SignupForm
           locale={locale}

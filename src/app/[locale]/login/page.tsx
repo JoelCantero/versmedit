@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { GalleryVerticalEndIcon } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
+import { getEnv } from "@/lib/env";
 import { LoginForm } from "@/modules/login/components/login-form";
 import { parseLoginCallbackPath, parseLoginLocale } from "@/modules/login/schema";
 
@@ -23,6 +24,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
   const callbackUrl = parseLoginCallbackPath(locale, resolvedSearchParams.callbackUrl);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Login" });
+  const projectName = getEnv().PROJECT_NAME;
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -31,7 +33,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEndIcon className="size-4" aria-hidden="true" />
           </span>
-          Nextself
+          {projectName}
         </Link>
         <LoginForm
           locale={locale}

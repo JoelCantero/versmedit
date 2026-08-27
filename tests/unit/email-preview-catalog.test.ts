@@ -33,7 +33,7 @@ describe("email preview catalogue", () => {
 
   it("accepts only validated, explicitly forwarded public brand values", () => {
     const configured = createPreviewBrand({
-      EMAIL_PREVIEW_PROJECT_NAME: "Versmedit Local",
+      PROJECT_NAME: "Configured Project",
       EMAIL_PREVIEW_BRAND_COLOR: "#0e79b2",
       EMAIL_PREVIEW_SUPPORT_EMAIL: "login@versmedit.com",
       EMAIL_PREVIEW_LOGO_URL: "",
@@ -42,7 +42,7 @@ describe("email preview catalogue", () => {
     });
 
     expect(configured).toEqual({
-      productName: "Versmedit Local",
+      productName: "Configured Project",
       canonicalOrigin: "https://app.example.test",
       primaryColor: "#0E79B2",
       actionForeground: "#FFFFFF",
@@ -51,13 +51,9 @@ describe("email preview catalogue", () => {
     });
     expect(Object.isFrozen(configured)).toBe(true);
 
-    expect(
-      createPreviewBrand({
-        PROJECT_NAME: "Ignored deployment name",
-        BRAND_COLOR: "#FFFFFF",
-        SUPPORT_EMAIL: "ignored@example.test",
-      }),
-    ).toEqual(previewManifest[0]!.request.brand);
+    expect(createPreviewBrand({ PROJECT_NAME: "Deployment Name" }).productName).toBe(
+      "Deployment Name",
+    );
   });
 
   it("contains the exact stable 12-by-3 Cartesian product", () => {

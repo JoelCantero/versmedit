@@ -7,8 +7,6 @@ import type { NextConfig } from "next";
 const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
 
 function loadPreviewBrandEnv(): Record<string, string> {
-  if (process.env.EMAIL_PREVIEW_USE_APP_BRAND !== "true") return {};
-
   let appEnv: Record<string, string> = {};
   try {
     appEnv = parse(readFileSync(`${repositoryRoot}/.env`));
@@ -17,7 +15,7 @@ function loadPreviewBrandEnv(): Record<string, string> {
   }
 
   const publicBrandFields = {
-    EMAIL_PREVIEW_PROJECT_NAME: "PROJECT_NAME",
+    PROJECT_NAME: "PROJECT_NAME",
     EMAIL_PREVIEW_BRAND_COLOR: "BRAND_COLOR",
     EMAIL_PREVIEW_SUPPORT_EMAIL: "SUPPORT_EMAIL",
     EMAIL_PREVIEW_LOGO_URL: "MAIL_LOGO_URL",
@@ -29,8 +27,13 @@ function loadPreviewBrandEnv(): Record<string, string> {
     MAIL_LOGO_URL: process.env.MAIL_LOGO_URL,
   } as const;
 
+  const forwardedFields =
+    process.env.EMAIL_PREVIEW_USE_APP_BRAND === "true"
+      ? publicBrandFields
+      : { PROJECT_NAME: publicBrandFields.PROJECT_NAME };
+
   return Object.fromEntries(
-    Object.entries(publicBrandFields).map(([previewField, appField]) => [
+    Object.entries(forwardedFields).map(([previewField, appField]) => [
       previewField,
       shellBrand[appField] ?? appEnv[appField] ?? "",
     ]),

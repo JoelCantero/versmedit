@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
+import { getEnv } from "@/lib/env";
 import { parseLoginLocale } from "@/modules/login/schema";
 
 export default async function LoginErrorPage({
@@ -20,6 +21,7 @@ export default async function LoginErrorPage({
   const locale = parseLoginLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Login" });
+  const projectName = getEnv().PROJECT_NAME;
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -28,7 +30,7 @@ export default async function LoginErrorPage({
           <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEndIcon className="size-4" aria-hidden="true" />
           </span>
-          Nextself
+          {projectName}
         </Link>
         <Card>
           <CardHeader className="text-center">

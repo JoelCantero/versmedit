@@ -17,7 +17,7 @@ vi.mock("@/lib/email/index", () => ({
 }));
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({
-    PROJECT_NAME: "VersMedit",
+    PROJECT_NAME: "Example Workspace",
     MAIL: { enabled: true, brand: mocks.brand },
   }),
 }));
@@ -27,24 +27,24 @@ import {
   sendAccountDeletionEmail,
 } from "@/modules/account/deletion/email";
 
-const brand = createTestEmailBrand("VersMedit");
+const brand = createTestEmailBrand("Example Workspace");
 mocks.brand = brand;
 
 const localeCopy = {
   en: {
-    subject: "Confirm your VersMedit account deletion",
+    subject: "Confirm your Example Workspace account deletion",
     introduction:
       "Authenticate with this link to continue reviewing permanent account deletion.",
     action: "Continue account deletion",
   },
   es: {
-    subject: "Confirma la eliminación de tu cuenta de VersMedit",
+    subject: "Confirma la eliminación de tu cuenta de Example Workspace",
     introduction:
       "Autentícate con este enlace para seguir revisando la eliminación permanente de la cuenta.",
     action: "Continuar con la eliminación de la cuenta",
   },
   ca: {
-    subject: "Confirma l'eliminació del teu compte de VersMedit",
+    subject: "Confirma l'eliminació del teu compte de Example Workspace",
     introduction:
       "Autentica't amb aquest enllaç per continuar revisant l'eliminació permanent del compte.",
     action: "Continua amb l'eliminació del compte",
@@ -87,7 +87,7 @@ describe("account deletion email", () => {
       expect(message.text).toContain(copy.action);
       expect(message.text).toContain(expectedUrl);
       expect(message.html).toMatch(/<!doctype html/i);
-      expect(message.html).toContain("VersMedit");
+      expect(message.html).toContain("Example Workspace");
       expect(message.html).toContain("support@example.test");
       expect(message.html).toContain(`href="${expectedUrl}"`);
       expect(message.text.match(/raw_deletion_token/gu)).toHaveLength(1);
@@ -100,7 +100,7 @@ describe("account deletion email", () => {
   );
 
   it("escapes brand content and submits once through the common boundary", async () => {
-    const unsafeBrand = createTestEmailBrand("<VersMedit & Co>");
+    const unsafeBrand = createTestEmailBrand("<Example Workspace & Co>");
     mocks.brand = unsafeBrand;
     const options = {
       recipient: "person@example.test",
@@ -110,9 +110,9 @@ describe("account deletion email", () => {
     };
     const message = await buildAccountDeletionEmail(options, unsafeBrand);
 
-    expect(message.subject).toContain("<VersMedit & Co>");
-    expect(message.html).toContain("&lt;VersMedit &amp; Co&gt;");
-    expect(message.html).not.toContain("<VersMedit & Co>");
+    expect(message.subject).toContain("<Example Workspace & Co>");
+    expect(message.html).toContain("&lt;Example Workspace &amp; Co&gt;");
+    expect(message.html).not.toContain("<Example Workspace & Co>");
 
     await expect(sendAccountDeletionEmail(options)).resolves.toEqual(
       expect.objectContaining({ accepted: true }),

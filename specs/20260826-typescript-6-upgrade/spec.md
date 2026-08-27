@@ -10,7 +10,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Upgrade Without Weakening Quality Safeguards (Priority: P1)
+### User story 1: Upgrade without weakening quality safeguards (Priority: P1)
 
 As a project maintainer, I can adopt the TypeScript 6.0 compiler line while retaining the project's strict type checking and complete lint policy so that the codebase benefits from the newer diagnostics without lowering existing quality guarantees.
 
@@ -26,7 +26,7 @@ As a project maintainer, I can adopt the TypeScript 6.0 compiler line while reta
 
 ---
 
-### User Story 2 - Prove the Application Still Builds and Behaves the Same (Priority: P2)
+### User story 2: Prove the application still builds and behaves the same (Priority: P2)
 
 As a release maintainer, I can run the full project validation matrix and both deployable image builds so that I know the compiler migration introduced no application behavior regression or release incompatibility.
 
@@ -42,7 +42,7 @@ As a release maintainer, I can run the full project validation matrix and both d
 
 ---
 
-### User Story 3 - Leave an Explicit Migration Record (Priority: P3)
+### User story 3: Leave an explicit migration record (Priority: P3)
 
 As a future maintainer, I can see why global type selection was retained or changed and can start new implementation plans from the current compiler baseline so that later TypeScript migrations do not repeat unresolved investigation.
 

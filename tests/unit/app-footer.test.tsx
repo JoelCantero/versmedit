@@ -70,7 +70,7 @@ function installTranslations() {
 
 async function renderFooter(locale: Locale) {
   document.body.innerHTML = renderToStaticMarkup(
-    await AppFooter({ locale, supportEmail: "login@versmedit.com" }),
+    await AppFooter({ locale, supportEmail: "support@example.test" }),
   );
 }
 
@@ -89,7 +89,7 @@ describe("AppFooter", () => {
     });
     const links = within(navigation).getAllByRole("link");
     const supportLink = within(footer).getByRole("link", {
-      name: "login@versmedit.com",
+      name: "support@example.test",
     });
 
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
@@ -97,8 +97,8 @@ describe("AppFooter", () => {
     expect(within(navigation).getByRole("list")).toBeInTheDocument();
     expect(within(navigation).getAllByRole("listitem")).toHaveLength(2);
     expect(links).toHaveLength(2);
-    expect(supportLink).toHaveAttribute("href", "mailto:login@versmedit.com");
-    expect(within(navigation).queryByRole("link", { name: "login@versmedit.com" })).not.toBeInTheDocument();
+    expect(supportLink).toHaveAttribute("href", "mailto:support@example.test");
+    expect(within(navigation).queryByRole("link", { name: "support@example.test" })).not.toBeInTheDocument();
     expect(links[0]).toHaveAccessibleName("Terms of Use");
     expect(links[0]).toHaveAttribute("href", POLICY_PATHS.terms);
     expect(links[1]).toHaveAccessibleName("Privacy Notice");
@@ -126,10 +126,10 @@ describe("AppFooter", () => {
       });
       const links = within(navigation).getAllByRole("link");
       const supportLink = screen.getByRole("link", {
-        name: "login@versmedit.com",
+        name: "support@example.test",
       });
 
-      expect(supportLink).toHaveAttribute("href", "mailto:login@versmedit.com");
+      expect(supportLink).toHaveAttribute("href", "mailto:support@example.test");
       expect(links[0]).toHaveAccessibleName(catalogs[locale].Policies.terms.title);
       expect(links[0]).toHaveAttribute("href", POLICY_PATHS.terms);
       expect(links[1]).toHaveAccessibleName(
@@ -172,9 +172,9 @@ describe("AppFooter", () => {
     expect(list.tagName).toBe("UL");
     expect(items.every((item) => item.tagName === "LI")).toBe(true);
     expect(links.every((link) => link.tagName === "A")).toBe(true);
-    expect(screen.getByRole("link", { name: "login@versmedit.com" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "support@example.test" })).toHaveAttribute(
       "href",
-      "mailto:login@versmedit.com",
+      "mailto:support@example.test",
     );
     expect(links[0]).toHaveAccessibleName(catalogs.ca.Policies.terms.title);
     expect(links[1]).toHaveAccessibleName(catalogs.ca.Policies.privacy.title);

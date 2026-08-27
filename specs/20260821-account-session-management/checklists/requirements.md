@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 clarified individual and bulk atomicity, replay behavior, existing abuse limits, and the usability-study cohort before final completion.
 - Final review found no unresolved placeholders or clarification markers. The specification is ready for planning.

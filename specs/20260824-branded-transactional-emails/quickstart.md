@@ -3,7 +3,7 @@
 This guide validates the completed feature. It does not define implementation tasks. The expected
 interfaces and invariants are in [data-model.md](./data-model.md) and [contracts/](./contracts/).
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24.15 or newer, but below 25
 - Corepack with pnpm 11.22.0
@@ -169,7 +169,7 @@ field but must not include the supplied value.
 docker build \
   --target runner \
   --file docker/Dockerfile \
-  --tag versmedit:branded-email-validation \
+  --tag "${PROJECT_NAME}:branded-email-validation" \
   .
 ```
 

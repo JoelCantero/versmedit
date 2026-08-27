@@ -20,7 +20,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - View and Update My Profile (Priority: P1)
+### User story 1: View and update my profile (Priority: P1)
 
 As an authenticated user, I can open my localized account page, review the profile associated with my session, change my name, and save it without signing in again.
 
@@ -37,7 +37,7 @@ As an authenticated user, I can open my localized account page, review the profi
 
 ---
 
-### User Story 2 - Preserve My Destination Through Sign-In (Priority: P2)
+### User story 2: Preserve my destination through sign-in (Priority: P2)
 
 As a signed-out visitor, I am redirected from an account page to the login page in the same locale and can return to the originally requested account page after successful authentication.
 
@@ -54,7 +54,7 @@ As a signed-out visitor, I am redirected from an account page to the login page 
 
 ---
 
-### User Story 3 - Recover From Invalid Input or Save Failure (Priority: P3)
+### User story 3: Recover from invalid input or save failure (Priority: P3)
 
 As an authenticated user, I receive clear, accessible feedback when my name is invalid or cannot be saved, without losing what I entered or encountering unpredictable focus movement.
 
@@ -70,7 +70,7 @@ As an authenticated user, I receive clear, accessible feedback when my name is i
 
 ---
 
-### User Story 4 - Use the Profile Page in Any Supported Locale and Viewport (Priority: P4)
+### User story 4: Use the profile page in any supported locale and viewport (Priority: P4)
 
 As an authenticated English, Spanish, or Catalan user, I can use the same complete profile experience with keyboard or assistive technology on supported mobile and desktop viewports.
 

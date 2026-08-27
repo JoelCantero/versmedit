@@ -188,6 +188,7 @@
     "getStarted": "Para empezar, edita el archivo page.tsx.",
     "navigation": {
       "ariaLabel": "Navegación de cuenta",
+      "skipToContent": "Saltar al contenido",
       "account": "Cuenta",
       "login": "Iniciar sesión",
       "signup": "Registrarse",
@@ -230,8 +231,8 @@
     },
     "actions": {
       "saveIdle": "Guardar cambios",
-      "savePending": "Guardando...",
-      "pendingAnnouncement": "Guardando los cambios de tu perfil..."
+      "savePending": "Guardando…",
+      "pendingAnnouncement": "Guardando los cambios de tu perfil…"
     },
     "states": {
       "saved": "Se han guardado los cambios de tu perfil.",
@@ -263,12 +264,12 @@
         "description": "Crea una instantánea JSON de los datos personales vinculados a tu cuenta.",
         "sensitiveWarning": "Este archivo puede contener información sensible. Guárdalo de forma segura.",
         "request": "Solicitar exportación de datos",
-        "requesting": "Enviando confirmación...",
+        "requesting": "Enviando confirmación…",
         "sent": "Consulta tu correo para abrir el enlace de confirmación.",
         "ready": "Tu exportación está lista para descargar.",
         "expiringSoon": "La autorización de descarga caduca pronto.",
         "download": "Descargar datos",
-        "downloading": "Preparando descarga...",
+        "downloading": "Preparando descarga…",
         "downloaded": "Se ha descargado tu exportación de datos.",
         "expired": "La autorización de descarga ha caducado.",
         "requestNew": "Solicitar una nueva confirmación",
@@ -341,10 +342,10 @@
         "sent": "Revisa tu correo para encontrar el nuevo enlace de autenticación. Después de usarlo, vuelve a elegir la acción."
       },
       "pending": {
-        "revokingSession": "Revocando la sesión...",
-        "revokingOtherSessions": "Revocando las demás sesiones...",
-        "sendingLink": "Enviando el enlace...",
-        "refreshing": "Actualizando las sesiones activas..."
+        "revokingSession": "Revocando la sesión…",
+        "revokingOtherSessions": "Revocando las demás sesiones…",
+        "sendingLink": "Enviando el enlace…",
+        "refreshing": "Actualizando las sesiones activas…"
       },
       "recovery": {
         "recovering": "Actualizando la lista de sesiones activas. La solicitud anterior no se volverá a enviar.",
@@ -381,15 +382,15 @@
         "cancel": "Cancelar",
         "continue": "Continuar",
         "sendLink": "Enviar un enlace nuevo",
-        "sendingLink": "Enviando el enlace...",
+        "sendingLink": "Enviando el enlace…",
         "reauthSent": "Revisa tu correo antes de continuar.",
         "reauthError": "No hemos podido enviar el enlace. Inténtalo de nuevo.",
         "confirmTitle": "Confirmación final",
         "confirmDescription": "La eliminación solo comienza después de la siguiente acción.",
         "confirmDelete": "Eliminar la cuenta permanentemente",
-        "deleting": "Eliminando la cuenta...",
+        "deleting": "Eliminando la cuenta…",
         "deletionError": "No hemos podido eliminar la cuenta. Inténtalo de nuevo.",
-        "recovering": "Comprobando si la eliminación ha terminado...",
+        "recovering": "Comprobando si la eliminación ha terminado…",
         "closeLabel": "Cerrar diálogo"
       },
       "states": {
@@ -435,12 +436,12 @@
     },
     "actions": {
       "submitIdle": "Enviar enlace de acceso",
-      "submitPending": "Enviando...",
+      "submitPending": "Enviando…",
       "retry": "Volver a intentarlo",
       "goHome": "Ir al inicio"
     },
     "states": {
-      "sending": "Enviando tu enlace de acceso...",
+      "sending": "Enviando tu enlace de acceso…",
       "accepted": "Si existe una cuenta asociada a esta dirección, recibirás un enlace para iniciar sesión.",
       "invalidRequest": "Esta solicitud ya no es válida. Actualiza la página y vuelve a intentarlo.",
       "unavailable": "El acceso por correo no está disponible temporalmente. Inténtalo más tarde.",
@@ -493,12 +494,12 @@
     },
     "actions": {
       "submitIdle": "Crear cuenta",
-      "submitPending": "Enviando...",
+      "submitPending": "Enviando…",
       "loginPrompt": "¿Ya tienes una cuenta?",
       "login": "Inicia sesión"
     },
     "states": {
-      "sending": "Enviando tu solicitud...",
+      "sending": "Enviando tu solicitud…",
       "accepted": "Revisa tu correo para continuar.",
       "invalidRequest": "Esta solicitud ya no es válida. Actualiza la página y vuelve a intentarlo.",
       "unavailable": "El registro no está disponible temporalmente. Inténtalo más tarde.",

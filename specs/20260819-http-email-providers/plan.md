@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
-## Summary
+## Implementation summary
 
 Replace Nodemailer/SMTP with a server-only transactional-email boundary that selects Brevo or
 Mailjet from validated runtime configuration, builds provider-specific HTTP requests, and returns
@@ -37,13 +37,13 @@ change. Remove Nodemailer and SMTP wiring after development and production smoke
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
 
-**Project Type**: Web application — single Next.js full-stack `app` container (+ `db`, optional `worker`)
+**Project Type**: Web application: single Next.js full-stack `app` container (+ `db`, optional `worker`)
 
 **Deployment**: Docker Compose; networks `traefik_network` (external ingress) + `internal` (private); services use `restart: unless-stopped`
 
 **CI/CD**: GitHub Actions on a self-hosted runner
 
-**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file — non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
+**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file: non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
 
 **Observability**: Healthcheck endpoint + structured logging (Pino → stdout JSON) + Docker logs + log rotation
 
@@ -61,26 +61,26 @@ change. Remove Nodemailer and SMTP wiring after development and production smoke
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- **I / IV — Docker portability**: PASS. All provider selection and credentials remain runtime
+- **I / IV: Docker portability**: PASS. All provider selection and credentials remain runtime
   environment configuration; fixed provider endpoints contain no host-specific deployment values;
   no new container or architecture-specific dependency is introduced.
-- **II / VII — Operational responsibility and minimal stack**: PASS. Synchronous bounded HTTP
+- **II / VII: Operational responsibility and minimal stack**: PASS. Synchronous bounded HTTP
   delivery remains in the existing Next.js app because the public flows already await one delivery
   result for token invalidation. Native Node HTTP APIs avoid a provider SDK, queue, or worker.
-- **III — Network isolation**: PASS. The app makes outbound HTTPS calls only to the official endpoint
+- **III: Network isolation**: PASS. The app makes outbound HTTPS calls only to the official endpoint
   selected by `MAIL_PROVIDER`; no inbound provider route or new exposed service is added.
-- **V / X — Secrets and security**: PASS. API credentials stay server-only and use GitHub Secrets;
+- **V / X: Secrets and security**: PASS. API credentials stay server-only and use GitHub Secrets;
   non-sensitive settings use GitHub Variables. Fixed endpoints prevent credential exfiltration by
   URL override, public responses remain anti-enumerating, and individual sends cannot alter public
   provider health.
-- **VI — Persistence and recovery**: PASS. No product data or schema changes are introduced;
+- **VI: Persistence and recovery**: PASS. No product data or schema changes are introduced;
   existing backup/restore remains unchanged and rollback is an application/configuration concern.
-- **VIII — Observability**: PASS. Pino emits allowlisted structured submission metadata to stdout;
+- **VIII: Observability**: PASS. Pino emits allowlisted structured submission metadata to stdout;
   recipient data, credentials, links, content, and raw provider data are prohibited. Acceptance is
   never labeled delivery.
-- **IX / XII — Reproducibility and verification**: PASS. The plan includes unit, provider-contract,
+- **IX / XII: Reproducibility and verification**: PASS. The plan includes unit, provider-contract,
   integration, E2E, coverage, audit, production-build, Docker-build, and real-provider smoke checks.
-- **XI — Specification first**: PASS. The clarified spec defines behavior, security boundaries,
+- **XI: Specification first**: PASS. The clarified spec defines behavior, security boundaries,
   migration, edge cases, and measurable acceptance before implementation planning.
 
 **Pre-design gate result**: PASS. No constitution violations require justification.
@@ -104,7 +104,7 @@ specs/20260819-http-email-providers/
 <!--
   This is the project's standard layout (Next.js App Router + Prisma + Docker),
   per the constitution. Adjust only the paths a feature actually adds or changes.
-  Do NOT split frontend/backend — Next.js combines them in the `app` container
+  Do NOT split frontend/backend: Next.js combines them in the `app` container
   (constitution Principle II). Organize business code by domain under
   src/modules/<domain>/; shared code stays in app/, components/, lib/, and server/.
 -->

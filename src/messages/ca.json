@@ -188,6 +188,7 @@
     "getStarted": "Per començar, edita el fitxer page.tsx.",
     "navigation": {
       "ariaLabel": "Navegació del compte",
+      "skipToContent": "Salta al contingut",
       "account": "Compte",
       "login": "Inicia sessió",
       "signup": "Registra't",
@@ -230,8 +231,8 @@
     },
     "actions": {
       "saveIdle": "Desa els canvis",
-      "savePending": "Desant...",
-      "pendingAnnouncement": "S'estan desant els canvis del teu perfil..."
+      "savePending": "Desant…",
+      "pendingAnnouncement": "S'estan desant els canvis del teu perfil…"
     },
     "states": {
       "saved": "S'han desat els canvis del teu perfil.",
@@ -263,12 +264,12 @@
         "description": "Crea una instantània JSON de les dades personals vinculades al teu compte.",
         "sensitiveWarning": "Aquest fitxer pot contenir informació sensible. Desa'l de manera segura.",
         "request": "Sol·licita l'exportació de dades",
-        "requesting": "S'està enviant la confirmació...",
+        "requesting": "S'està enviant la confirmació…",
         "sent": "Consulta el teu correu per obrir l'enllaç de confirmació.",
         "ready": "La teva exportació està a punt per baixar.",
         "expiringSoon": "L'autorització de baixada caduca aviat.",
         "download": "Descarrega les dades",
-        "downloading": "S'està preparant la baixada...",
+        "downloading": "S'està preparant la baixada…",
         "downloaded": "S'ha descarregat l'exportació de dades.",
         "expired": "L'autorització de baixada ha caducat.",
         "requestNew": "Sol·licita una confirmació nova",
@@ -341,10 +342,10 @@
         "sent": "Revisa el correu per trobar el nou enllaç d'autenticació. Després d'utilitzar-lo, torna a triar l'acció."
       },
       "pending": {
-        "revokingSession": "Revocant la sessió...",
-        "revokingOtherSessions": "Revocant les altres sessions...",
-        "sendingLink": "Enviant l'enllaç...",
-        "refreshing": "Actualitzant les sessions actives..."
+        "revokingSession": "Revocant la sessió…",
+        "revokingOtherSessions": "Revocant les altres sessions…",
+        "sendingLink": "Enviant l'enllaç…",
+        "refreshing": "Actualitzant les sessions actives…"
       },
       "recovery": {
         "recovering": "Actualitzant la llista de sessions actives. La sol·licitud anterior no es tornarà a enviar.",
@@ -381,15 +382,15 @@
         "cancel": "Cancel·la",
         "continue": "Continua",
         "sendLink": "Envia un enllaç nou",
-        "sendingLink": "Enviant l'enllaç...",
+        "sendingLink": "Enviant l'enllaç…",
         "reauthSent": "Revisa el correu abans de continuar.",
         "reauthError": "No hem pogut enviar l'enllaç. Torna-ho a provar.",
         "confirmTitle": "Confirmació final",
         "confirmDescription": "L'eliminació només comença després de l'acció següent.",
         "confirmDelete": "Elimina el compte permanentment",
-        "deleting": "Eliminant el compte...",
+        "deleting": "Eliminant el compte…",
         "deletionError": "No hem pogut eliminar el compte. Torna-ho a provar.",
-        "recovering": "Comprovant si l'eliminació ha acabat...",
+        "recovering": "Comprovant si l'eliminació ha acabat…",
         "closeLabel": "Tanca el diàleg"
       },
       "states": {
@@ -435,12 +436,12 @@
     },
     "actions": {
       "submitIdle": "Envia l'enllaç d'accés",
-      "submitPending": "Enviant...",
+      "submitPending": "Enviant…",
       "retry": "Torna-ho a provar",
       "goHome": "Ves a l'inici"
     },
     "states": {
-      "sending": "Enviant el teu enllaç d'accés...",
+      "sending": "Enviant el teu enllaç d'accés…",
       "accepted": "Si existeix un compte associat a aquesta adreça, rebràs un enllaç per iniciar sessió.",
       "invalidRequest": "Aquesta sol·licitud ja no és vàlida. Actualitza la pàgina i torna-ho a provar.",
       "unavailable": "L'accés per correu no està disponible temporalment. Torna-ho a provar més tard.",
@@ -493,12 +494,12 @@
     },
     "actions": {
       "submitIdle": "Crea el compte",
-      "submitPending": "Enviant...",
+      "submitPending": "Enviant…",
       "loginPrompt": "Ja tens un compte?",
       "login": "Inicia sessió"
     },
     "states": {
-      "sending": "Enviant la teva sol·licitud...",
+      "sending": "Enviant la teva sol·licitud…",
       "accepted": "Revisa el correu per continuar.",
       "invalidRequest": "Aquesta sol·licitud ja no és vàlida. Actualitza la pàgina i torna-ho a provar.",
       "unavailable": "El registre no està disponible temporalment. Torna-ho a provar més tard.",

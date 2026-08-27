@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit-plan` skill; its definition describes the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a protected, localized Account Security page that lists at most 20 active sessions with the
 current session pinned first, revokes one other session or all other sessions after recent

@@ -2,9 +2,9 @@
 
 **Date**: 2026-08-26
 
-## Automated Quality Gate
+## Automated quality-gate evidence
 
-The required commands completed successfully in sequence:
+The following recorded command outcomes provide the automated validation evidence:
 
 | Command | Outcome |
 |---------|---------|
@@ -23,14 +23,9 @@ Coverage met the configured minimums:
 | Functions | 81.30% (509/626) | 80% |
 | Lines | 82.43% (2,460/2,984) | 80% |
 
-## Production E2E
+## Production end-to-end evidence
 
-`pnpm test:e2e` completed successfully against an isolated PostgreSQL container and a fresh Next.js
-standalone production build. Playwright reported 72/72 passing tests in 38.6 seconds across desktop
-Chromium and the tagged mobile project. The run covered the US1 and US2 files identified in the
-quickstart, including keyboard signup, localized navigation, responsive layouts, legal notes,
-personal-data callbacks, deletion and security dialogs, session semantics, duplicate-action request
-guards, and focus placement/restoration.
+The recorded `pnpm test:e2e` run used an isolated PostgreSQL container and a fresh Next.js standalone production build. Playwright reported 72/72 passing tests in 38.6 seconds across desktop Chromium and the tagged mobile project. The run covered the US1 and US2 files identified in the quickstart, including keyboard signup, localized navigation, responsive layouts, legal notes, personal-data callbacks, deletion and security dialogs, session semantics, duplicate-action request guards, and focus placement/restoration.
 
 The first run exposed two testable regressions: destructive callout text measured 4.49:1 against
 white, and the signup visual test still queried conditionally absent error nodes. The alert text now

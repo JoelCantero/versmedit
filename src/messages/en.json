@@ -167,7 +167,7 @@
       "previewText": "Review confirmation request {reference}.",
       "heading": "Confirm your request",
       "paragraphs": [
-        "We received request {reference}.",
+        "Request {reference} received.",
         "Use the confirmation below only if you initiated this request."
       ],
       "actionLabel": "Confirm request",
@@ -188,6 +188,7 @@
     "getStarted": "To get started, edit the page.tsx file.",
     "navigation": {
       "ariaLabel": "Account navigation",
+      "skipToContent": "Skip to content",
       "account": "Account",
       "login": "Login",
       "signup": "Sign up",
@@ -230,18 +231,18 @@
     },
     "actions": {
       "saveIdle": "Save changes",
-      "savePending": "Saving...",
-      "pendingAnnouncement": "Saving your profile changes..."
+      "savePending": "Saving…",
+      "pendingAnnouncement": "Saving your profile changes…"
     },
     "states": {
       "saved": "Your profile changes were saved.",
-      "saveFailed": "We could not save your profile. Please try again."
+      "saveFailed": "Couldn’t save your profile. Please try again."
     },
     "validation": {
       "required": "Enter your name.",
       "tooLong": "Name must be 80 characters or fewer.",
       "invalidCharacters": "Use letters, spaces, apostrophes, or hyphens only.",
-      "invalidSubmission": "We could not process this submission. Review the form and try again."
+      "invalidSubmission": "Couldn’t process this submission. Review the form and try again."
     },
     "data": {
       "metadata": {
@@ -263,18 +264,18 @@
         "description": "Create a JSON snapshot of personal data linked to your account.",
         "sensitiveWarning": "This file may contain sensitive information. Store it securely.",
         "request": "Request data export",
-        "requesting": "Sending confirmation...",
+        "requesting": "Sending confirmation…",
         "sent": "Check your email for a confirmation link.",
         "ready": "Your export is ready to download.",
         "expiringSoon": "Your download authorization expires soon.",
         "download": "Download data",
-        "downloading": "Preparing download...",
+        "downloading": "Preparing download…",
         "downloaded": "Your data export was downloaded.",
         "expired": "Your download authorization expired.",
         "requestNew": "Request new confirmation",
         "invalid": "This confirmation link is not valid. Request a new one.",
-        "requestError": "We could not send the confirmation. Try again.",
-        "downloadError": "We could not prepare your export. Try again.",
+        "requestError": "Couldn’t send the confirmation. Try again.",
+        "downloadError": "Couldn’t prepare your export. Try again.",
         "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
         "availableFor": "Available for {time}."
       },
@@ -341,10 +342,10 @@
         "sent": "Check your email for the fresh authentication link. After using it, choose the action again."
       },
       "pending": {
-        "revokingSession": "Revoking session...",
-        "revokingOtherSessions": "Revoking other sessions...",
-        "sendingLink": "Sending link...",
-        "refreshing": "Refreshing active sessions..."
+        "revokingSession": "Revoking session…",
+        "revokingOtherSessions": "Revoking other sessions…",
+        "sendingLink": "Sending link…",
+        "refreshing": "Refreshing active sessions…"
       },
       "recovery": {
         "recovering": "Refreshing the active session list. The previous request will not be sent again.",
@@ -357,10 +358,10 @@
       "errors": {
         "invalidLink": "This authentication link is not valid. Choose an action and request a new link.",
         "sessionConflict": "This link cannot be used with the current session. Use an active session for the same account.",
-        "sendFailed": "We could not send the link. No sessions changed. Try again.",
+        "sendFailed": "Couldn’t send the link. No sessions changed. Try again.",
         "rateLimited": "Too many attempts. No sessions changed. Try again later.",
-        "revocationFailed": "We could not update your sessions. No sessions changed. Review the list and try again.",
-        "refreshFailed": "We could not refresh your active sessions. Reload the page before trying again."
+        "revocationFailed": "Couldn’t update your sessions. No sessions changed. Review the list and try again.",
+        "refreshFailed": "Couldn’t refresh your active sessions. Reload the page before trying again."
       },
       "email": {
         "subject": "Confirm your {projectName} account security action",
@@ -381,15 +382,15 @@
         "cancel": "Cancel",
         "continue": "Continue",
         "sendLink": "Send fresh link",
-        "sendingLink": "Sending link...",
+        "sendingLink": "Sending link…",
         "reauthSent": "Check your email before continuing.",
-        "reauthError": "We could not send the link. Try again.",
+        "reauthError": "Couldn’t send the link. Try again.",
         "confirmTitle": "Final confirmation",
         "confirmDescription": "Deletion starts only after the next action.",
         "confirmDelete": "Permanently delete account",
-        "deleting": "Deleting account...",
-        "deletionError": "We could not delete the account. Try again.",
-        "recovering": "Checking whether deletion completed...",
+        "deleting": "Deleting account…",
+        "deletionError": "Couldn’t delete the account. Try again.",
+        "recovering": "Checking whether deletion completed…",
         "closeLabel": "Close dialog"
       },
       "states": {
@@ -424,7 +425,7 @@
     },
     "heading": {
       "title": "Welcome back",
-      "description": "Enter your email address and we will send you a secure sign-in link."
+      "description": "Enter your email address to receive a secure sign-in link."
     },
     "fields": {
       "email": {
@@ -435,12 +436,12 @@
     },
     "actions": {
       "submitIdle": "Send sign-in link",
-      "submitPending": "Sending...",
+      "submitPending": "Sending…",
       "retry": "Try again",
       "goHome": "Go to home"
     },
     "states": {
-      "sending": "Sending your sign-in link...",
+      "sending": "Sending your sign-in link…",
       "accepted": "If an account exists for this address, you will receive a link to sign in.",
       "invalidRequest": "This request is no longer valid. Refresh the page and try again.",
       "unavailable": "Email sign-in is temporarily unavailable. Please try again later.",
@@ -470,7 +471,7 @@
     },
     "heading": {
       "title": "Create your account",
-      "description": "Enter your name and email. We will send the next step to your inbox."
+      "description": "Enter your name and email. You’ll receive the next step in your inbox."
     },
     "fields": {
       "name": {
@@ -493,12 +494,12 @@
     },
     "actions": {
       "submitIdle": "Create account",
-      "submitPending": "Sending...",
+      "submitPending": "Sending…",
       "loginPrompt": "Already have an account?",
       "login": "Sign in"
     },
     "states": {
-      "sending": "Sending your request...",
+      "sending": "Sending your request…",
       "accepted": "Check your email for the next step.",
       "invalidRequest": "This request is no longer valid. Refresh the page and try again.",
       "unavailable": "Signup is temporarily unavailable. Please try again later.",
@@ -524,7 +525,7 @@
         "invalid": "Select a valid language and try again."
       },
       "form": {
-        "invalidSubmission": "We could not process this submission. Review the form and try again."
+        "invalidSubmission": "Couldn’t process this submission. Review the form and try again."
       }
     },
     "email": {
@@ -552,7 +553,7 @@
       },
       "sessionFailed": {
         "title": "Your account is ready",
-        "description": "We could not start your session. Sign in with your verified email address.",
+        "description": "Couldn’t start your session. Sign in with your verified email address.",
         "action": "Sign in"
       }
     }

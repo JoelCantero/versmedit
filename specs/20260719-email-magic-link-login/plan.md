@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a responsive, accessible, email-only login at `/login`, `/es/login`, and `/ca/login` for
 existing users. Keep Auth.js v4's email callback and Prisma token compatibility, but wrap the native
@@ -31,17 +31,17 @@ localized design and single-field flow without schema, migration, container, or 
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
 
-**Project Type**: Web application — single Next.js full-stack `app` container (+ `db`, optional `worker`)
+**Project Type**: Web application: single Next.js full-stack `app` container (+ `db`, optional `worker`)
 
 **Deployment**: Docker Compose; networks `traefik_network` (external ingress) + `internal` (private); services use `restart: unless-stopped`
 
 **CI/CD**: GitHub Actions on a self-hosted runner
 
-**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file — non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
+**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file: non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
 
 **Observability**: Healthcheck endpoint + structured logging (Pino → stdout JSON) + Docker logs + log rotation
 
-**Migration Strategy**: N/A — no schema or data migration. Application rollout reuses compatible existing tables and keys provider state under a reserved `auth:email:provider:*` namespace.
+**Migration Strategy**: N/A: no schema or data migration. Application rollout reuses compatible existing tables and keys provider state under a reserved `auth:email:provider:*` namespace.
 
 **Recovery Strategy**: Revert application code. No persistent schema conversion occurs; rate-limit/provider-state rows expire naturally and outstanding verification tokens expire within 15 minutes. If rollback follows a partially handled delivery failure, stale tokens are removed by the new compensation path or expire under the existing TTL.
 
@@ -49,7 +49,7 @@ localized design and single-field flow without schema, migration, container, or 
 
 **Constraints**: Raspberry Pi memory/CPU limits; no host-specific paths/IPs; portable to VPS; public endpoint; emails/tokens/URLs/SMTP credentials excluded from logs; canonical-origin callbacks only; five client and three normalized-address attempts per 15 minutes; 15-minute single-use newest-only links; no account creation; no feature E2E; no schema/migration or SMTP-provider changes
 
-**Scale/Scope**: Three localized login routes, one email field, eight login UI states, one wrapped Auth.js request endpoint, one Auth.js callback path, existing-user accounts only, shared PostgreSQL coordination across all application replicas, and one localized home navigation shell with session-aware account actions, locale selection, and persistent system-aware theming. Completion scope also replaces application-facing branding with Nextself and moves development seed identity to environment variables.
+**Scale/Scope**: Three localized login routes, one email field, eight login UI states, one wrapped Auth.js request endpoint, one Auth.js callback path, existing-user accounts only, shared PostgreSQL coordination across all application replicas, and one localized home navigation shell with session-aware account actions, locale selection, and persistent system-aware theming. Completion scope also derives application-facing branding and development seed identity from environment variables.
 
 ## Constitution Check
 
@@ -116,7 +116,7 @@ specs/20260719-email-magic-link-login/
 <!--
   This is the project's standard layout (Next.js App Router + Prisma + Docker),
   per the constitution. Adjust only the paths a feature actually adds or changes.
-  Do NOT split frontend/backend — Next.js combines them in the `app` container
+  Do NOT split frontend/backend: Next.js combines them in the `app` container
   (constitution Principle II). Organize business code by domain under
   src/modules/<domain>/; shared code stays in app/, components/, lib/, and server/.
 -->

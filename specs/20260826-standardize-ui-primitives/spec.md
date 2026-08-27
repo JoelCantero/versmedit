@@ -16,7 +16,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Complete forms and actions accessibly (Priority: P1)
+### User story 1: Complete forms and actions accessibly (Priority: P1)
 
 As a visitor or account holder, I can complete authentication and account actions through consistent controls without losing keyboard access, error context, focus behavior, or the expected meaning of links and buttons.
 
@@ -33,7 +33,7 @@ As a visitor or account holder, I can complete authentication and account action
 
 ---
 
-### User Story 2 - Understand warnings and account status (Priority: P2)
+### User story 2: Understand warnings and account status (Priority: P2)
 
 As a visitor or account holder, I can distinguish legal notices, personal-data warnings, operation outcomes, and current-session state through consistent presentation that preserves the urgency and announcement behavior of each message.
 
@@ -50,7 +50,7 @@ As a visitor or account holder, I can distinguish legal notices, personal-data w
 
 ---
 
-### User Story 3 - Receive useful state enhancements without semantic regressions (Priority: P3)
+### User story 3: Receive useful state enhancements without semantic regressions (Priority: P3)
 
 As a keyboard, screen-reader, or pointer user, I receive useful progress, help, empty-state, list, and navigation cues only where they improve clarity without changing the task's established semantics.
 

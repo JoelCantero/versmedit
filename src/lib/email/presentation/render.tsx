@@ -513,19 +513,21 @@ export async function renderResolvedEmailContent(
   );
 
   try {
-    const html = await render(document);
-    const text = await render(document, {
-      plainText: true,
-      htmlToTextOptions: {
-        selectors: [
-          {
-            selector: "[data-primary-action=true]",
-            format: "anchor",
-            options: { ignoreHref: true },
-          },
-        ],
-      },
-    });
+    const [html, text] = await Promise.all([
+      render(document),
+      render(document, {
+        plainText: true,
+        htmlToTextOptions: {
+          selectors: [
+            {
+              selector: "[data-primary-action=true]",
+              format: "anchor",
+              options: { ignoreHref: true },
+            },
+          ],
+        },
+      }),
+    ]);
 
     if (
       html.trim() === "" ||

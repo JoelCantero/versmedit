@@ -21,7 +21,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Send Transactional Email Through the Selected Provider (Priority: P1)
+### User story 1: Send transactional email through the selected provider (Priority: P1)
 
 As a person using login or signup, I receive the same localized transactional email as today while the application sends it through the configured HTTP provider.
 
@@ -38,7 +38,7 @@ As a person using login or signup, I receive the same localized transactional em
 
 ---
 
-### User Story 2 - Change Providers Through Configuration (Priority: P1)
+### User story 2: Change providers through configuration (Priority: P1)
 
 As an operator, I can select Brevo or Mailjet through deployment configuration without modifying login, signup, or message-composition behavior.
 
@@ -57,7 +57,7 @@ As an operator, I can select Brevo or Mailjet through deployment configuration w
 
 ---
 
-### User Story 3 - Preserve Private Authentication Outcomes During Failures (Priority: P1)
+### User story 3: Preserve private authentication outcomes during failures (Priority: P1)
 
 As a login or signup visitor, I receive the same account-private public outcome and token protections regardless of provider acceptance, rejection, timeout, or isolated network failure.
 
@@ -77,7 +77,7 @@ As a login or signup visitor, I receive the same account-private public outcome 
 
 ---
 
-### User Story 4 - Diagnose Provider Submission Outcomes Safely (Priority: P2)
+### User story 4: Diagnose provider submission outcomes safely (Priority: P2)
 
 As an operator, I can distinguish provider request acceptance from normalized request failures without exposing recipients, credentials, links, or message content.
 
@@ -94,7 +94,7 @@ As an operator, I can distinguish provider request acceptance from normalized re
 
 ---
 
-### User Story 5 - Complete a Staged SMTP Retirement (Priority: P2)
+### User story 5: Complete a staged smtp retirement (Priority: P2)
 
 As an operator and maintainer, I can deploy, verify, and complete the HTTP migration without an undocumented fallback or a period in which production email has no recoverable path.
 

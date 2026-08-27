@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit-plan` skill; its definition describes the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a protected, localized Download your data section before account deletion on Data & Privacy.
 An exact active Session requests a purpose-isolated 15-minute credential through the existing HTTP

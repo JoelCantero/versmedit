@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a separate localized signup flow that creates or reuses an inactive account, sends a
 newest-only email onboarding link, activates the account with its link-bound name and policy
@@ -42,7 +42,7 @@ CI gate.
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
 
-**Project Type**: Web application — single Next.js full-stack `app` container (+ `db`, optional `worker`)
+**Project Type**: Web application: single Next.js full-stack `app` container (+ `db`, optional `worker`)
 
 **Deployment**: Docker Compose; networks `traefik_network` (external ingress) + `internal` (private); services use `restart: unless-stopped`
 
@@ -131,7 +131,7 @@ specs/20260818-signup-page/
 <!--
   This is the project's standard layout (Next.js App Router + Prisma + Docker),
   per the constitution. Adjust only the paths a feature actually adds or changes.
-  Do NOT split frontend/backend — Next.js combines them in the `app` container
+  Do NOT split frontend/backend: Next.js combines them in the `app` container
   (constitution Principle II). Organize business code by domain under
   src/modules/<domain>/; shared code stays in app/, components/, lib/, and server/.
 -->
@@ -187,7 +187,7 @@ docker-compose.prod.yml     # Prod: app + migrate + db (no public db ports; log 
 
 **Structure Decision**: Production runs a single Next.js full-stack `app` container (UI + SSR + API
 routes + Server Actions + auth), a one-shot `migrate` service that applies Prisma migrations before
-`app` starts, and a `db` (PostgreSQL) service — wired through Docker Compose on `traefik_network`
+`app` starts, and a `db` (PostgreSQL) service: wired through Docker Compose on `traefik_network`
 (ingress) + `internal` (private) networks (`worker` optional). In development, `docker-compose.yml`
 runs only the `db`; the app runs on the host via `pnpm dev`. Frontend and backend are intentionally
 NOT split (constitution Principle II). Business behavior is organized in cohesive domain modules

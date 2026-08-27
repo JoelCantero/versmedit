@@ -301,7 +301,7 @@ Then sequence: T062/T063/T064 -> T065
 
 The representative 20-person usability measurement in `specs/20260823-personal-data-export/quickstart.md` is an external product KPI, not unfinished implementation work. After release, retain only aggregate threshold evidence and non-identifying reproducible defects at the documented location; do not retain participant identity, contact details, account data, recordings, or raw observation transcripts.
 
-## Notes
+## Implementation notes
 
 - `[P]` means file-level parallelism is safe only after the dependencies stated in that phase are complete.
 - Setup, foundational, and polish tasks intentionally have no story label; all story tasks carry exactly one `[US1]`-`[US4]` label.

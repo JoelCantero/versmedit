@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit-plan` skill; its definition describes the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add one pure React Email presentation layer before the existing provider-neutral delivery boundary.
 The layer renders 12 strictly typed variants in English, Spanish, and Catalan from shared catalogue

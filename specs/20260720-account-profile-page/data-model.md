@@ -1,6 +1,6 @@
 # Data Model: Account Profile Page
 
-## Overview
+## Data model overview
 
 This feature reuses the existing Auth.js `User` and `Session` records. It adds no table, column, relation, index, or migration. `ProfileUpdate`, `ProfileActionState`, and `LocalizedReturnDestination` are transient application contracts, not persisted entities.
 

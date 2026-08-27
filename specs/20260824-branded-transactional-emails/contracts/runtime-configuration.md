@@ -75,7 +75,7 @@ address.
 Only `src/lib/env.ts` reads these environment variables. Presentation receives `EmailBrand` as a
 value and never reads process state.
 
-## Validation
+## Runtime configuration validation
 
 | `MAIL_ENABLED` | Global brand inputs | Result |
 |----------------|---------------------|--------|
@@ -123,7 +123,7 @@ logo beside provider settings. A representative non-secret setup is:
 
 ```dotenv
 BRAND_COLOR="#0E79B2"
-SUPPORT_EMAIL=login@versmedit.com
+SUPPORT_EMAIL=support@example.test
 MAIL_LOGO_URL=
 ```
 

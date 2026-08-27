@@ -6,7 +6,14 @@
 
 **Status**: Draft
 
-**Input**: New users need a public, localized, passwordless signup flow that collects a valid name and email, proves mailbox control through an onboarding link, signs the verified user in without a separate login, and never turns the existing login flow into an implicit account-creation path.
+**Input**: New users need a public, localized, passwordless signup flow.
+
+The flow must:
+
+- collect a valid name and email;
+- prove mailbox control through an onboarding link;
+- sign the verified user in without a separate login; and
+- keep the existing login flow from becoming an implicit account-creation path.
 
 ## Clarifications
 
@@ -24,7 +31,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Start Registration Privately (Priority: P1)
+### User story 1: Start registration privately (Priority: P1)
 
 As a new visitor, I can submit my name and email to start registration while the public result does not reveal whether an account already uses the address.
 
@@ -43,7 +50,7 @@ As a new visitor, I can submit my name and email to start registration while the
 
 ---
 
-### User Story 2 - Verify and Enter the New Account (Priority: P1)
+### User story 2: Verify and enter the new account (Priority: P1)
 
 As a new user, I can open the onboarding link, prove control of my email address, and become signed in immediately without completing a separate login form.
 
@@ -62,7 +69,7 @@ As a new user, I can open the onboarding link, prove control of my email address
 
 ---
 
-### User Story 3 - Recover From Rejected or Delayed Requests (Priority: P2)
+### User story 3: Recover from rejected or delayed requests (Priority: P2)
 
 As a visitor, I receive clear, localized, accessible feedback when my input is invalid, a request is limited, or signup is temporarily unavailable.
 
@@ -81,7 +88,7 @@ As a visitor, I receive clear, localized, accessible feedback when my input is i
 
 ---
 
-### User Story 4 - Use Signup in Any Supported Locale and Viewport (Priority: P2)
+### User story 4: Use signup in any supported locale and viewport (Priority: P2)
 
 As an English, Spanish, or Catalan visitor using a keyboard, assistive technology, mobile device, or desktop, I can understand and complete the full signup flow.
 
@@ -98,7 +105,7 @@ As an English, Spanish, or Catalan visitor using a keyboard, assistive technolog
 
 ---
 
-### User Story 5 - Find the Correct Account Entry Flow (Priority: P3)
+### User story 5: Find the correct account entry flow (Priority: P3)
 
 As a signed-out visitor, I can choose signup for a new account or login for an existing account without the two flows being combined.
 

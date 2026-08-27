@@ -1,16 +1,13 @@
 # Web app
 
-A generic, production-minded architecture for **self-hosted, Dockerized web applications**. It is a
-full-stack Next.js app (UI + API + Server Actions) backed by PostgreSQL, built to run on constrained
-hardware (Raspberry Pi) and move to a VPS with minimal changes.
+A generic, production-minded architecture for **self-hosted, Dockerized web applications**. It is a full-stack Next.js app with a user interface (UI), application programming interface (API), and Server Actions backed by PostgreSQL. It runs on constrained hardware such as a Raspberry Pi and can move to a virtual private server (VPS) with minimal changes.
 
-The non-negotiable engineering principles for this architecture live in
-[`.specify/memory/constitution.md`](.specify/memory/constitution.md).
+The non-negotiable engineering principles for this architecture live in [`.specify/memory/constitution.md`](.specify/memory/constitution.md).
 
 ## Stack
 
 - **Language / runtime**: TypeScript on Node.js 24 LTS · **pnpm**
-- **Framework**: Next.js (App Router) + React — one full-stack `app` (UI, SSR, API routes, Server Actions, auth)
+- **Framework**: Next.js (App Router) + React in one full-stack `app`, including UI, server-side rendering (SSR), API routes, Server Actions, and authentication
 - **Database**: PostgreSQL via Prisma 7 (driver adapter)
 - **Validation**: Zod · **Auth**: NextAuth v4 stable · **Email**: Brevo or Mailjet over HTTPS
 - **Testing**: Vitest + jsdom + Testing Library + Playwright
@@ -31,13 +28,7 @@ pnpm install
 pnpm dev                      # runs on http://localhost:3000
 ```
 
-`pnpm dev` starts the database in Docker via the `predev` hook, then launches Next.js. The quality
-gate (`lint` → `typecheck` → `test`) runs later — before opening a PR — via the Spec Kit
-`after_implement` hook (`speckit.quality-gate`); CI repeats it with coverage thresholds and adds a
-production dependency audit, SpecKit compliance validation, production build, and Playwright tests
-as the authoritative merge gate. The mandatory `speckit.compliance-check` verifies that each
-feature's spec, plan, and tasks remain complete. To change the schema, edit
-`prisma/schema.prisma` and run `pnpm db:migrate`.
+`pnpm dev` starts the database in Docker via the `predev` hook, then launches Next.js. Run the quality gate (`lint` → `typecheck` → `test`) before opening a pull request. The Spec Kit `after_implement` hook (`speckit.quality-gate`) runs it automatically. Continuous integration (CI) repeats the gate with coverage thresholds and adds a production dependency audit, SpecKit compliance validation, production build, and Playwright tests as the authoritative merge gate. The mandatory `speckit.compliance-check` verifies that each feature's spec, plan, and tasks remain complete. To change the schema, edit `prisma/schema.prisma` and run `pnpm db:migrate`.
 
 Spec Kit creates every feature branch from an up-to-date `origin/main`. Before the first spec, push
 the initial main branch (`git push -u origin main`) and commit or stash tracked changes; otherwise
@@ -80,7 +71,7 @@ pnpm dev (host)                 Cloudflare Tunnel / DNS
 All runtime configuration comes from environment variables.
 
 - **Development**: a local `.env` (copy of `.env.example`). Never committed.
-- **Production**: **no `.env` file** — the deploy workflow injects values from GitHub into the
+- **Production**: **no `.env` file**. The deploy workflow injects values from GitHub into the
   Compose process and containers at runtime. Docker builds use non-secret placeholders only while
   Next.js collects build metadata; real credentials are never baked into the image.
 
@@ -121,7 +112,7 @@ named by the `RUNNER_NAME` Variable:
 
 1. `rsync` the repository into the deploy directory (`DEPLOY_BASE_DIR`/`PROJECT_NAME`).
 2. Ensure the external `traefik_network` exists.
-3. `docker compose -f docker-compose.prod.yml up -d --build --remove-orphans` — Compose orders it
+3. `docker compose -f docker-compose.prod.yml up -d --build --remove-orphans`. Compose orders it
    **db → migrate → app**.
 
 The local SpecKit hooks provide pre-PR feedback. CI is authoritative and requires lint, typecheck,
@@ -240,5 +231,5 @@ part of forward recovery and must remain reusable by later valid submissions.
 ## VPS migration
 
 Portable by design: install Docker on the target, copy the repository + compose files, recreate the
-environment variables/secrets (no `.env` to copy — they are injected at runtime), restore the DB
+environment variables/secrets (no `.env` to copy because they are injected at runtime), restore the DB
 backup/volume, create the networks, run Compose, and repoint DNS / the Cloudflare Tunnel.

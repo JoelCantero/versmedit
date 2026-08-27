@@ -1,6 +1,6 @@
 # Data Model: Personal Data Export
 
-## Overview
+## Data model overview
 
 The account remains rooted in the existing `User` and exact database `Session`. This feature adds
 one verification-purpose value and one narrow authorization table. It creates no export file,

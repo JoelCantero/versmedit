@@ -19,7 +19,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Receive Consistent Transactional Messages (Priority: P1)
+### User story 1: Receive consistent transactional messages (Priority: P1)
 
 As a recipient, I receive a recognizable, localized transactional message with a clear purpose and action so that I can complete the intended account task safely.
 
@@ -38,7 +38,7 @@ As a recipient, I receive a recognizable, localized transactional message with a
 
 ---
 
-### User Story 2 - Configure One Trusted Application Brand (Priority: P1)
+### User story 2: Configure one trusted application brand (Priority: P1)
 
 As an operator, I configure one deployment-wide application brand so that the web experience and every transactional message use the same product identity, color, and support contact.
 
@@ -56,7 +56,7 @@ As an operator, I configure one deployment-wide application brand so that the we
 
 ---
 
-### User Story 3 - Review Every Message Locally (Priority: P2)
+### User story 3: Review every message locally (Priority: P2)
 
 As a developer or reviewer, I can inspect every message variant in every supported language using obviously fictional data so that I can review content and layout without sending email or running a business workflow.
 
@@ -73,7 +73,7 @@ As a developer or reviewer, I can inspect every message variant in every support
 
 ---
 
-### User Story 4 - Prepare Future Messages Without Enabling Them (Priority: P2)
+### User story 4: Prepare future messages without enabling them (Priority: P2)
 
 As a product reviewer, I can inspect complete future transactional messages before their business workflows exist so that content and presentation can be agreed without accidentally enabling new account behavior.
 
@@ -195,7 +195,7 @@ As a product reviewer, I can inspect complete future transactional messages befo
 
 ## Assumptions
 
-- Versmedit remains one deployable application with one active email brand rather than tenant-specific or account-specific branding.
+- The project remains one deployable application with one active email brand rather than tenant-specific or account-specific branding.
 - English, Spanish, and Catalan remain the complete locale set for this feature.
 - The existing Terms of Use and Privacy Notice routes remain the canonical legal destinations.
 - The existing delivery service continues to accept a fully prepared recipient, subject, HTML body, and plain-text body and remains the sole owner of provider submission.

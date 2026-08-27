@@ -19,7 +19,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Permanently Delete My Account (Priority: P1)
+### User story 1: Permanently delete my account (Priority: P1)
 
 As an authenticated person, I can open Data & Privacy, review every consequence of account deletion, verify my identity when needed, and explicitly confirm permanent deletion so that my access and all application data attributable to me are removed.
 
@@ -39,7 +39,7 @@ As an authenticated person, I can open Data & Privacy, review every consequence 
 
 ---
 
-### User Story 2 - Leave Without Deleting or Recover From Failure (Priority: P2)
+### User story 2: Leave without deleting or recover from failure (Priority: P2)
 
 As an authenticated person, I can cancel at every pre-deletion step and can safely retry after a failure without losing any part of my account.
 
@@ -57,7 +57,7 @@ As an authenticated person, I can cancel at every pre-deletion step and can safe
 
 ---
 
-### User Story 3 - Prevent Unauthorized or Ambiguous Deletion (Priority: P3)
+### User story 3: Prevent unauthorized or ambiguous deletion (Priority: P3)
 
 As an account holder, I am protected from another person, another origin, or a replayed request deleting my account or learning whether an account exists.
 
@@ -75,7 +75,7 @@ As an account holder, I am protected from another person, another origin, or a r
 
 ---
 
-### User Story 4 - Use the Flow in Every Supported Locale and Viewport (Priority: P4)
+### User story 4: Use the flow in every supported locale and viewport (Priority: P4)
 
 As an English, Spanish, or Catalan user, I can understand and operate the complete deletion flow with a keyboard or assistive technology on mobile and desktop.
 

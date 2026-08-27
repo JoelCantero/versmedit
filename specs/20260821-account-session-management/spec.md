@@ -18,7 +18,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Review and Revoke Another Session (Priority: P1)
+### User story 1: Review and revoke another session (Priority: P1)
 
 As an authenticated person, I can review my active sessions, recognize the session I am currently using, and revoke one other session so that a browser or device I no longer trust loses access without affecting the rest of my account.
 
@@ -36,7 +36,7 @@ As an authenticated person, I can review my active sessions, recognize the sessi
 
 ---
 
-### User Story 2 - Revoke All Other Sessions (Priority: P2)
+### User story 2: Revoke all other sessions (Priority: P2)
 
 As an authenticated person who suspects broader account exposure, I can revoke every session except the one I am currently using so that I regain control without interrupting the security workflow in front of me.
 
@@ -53,7 +53,7 @@ As an authenticated person who suspects broader account exposure, I can revoke e
 
 ---
 
-### User Story 3 - Require Fresh, Authorized Confirmation (Priority: P3)
+### User story 3: Require fresh, authorized confirmation (Priority: P3)
 
 As an account holder, I am protected from forged, stale, cross-origin, or replayed requests ending my sessions, and I must recently prove control of the account before any revocation occurs.
 
@@ -72,7 +72,7 @@ As an account holder, I am protected from forged, stale, cross-origin, or replay
 
 ---
 
-### User Story 4 - Use Security Controls in Every Supported Context (Priority: P4)
+### User story 4: Use security controls in every supported context (Priority: P4)
 
 As an English, Spanish, or Catalan user, I can understand and operate session security controls with a keyboard or assistive technology on supported mobile and desktop viewports.
 

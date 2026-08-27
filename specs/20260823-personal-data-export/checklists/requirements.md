@@ -29,6 +29,6 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 2 passed all 16 criteria. No clarification markers remain.

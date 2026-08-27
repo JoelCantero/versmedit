@@ -19,7 +19,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Request a Magic Link Privately (Priority: P1)
+### User story 1: Request a magic link privately (Priority: P1)
 
 As a registered user, I can submit my email address and receive a magic sign-in link while the public response protects account existence.
 
@@ -36,7 +36,7 @@ As a registered user, I can submit my email address and receive a magic sign-in 
 
 ---
 
-### User Story 2 - Complete Login in the Current Language (Priority: P1)
+### User story 2: Complete login in the current language (Priority: P1)
 
 As a registered user, I can use the emailed link once and return authenticated to the home page in the language where I started.
 
@@ -54,7 +54,7 @@ As a registered user, I can use the emailed link once and return authenticated t
 
 ---
 
-### User Story 3 - Understand Request Failures (Priority: P2)
+### User story 3: Understand request failures (Priority: P2)
 
 As a user, I receive clear, localized, accessible feedback when I must wait or when the mail service is temporarily unavailable.
 
@@ -74,7 +74,7 @@ As a user, I receive clear, localized, accessible feedback when I must wait or w
 
 ---
 
-### User Story 4 - Use Login Accessibly on Any Supported Route (Priority: P2)
+### User story 4: Use login accessibly on any supported route (Priority: P2)
 
 As a keyboard, mobile, or assistive-technology user, I can understand and operate the login page in English, Spanish, or Catalan.
 
@@ -91,7 +91,7 @@ As a keyboard, mobile, or assistive-technology user, I can understand and operat
 
 ---
 
-### User Story 5 - Navigate and Personalize the Authentication Shell (Priority: P3)
+### User story 5: Navigate and personalize the authentication shell (Priority: P3)
 
 As a visitor or authenticated user, I can use a localized account navigation shell, select my
 language, and choose a light or dark appearance without losing my current route context.
@@ -162,7 +162,7 @@ accessible labels.
 - **FR-029**: The application shell MUST provide CA, ENG, and ES locale choices that preserve the active pathname, update the locale cookie through canonical locale routing, and identify the current locale accessibly.
 - **FR-030**: The application shell MUST provide a system-aware light/dark theme control, persist the selected preference, and initialize it under the active content-security policy without a hydration mismatch.
 - **FR-031**: Account actions and language/theme preferences MUST be visually grouped with a responsive shadcn separator, aligned controls, a globe language icon, and stable spacing without horizontal overflow.
-- **FR-032**: Application-facing authentication and home branding MUST use the generic product name "Nextself" in every supported locale.
+- **FR-032**: Application-facing authentication and home branding MUST use `PROJECT_NAME` in every supported locale.
 - **FR-033**: Development seed identity MUST come from required `SEED_USER_NAME` and `SEED_USER_EMAIL` environment variables; personal seed values MUST NOT be hardcoded or committed.
 
 ### Verification Requirements

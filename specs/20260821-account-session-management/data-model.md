@@ -1,6 +1,6 @@
 # Data Model: Active Session Management
 
-## Overview
+## Data model overview
 
 This feature reuses the existing `User`, `Session`, `VerificationToken`, and `RateLimitBucket`
 records. It adds one verification-purpose enum value, one nullable immutable session-start field,

@@ -1,6 +1,6 @@
 # Data Model: Signup Page
 
-## Overview
+## Data model overview
 
 The feature extends the existing Auth.js account and verification-token models. `User` remains the
 canonical identity, `VerificationToken` stores either a login credential or one immutable signup

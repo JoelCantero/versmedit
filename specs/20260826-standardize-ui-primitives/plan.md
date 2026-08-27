@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit-plan` skill; its definition describes the execution workflow.
 
-## Summary
+## Implementation summary
 
 Standardize repeated form controls, field errors, action styling, persistent callouts, current-session
 status, and explicit content separators without changing routes, business behavior, semantic HTML,

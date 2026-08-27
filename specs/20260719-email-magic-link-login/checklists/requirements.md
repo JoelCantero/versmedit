@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 found no placeholders or clarification markers and confirmed explicit coverage of requirements, verification, and measurable outcomes.
 - Validation iteration 2 clarified that mail-service unavailability produces an account-independent public outcome and fixed the generic confirmation text for all three locales.

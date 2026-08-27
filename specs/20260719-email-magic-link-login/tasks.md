@@ -270,7 +270,7 @@ Changes to src/app/api/auth/[...nextauth]/route.ts, src/lib/auth.ts,
 src/modules/login/components/login-form.tsx, and tests/integration/magic-link-login.test.ts must be
 serialized according to task IDs to avoid conflicting edits.
 
-## Notes
+## Implementation notes
 
 - `[P]` marks only tasks with independent files and no incomplete prerequisite in the same phase.
 - No task adds a feature-specific E2E test.

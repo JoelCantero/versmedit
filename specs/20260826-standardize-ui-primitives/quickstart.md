@@ -6,7 +6,7 @@
 
 **Model**: [Conceptual data model](./data-model.md)
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS in the range declared by `package.json`
 - pnpm 11.22.0 through Corepack

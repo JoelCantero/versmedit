@@ -1,6 +1,6 @@
 # Quickstart: Validate Transactional Email HTTP Providers
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and pnpm 11
 - Docker with Docker Compose
@@ -126,9 +126,14 @@ Prime available and unavailable states for each provider, expire them, and race 
 
 ### 6. Response-Time Sample
 
-Use the immediate-accept controlled provider with application and provider-health state pre-warmed. For each of login with Brevo, login with Mailjet, signup with Brevo, and signup with Mailjet, run two unmeasured warm-ups followed by 20 sequential measured requests using fresh request data.
+Use the immediate-accept controlled provider with pre-warmed application and provider-health state.
 
-Assert at least 19 of 20 requests in every combination finish in under five seconds and every accepted valid-email response takes at least 500 ms from request start. Record every measured request; do not retry, discard, or exclude outliers.
+1. Test login with Brevo, login with Mailjet, signup with Brevo, and signup with Mailjet.
+2. Run two unmeasured warm-ups for each combination.
+3. Run 20 sequential measured requests with fresh request data.
+4. Verify that at least 19 of 20 requests in every combination finish in under five seconds.
+5. Verify that every accepted valid-email response takes at least 500 ms from request start.
+6. Record every measured request without retrying, discarding, or excluding outliers.
 
 ### 7. Redaction and Acceptance Semantics
 

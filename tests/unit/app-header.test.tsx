@@ -44,10 +44,12 @@ describe("AppHeader", () => {
       },
     });
 
-    const markup = renderToStaticMarkup(await AppHeader({ locale: "es" }));
+    const markup = renderToStaticMarkup(
+      await AppHeader({ locale: "es", projectName: "Example Workspace" }),
+    );
 
     expect(markup).toContain('<a href="/"');
-    expect(markup).toContain(">Nextself</a>");
+    expect(markup).toContain(">Example Workspace</a>");
 
     expect(mocks.appNavigation).toHaveBeenCalledWith(
       expect.objectContaining({

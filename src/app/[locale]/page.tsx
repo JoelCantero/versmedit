@@ -1,12 +1,29 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { parseLoginLocale } from "@/modules/login/schema";
+import { getEnv } from "@/lib/env";
+import { publicPageMetadata } from "@/lib/seo";
+
+type HomePageProps = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: HomePageProps): Promise<Metadata> {
+  const locale = parseLoginLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  const { BRAND } = getEnv();
+  return publicPageMetadata({
+    origin: BRAND.canonicalOrigin,
+    siteName: BRAND.productName,
+    locale,
+    pathname: "/",
+    title: t("title"),
+    description: t("description"),
+  });
+}
 
 export default async function Home({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+}: HomePageProps) {
   const locale = parseLoginLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("HomePage");

@@ -43,7 +43,7 @@
 
 ## Phase 3: User Story 1 - Send Transactional Email Through the Selected Provider (Priority: P1) MVP
 
-**Goal**: Submit the three existing localized messages—magic-link login, signup onboarding/activation, and existing-account notice—through Brevo or Mailjet using one normalized server-only boundary.
+**Goal**: Submit the three existing localized messages, magic-link login, signup onboarding/activation, and existing-account notice, through Brevo or Mailjet using one normalized server-only boundary.
 
 **Independent Test**: Invoke login and signup against the injected transport for each provider and verify the official logical endpoint, authentication scheme, sender/project name, one recipient, localized subject/text/HTML, accepted/null identifier behavior, and existing token lifecycle with zero SMTP calls.
 
@@ -284,7 +284,7 @@ T051 and T053 remain ordered dependency/operations gates
 
 ---
 
-## Notes
+## Implementation notes
 
 - `[P]` tasks touch distinct files or are independent command gates after their prerequisites.
 - Provider acceptance is never described as delivery; later delivery remains unknown.

@@ -245,7 +245,7 @@ independent. Coordinate shared test files listed in multiple stories, especially
 `signup-form.test.tsx`, `account-security-dialog.test.tsx`, and navigation tests, and serialize T029
 after all evidence-producing tasks.
 
-## Notes
+## Implementation notes
 
 - `[P]` means parallelizable only after phase prerequisites and listed dependencies are satisfied.
 - Preserve existing user-facing text; do not add message keys unless a failing accessibility test

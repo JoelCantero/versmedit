@@ -278,7 +278,7 @@ Then sequence: T047/T048/T049 -> T050
 
 ---
 
-## Notes
+## Implementation notes
 
 - `[P]` means file-level parallelism is safe at that point in the dependency graph.
 - Story labels provide traceability to `spec.md`; setup, foundational, and polish tasks intentionally have no story label.

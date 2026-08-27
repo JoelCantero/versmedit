@@ -410,6 +410,10 @@ p {
   background: var(--blue);
 }
 
+.locale-switcher a:hover:not([aria-current="page"]) {
+  background: #edf2f4;
+}
+
 .inspector {
   margin-top: 24px;
   border: 1px solid var(--ink);
@@ -453,6 +457,7 @@ p {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .segment-button:last-child {
@@ -462,6 +467,11 @@ p {
 .segment-button[aria-pressed="true"] {
   color: var(--paper);
   background: var(--ink);
+}
+
+.segment-button:hover:not([aria-pressed="true"]) {
+  color: var(--ink);
+  background: #edf2f4;
 }
 
 .inspector-stage {
@@ -479,7 +489,6 @@ p {
   border: 1px solid var(--line-strong);
   background: var(--paper);
   box-shadow: 0 12px 34px rgba(21, 27, 35, 0.18);
-  transition: width 220ms ease;
 }
 
 .preview-viewport[data-viewport="mobile"] {

@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from `specs/20260826-typescript-6-upgrade/spec.md`
 
-## Summary
+## Implementation summary
 
 Upgrade the project-local compiler from TypeScript 5.9.3 to the compatible 6.0 patch line by declaring `~6.0.2`, regenerating the lockfile with pnpm 11.22.0, and preserving the current ESLint 9.39.4, `eslint-config-next` 16.3.2, and `typescript-eslint` 8.67.0 stack. Start from the existing `tsconfig.json`, which already passes an isolated TypeScript 6.0.2 typecheck; do not add global types, `rootDir`, suppressions, or permanent migration flags unless a later full-suite failure supplies concrete evidence. Update the active Spec Kit plan template, then prove compatibility through the complete local, CI, production-build, end-to-end, and Docker target matrix.
 

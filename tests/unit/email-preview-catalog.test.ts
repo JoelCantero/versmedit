@@ -33,20 +33,20 @@ describe("email preview catalogue", () => {
 
   it("accepts only validated, explicitly forwarded public brand values", () => {
     const configured = createPreviewBrand({
-      EMAIL_PREVIEW_PROJECT_NAME: "Versmedit Local",
+      EMAIL_PREVIEW_PROJECT_NAME: "Example Workspace Local",
       EMAIL_PREVIEW_BRAND_COLOR: "#0e79b2",
-      EMAIL_PREVIEW_SUPPORT_EMAIL: "login@versmedit.com",
+      EMAIL_PREVIEW_SUPPORT_EMAIL: "support@example.test",
       EMAIL_PREVIEW_LOGO_URL: "",
       AUTH_SECRET: "must-not-be-read",
       MAIL_API_KEY: "must-not-be-read",
     });
 
     expect(configured).toEqual({
-      productName: "Versmedit Local",
+      productName: "Example Workspace Local",
       canonicalOrigin: "https://app.example.test",
       primaryColor: "#0E79B2",
       actionForeground: "#FFFFFF",
-      supportEmail: "login@versmedit.com",
+      supportEmail: "support@example.test",
       logoUrl: null,
     });
     expect(Object.isFrozen(configured)).toBe(true);

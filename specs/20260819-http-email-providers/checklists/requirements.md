@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation passed on the first quality review with no clarification markers or incomplete sections.
 - Named provider endpoints, authentication forms, and environment variables are externally imposed interoperability and deployment constraints from the feature request, not discretionary internal design choices.

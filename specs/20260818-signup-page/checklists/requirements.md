@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 tightened the exact public-result parity, mailbox-only existing-account notice, and one-step session transition after onboarding-link consumption.
 - Validation iteration 2 found no unresolved markers, technology choices, missing mandatory sections, duplicate requirement identifiers, or uncovered primary flows.

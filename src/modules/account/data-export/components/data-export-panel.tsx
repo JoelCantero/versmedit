@@ -225,6 +225,9 @@ export function DataExportPanel({
   const expiryFocusRef = useRef<boolean | null>(null);
   const callbackReadyFocusedRef = useRef(false);
   const pending = state === "requesting" || state === "downloading";
+  const authorizationExpiresAt =
+    authorizationState.status === "ready" ? authorizationState.expiresAt : null;
+  const callbackNoticeStatus = callbackNotice?.status;
 
   function enterRateLimit(value: number | undefined, action: RetryAction) {
     const seconds = normalizeRetryAfter(value);
@@ -282,10 +285,9 @@ export function DataExportPanel({
   }
 
   useEffect(() => {
-    if (authorizationState.status !== "ready") return;
-    const expiresAt = authorizationState.expiresAt;
+    if (authorizationExpiresAt === null) return;
     const update = () => {
-      const remaining = secondsUntil(expiresAt);
+      const remaining = secondsUntil(authorizationExpiresAt);
       setAuthorizationRemaining(remaining);
       if (remaining !== 0) return;
       setState((current) => {
@@ -310,7 +312,7 @@ export function DataExportPanel({
       window.clearTimeout(initialTimer);
       window.clearInterval(interval);
     };
-  }, [authorizationState]);
+  }, [authorizationExpiresAt]);
 
   useEffect(() => {
     if (state !== "rate_limited" || retryUntil === null) return;
@@ -319,8 +321,8 @@ export function DataExportPanel({
       setRetryRemaining(remaining);
       if (remaining !== 0) return;
       setState(
-        authorizationState.status === "ready" &&
-          secondsUntil(authorizationState.expiresAt) > 0
+        authorizationExpiresAt !== null &&
+          secondsUntil(authorizationExpiresAt) > 0
           ? "ready"
           : "idle",
       );
@@ -331,7 +333,7 @@ export function DataExportPanel({
       window.clearTimeout(initialTimer);
       window.clearInterval(interval);
     };
-  }, [authorizationState, retryAction, retryUntil, state]);
+  }, [authorizationExpiresAt, retryUntil, state]);
 
   const requestLabel =
     state === "requesting"
@@ -412,13 +414,13 @@ export function DataExportPanel({
   useEffect(() => {
     if (
       !callbackReadyFocusedRef.current &&
-      callbackNotice?.status === "ready" &&
+      callbackNoticeStatus === "ready" &&
       state === "ready"
     ) {
       callbackReadyFocusedRef.current = true;
       statusRef.current?.focus();
     }
-  }, [callbackNotice, state]);
+  }, [callbackNoticeStatus, state]);
 
   return (
     <section

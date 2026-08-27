@@ -70,6 +70,7 @@ describe("DeleteAccountDialog US1", () => {
     const user = userEvent.setup();
     const clients = renderDialog();
     const trigger = screen.getByRole("button", { name: "Delete account" });
+    expect(trigger.className).toContain("min-h-11");
 
     await user.click(trigger);
 
@@ -96,6 +97,7 @@ describe("DeleteAccountDialog US1", () => {
 
     await user.click(screen.getByRole("button", { name: messages.confirmDelete }));
     await waitFor(() => expect(deleteAccount).toHaveBeenCalledOnce());
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     expect(deleteAccount).toHaveBeenCalledWith({
       csrfToken: "csrf",
       locale: "en",

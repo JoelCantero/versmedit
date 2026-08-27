@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import {
   Field,
   FieldContent,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -299,20 +301,22 @@ export function SignupForm({
                 autoComplete="name"
                 placeholder={messages.namePlaceholder}
                 aria-invalid={Boolean(errors.name)}
-                aria-describedby="signup-name-description signup-name-error"
+                aria-describedby={
+                  errors.name
+                    ? "signup-name-description signup-name-error"
+                    : "signup-name-description"
+                }
                 disabled={pending}
                 required
               />
               <FieldDescription id="signup-name-description">
                 {messages.nameDescription}
               </FieldDescription>
-              <p
-                id="signup-name-error"
-                className="min-h-5 text-sm text-destructive"
-                role={errors.name ? "alert" : undefined}
-              >
-                {errors.name ?? ""}
-              </p>
+              <div className="min-h-5">
+                {errors.name ? (
+                  <FieldError id="signup-name-error">{errors.name}</FieldError>
+                ) : null}
+              </div>
             </Field>
 
             <Field data-invalid={Boolean(errors.email) || undefined} data-disabled={pending || undefined}>
@@ -325,20 +329,22 @@ export function SignupForm({
                 autoComplete="email"
                 placeholder={messages.emailPlaceholder}
                 aria-invalid={Boolean(errors.email)}
-                aria-describedby="signup-email-description signup-email-error"
+                aria-describedby={
+                  errors.email
+                    ? "signup-email-description signup-email-error"
+                    : "signup-email-description"
+                }
                 disabled={pending}
                 required
               />
               <FieldDescription id="signup-email-description">
                 {messages.emailDescription}
               </FieldDescription>
-              <p
-                id="signup-email-error"
-                className="min-h-5 text-sm text-destructive"
-                role={errors.email ? "alert" : undefined}
-              >
-                {errors.email ?? ""}
-              </p>
+              <div className="min-h-5">
+                {errors.email ? (
+                  <FieldError id="signup-email-error">{errors.email}</FieldError>
+                ) : null}
+              </div>
             </Field>
 
             <Field
@@ -346,14 +352,17 @@ export function SignupForm({
               data-invalid={Boolean(errors.policyAccepted) || undefined}
               data-disabled={pending || undefined}
             >
-              <input
-                ref={policyRef}
+              <Checkbox
+                inputRef={policyRef}
                 id="signup-policy"
                 name="policyAccepted"
-                type="checkbox"
-                className="mt-0.5 size-6 shrink-0 accent-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="mt-0.5 size-6"
                 aria-invalid={Boolean(errors.policyAccepted)}
-                aria-describedby="signup-policy-description signup-policy-error"
+                aria-describedby={
+                  errors.policyAccepted
+                    ? "signup-policy-description signup-policy-error"
+                    : "signup-policy-description"
+                }
                 disabled={pending}
                 required
               />
@@ -369,13 +378,13 @@ export function SignupForm({
                 <FieldDescription id="signup-policy-description">
                   {messages.policyDescription}
                 </FieldDescription>
-                <p
-                  id="signup-policy-error"
-                  className="min-h-10 text-sm text-destructive"
-                  role={errors.policyAccepted ? "alert" : undefined}
-                >
-                  {errors.policyAccepted ?? ""}
-                </p>
+                <div className="min-h-10">
+                  {errors.policyAccepted ? (
+                    <FieldError id="signup-policy-error">
+                      {errors.policyAccepted}
+                    </FieldError>
+                  ) : null}
+                </div>
               </FieldContent>
             </Field>
 

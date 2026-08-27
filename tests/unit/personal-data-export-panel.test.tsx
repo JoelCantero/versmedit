@@ -31,9 +31,26 @@ const messages: DataExportPanelMessages = {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe("DataExportPanel", () => {
+  it("renders the sensitivity warning as a non-live shared callout", () => {
+    render(
+      <DataExportPanel
+        locale="en"
+        authorizationState={{ status: "absent" }}
+        callbackNotice={null}
+        messages={messages}
+      />,
+    );
+
+    const warning = screen.getByRole("note");
+    expect(warning).toHaveAttribute("data-slot", "alert");
+    expect(warning).toHaveTextContent(messages.sensitiveWarning);
+  });
+
   it("moves from explicit request through stable pending to sent", async () => {
     const user = userEvent.setup();
     let release: ((value: { status: "sent" }) => void) | undefined;
@@ -57,6 +74,7 @@ describe("DataExportPanel", () => {
     const button = screen.getByRole("button", { name: messages.request });
     await user.click(button);
     expect(screen.getByRole("button", { name: messages.requesting })).toBeDisabled();
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(messages.requesting);
     release?.({ status: "sent" });
     expect(await screen.findByText(messages.sent)).toHaveAttribute("role", "status");
@@ -64,6 +82,70 @@ describe("DataExportPanel", () => {
       csrfToken: "proof",
       locale: "en",
     });
+  });
+
+  it("uses the default CSRF and request clients", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ csrfToken: "fetched-proof" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ status: "sent" }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <DataExportPanel
+        locale="en"
+        authorizationState={{ status: "absent" }}
+        callbackNotice={null}
+        messages={messages}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: messages.request }));
+
+    expect(await screen.findByText(messages.sent)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/auth/csrf", {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/account/data-export/request",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ csrfToken: "fetched-proof", locale: "en" }),
+      }),
+    );
+  });
+
+  it("fails closed when the default CSRF response is invalid", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <DataExportPanel
+        locale="en"
+        authorizationState={{ status: "absent" }}
+        callbackNotice={null}
+        messages={messages}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: messages.request }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      messages.requestError,
+    );
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it("never downloads on ready render and requires a separate explicit action", async () => {
@@ -105,6 +187,49 @@ describe("DataExportPanel", () => {
     );
   });
 
+  it("uses the default download and browser save clients", async () => {
+    const user = userEvent.setup();
+    const blob = new Blob(["{}"], { type: "application/json" });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: new Headers({
+        "content-disposition":
+          'attachment; filename="personal-data-export-20260823T120000Z.json"',
+      }),
+      blob: vi.fn().mockResolvedValue(blob),
+    });
+    const createObjectURL = vi.fn().mockReturnValue("blob:export");
+    const revokeObjectURL = vi.fn();
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    render(
+      <DataExportPanel
+        locale="en"
+        authorizationState={{
+          status: "ready",
+          expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+        }}
+        callbackNotice={null}
+        csrfToken="proof"
+        messages={messages}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: messages.download }));
+
+    expect(await screen.findByText(messages.downloaded)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/account/data-export/download",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(createObjectURL).toHaveBeenCalledWith(blob);
+    expect(click).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:export");
+  });
+
   it("renders generic invalid callback state without starting protected work", () => {
     const requestExport = vi.fn();
     const downloadExport = vi.fn();
@@ -120,6 +245,7 @@ describe("DataExportPanel", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(messages.invalid);
+    expect(screen.getByRole("alert")).toHaveAttribute("data-slot", "alert");
     expect(requestExport).not.toHaveBeenCalled();
     expect(downloadExport).not.toHaveBeenCalled();
   });
@@ -153,6 +279,7 @@ describe("DataExportPanel", () => {
       );
 
       expect(screen.getByRole("alert")).toHaveTextContent(expectedAlert);
+      expect(screen.getByRole("alert")).toHaveAttribute("data-slot", "alert");
       expect(
         screen.getByRole("button", { name: messages.download }),
       ).toBeEnabled();
@@ -182,6 +309,7 @@ describe("DataExportPanel", () => {
     await user.click(screen.getByRole("button", { name: messages.request }));
 
     const alert = await screen.findByRole("alert");
+    expect(alert).not.toHaveAttribute("data-slot", "alert");
     expect(alert).toHaveTextContent(messages.requestError);
     expect(alert).toHaveFocus();
     expect(requestExport).toHaveBeenCalledOnce();

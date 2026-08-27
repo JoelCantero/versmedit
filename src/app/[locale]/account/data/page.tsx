@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { DataExportPanel } from "@/modules/account/data-export/components/data-export-panel";
@@ -92,12 +94,16 @@ export default async function AccountDataPage({
           </header>
 
           {invalidState ? (
-            <p role="alert" className="text-sm text-destructive">
-              {query.state === "session_conflict"
-                ? t("deletion.states.sessionConflict")
-                : t("deletion.states.invalidLink")}
-            </p>
+            <Alert variant="destructive">
+              <AlertDescription>
+                {query.state === "session_conflict"
+                  ? t("deletion.states.sessionConflict")
+                  : t("deletion.states.invalidLink")}
+              </AlertDescription>
+            </Alert>
           ) : null}
+
+          <Separator />
 
           <DataExportPanel
             key={callbackNotice?.status ?? authorizationState.status}
@@ -126,9 +132,11 @@ export default async function AccountDataPage({
             }}
           />
 
+          <Separator />
+
           <section
             aria-labelledby="delete-account-heading"
-            className="space-y-5 border-t border-destructive/40 pt-8"
+            className="space-y-5"
           >
             <div className="space-y-2">
               <h2 id="delete-account-heading" className="text-lg font-semibold text-foreground">

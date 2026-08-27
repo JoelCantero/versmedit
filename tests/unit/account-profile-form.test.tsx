@@ -97,6 +97,7 @@ describe("ProfileForm", () => {
     await userEvent.click(screen.getByRole("button", { name: messages.saveIdle }));
 
     expect(screen.getByRole("button", { name: messages.savePending })).toBeDisabled();
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: messages.savePending }));
     expect(action).toHaveBeenCalledOnce();
 
@@ -131,7 +132,14 @@ describe("ProfileForm", () => {
     await userEvent.clear(nameInput);
     await userEvent.click(screen.getByRole("button", { name: messages.saveIdle }));
 
-    expect(await screen.findByText(messages.required)).toBeVisible();
+    const error = await screen.findByText(messages.required);
+    expect(error).toBeVisible();
+    expect(error).toHaveAttribute("data-slot", "field-error");
+    expect(error.parentElement).toHaveClass("min-h-5");
+    expect(nameInput).toHaveAttribute(
+      "aria-describedby",
+      "account-name-description account-name-error",
+    );
     expect(nameInput).toHaveFocus();
     expect(nameInput).toHaveValue("");
   });

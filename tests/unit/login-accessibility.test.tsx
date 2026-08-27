@@ -36,9 +36,7 @@ describe("LoginForm accessibility", () => {
       />,
     );
     const input = screen.getByRole("textbox", { name: messages.emailLabel });
-    expect(input).toHaveAccessibleDescription(
-      `${messages.emailDescription} `,
-    );
+    expect(input).toHaveAccessibleDescription(messages.emailDescription);
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
     expect(screen.getAllByRole("button")).toHaveLength(1);
     await expectNoAxeViolations(container);

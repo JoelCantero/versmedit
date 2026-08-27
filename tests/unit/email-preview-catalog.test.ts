@@ -1,5 +1,8 @@
 // @vitest-environment node
 
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -12,6 +15,22 @@ import { previewManifest } from "../../emails/lib/preview-manifest";
 const reservedHostPattern = /(?:^|\.)example\.(?:com|net|org|test)$/u;
 
 describe("email preview catalogue", () => {
+  it("keeps both preview control groups deferred to the preview application", async () => {
+    const inspectionControls = await readFile(
+      path.join(process.cwd(), "emails/components/preview-inspector.tsx"),
+      "utf8",
+    );
+    const viewportControls = await readFile(
+      path.join(process.cwd(), "emails/components/viewport-control.tsx"),
+      "utf8",
+    );
+
+    for (const source of [inspectionControls, viewportControls]) {
+      expect(source).not.toMatch(/@\/components\/ui/u);
+      expect(source).not.toMatch(/<(?:Checkbox|Alert|Badge|Separator)\b/u);
+    }
+  });
+
   it("accepts only validated, explicitly forwarded public brand values", () => {
     const configured = createPreviewBrand({
       EMAIL_PREVIEW_PROJECT_NAME: "Versmedit Local",

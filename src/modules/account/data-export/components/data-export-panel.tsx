@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DownloadIcon, FileJsonIcon, MailIcon } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type {
   PersonalDataExportAuthorizationState,
@@ -217,8 +218,8 @@ export function DataExportPanel({
       : 0,
   );
   const inFlightRef = useRef(false);
-  const alertRef = useRef<HTMLParagraphElement>(null);
-  const statusRef = useRef<HTMLParagraphElement>(null);
+  const alertRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLDivElement>(null);
   const requestButtonRef = useRef<HTMLButtonElement>(null);
   const downloadButtonRef = useRef<HTMLButtonElement>(null);
   const expiryFocusRef = useRef<boolean | null>(null);
@@ -383,6 +384,13 @@ export function DataExportPanel({
       state === "download_error" ||
       state === "invalid" ||
       state === "rate_limited");
+  const callbackStatus =
+    callbackNotice?.status === "ready" && state === "ready" ? status : null;
+  const callbackError =
+    (callbackNotice?.status === "invalid" && state === "invalid") ||
+    (callbackNotice?.status === "rate_limited" && state === "rate_limited")
+      ? error
+      : null;
 
   useEffect(() => {
     if (
@@ -416,7 +424,7 @@ export function DataExportPanel({
     <section
       aria-labelledby="personal-data-export-heading"
       aria-busy={pending}
-      className="space-y-5 border-t border-border pt-8"
+      className="space-y-5"
     >
       <div className="space-y-2">
         <h2
@@ -430,14 +438,17 @@ export function DataExportPanel({
         </p>
       </div>
 
-      <div className="flex max-w-2xl gap-3 border-l-2 border-border pl-4 text-sm text-muted-foreground">
+      <Alert role="note" className="max-w-2xl">
         <FileJsonIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-        <p>{messages.sensitiveWarning}</p>
-      </div>
+        <AlertDescription>{messages.sensitiveWarning}</AlertDescription>
+      </Alert>
 
-      {status ? (
+      {callbackStatus ? (
+        <Alert ref={statusRef} role="status" aria-live="polite" tabIndex={-1}>
+          <AlertDescription>{callbackStatus}</AlertDescription>
+        </Alert>
+      ) : status ? (
         <p
-          ref={statusRef}
           role="status"
           aria-live="polite"
           tabIndex={-1}
@@ -454,9 +465,19 @@ export function DataExportPanel({
           )}
         </p>
       ) : null}
-      {error ? (
-        <p
+      {callbackError ? (
+        <Alert
           ref={alertRef}
+          variant="destructive"
+          aria-live="assertive"
+          tabIndex={-1}
+          className="outline-none"
+        >
+          <AlertDescription>{callbackError}</AlertDescription>
+        </Alert>
+      ) : error ? (
+        <p
+          ref={alertRef as React.RefObject<HTMLParagraphElement>}
           role="alert"
           tabIndex={-1}
           className="text-sm text-destructive outline-none"

@@ -63,7 +63,11 @@ describe("SignupForm core flow", () => {
 
     expect(screen.getAllByRole("textbox")).toHaveLength(2);
     expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    const policy = screen.getByRole("checkbox");
+    expect(policy).not.toBeChecked();
+    expect(document.querySelector('[data-slot="checkbox"]')).toBeInTheDocument();
+    expect(policy).toHaveAttribute("aria-describedby", "signup-policy-description");
+    expect(document.querySelector('[data-slot="field-error"]')).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: messages.policyTerms })).toHaveAttribute(
       "href",
       "/terms",
@@ -98,6 +102,7 @@ describe("SignupForm core flow", () => {
     await userEvent.click(screen.getByRole("button", { name: messages.submitIdle }));
 
     expect(screen.getByRole("button")).toBeDisabled();
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(messages.sending);
     await userEvent.click(screen.getByRole("button"));
     expect(fetcher).toHaveBeenCalledOnce();
@@ -135,6 +140,11 @@ describe("SignupForm core flow", () => {
     expect(screen.getByText(messages.invalidNameRequired)).toBeVisible();
     expect(screen.getByText(messages.invalidEmail)).toBeVisible();
     expect(screen.getByText(messages.invalidPolicy)).toBeVisible();
+    expect(document.querySelectorAll('[data-slot="field-error"]')).toHaveLength(3);
+    expect(screen.getByRole("checkbox")).toHaveAttribute(
+      "aria-describedby",
+      "signup-policy-description signup-policy-error",
+    );
     await waitFor(() => expect(screen.getByLabelText(messages.nameLabel)).toHaveFocus());
   });
 
@@ -268,5 +278,6 @@ describe("SignupForm core flow", () => {
     expect(screen.getByRole("heading", { name: title })).toBeVisible();
     expect(screen.getByRole("link", { name: action })).toBeVisible();
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(document.querySelector('[data-slot="empty"]')).not.toBeInTheDocument();
   });
 });

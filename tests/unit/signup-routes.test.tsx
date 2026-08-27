@@ -108,7 +108,9 @@ describe("localized signup routes", () => {
         name: `es:Policies.${kind}:title`,
       }),
     ).toBeVisible();
-    expect(screen.getByText("es:Policies:draftNotice")).toBeVisible();
+    const notice = screen.getByRole("note");
+    expect(notice).toHaveAttribute("data-slot", "alert");
+    expect(notice).toHaveTextContent("es:Policies:draftNotice");
     expect(screen.getByText(/2026-08-18-draft/)).toBeVisible();
   });
 

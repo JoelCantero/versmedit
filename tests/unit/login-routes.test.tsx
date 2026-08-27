@@ -77,6 +77,7 @@ describe("localized login routes", () => {
     );
     expect(errorHtml).toContain('href="/login"');
     expect(errorHtml).toContain('href="/"');
+    expect(errorHtml).not.toMatch(/data-slot="(?:empty|tabs|sidebar)"/u);
   });
 
   it.each(["en", "es", "ca"])("localizes metadata for %s", async (locale) => {

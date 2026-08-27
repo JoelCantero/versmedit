@@ -154,6 +154,20 @@ describe("personal data export protected page", () => {
       exportSection.compareDocumentPosition(deletionHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(screen.getAllByRole("separator")).toHaveLength(2);
+  });
+
+  it("renders invalid URL state as a persistent destructive callout", async () => {
+    render(
+      await AccountDataPage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({ state: "invalid_link" }),
+      }),
+    );
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveAttribute("data-slot", "alert");
+    expect(alert).toHaveClass("text-destructive");
   });
 
   it.each(["en", "es", "ca"] as const)(

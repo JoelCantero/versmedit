@@ -13,7 +13,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -72,14 +71,19 @@ export function HomeNavigation({
               </NavigationMenuItem>
             ) : null}
             <NavigationMenuItem>
-              <button
-                type="button"
-                className={navigationMenuTriggerStyle()}
-                disabled={isPending}
-                onClick={logout}
+              <NavigationMenuLink
+                aria-disabled={isPending}
+                className={cn(isPending && "pointer-events-none opacity-50")}
+                render={
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={logout}
+                  />
+                }
               >
                 {labels.logout}
-              </button>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </>
         ) : (
@@ -144,16 +148,20 @@ export function HomeNavigation({
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <button
-            type="button"
-            className={cn(navigationMenuTriggerStyle(), "relative size-9 px-0")}
-            aria-label={labels.toggleTheme}
-            title={labels.toggleTheme}
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          <NavigationMenuLink
+            className="relative size-9 justify-center px-0"
+            render={
+              <button
+                type="button"
+                aria-label={labels.toggleTheme}
+                title={labels.toggleTheme}
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              />
+            }
           >
             <Sun className="size-4 scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
             <Moon className="absolute inset-0 m-auto size-4 scale-0 rotate-90 dark:scale-100 dark:rotate-0" />
-          </button>
+          </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

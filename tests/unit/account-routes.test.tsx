@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { buttonVariants } from "@/components/ui/button";
 import caMessages from "@/messages/ca.json";
 import enMessages from "@/messages/en.json";
 import esMessages from "@/messages/es.json";
@@ -97,6 +98,7 @@ vi.mock("next-auth/react", () => ({ signOut: vi.fn() }));
 
 import AccountPage from "@/app/[locale]/account/page";
 import AccountDataPage from "@/app/[locale]/account/data/page";
+import AccountDeletedPage from "@/app/[locale]/account-deleted/page";
 import AccountSecurityPage from "@/app/[locale]/account/security/page";
 
 describe("account route authentication", () => {
@@ -138,6 +140,20 @@ describe("account route authentication", () => {
       },
     ]);
     mocks.getServerSession.mockResolvedValue(null);
+  });
+
+  it("keeps the account-deleted action a localized link with shared button styling", async () => {
+    mocks.getTranslations.mockResolvedValue((key: string) =>
+      key === "title" ? "Account deleted" : key === "description" ? "Done" : "Home",
+    );
+
+    render(await AccountDeletedPage({ params: Promise.resolve({ locale: "es" }) }));
+
+    const homeLink = screen.getByRole("link", { name: "Home" });
+    expect(homeLink).toHaveAttribute("href", "/es/");
+    for (const className of buttonVariants({ size: "lg", className: "w-fit" }).split(" ")) {
+      expect(homeLink).toHaveClass(className);
+    }
   });
 
   it.each([
@@ -215,6 +231,8 @@ describe("account route authentication", () => {
           name: destinations.find(([, , key]) => key === active)![0],
         }),
       );
+      expect(within(navigation).queryByRole("tab")).not.toBeInTheDocument();
+      expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
     },
   );
 });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "@/i18n/navigation";
 import { PRIVACY_NOTICE_VERSION } from "@/modules/signup/policy";
 import { parseSignupLocale } from "@/modules/signup/schema";
@@ -30,9 +31,9 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
           </Link>
           <h1 className="text-3xl font-semibold">{t("title")}</h1>
           <p className="text-muted-foreground">{t("intro")}</p>
-          <p role="note" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
-            {common("draftNotice")}
-          </p>
+          <Alert role="note" variant="destructive">
+            <AlertDescription>{common("draftNotice")}</AlertDescription>
+          </Alert>
           <p className="text-sm text-muted-foreground">
             {common("versionLabel", { version: PRIVACY_NOTICE_VERSION })}
           </p>

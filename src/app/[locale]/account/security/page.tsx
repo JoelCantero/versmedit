@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { readAccountSessionToken } from "@/modules/account/session";
 import { SecuritySessionHeading } from "@/modules/account/security/components/security-session-heading";
@@ -87,18 +88,14 @@ export default async function AccountSecurityPage({
           </header>
 
           {callbackNotice ? (
-            <p
+            <Alert
+              variant={positiveNotice ? "default" : "destructive"}
               role={positiveNotice ? "status" : "alert"}
               aria-live={positiveNotice ? "polite" : "assertive"}
               aria-atomic="true"
-              className={
-                positiveNotice
-                  ? "text-sm text-foreground"
-                  : "text-sm text-destructive"
-              }
             >
-              {callbackNotice}
-            </p>
+              <AlertDescription>{callbackNotice}</AlertDescription>
+            </Alert>
           ) : null}
 
           <section aria-labelledby="active-sessions-heading" className="min-w-0">

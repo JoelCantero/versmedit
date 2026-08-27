@@ -229,7 +229,11 @@ describe("Account Security individual session review", () => {
       />,
     );
 
-    const rows = screen.getAllByRole("listitem");
+    const list = screen.getByRole("list", { name: listMessages.ariaLabel });
+    const rows = within(list).getAllByRole("listitem");
+    expect([...list.children].every((child) => child.tagName === "LI")).toBe(true);
+    expect(within(list).queryByRole("separator")).not.toBeInTheDocument();
+    expect(list.querySelector('[data-slot="item"]')).not.toBeInTheDocument();
     expect(within(rows[0]!).queryByRole("button", { name: "Revoke session" })).toBeNull();
     await userEvent.click(within(rows[0]!).getByRole("button", { name: "Sign out" }));
     expect(signOutCurrent).toHaveBeenCalledOnce();
@@ -312,6 +316,7 @@ describe("Account Security individual session review", () => {
     expect(cancel).toBeDisabled();
     expect(close).toBeDisabled();
     expect(confirmation).toBeDisabled();
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(dialog).toBeInTheDocument();
     expect(requestRevocation).toHaveBeenCalledOnce();

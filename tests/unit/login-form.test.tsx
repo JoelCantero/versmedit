@@ -34,6 +34,11 @@ describe("LoginForm", () => {
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
     expect(screen.getAllByRole("button")).toHaveLength(1);
     expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox")).toHaveAttribute(
+      "aria-describedby",
+      "login-email-description",
+    );
+    expect(document.querySelector('[data-slot="field-error"]')).not.toBeInTheDocument();
   });
 
   it("validates email without sending a request", async () => {
@@ -51,7 +56,14 @@ describe("LoginForm", () => {
     await userEvent.type(screen.getByRole("textbox"), "not-an-email");
     await userEvent.click(screen.getByRole("button"));
 
-    expect(await screen.findByText(messages.invalidEmail)).toBeVisible();
+    const error = await screen.findByText(messages.invalidEmail);
+    expect(error).toBeVisible();
+    expect(error).toHaveAttribute("data-slot", "field-error");
+    expect(error.parentElement).toHaveClass("min-h-5");
+    expect(screen.getByRole("textbox")).toHaveAttribute(
+      "aria-describedby",
+      "login-email-description login-email-error",
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -76,6 +88,7 @@ describe("LoginForm", () => {
     await userEvent.type(screen.getByRole("textbox"), "person@example.com");
     await userEvent.click(screen.getByRole("button"));
     expect(screen.getByRole("button")).toBeDisabled();
+    expect(document.querySelector('[data-slot="spinner"]')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button"));
     expect(fetcher).toHaveBeenCalledOnce();
 

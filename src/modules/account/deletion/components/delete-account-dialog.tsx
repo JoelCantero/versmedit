@@ -261,7 +261,9 @@ export function DeleteAccountDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal={pending}>
-      <DialogTrigger render={<Button variant="destructive" />}>
+      <DialogTrigger
+        render={<Button variant="destructive" className="min-h-11" />}
+      >
         {messages.deleteTrigger}
       </DialogTrigger>
       <DialogContent

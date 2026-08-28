@@ -10,7 +10,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Reach Legal Information from Any Page (Priority: P1)
+### User story 1: Reach legal information from any page (Priority: P1)
 
 As a visitor or authenticated user, I can reach the Terms of Use and Privacy Notice from any normal user-facing page so that I can review legal information without returning to a specific entry page or knowing a direct address.
 
@@ -26,7 +26,7 @@ As a visitor or authenticated user, I can reach the Terms of Use and Privacy Not
 
 ---
 
-### User Story 2 - Keep the Active Language (Priority: P2)
+### User story 2: Keep the active language (Priority: P2)
 
 As a user browsing in English, Spanish, or Catalan, I can read the footer in that language and follow its links without losing my selected language.
 
@@ -43,7 +43,7 @@ As a user browsing in English, Spanish, or Catalan, I can read the footer in tha
 
 ---
 
-### User Story 3 - Use the Footer Across Devices and Access Methods (Priority: P3)
+### User story 3: Use the footer across devices and access methods (Priority: P3)
 
 As a keyboard, screen-reader, mobile, or desktop user, I can identify and use the legal links without the footer obscuring content or becoming unreadable.
 

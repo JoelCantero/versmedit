@@ -4,7 +4,7 @@ This guide validates the feature end to end without duplicating implementation d
 data transitions are defined in [data-model.md](./data-model.md); public request and response shapes
 are defined in [contracts/openapi.yaml](./contracts/openapi.yaml).
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and pnpm 11.22.0.
 - Docker with Compose.

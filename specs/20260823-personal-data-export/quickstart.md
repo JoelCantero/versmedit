@@ -1,6 +1,6 @@
 # Quickstart: Validate Personal Data Export
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and repository-pinned pnpm 11.22.0
 - Docker Desktop/Engine with Compose running

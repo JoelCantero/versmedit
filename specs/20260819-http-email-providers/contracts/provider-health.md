@@ -1,6 +1,6 @@
 # Contract: Recipient-Independent Provider Health
 
-## Purpose
+## Provider health contract
 
 Provider health is an account-independent preflight for email-dependent public routes. It prevents a known provider-wide outage from causing account-dependent work or timing while keeping individual send outcomes private.
 

@@ -91,6 +91,9 @@ export function ProfileForm({ locale, initialProfile, messages, action }: Profil
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const stateStatus = state.status;
+  const validationField =
+    state.status === "validation_error" ? state.field : null;
 
   function setAvatarImageRef(image: HTMLImageElement | null) {
     if (image?.complete && image.naturalWidth === 0) {
@@ -101,13 +104,13 @@ export function ProfileForm({ locale, initialProfile, messages, action }: Profil
   useEffect(() => {
     if (pending) return;
 
-    if (state.status === "validation_error" && state.field === "name") {
+    if (stateStatus === "validation_error" && validationField === "name") {
       nameInputRef.current?.focus();
     }
-    if (state.status === "persistence_error") {
+    if (stateStatus === "persistence_error") {
       submitButtonRef.current?.focus();
     }
-  }, [pending, state]);
+  }, [pending, stateStatus, validationField]);
 
   const initials = useMemo(
     () =>
@@ -223,6 +226,7 @@ export function ProfileForm({ locale, initialProfile, messages, action }: Profil
             <FieldLabel htmlFor="account-email">{messages.emailLabel}</FieldLabel>
             <Input
               id="account-email"
+              name="email"
               type="email"
               autoComplete="email"
               value={initialProfile.email}

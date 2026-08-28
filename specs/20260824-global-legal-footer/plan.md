@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from `specs/20260824-global-legal-footer/spec.md`
 
-## Summary
+## Implementation summary
 
 Add one localized, accessible legal footer to the existing `[locale]` application layout so every
 normal user-facing page inherits it exactly once. Implement the footer as a server-rendered shared

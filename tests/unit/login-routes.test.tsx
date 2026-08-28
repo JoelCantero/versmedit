@@ -55,7 +55,9 @@ vi.mock("@/modules/login/components/login-form", () => ({
   },
 }));
 
-import LoginErrorPage from "@/app/[locale]/login/error/page";
+import LoginErrorPage, {
+  generateMetadata as generateErrorMetadata,
+} from "@/app/[locale]/login/error/page";
 import LoginPage, { generateMetadata } from "@/app/[locale]/login/page";
 
 describe("localized login routes", () => {
@@ -85,6 +87,15 @@ describe("localized login routes", () => {
       generateMetadata({ params: Promise.resolve({ locale }) }),
     ).resolves.toEqual(expect.objectContaining({
       title: translations[locale]["Login.page.metadata.title"],
+      robots: { index: false, follow: false },
+    }));
+  });
+
+  it("prevents the transient login error page from being indexed", async () => {
+    await expect(
+      generateErrorMetadata({ params: Promise.resolve({ locale: "en" }) }),
+    ).resolves.toEqual(expect.objectContaining({
+      robots: { index: false, follow: false },
     }));
   });
 

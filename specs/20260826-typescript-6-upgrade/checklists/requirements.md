@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 found all mandatory sections complete, all requirements testable, and all success criteria measurable.
 - Technical product names and compatibility ranges are retained only where they define the migration outcome; implementation design remains deferred to planning.

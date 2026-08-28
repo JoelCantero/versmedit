@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 identified an ambiguous "sufficient contrast" requirement.
 - Validation iteration 2 defined explicit AA contrast thresholds in FR-015 and SC-004; all checklist items pass.

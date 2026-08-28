@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 completed on 2026-08-26: all checklist items pass.
 - The source issue's library and component names were intentionally expressed as shared interaction outcomes; implementation selection belongs in the plan.

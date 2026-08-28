@@ -369,7 +369,7 @@ Then: T062/T063 -> T059 localized navigation E2E rerun
 3. After US1 stabilizes, assign US3 and US5 independently while US2 integration completes.
 4. Run US4 after all visible states exist, then converge on Phase 8 validation.
 
-## Notes
+## Implementation notes
 
 - `[P]` means separate files and no dependency on another incomplete task in the same batch.
 - Story labels provide traceability to the five user stories in spec.md.

@@ -181,6 +181,7 @@ describe("personal data export protected page", () => {
       ).resolves.toEqual({
         title: catalogs[locale].data.metadata.title,
         description: catalogs[locale].data.metadata.description,
+        robots: { index: false, follow: false },
       });
     },
   );

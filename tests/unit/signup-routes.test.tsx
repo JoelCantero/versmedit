@@ -52,9 +52,15 @@ vi.mock("@/modules/signup/components/signup-form", () => ({
   ),
 }));
 
-import PrivacyPage from "@/app/[locale]/privacy/page";
-import SignupPage from "@/app/[locale]/signup/page";
-import TermsPage from "@/app/[locale]/terms/page";
+import PrivacyPage, {
+  generateMetadata as generatePrivacyMetadata,
+} from "@/app/[locale]/privacy/page";
+import SignupPage, {
+  generateMetadata as generateSignupMetadata,
+} from "@/app/[locale]/signup/page";
+import TermsPage, {
+  generateMetadata as generateTermsMetadata,
+} from "@/app/[locale]/terms/page";
 
 describe("localized signup routes", () => {
   beforeEach(() => {
@@ -112,6 +118,18 @@ describe("localized signup routes", () => {
     expect(notice).toHaveAttribute("data-slot", "alert");
     expect(notice).toHaveTextContent("es:Policies:draftNotice");
     expect(screen.getByText(/2026-08-18-draft/)).toBeVisible();
+  });
+
+  it("prevents signup and policy pages from being indexed", async () => {
+    const metadata = await Promise.all([
+      generateSignupMetadata({ params: Promise.resolve({ locale: "en" }) }),
+      generatePrivacyMetadata({ params: Promise.resolve({ locale: "en" }) }),
+      generateTermsMetadata({ params: Promise.resolve({ locale: "en" }) }),
+    ]);
+
+    for (const pageMetadata of metadata) {
+      expect(pageMetadata.robots).toEqual({ index: false, follow: false });
+    }
   });
 
   it.each([

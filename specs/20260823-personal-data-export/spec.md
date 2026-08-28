@@ -19,7 +19,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Request, Confirm, and Download Personal Data (Priority: P1)
+### User story 1: Request, confirm, and download personal data (Priority: P1)
 
 As an authenticated user, I want to confirm a personal-data export through my account email and explicitly download it from Data & Privacy so that I can inspect or port the information associated with my account without weakening other account protections.
 
@@ -37,7 +37,7 @@ As an authenticated user, I want to confirm a personal-data export through my ac
 
 ---
 
-### User Story 2 - Fail Safely Without Revealing Account State (Priority: P2)
+### User story 2: Fail safely without revealing account state (Priority: P2)
 
 As a user or visitor whose confirmation cannot be accepted, I want a clear but non-revealing outcome so that I can recover without exposing whether an account, session, or credential exists.
 
@@ -55,7 +55,7 @@ As a user or visitor whose confirmation cannot be accepted, I want a clear but n
 
 ---
 
-### User Story 3 - Contribute Application-Specific Personal Data (Priority: P2)
+### User story 3: Contribute application-specific personal data (Priority: P2)
 
 As an application maintainer using the framework, I want each domain that owns personal data to register a namespaced export contribution so that exports remain complete as the application grows without coupling framework core to product-specific data.
 
@@ -73,7 +73,7 @@ As an application maintainer using the framework, I want each domain that owns p
 
 ---
 
-### User Story 4 - Complete the Journey Accessibly in Any Supported Language (Priority: P3)
+### User story 4: Complete the journey accessibly in any supported language (Priority: P3)
 
 As an English-, Spanish-, or Catalan-speaking user, including one using a keyboard, screen reader, or small screen, I want the export journey to retain my language and clearly announce each state so that I can complete it without confusion or loss of context.
 

@@ -38,7 +38,7 @@ A server-only discriminated configuration selected at startup.
 | `healthTimeoutMs` | constant | yes | 1,500 |
 | `responseLimitBytes` | constant | yes | 65,536 |
 
-### Validation
+### Provider state validation
 
 - Invalid `MAIL_ENABLED` always fails startup validation.
 - When disabled, provider credentials alone do not activate any flow and normalized configuration contains no active provider.

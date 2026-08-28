@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { noIndexMetadata } from "@/lib/seo";
 import { parseLoginLocale } from "@/modules/login/schema";
 
 interface AccountDeletedPageProps {
@@ -12,7 +13,7 @@ interface AccountDeletedPageProps {
 export async function generateMetadata({ params }: AccountDeletedPageProps): Promise<Metadata> {
   const locale = parseLoginLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: "Account.deleted.metadata" });
-  return { title: t("title"), description: t("description") };
+  return noIndexMetadata({ title: t("title"), description: t("description") });
 }
 
 export default async function AccountDeletedPage({ params }: AccountDeletedPageProps) {

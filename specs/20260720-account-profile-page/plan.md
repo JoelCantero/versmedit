@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a protected, localized account Profile page that displays the current session user's image or
 initials, permits only a validated name update, and preserves locale through account navigation and
@@ -32,13 +32,13 @@ integration, accessibility, responsive, and standalone-production Playwright tes
 
 **Target Platform**: Docker (Linux containers) on Raspberry Pi (ARM64), portable to VPS; ingress via Cloudflare Tunnel → Traefik
 
-**Project Type**: Web application — single Next.js full-stack `app` container (+ `db`, optional `worker`)
+**Project Type**: Web application: single Next.js full-stack `app` container (+ `db`, optional `worker`)
 
 **Deployment**: Docker Compose; networks `traefik_network` (external ingress) + `internal` (private); services use `restart: unless-stopped`
 
 **CI/CD**: GitHub Actions on a self-hosted runner
 
-**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file — non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
+**Secrets**: dev uses a local `.env`; prod uses **no** `.env` file: non-sensitive config in GitHub **Variables**, secrets in GitHub **Secrets**, injected into the containers at deploy time. Never committed.
 
 **Observability**: Healthcheck endpoint + structured logging (Pino → stdout JSON) + Docker logs + log rotation
 
@@ -58,16 +58,16 @@ integration, accessibility, responsive, and standalone-production Playwright tes
 
 ### Pre-Design Gate
 
-- **I / IV — Docker portability**: PASS. Uses the existing app and database containers with no host-specific configuration or new runtime dependency.
-- **II / Standard architecture — operational and domain boundaries**: PASS. UI, Server Action, service, schema, and types live in `src/modules/account`; localized route composition remains in `src/app/[locale]`; shared navigation, auth, and i18n stay shared.
-- **V — secrets**: PASS. No new secrets or environment variables; Auth.js session handling remains server-side.
-- **VI / Database rules — persistence and recovery**: PASS. Existing columns only, no migration, no destructive operation, and atomic single-field updates.
-- **VII — minimal stack**: PASS. Uses installed Next.js, React, shadcn/Base UI, Zod, Auth.js, Prisma, next-intl, and Pino; no new package or service is required.
-- **VIII — production readiness and logging**: PASS. Existing healthcheck remains sufficient; sanitized failure categories may be logged without names, emails, form values, or session data.
-- **IX — reproducible CI/CD**: PASS. Existing lint, typecheck, coverage, production build, audit, and E2E commands cover the change.
-- **X — security by default**: PASS. The server derives identity from the session, strictly rejects extra fields, updates only `name`, validates return paths, relies on Server Action origin protections, and reveals no account-existence information.
-- **XI — specification first**: PASS. The clarified spec defines behavior, non-goals, security, abuse cases, and operational impact.
-- **XII — tests and verification**: PASS. Planned unit/component, PostgreSQL integration, accessibility, keyboard, responsive, and production-artifact E2E checks cover the critical authenticated flow.
+- **I / IV: Docker portability**: PASS. Uses the existing app and database containers with no host-specific configuration or new runtime dependency.
+- **II / Standard architecture: operational and domain boundaries**: PASS. UI, Server Action, service, schema, and types live in `src/modules/account`; localized route composition remains in `src/app/[locale]`; shared navigation, auth, and i18n stay shared.
+- **V: secrets**: PASS. No new secrets or environment variables; Auth.js session handling remains server-side.
+- **VI / Database rules: persistence and recovery**: PASS. Existing columns only, no migration, no destructive operation, and atomic single-field updates.
+- **VII: minimal stack**: PASS. Uses installed Next.js, React, shadcn/Base UI, Zod, Auth.js, Prisma, next-intl, and Pino; no new package or service is required.
+- **VIII: production readiness and logging**: PASS. Existing healthcheck remains sufficient; sanitized failure categories may be logged without names, emails, form values, or session data.
+- **IX: reproducible CI/CD**: PASS. Existing lint, typecheck, coverage, production build, audit, and E2E commands cover the change.
+- **X: security by default**: PASS. The server derives identity from the session, strictly rejects extra fields, updates only `name`, validates return paths, relies on Server Action origin protections, and reveals no account-existence information.
+- **XI: specification first**: PASS. The clarified spec defines behavior, non-goals, security, abuse cases, and operational impact.
+- **XII: tests and verification**: PASS. Planned unit/component, PostgreSQL integration, accessibility, keyboard, responsive, and production-artifact E2E checks cover the critical authenticated flow.
 - **Internationalization**: PASS. Routes use locale-aware navigation and all account, validation, pending, and feedback strings come from all three message catalogs.
 
 No gate violations require justification.
@@ -98,7 +98,7 @@ specs/20260720-account-profile-page/
 <!--
   This is the project's standard layout (Next.js App Router + Prisma + Docker),
   per the constitution. Adjust only the paths a feature actually adds or changes.
-  Do NOT split frontend/backend — Next.js combines them in the `app` container
+  Do NOT split frontend/backend: Next.js combines them in the `app` container
   (constitution Principle II). Organize business code by domain under
   src/modules/<domain>/; shared code stays in app/, components/, lib/, and server/.
 -->

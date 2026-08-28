@@ -96,10 +96,18 @@ vi.mock("@/modules/account/security/service", () => ({
 }));
 vi.mock("next-auth/react", () => ({ signOut: vi.fn() }));
 
-import AccountPage from "@/app/[locale]/account/page";
-import AccountDataPage from "@/app/[locale]/account/data/page";
-import AccountDeletedPage from "@/app/[locale]/account-deleted/page";
-import AccountSecurityPage from "@/app/[locale]/account/security/page";
+import AccountPage, {
+  generateMetadata as generateAccountMetadata,
+} from "@/app/[locale]/account/page";
+import AccountDataPage, {
+  generateMetadata as generateAccountDataMetadata,
+} from "@/app/[locale]/account/data/page";
+import AccountDeletedPage, {
+  generateMetadata as generateAccountDeletedMetadata,
+} from "@/app/[locale]/account-deleted/page";
+import AccountSecurityPage, {
+  generateMetadata as generateAccountSecurityMetadata,
+} from "@/app/[locale]/account/security/page";
 
 describe("account route authentication", () => {
   beforeEach(() => {
@@ -140,6 +148,22 @@ describe("account route authentication", () => {
       },
     ]);
     mocks.getServerSession.mockResolvedValue(null);
+  });
+
+  it("prevents all account pages from being indexed", async () => {
+    mocks.getTranslations.mockResolvedValue(() => "Account metadata");
+    const params = Promise.resolve({ locale: "en" });
+    const searchParams = Promise.resolve({});
+    const metadata = await Promise.all([
+      generateAccountMetadata({ params }),
+      generateAccountDataMetadata({ params, searchParams }),
+      generateAccountDeletedMetadata({ params }),
+      generateAccountSecurityMetadata({ params, searchParams }),
+    ]);
+
+    for (const pageMetadata of metadata) {
+      expect(pageMetadata.robots).toEqual({ index: false, follow: false });
+    }
   });
 
   it("keeps the account-deleted action a localized link with shared button styling", async () => {

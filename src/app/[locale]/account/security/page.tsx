@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { noIndexMetadata } from "@/lib/seo";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { readAccountSessionToken } from "@/modules/account/session";
 import { SecuritySessionHeading } from "@/modules/account/security/components/security-session-heading";
@@ -29,7 +30,7 @@ export async function generateMetadata({
     namespace: "Account.security.metadata",
   });
 
-  return { title: t("title"), description: t("description") };
+  return noIndexMetadata({ title: t("title"), description: t("description") });
 }
 
 export default async function AccountSecurityPage({
@@ -38,7 +39,6 @@ export default async function AccountSecurityPage({
 }: AccountSecurityPageProps) {
   const locale = parseLoginLocale((await params).locale);
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "Account" });
   const cookieStore = await cookies();
   const sessionToken = readAccountSessionToken(cookieStore.toString());
 
@@ -47,6 +47,7 @@ export default async function AccountSecurityPage({
   const sessions = await listActiveAccountSessions({ sessionToken });
   if (!sessions) redirect(getAccountSecurityLoginPath(locale));
 
+  const t = await getTranslations({ locale, namespace: "Account" });
   const query = await searchParams;
   const callbackState = parseAccountSecurityCallbackState(query.state);
   const recovered = query.state === "recovered";

@@ -2,7 +2,7 @@
 
 **Feature**: [TypeScript 6 Upgrade](spec.md)
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js `>=24.15.0 <25.0.0`
 - Corepack enabled; `package.json` selects pnpm 11.22.0
@@ -80,8 +80,8 @@ Expected outcomes:
 ## 4. Build the Deployment Targets
 
 ```bash
-docker build --target runner --tag versmedit-ts6-ci:latest --file docker/Dockerfile .
-docker build --target migrator --tag versmedit-ts6-migrate-ci:latest --file docker/Dockerfile .
+docker build --target runner --tag "${PROJECT_NAME}-ts6-ci:latest" --file docker/Dockerfile .
+docker build --target migrator --tag "${PROJECT_NAME}-ts6-migrate-ci:latest" --file docker/Dockerfile .
 ```
 
 Expected outcomes:

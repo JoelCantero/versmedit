@@ -31,7 +31,9 @@ test("serves localized pages with strict CSP and request correlation", async ({
 
   await page.goto("/es");
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
-  const brandBox = await page.getByText("Nextself", { exact: true }).boundingBox();
+  const brandBox = await page
+    .getByText(process.env.PROJECT_NAME ?? "playwright", { exact: true })
+    .boundingBox();
   const navigationBox = await page
     .getByRole("navigation", { name: "Navegación de cuenta" })
     .boundingBox();

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache, Suspense } from "react";
 
 import { renderEmailPresentation } from "../../../../src/lib/email/presentation";
 import { PreviewInspector } from "../../../components/preview-inspector";
@@ -12,6 +13,8 @@ import {
 interface DetailPageProps {
   params: Promise<{ locale: string; variant: string }>;
 }
+
+const renderPreviewEmail = cache(renderEmailPresentation);
 
 export const dynamicParams = false;
 
@@ -26,7 +29,7 @@ export async function generateMetadata({
   const entry = findPreviewEntry(locale, variant);
   if (!entry) return { title: "Proof not found" };
 
-  const rendered = await renderEmailPresentation(entry.request);
+  const rendered = await renderPreviewEmail(entry.request);
   return { title: rendered.subject };
 }
 
@@ -35,7 +38,7 @@ export default async function PreviewDetailPage({ params }: DetailPageProps) {
   const entry = findPreviewEntry(locale, variant);
   if (!entry) notFound();
 
-  const rendered = await renderEmailPresentation(entry.request);
+  const rendered = await renderPreviewEmail(entry.request);
   const proofNumber = previewManifest.findIndex(({ key }) => key === entry.key) + 1;
   const localeEntries = previewManifest.filter(
     (candidate) => candidate.variant === entry.variant,
@@ -75,7 +78,9 @@ export default async function PreviewDetailPage({ params }: DetailPageProps) {
         </nav>
       </header>
 
-      <PreviewInspector html={rendered.html} text={rendered.text} />
+      <Suspense fallback={null}>
+        <PreviewInspector html={rendered.html} text={rendered.text} />
+      </Suspense>
     </main>
   );
 }

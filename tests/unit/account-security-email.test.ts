@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestEmailBrand } from "../helpers/email-brand";
 
 const mocks = vi.hoisted(() => ({
-  projectName: "VersMedit",
+  projectName: "Example Workspace",
   brand: undefined as ReturnType<
     typeof import("../helpers/email-brand").createTestEmailBrand
   > | undefined,
@@ -28,24 +28,24 @@ import {
   sendAccountSecurityEmail,
 } from "@/modules/account/security/email";
 
-const brand = createTestEmailBrand("VersMedit");
+const brand = createTestEmailBrand("Example Workspace");
 mocks.brand = brand;
 
 const localeCopy = {
   en: {
-    subject: "Confirm your VersMedit account security action",
+    subject: "Confirm your Example Workspace account security action",
     introduction:
       "Authenticate with this link to return to Account Security. You will need to choose and confirm the action again.",
     action: "Continue to Account Security",
   },
   es: {
-    subject: "Confirma una acción de seguridad en tu cuenta de VersMedit",
+    subject: "Confirma una acción de seguridad en tu cuenta de Example Workspace",
     introduction:
       "Autentícate con este enlace para volver a Seguridad de la cuenta. Tendrás que elegir y confirmar la acción de nuevo.",
     action: "Ir a Seguridad de la cuenta",
   },
   ca: {
-    subject: "Confirma una acció de seguretat al teu compte de VersMedit",
+    subject: "Confirma una acció de seguretat al teu compte de Example Workspace",
     introduction:
       "Autentica't amb aquest enllaç per tornar a Seguretat del compte. Hauràs de tornar a triar i confirmar l'acció.",
     action: "Ves a Seguretat del compte",
@@ -54,7 +54,7 @@ const localeCopy = {
 
 describe("account security email", () => {
   beforeEach(() => {
-    mocks.projectName = "VersMedit";
+    mocks.projectName = "Example Workspace";
     mocks.sendTransactionalEmail.mockReset();
     mocks.sendTransactionalEmail.mockResolvedValue({
       accepted: true,
@@ -87,7 +87,7 @@ describe("account security email", () => {
       expect(message.text).toContain(copy.introduction);
       expect(message.text).toContain(expectedUrl);
       expect(message.html).toMatch(/<!doctype html/i);
-      expect(message.html).toContain("VersMedit");
+      expect(message.html).toContain("Example Workspace");
       expect(message.html).toContain("support@example.test");
       expect(message.html).toContain(`href="${expectedUrl}"`);
       expect(message.text).not.toContain("person@example.test");
@@ -95,7 +95,7 @@ describe("account security email", () => {
   );
 
   it("escapes branded HTML content and never interpolates the recipient", async () => {
-    const unsafeBrand = createTestEmailBrand("<VersMedit & Co>");
+    const unsafeBrand = createTestEmailBrand("<Example Workspace & Co>");
     const message = await buildAccountSecurityEmail(
       {
         recipient: "person@example.test",
@@ -106,11 +106,11 @@ describe("account security email", () => {
       unsafeBrand,
     );
 
-    expect(message.subject).toContain("<VersMedit & Co>");
+    expect(message.subject).toContain("<Example Workspace & Co>");
     expect(message.html).toContain("Autentica&#x27;t");
     expect(message.html).not.toContain("Autentica't");
     expect(message.html).not.toContain("person@example.test");
-    expect(message.html).not.toContain("<VersMedit & Co>");
+    expect(message.html).not.toContain("<Example Workspace & Co>");
   });
 
   it.each(Object.keys(localeCopy) as Array<keyof typeof localeCopy>)(

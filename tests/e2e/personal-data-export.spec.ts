@@ -298,7 +298,7 @@ test("retries a rejected delivery only after an explicit action", async ({
   await page.goto("/account/data");
   await page.getByRole("button", { name: "Request data export" }).click();
   const alert = getDataExportPanel(page).getByRole("alert");
-  await expect(alert).toHaveText("We could not send the confirmation. Try again.");
+  await expect(alert).toHaveText("Couldn’t send the confirmation. Try again.");
   await expect(alert).toBeFocused();
   await expect
     .poll(async () =>
@@ -341,7 +341,7 @@ test("preserves the previously delivered link when a newer delivery fails", asyn
     .getByRole("button", { name: "Request new confirmation" })
     .click();
   await expect(getDataExportPanel(page).getByRole("alert")).toHaveText(
-    "We could not send the confirmation. Try again.",
+    "Couldn’t send the confirmation. Try again.",
   );
 
   await page.goto(
@@ -583,7 +583,7 @@ test("maps timeout and oversize failures to one retryable state without a partia
     expect(response.status()).toBe(503);
     expect(response.headers()["content-disposition"]).toBeUndefined();
     const alert = getDataExportPanel(page).getByRole("alert");
-    await expect(alert).toHaveText("We could not prepare your export. Try again.");
+    await expect(alert).toHaveText("Couldn’t prepare your export. Try again.");
     await expect(alert).toBeFocused();
     await page.waitForTimeout(150);
     expect(attempts).toBe(1);

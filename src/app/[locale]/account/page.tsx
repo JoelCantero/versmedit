@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
+import { noIndexMetadata } from "@/lib/seo";
 import { updateProfile } from "@/modules/account/actions/update-profile";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { ProfileForm } from "@/modules/account/components/profile-form";
@@ -23,16 +24,15 @@ export async function generateMetadata({ params }: AccountPageProps): Promise<Me
   const locale = parseLoginLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: "Account.page.metadata" });
 
-  return {
+  return noIndexMetadata({
     title: t("title"),
     description: t("description"),
-  };
+  });
 }
 
 export default async function AccountPage({ params }: AccountPageProps) {
   const locale = parseLoginLocale((await params).locale);
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "Account" });
   const session = await getServerSession(authOptions);
   const sessionUserId = getSessionUserId(session);
 
@@ -41,6 +41,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
     redirect(`${getLoginPathForLocale(locale)}?callbackUrl=${encodeURIComponent(callbackPath)}`);
   }
 
+  const t = await getTranslations({ locale, namespace: "Account" });
   const profile = await getCurrentUserProfile(sessionUserId);
 
   return (

@@ -1,12 +1,10 @@
 # Quickstart Validation: Global Legal Footer
 
-## Purpose
+## Verify the shared legal footer
 
-Use this guide after implementation to prove the global footer against the feature specification,
-the [UI contract](contracts/global-footer-ui.md), and the static presentation rules in
-[data-model.md](data-model.md).
+Use this guide after implementation to verify that the shared legal footer meets the feature specification, the [UI contract](contracts/global-footer-ui.md), and the static presentation rules in [data-model.md](data-model.md).
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and pnpm 11.x
 - Docker with Docker Compose available for database-backed E2E setup

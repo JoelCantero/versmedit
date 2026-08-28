@@ -735,7 +735,7 @@ test("handles stale proof and a provider delivery failure before a safe retry", 
 
   const alert = dialog.getByRole("alert");
   await expect(alert).toHaveText(
-    "We could not send the link. No sessions changed. Try again.",
+    "Couldn’t send the link. No sessions changed. Try again.",
   );
   await expect(alert).toBeFocused();
   expect(issuanceShape).toEqual({

@@ -1,8 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.6.2 → 1.7.0 (governance change)
-Ratified: 2026-07-10 | Last amended: 2026-07-19
+Version change: 1.8.0 → 1.8.1 (route-classification clarification)
+Ratified: 2026-07-10 | Last amended: 2026-08-27
+
+1.8.1 — Classified privacy, terms, authentication, account, account-deleted, and transient error
+pages as non-indexable by default. Required `X-Robots-Tag` for non-HTML API responses and clarified
+that `robots.txt` must not prevent crawlers from reading an HTML page's `noindex` directive.
+
+1.8.0 — Added Principle XIII, requiring every new or changed page to declare its indexing class
+and implement the corresponding canonical, hreflang, social metadata, sitemap, robots, and
+verification behavior. Clarified that crawler directives never replace authorization.
 
 1.7.0 — Changed feature identifiers to `YYYYMMDD-english-feature-name`, matching the configured
 date-based workflow. English suffixes must be concise and unique when multiple features are created
@@ -55,7 +63,7 @@ locally or in CI; the deploy pipeline handles build + deploy).
 Architecture: default layer-based structure; grow into feature modules; shared stays shared.
 1.0.0 — Initial ratification of the principles and sections listed below.
 
-Principle set (template's 5 generic placeholders → 12 concrete principles):
+Principle set (template's 5 generic placeholders → 13 concrete principles):
   I.    Docker-First, Portable by Default
   II.   Separate by Operational Responsibility, Not by Artificial Layers
   III.  Reverse Proxy and Network Isolation Are Mandatory
@@ -68,6 +76,7 @@ Principle set (template's 5 generic placeholders → 12 concrete principles):
   X.    Security by Default
   XI.   Specs Before Implementation
   XII.  Tests and Verification Are Required
+  XIII. Public Discoverability and Indexing Must Be Explicit
 
 Added sections:
   - Purpose
@@ -84,6 +93,8 @@ Removed sections:
   - Generic [SECTION_2_NAME] / [SECTION_3_NAME] template placeholders (superseded)
 
 Template sync status:
+  ✅ Runtime SpecKit workflows — consume the constitution and must apply Principle XIII when
+     generating specs, plans, and tasks
   ✅ .specify/templates/plan-template.md — synchronized with domain modules under src/modules
   ✅ .specify/templates/spec-template.md — added Non-Goals, Security & Privacy Implications, Operational Impact (Principles X, XI); updated for the logging change (structured-logging Observability prompt + Log hygiene bullet)
   ✅ .specify/templates/tasks-template.md — TypeScript/domain paths; automated tests required unless the plan explicitly justifies manual-only verification
@@ -414,6 +425,46 @@ tests alone are insufficient.
 **Rationale**: Verification is what converts "it works on my machine" into a claim that can survive
 deployment to constrained, unattended infrastructure.
 
+### XIII. Public Discoverability and Indexing Must Be Explicit
+
+Every new or changed user-facing page MUST be classified in its specification as one of: public
+and indexable; public but non-indexable; or private/transient. The implementation plan and tasks
+MUST carry that classification into concrete metadata, crawler directives, and verification.
+
+Requirements for public indexable pages:
+
+- Provide a unique localized title and description.
+- Provide an absolute canonical URL derived from validated environment configuration.
+- Provide reciprocal `hreflang` alternatives for every supported locale and `x-default` when the
+  application has a default locale.
+- Provide Open Graph metadata and a representative social image; Twitter metadata SHOULD be
+  provided when the application supports social sharing.
+- Include only canonical public URLs in the generated sitemap, with localized alternatives when
+  applicable.
+
+Requirements for public non-indexable and private/transient pages:
+
+- Emit explicit `noindex` metadata; sensitive or disposable flows SHOULD also disable following.
+- Exclude the page from every sitemap.
+- Non-HTML routes such as APIs MUST emit an equivalent `X-Robots-Tag` response header.
+- Generated `robots.txt` MAY block non-HTML route families such as APIs, but MUST NOT block an HTML
+  page when the crawler needs to read that page's `noindex` directive.
+- Authentication, authorization, and server-side access checks remain mandatory; `robots.txt` and
+  metadata MUST NOT be treated as security controls.
+
+For this baseline, only the localized home page is indexable by default. Privacy, terms, login,
+signup, login errors, account-deleted, and all authenticated account pages MUST be non-indexable in
+every locale. Product-specific public pages MAY be classified as indexable by their specification.
+
+Shared SEO behavior MUST be centralized so locale prefixing, canonical origins, and route
+classification cannot drift between pages. Origins, product names, and public URLs MUST NOT be
+hardcoded. Changes to page routing or metadata MUST include automated assertions for the relevant
+metadata, sitemap, and robots behavior, plus a successful production build.
+
+**Rationale**: Search indexing and link previews are externally observable product behavior.
+Explicit classification prevents private or low-value pages from entering search results while
+ensuring every intended public page has consistent localized discovery metadata.
+
 ## Standard Project Architecture
 
 The default architecture for self-hosted web apps is:
@@ -593,4 +644,4 @@ equivalent, documented exception).
 **Scope**: Self-hosted Docker web applications for Raspberry Pi, VPS, and small production
 deployments.
 
-**Version**: 1.7.0 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-07-19
+**Version**: 1.8.1 | **Ratified**: 2026-07-10 | **Last Amended**: 2026-08-27

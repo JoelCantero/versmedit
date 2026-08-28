@@ -281,7 +281,7 @@ Implementation tasks T056-T058 can run together because list, dialog, and page/n
 
 The moderated 20-participant usability measurement in `specs/20260821-account-session-management/quickstart.md` is a post-release KPI, not a merge-blocking implementation task. Record only the aggregate, non-identifying results at the documented path after release.
 
-## Notes
+## Implementation notes
 
 - No task adds a runtime dependency, provider, worker, queue, cache, service, port, network, volume, secret, or environment variable.
 - Security reauthentication consumes its own token directly; it does not add an Auth.js provider or create a session/cookie.

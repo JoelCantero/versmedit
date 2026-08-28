@@ -1,7 +1,7 @@
 "use client";
 
 import { AlignLeft, Code2, PanelsTopLeft } from "lucide-react";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
   ViewportControl,
@@ -15,9 +15,36 @@ interface PreviewInspectorProps {
   text: string;
 }
 
+function parseMode(value: string | null): InspectionMode {
+  return value === "source" || value === "text" ? value : "display";
+}
+
+function parseViewport(value: string | null): PreviewViewport {
+  return value === "mobile" ? value : "desktop";
+}
+
 export function PreviewInspector({ html, text }: PreviewInspectorProps) {
-  const [mode, setMode] = useState<InspectionMode>("display");
-  const [viewport, setViewport] = useState<PreviewViewport>("desktop");
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = parseMode(searchParams.get("mode"));
+  const viewport = parseViewport(searchParams.get("viewport"));
+
+  function updatePreview(
+    nextMode: InspectionMode,
+    nextViewport: PreviewViewport = viewport,
+  ) {
+    const params = new URLSearchParams(searchParams);
+
+    if (nextMode === "display") params.delete("mode");
+    else params.set("mode", nextMode);
+
+    if (nextViewport === "desktop") params.delete("viewport");
+    else params.set("viewport", nextViewport);
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   return (
     <section className="inspector" aria-label="Email inspector">
@@ -31,7 +58,7 @@ export function PreviewInspector({ html, text }: PreviewInspectorProps) {
             type="button"
             className="segment-button"
             aria-pressed={mode === "display"}
-            onClick={() => setMode("display")}
+            onClick={() => updatePreview("display")}
           >
             <PanelsTopLeft aria-hidden="true" size={16} strokeWidth={1.8} />
             <span>Display</span>
@@ -40,7 +67,7 @@ export function PreviewInspector({ html, text }: PreviewInspectorProps) {
             type="button"
             className="segment-button"
             aria-pressed={mode === "source"}
-            onClick={() => setMode("source")}
+            onClick={() => updatePreview("source")}
           >
             <Code2 aria-hidden="true" size={16} strokeWidth={1.8} />
             <span>HTML source</span>
@@ -49,7 +76,7 @@ export function PreviewInspector({ html, text }: PreviewInspectorProps) {
             type="button"
             className="segment-button"
             aria-pressed={mode === "text"}
-            onClick={() => setMode("text")}
+            onClick={() => updatePreview("text")}
           >
             <AlignLeft aria-hidden="true" size={16} strokeWidth={1.8} />
             <span>Plain text</span>
@@ -57,7 +84,10 @@ export function PreviewInspector({ html, text }: PreviewInspectorProps) {
         </div>
 
         {mode === "display" ? (
-          <ViewportControl value={viewport} onChange={setViewport} />
+          <ViewportControl
+            value={viewport}
+            onChange={(nextViewport) => updatePreview(mode, nextViewport)}
+          />
         ) : null}
       </div>
 

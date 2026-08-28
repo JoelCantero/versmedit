@@ -29,7 +29,7 @@
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
-## Notes
+## Checklist notes
 
 - Validation iteration 1 passed all 16 quality criteria.
 - An independent read-only audit confirmed direct permanent deletion, complete issue 37 data coverage, and no feature-level backup or retention requirements.

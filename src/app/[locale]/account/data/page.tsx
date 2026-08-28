@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
+import { noIndexMetadata } from "@/lib/seo";
 import { AccountNavigation } from "@/modules/account/components/account-navigation";
 import { DataExportPanel } from "@/modules/account/data-export/components/data-export-panel";
 import {
@@ -30,7 +31,7 @@ interface AccountDataPageProps {
 export async function generateMetadata({ params }: AccountDataPageProps): Promise<Metadata> {
   const locale = parseLoginLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: "Account.data.metadata" });
-  return { title: t("title"), description: t("description") };
+  return noIndexMetadata({ title: t("title"), description: t("description") });
 }
 
 export default async function AccountDataPage({
@@ -39,7 +40,6 @@ export default async function AccountDataPage({
 }: AccountDataPageProps) {
   const locale = parseLoginLocale((await params).locale);
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "Account" });
   const session = await getServerSession(authOptions);
   const sessionUserId = getSessionUserId(session);
   if (!sessionUserId) redirect(getAccountDeletionLoginPath(locale));
@@ -52,6 +52,7 @@ export default async function AccountDataPage({
     redirect(getAccountDeletionLoginPath(locale));
   }
 
+  const t = await getTranslations({ locale, namespace: "Account" });
   const query = await searchParams;
   const intent = query.intent === "delete";
   const invalidState = query.state === "invalid_link" || query.state === "session_conflict";

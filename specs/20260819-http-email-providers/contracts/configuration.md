@@ -1,6 +1,6 @@
 # Contract: Runtime Email Configuration
 
-## Scope
+## Provider configuration boundary
 
 This is a server-only startup contract. No browser bundle, public request, route parameter, or message input may select a provider, endpoint, sender, or credential.
 

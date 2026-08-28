@@ -1,6 +1,6 @@
 # Data Model: Permanent Account Deletion
 
-## Overview
+## Data model overview
 
 The account remains rooted in the existing `User` record. This feature adds no deletion ledger,
 tombstone, recovery envelope, or persistent intent record. It makes two additive schema changes:

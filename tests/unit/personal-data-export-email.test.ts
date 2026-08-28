@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestEmailBrand } from "../helpers/email-brand";
 
 const mocks = vi.hoisted(() => ({
-  projectName: "VersMedit",
+  projectName: "Example Workspace",
   brand: undefined as ReturnType<
     typeof import("../helpers/email-brand").createTestEmailBrand
   > | undefined,
@@ -28,27 +28,27 @@ import {
   sendPersonalDataExportEmail,
 } from "@/modules/account/data-export/email";
 
-const brand = createTestEmailBrand("VersMedit");
+const brand = createTestEmailBrand("Example Workspace");
 mocks.brand = brand;
 
 const localeCopy = {
   en: {
-    subject: "Confirm your VersMedit personal data export",
+    subject: "Confirm your Example Workspace personal data export",
     action: "Confirm data export",
   },
   es: {
-    subject: "Confirma la exportación de tus datos personales de VersMedit",
+    subject: "Confirma la exportación de tus datos personales de Example Workspace",
     action: "Confirmar la exportación de datos",
   },
   ca: {
-    subject: "Confirma l'exportació de les teves dades personals de VersMedit",
+    subject: "Confirma l'exportació de les teves dades personals de Example Workspace",
     action: "Confirma l'exportació de dades",
   },
 } as const;
 
 describe("personal data export email", () => {
   beforeEach(() => {
-    mocks.projectName = "VersMedit";
+    mocks.projectName = "Example Workspace";
     mocks.sendTransactionalEmail.mockReset();
     mocks.sendTransactionalEmail.mockResolvedValue({ accepted: true });
   });
@@ -76,7 +76,7 @@ describe("personal data export email", () => {
       expect(message.text).toContain(copy.action);
       expect(message.text).toContain(expectedUrl);
       expect(message.html).toMatch(/<!doctype html/i);
-      expect(message.html).toContain("VersMedit");
+      expect(message.html).toContain("Example Workspace");
       expect(message.html).toContain("support@example.test");
       expect(message.html).toContain(`href="${expectedUrl.replace("&", "&amp;")}"`);
       expect(message.subject).not.toContain("private@example.test");
@@ -85,7 +85,7 @@ describe("personal data export email", () => {
   );
 
   it("escapes project content in HTML and submits through the common provider", async () => {
-    mocks.projectName = "<VersMedit & Co>";
+    mocks.projectName = "<Example Workspace & Co>";
     const unsafeBrand = createTestEmailBrand(mocks.projectName);
     mocks.brand = unsafeBrand;
     const options = {
@@ -96,8 +96,8 @@ describe("personal data export email", () => {
     };
 
     const message = await buildPersonalDataExportEmail(options, unsafeBrand);
-    expect(message.html).not.toContain("<VersMedit & Co>");
-    expect(message.html).toContain("&lt;VersMedit &amp; Co&gt;");
+    expect(message.html).not.toContain("<Example Workspace & Co>");
+    expect(message.html).toContain("&lt;Example Workspace &amp; Co&gt;");
     await sendPersonalDataExportEmail(options);
     expect(mocks.sendTransactionalEmail).toHaveBeenCalledWith(
       message,

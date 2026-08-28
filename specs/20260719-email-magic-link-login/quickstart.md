@@ -1,6 +1,6 @@
 # Quickstart: Validate Email Magic Link Login
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and pnpm 11
 - Docker Compose

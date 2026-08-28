@@ -76,6 +76,7 @@ export function EmailDocument({
                 alt={`${brand.productName} logo`}
                 src={brand.logoUrl}
                 width="160"
+                height="48"
                 style={logoStyle}
               />
             ) : null}

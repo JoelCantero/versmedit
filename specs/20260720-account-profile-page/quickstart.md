@@ -1,6 +1,6 @@
 # Quickstart: Validate the Account Profile Page
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and the repository-pinned pnpm version
 - Docker Desktop/Engine with Compose
@@ -85,7 +85,7 @@ compliance, coverage, audit, build, and production E2E.
 pnpm test:e2e
 ```
 
-The existing E2E harness starts an isolated PostgreSQL container, applies existing migrations, builds the standalone Next.js artifact, and runs desktop Chromium plus a 320×900 mobile viewport.
+Run the existing end-to-end (E2E) harness. It starts an isolated PostgreSQL container and applies existing migrations. It then builds the standalone Next.js artifact and runs Chromium on desktop and at a 320×900 mobile viewport.
 
 Required account scenarios:
 

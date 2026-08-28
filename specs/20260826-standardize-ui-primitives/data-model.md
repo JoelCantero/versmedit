@@ -4,7 +4,7 @@
 
 **Date**: 2026-08-27
 
-## Scope
+## Primitive standardization boundary
 
 This feature introduces no persistent entity, Prisma model, migration, stored value, API payload,
 cookie, or environment variable. The models below describe implementation-time audit records and

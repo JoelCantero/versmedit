@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -23,6 +23,14 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+};
 
 export async function generateMetadata({
   params,
@@ -80,8 +88,12 @@ export default async function LocaleLayout({
         >
           {/* Messages/locale are inherited from src/i18n/request.ts. */}
           <NextIntlClientProvider>
-            <AppHeader locale={locale} />
-            <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+            <AppHeader locale={locale} projectName={BRAND.productName} />
+            <div
+              id="main-content"
+              tabIndex={-1}
+              className="flex flex-1 flex-col bg-zinc-50 outline-none dark:bg-black"
+            >
               {children}
             </div>
             <AppFooter locale={locale} supportEmail={BRAND.supportEmail} />

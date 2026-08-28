@@ -252,7 +252,7 @@ After Phase 2, separate developers may prepare tests and isolated files for each
 - src/messages/en.json, src/messages/es.json, and src/messages/ca.json are touched in Foundation and US4.
 - tests/unit/account-action.test.ts and tests/integration/account-profile.test.ts span multiple stories.
 
-## Notes
+## Implementation notes
 
 - `[P]` means different files and no incomplete-task dependency at that point, not merely that work is conceptually separable.
 - No task may add a Prisma migration, user/profile record, environment variable, secret, container, volume, external service, upload control, or unavailable account section.

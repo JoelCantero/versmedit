@@ -50,7 +50,9 @@ test("renders authenticated profile, supports update+reload, and checks accessib
   });
 
   await page.goto("/account");
-  await expect(page.getByText("Nextself", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(process.env.PROJECT_NAME ?? "playwright", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Account navigation" })).toBeVisible();
   await page.getByRole("button", { name: "Account" }).click();
   await expect(page.getByRole("link", { name: "Account" })).toHaveAttribute(

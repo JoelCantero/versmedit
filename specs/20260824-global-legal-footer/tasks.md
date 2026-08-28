@@ -225,7 +225,7 @@ content, or authentication behavior.
 3. Each branch runs its focused tests before merge; reconcile additions to the two shared test files.
 4. Run Phase 6 once both stories are integrated.
 
-## Notes
+## Implementation notes
 
 - `[P]` tasks touch different files within the same ready phase.
 - `[US1]`, `[US2]`, and `[US3]` provide requirement-to-task traceability.

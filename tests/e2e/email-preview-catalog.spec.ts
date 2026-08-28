@@ -67,6 +67,7 @@ test.describe("isolated email preview catalogue", () => {
       );
 
       await page.getByRole("button", { name: "HTML source" }).click();
+      await expect(page).toHaveURL(`${entry.path}?mode=source`);
       await expect(page.getByTestId("html-source")).toContainText(/<!DOCTYPE html/i);
 
       await page.getByRole("button", { name: "Plain text" }).click();
@@ -76,6 +77,7 @@ test.describe("isolated email preview catalogue", () => {
 
       await page.getByRole("button", { name: "Display" }).click();
       await page.getByRole("button", { name: "Mobile width" }).click();
+      await expect(page).toHaveURL(`${entry.path}?viewport=mobile`);
       await expect(page.getByTestId("preview-viewport")).toHaveAttribute(
         "data-viewport",
         "mobile",

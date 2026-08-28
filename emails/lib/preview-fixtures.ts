@@ -6,7 +6,7 @@ import type {
 import { validateEmailBrand } from "../../src/lib/email/presentation";
 
 const fictionalPreviewBrand = validateEmailBrand({
-  productName: "Versmedit",
+  productName: "Example Workspace",
   canonicalOrigin: "https://app.example.test",
   primaryColor: "#0057B8",
   supportEmail: "support@example.test",

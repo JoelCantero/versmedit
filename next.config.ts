@@ -21,6 +21,10 @@ const securityHeaders = [
   },
 ];
 
+const noIndexHeaders = [
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+];
+
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   logging: {
@@ -37,7 +41,10 @@ const nextConfig: NextConfig = {
   // bundler cannot trace and would break in the standalone output.
   serverExternalPackages: ["pino", "pino-pretty"],
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/api/:path*", headers: noIndexHeaders },
+    ];
   },
 };
 

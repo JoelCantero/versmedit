@@ -6,7 +6,7 @@
 
 **Note**: This template is filled in by the `/speckit-plan` skill; its definition describes the execution workflow.
 
-## Summary
+## Implementation summary
 
 Add a protected, localized Data & Privacy page where the current account holder can request fresh
 email authentication when necessary and permanently delete the account after a separate accessible

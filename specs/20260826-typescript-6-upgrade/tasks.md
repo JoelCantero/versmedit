@@ -218,7 +218,7 @@ Run T016 after T015; run T017 only after US1 and US2 supply final evidence.
 3. After T007, distribute T008-T011 across separate workers or terminals with isolated outputs.
 4. Rejoin for T012-T014, T017, and the final gates.
 
-## Notes
+## Implementation notes
 
 - `[P]` tasks use distinct generated outputs or files and have no incomplete dependency.
 - Story labels provide direct traceability to the prioritized scenarios in [spec.md](spec.md).

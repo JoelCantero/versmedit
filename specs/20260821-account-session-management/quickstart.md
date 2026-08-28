@@ -1,6 +1,6 @@
 # Quickstart: Validate Active Session Management
 
-## Prerequisites
+## Validation prerequisites
 
 - Node.js 24 LTS and repository-pinned pnpm 11.22.0
 - Docker Desktop/Engine with Compose running
@@ -58,10 +58,10 @@ Expected outcomes from [data-model.md](./data-model.md),
 3. The adapter uses one user advisory lock, explicit `createdAt` null-first oldest ordering, one
    captured time for new `createdAt`/`authenticatedAt`, pre-insert eviction, and transaction rollback
    without calling the unhardened creator.
-4. Security routes map canonical-origin, CSRF, authentication, stale-auth, provider, rate-limit,
+4. Security routes map canonical-origin, cross-site request forgery (CSRF), authentication, stale-auth, provider, rate-limit,
    completed/no-op, transaction-failure, and callback outcomes to the documented generic contract;
    callback success updates one existing session and never creates a session/cookie.
-   Top-level callback GETs succeed without an HTTP `Origin` header when their effective URL is
+   Top-level callback GETs succeed without a Hypertext Transfer Protocol (HTTP) `Origin` header when their effective URL is
    canonical, and return `421` for mismatched effective scheme/host/port.
 5. Current is pinned, other rows use immutable `createdAt` newest-first order, only-current disables
    bulk, mutable `authenticatedAt` never renders, and no forbidden metadata/visible selector appears.
@@ -143,13 +143,13 @@ Expected outcome: every feature artifact validates and every implementation task
 registered `after_implement` hooks then run compliance and the local quality gate; CI repeats the
 authoritative checks.
 
-## Production-Artifact E2E
+## Production-artifact end-to-end tests
 
 ```bash
 pnpm test:e2e
 ```
 
-The existing harness starts isolated PostgreSQL and controlled HTTP email-provider fixtures,
+The existing end-to-end (E2E) harness starts isolated PostgreSQL and controlled HTTP email-provider fixtures,
 applies migrations, builds the standalone artifact, and runs desktop Chromium plus 320 x 900 mobile.
 
 Required journeys:

@@ -289,7 +289,7 @@ Task T044: Generic-confirmation template
 
 ---
 
-## Notes
+## Implementation notes
 
 - No task adds a Prisma model, migration, queue, worker, service, route, volume, port, or provider redesign.
 - Presentation receives no recipient, provider credential, persistence handle, logger, or caller-provided HTML/plain text.

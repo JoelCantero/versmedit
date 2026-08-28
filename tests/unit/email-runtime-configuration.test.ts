@@ -19,16 +19,16 @@ function between(source: string, start: string, end: string): string {
 }
 
 describe("email runtime configuration", () => {
-  it("forwards only public app branding to the opt-in local preview", async () => {
+  it("always forwards only public app branding to the local preview", async () => {
     const [packageJson, previewConfig, previewFixtures] = await Promise.all([
       readFile("package.json", "utf8"),
       readFile("emails/next.config.ts", "utf8"),
       readFile("emails/lib/preview-fixtures.ts", "utf8"),
     ]);
 
-    expect(packageJson).toContain("EMAIL_PREVIEW_USE_APP_BRAND=true");
+    expect(packageJson).not.toContain("EMAIL_PREVIEW_USE_APP_BRAND");
     for (const [previewField, appField] of Object.entries({
-      EMAIL_PREVIEW_PROJECT_NAME: "PROJECT_NAME",
+      PROJECT_NAME: "PROJECT_NAME",
       EMAIL_PREVIEW_BRAND_COLOR: "BRAND_COLOR",
       EMAIL_PREVIEW_SUPPORT_EMAIL: "SUPPORT_EMAIL",
       EMAIL_PREVIEW_LOGO_URL: "MAIL_LOGO_URL",

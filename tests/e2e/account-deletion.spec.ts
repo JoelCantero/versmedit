@@ -42,11 +42,11 @@ const localeTargets = [
     cancel: "Cancel",
     continue: "Continue",
     sendLink: "Send fresh link",
-    reauthError: "We could not send the link. Try again.",
+    reauthError: "Couldn’t send the link. Try again.",
     dialogTitle: "Permanently delete your account?",
     confirmTitle: "Final confirmation",
     confirm: "Permanently delete account",
-    deletionError: "We could not delete the account. Try again.",
+    deletionError: "Couldn’t delete the account. Try again.",
     completion: "Account deleted",
     home: "Return home",
     close: "Close dialog",
@@ -601,7 +601,7 @@ test("rolls back a database failure, restores controls, and deletes on retry", a
     await page.getByRole("button", { name: "Continue" }).click();
     await page.getByRole("button", { name: "Permanently delete account" }).click();
     const alert = page.getByRole("alert");
-    await expect(alert).toHaveText("We could not delete the account. Try again.");
+    await expect(alert).toHaveText("Couldn’t delete the account. Try again.");
     await expect(alert).toBeFocused();
     await expect(readAccountGraph(seeded)).resolves.toEqual(before);
   } finally {
@@ -656,7 +656,7 @@ test("blocks dismissal and duplicate controls while final deletion is pending", 
   await page.getByRole("button", { name: "Permanently delete account" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toHaveAttribute("aria-busy", "true");
-  await expect(page.getByRole("status")).toHaveText("Deleting account...");
+  await expect(page.getByRole("status")).toHaveText("Deleting account…");
   await expect(page.getByRole("button", { name: "Cancel" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Close dialog" })).toHaveCount(0);
   await expect(
@@ -929,7 +929,7 @@ test("recovers a committed deletion after the response is lost without another P
   await page.getByRole("button", { name: "Delete account" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Permanently delete account" }).click();
-  await expect(page.getByText("Checking whether deletion completed...")).toBeVisible();
+  await expect(page.getByText("Checking whether deletion completed…")).toBeVisible();
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
 
   await expect(page).toHaveURL(`${appUrl}/account-deleted`);
@@ -963,12 +963,12 @@ test("does not report success when a lost request did not commit", async ({
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Permanently delete account" }).click();
   await expect(page.getByRole("status")).toHaveText(
-    "Checking whether deletion completed...",
+    "Checking whether deletion completed…",
   );
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
 
   await expect(page.getByRole("alert")).toHaveText(
-    "We could not delete the account. Try again.",
+    "Couldn’t delete the account. Try again.",
   );
   await expect(page.getByRole("alert")).toBeFocused();
   expect(deletionPosts).toBe(1);

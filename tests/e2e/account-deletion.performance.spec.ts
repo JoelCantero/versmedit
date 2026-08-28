@@ -183,7 +183,7 @@ async function runSample({
     await confirm.click();
     if (rollback) {
       await expect(page.getByRole("alert")).toHaveText(
-        "We could not delete the account. Try again.",
+        "Couldn’t delete the account. Try again.",
       );
     } else {
       await expect(

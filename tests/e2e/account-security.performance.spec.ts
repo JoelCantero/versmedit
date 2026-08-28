@@ -24,7 +24,7 @@ const warmupCount = 10;
 const sampleCount = 100;
 const latencyBudgetMs = 2_000;
 const recoverableErrorMessage =
-  "We could not update your sessions. No sessions changed. Review the list and try again.";
+  "Couldn’t update your sessions. No sessions changed. Review the list and try again.";
 const databaseImage =
   "postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193";
 

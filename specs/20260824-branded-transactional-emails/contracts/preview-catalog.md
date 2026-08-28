@@ -16,7 +16,7 @@ delivery boundary.
 
 ```json
 {
-  "email:dev": "EMAIL_PREVIEW_USE_APP_BRAND=true NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
+  "email:dev": "NEXT_TELEMETRY_DISABLED=1 next dev emails --hostname 127.0.0.1 --port 3001"
 }
 ```
 
@@ -26,8 +26,8 @@ Expected behavior:
 - listens on loopback only at `http://127.0.0.1:3001`;
 - starts without `.env`, Docker, database, authentication, provider credentials, or Internet;
 - when the repository `.env` exists, reads only `PROJECT_NAME`, `BRAND_COLOR`, `SUPPORT_EMAIL`,
-  and `MAIL_LOGO_URL`, validates them through the production brand contract, and exposes them under
-  preview-only names;
+  and `MAIL_LOGO_URL`, validates them through the production brand contract, and uses
+  `PROJECT_NAME` directly while exposing the remaining values under preview-only names;
 - performs no seed, migration, application startup, or production build step;
 - supports ordinary development refresh when presentation or fixture source changes.
 

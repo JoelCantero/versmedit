@@ -33,7 +33,7 @@ describe("email preview catalogue", () => {
 
   it("accepts only validated, explicitly forwarded public brand values", () => {
     const configured = createPreviewBrand({
-      EMAIL_PREVIEW_PROJECT_NAME: "Example Workspace Local",
+      PROJECT_NAME: "Example Workspace Local",
       EMAIL_PREVIEW_BRAND_COLOR: "#0e79b2",
       EMAIL_PREVIEW_SUPPORT_EMAIL: "support@example.test",
       EMAIL_PREVIEW_LOGO_URL: "",
@@ -53,11 +53,14 @@ describe("email preview catalogue", () => {
 
     expect(
       createPreviewBrand({
-        PROJECT_NAME: "Ignored deployment name",
+        PROJECT_NAME: "Configured deployment name",
         BRAND_COLOR: "#FFFFFF",
         SUPPORT_EMAIL: "ignored@example.test",
       }),
-    ).toEqual(previewManifest[0]!.request.brand);
+    ).toEqual({
+      ...previewManifest[0]!.request.brand,
+      productName: "Configured deployment name",
+    });
   });
 
   it("contains the exact stable 12-by-3 Cartesian product", () => {

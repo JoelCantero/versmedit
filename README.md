@@ -13,7 +13,7 @@ The non-negotiable engineering principles for this architecture live in [`.speci
 - **Testing**: Vitest + jsdom + Testing Library + Playwright
 - **Logging**: Pino (structured JSON to stdout)
 - **Infra**: Docker + Docker Compose · Traefik ingress · Cloudflare Tunnel (home hosting)
-- **CI/CD**: GitHub Actions (self-hosted runner)
+- **CI/CD**: GitHub Actions (GitHub-hosted CI + self-hosted deployment runner)
 
 ## Requirements
 
@@ -28,7 +28,7 @@ pnpm install
 pnpm dev                      # runs on http://localhost:3000
 ```
 
-`pnpm dev` starts the database in Docker via the `predev` hook, then launches Next.js. Run the quality gate (`lint` → `typecheck` → `test`) before opening a pull request. The Spec Kit `after_implement` hook (`speckit.quality-gate`) runs it automatically. Continuous integration (CI) repeats the gate with coverage thresholds and adds a production dependency audit, SpecKit compliance validation, production build, and Playwright tests as the authoritative merge gate. The mandatory `speckit.compliance-check` verifies that each feature's spec, plan, and tasks remain complete. To change the schema, edit `prisma/schema.prisma` and run `pnpm db:migrate`.
+`pnpm dev` starts the database in Docker via the `predev` hook, then launches Next.js. Run the quality gate (`lint` → `typecheck` → `test`) before opening a pull request. The Spec Kit `after_implement` hook (`speckit.quality-gate`) runs it automatically. Continuous integration (CI) runs static checks, coverage, production E2E, relevant email previews, and production image builds in parallel as the authoritative merge gate. The same gate validates the exact `main` revision before invoking deployment. The mandatory `speckit.compliance-check` verifies that each feature's spec, plan, and tasks remain complete. To change the schema, edit `prisma/schema.prisma` and run `pnpm db:migrate`.
 
 Spec Kit creates every feature branch from an up-to-date `origin/main`. Before the first spec, push
 the initial main branch (`git push -u origin main`) and commit or stash tracked changes; otherwise
@@ -106,14 +106,17 @@ and address headers remain ignored and the email limiter uses one conservative s
 
 ## Deployment
 
-Push to `main` (or run it manually) triggers
+Push to `main` triggers [`.github/workflows/ci.yml`](.github/workflows/ci.yml). After every parallel
+check succeeds for that exact revision, CI invokes
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on the self-hosted **ARM64** runner
-named by the `RUNNER_NAME` Variable:
+named by the `RUNNER_NAME` Variable. For a manual verified deployment, dispatch the `CI` workflow
+from `main`; the deployment workflow cannot be dispatched directly.
 
 1. `rsync` the repository into the deploy directory (`DEPLOY_BASE_DIR`/`PROJECT_NAME`).
 2. Ensure the external `traefik_network` exists.
-3. `docker compose -f docker-compose.prod.yml up -d --build --remove-orphans`. Compose orders it
-   **db → migrate → app**.
+3. Build the `app` and `migrate` images while the current application remains available.
+4. Wait for the database, stop the old application, and run the migrator synchronously.
+5. Start the new application and require its container healthcheck to pass.
 
 The local SpecKit hooks provide pre-PR feedback. CI is authoritative and requires lint, typecheck,
 unit/integration tests with coverage thresholds, SpecKit compliance, a production dependency audit,
@@ -169,8 +172,9 @@ part of forward recovery and must remain reusable by later valid submissions.
   `pnpm db:restore:dev <file>` restores it. Other stacks require an explicit selection, for example
   `COMPOSE_FILE=docker-compose.prod.yml pnpm db:backup`. Restore deliberately refuses a non-empty
   database and runs transactionally, preventing mixed old/restored state.
-- **Restore verification**: the weekly/manual `Verify Backup And Restore` workflow migrates a test
-  database, backs it up, recreates its volume, restores it, and verifies a sentinel record.
+- **Restore verification**: the weekly/manual `Verify Backup And Restore` workflow starts the
+  production Compose database without publishing it, migrates it, creates a logical backup,
+  recreates its volume, restores it, and verifies a sentinel record.
 - **Healthcheck**: `GET /api/health` (used by the container healthcheck).
 
 ## Security and observability baseline

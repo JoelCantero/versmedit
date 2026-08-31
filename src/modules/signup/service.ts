@@ -17,9 +17,13 @@ import {
   PRIVACY_NOTICE_VERSION,
   TERMS_VERSION,
 } from "@/modules/signup/policy";
-import { createSignupCredential } from "@/modules/signup/token";
+import {
+  createSignupCredential,
+  hashSignupToken,
+} from "@/modules/signup/token";
 import type {
   SanitizedSignupEvent,
+  SignupLocale,
   SignupLifecycleOutcome,
   SignupLifecycleResult,
   ValidatedSignupRequest,
@@ -39,6 +43,29 @@ interface AcceptedSignupResponseOptions {
   sleep?: (milliseconds: number) => Promise<void>;
 }
 
+interface SignupActivationPreflightOptions {
+  now?: () => Date;
+}
+
+export type SignupActivationCandidate = {
+  userId: string;
+  identifier: string;
+  tokenHash: string;
+  locale: SignupLocale;
+};
+
+export type SignupActivationPreflightResult =
+  | { status: "invalid_link"; locale: SignupLocale }
+  | { status: "eligible_candidate"; candidate: SignupActivationCandidate };
+
+export type SignupActivationSessionResult =
+  | { status: "eligible"; candidate: SignupActivationCandidate }
+  | { status: "session_conflict"; locale: SignupLocale };
+
+export type SignupActivationFailureResult =
+  | { status: "session_failed"; locale: SignupLocale }
+  | { status: "invalid_link"; locale: SignupLocale };
+
 type IssuanceResult =
   | { kind: "active" }
   | {
@@ -46,6 +73,78 @@ type IssuanceResult =
       rawToken: string;
       tokenHash: string;
     };
+
+function isSignupLocale(value: unknown): value is SignupLocale {
+  return value === "en" || value === "es" || value === "ca";
+}
+
+export async function preflightSignupActivation(
+  rawToken: string,
+  { now = () => new Date() }: SignupActivationPreflightOptions = {},
+): Promise<SignupActivationPreflightResult> {
+  const tokenHash = hashSignupToken(rawToken, getEnv().AUTH_SECRET);
+  const storedToken = await db.verificationToken.findUnique({
+    where: { token: tokenHash },
+  });
+  const locale: SignupLocale = isSignupLocale(storedToken?.locale)
+    ? storedToken.locale
+    : "en";
+  if (
+    !storedToken ||
+    storedToken.purpose !== VerificationPurpose.SIGNUP ||
+    !storedToken.deliveredAt ||
+    storedToken.expires.getTime() <= now().getTime()
+  ) {
+    return { status: "invalid_link", locale };
+  }
+
+  const targetUser = await db.user.findUnique({
+    where: { normalizedEmail: storedToken.identifier },
+    select: { id: true, status: true },
+  });
+  if (!targetUser || targetUser.status !== UserStatus.PENDING) {
+    return { status: "invalid_link", locale };
+  }
+
+  return {
+    status: "eligible_candidate",
+    candidate: {
+      userId: targetUser.id,
+      identifier: storedToken.identifier,
+      tokenHash,
+      locale,
+    },
+  };
+}
+
+export function evaluateSignupActivationSession(
+  candidate: SignupActivationCandidate,
+  currentUserId: string | null,
+): SignupActivationSessionResult {
+  if (currentUserId && currentUserId !== candidate.userId) {
+    return { status: "session_conflict", locale: candidate.locale };
+  }
+  return { status: "eligible", candidate };
+}
+
+export async function resolveSignupActivationFailure(
+  candidate: SignupActivationCandidate,
+): Promise<SignupActivationFailureResult> {
+  const [remainingToken, activatedUser] = await Promise.all([
+    db.verificationToken.findUnique({
+      where: { token: candidate.tokenHash },
+      select: { token: true },
+    }),
+    db.user.findUnique({
+      where: { id: candidate.userId },
+      select: { status: true },
+    }),
+  ]);
+  if (!remainingToken && activatedUser?.status === UserStatus.ACTIVE) {
+    return { status: "session_failed", locale: candidate.locale };
+  }
+  return { status: "invalid_link", locale: candidate.locale };
+}
 
 function recordOutcome(outcome: SignupLifecycleOutcome, startedAt: number) {
   const event: SanitizedSignupEvent = {

@@ -9,10 +9,13 @@ const mocks = vi.hoisted(() => ({
   executeRaw: vi.fn(),
   userFindUnique: vi.fn(),
   userCreate: vi.fn(),
+  activationTokenFindUnique: vi.fn(),
+  activationUserFindUnique: vi.fn(),
   tokenDeleteMany: vi.fn(),
   tokenCreate: vi.fn(),
   tokenUpdateMany: vi.fn(),
   createSignupCredential: vi.fn(),
+  hashSignupToken: vi.fn(),
   sendOnboardingEmail: vi.fn(),
   sendActiveAccountEmail: vi.fn(),
   logInfo: vi.fn(),
@@ -20,7 +23,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/db", () => ({
-  db: { $transaction: mocks.transaction },
+  db: {
+    $transaction: mocks.transaction,
+    verificationToken: { findUnique: mocks.activationTokenFindUnique },
+    user: { findUnique: mocks.activationUserFindUnique },
+  },
 }));
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({
@@ -33,6 +40,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 vi.mock("@/modules/signup/token", () => ({
   createSignupCredential: mocks.createSignupCredential,
+  hashSignupToken: mocks.hashSignupToken,
 }));
 vi.mock("@/modules/signup/email", () => ({
   sendOnboardingEmail: mocks.sendOnboardingEmail,
@@ -41,7 +49,10 @@ vi.mock("@/modules/signup/email", () => ({
 
 import {
   acceptedSignupResponse,
+  evaluateSignupActivationSession,
+  preflightSignupActivation,
   processSignup,
+  resolveSignupActivationFailure,
 } from "@/modules/signup/service";
 
 const request = {
@@ -53,6 +64,26 @@ const request = {
 };
 const issuedAt = new Date("2026-08-18T12:00:00.000Z");
 const expires = new Date("2026-08-18T12:15:00.000Z");
+const activationCheckedAt = new Date("2026-08-18T12:10:00.000Z");
+const rawActivationToken = "a".repeat(43);
+const activationToken = {
+  identifier: request.email,
+  token: "hashed-activation-token",
+  expires,
+  purpose: "SIGNUP",
+  locale: "es",
+  deliveredAt: issuedAt,
+};
+const activationUser = {
+  id: "pending-user",
+  status: "PENDING",
+};
+const activationCandidate = {
+  userId: activationUser.id,
+  identifier: activationToken.identifier,
+  tokenHash: activationToken.token,
+  locale: "es" as const,
+};
 
 describe("signup service", () => {
   beforeEach(() => {
@@ -83,8 +114,134 @@ describe("signup service", () => {
       raw: "raw-signup-token",
       persisted: { token: "hashed-signup-token", expires },
     });
+    mocks.hashSignupToken.mockReturnValue(activationToken.token);
+    mocks.activationTokenFindUnique.mockResolvedValue(activationToken);
+    mocks.activationUserFindUnique.mockResolvedValue(activationUser);
     mocks.sendOnboardingEmail.mockResolvedValue({ accepted: true });
     mocks.sendActiveAccountEmail.mockResolvedValue({ accepted: true });
+  });
+
+  describe("activation verification", () => {
+    it.each([
+      ["unknown token", null, "en"],
+      [
+        "wrong token purpose",
+        { ...activationToken, purpose: "ACCOUNT_DELETION", locale: "ca" },
+        "ca",
+      ],
+      [
+        "unconfirmed delivery",
+        { ...activationToken, deliveredAt: null, locale: "ca" },
+        "ca",
+      ],
+      [
+        "expiry at the verification boundary",
+        { ...activationToken, expires: activationCheckedAt, locale: "ca" },
+        "ca",
+      ],
+    ])("maps %s to an invalid link", async (_name, storedToken, locale) => {
+      mocks.activationTokenFindUnique.mockResolvedValue(storedToken);
+
+      await expect(
+        preflightSignupActivation(rawActivationToken, {
+          now: () => activationCheckedAt,
+        }),
+      ).resolves.toEqual({ status: "invalid_link", locale });
+
+      expect(mocks.activationUserFindUnique).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["missing", null],
+      ["active", { ...activationUser, status: "ACTIVE" }],
+    ])("rejects a %s signup account", async (_name, user) => {
+      mocks.activationUserFindUnique.mockResolvedValue(user);
+
+      await expect(
+        preflightSignupActivation(rawActivationToken, {
+          now: () => activationCheckedAt,
+        }),
+      ).resolves.toEqual({ status: "invalid_link", locale: "es" });
+    });
+
+    it("returns the minimal candidate and falls back to English locale", async () => {
+      mocks.activationTokenFindUnique.mockResolvedValue({
+        ...activationToken,
+        locale: "unsupported",
+      });
+
+      await expect(
+        preflightSignupActivation(rawActivationToken, {
+          now: () => activationCheckedAt,
+        }),
+      ).resolves.toEqual({
+        status: "eligible_candidate",
+        candidate: { ...activationCandidate, locale: "en" },
+      });
+
+      expect(mocks.hashSignupToken).toHaveBeenCalledWith(
+        rawActivationToken,
+        "test-auth-secret",
+      );
+      expect(mocks.activationTokenFindUnique).toHaveBeenCalledWith({
+        where: { token: activationToken.token },
+      });
+      expect(mocks.activationUserFindUnique).toHaveBeenCalledWith({
+        where: { normalizedEmail: activationToken.identifier },
+        select: { id: true, status: true },
+      });
+    });
+
+    it.each([
+      [null, "eligible"],
+      [activationUser.id, "eligible"],
+      ["another-user", "session_conflict"],
+    ] as const)(
+      "maps current session %s to %s",
+      (currentUserId, status) => {
+        const result = evaluateSignupActivationSession(
+          activationCandidate,
+          currentUserId,
+        );
+
+        expect(result).toEqual(
+          status === "eligible"
+            ? { status, candidate: activationCandidate }
+            : { status, locale: activationCandidate.locale },
+        );
+      },
+    );
+
+    it("distinguishes durable activation followed by session failure", async () => {
+      mocks.activationTokenFindUnique.mockResolvedValue(null);
+      mocks.activationUserFindUnique.mockResolvedValue({ status: "ACTIVE" });
+
+      await expect(
+        resolveSignupActivationFailure(activationCandidate),
+      ).resolves.toEqual({ status: "session_failed", locale: "es" });
+
+      expect(mocks.activationTokenFindUnique).toHaveBeenCalledWith({
+        where: { token: activationCandidate.tokenHash },
+        select: { token: true },
+      });
+      expect(mocks.activationUserFindUnique).toHaveBeenCalledWith({
+        where: { id: activationCandidate.userId },
+        select: { status: true },
+      });
+    });
+
+    it.each([
+      ["token remains", { token: activationToken.token }, { status: "ACTIVE" }],
+      ["user remains pending", null, { status: "PENDING" }],
+      ["user is missing", null, null],
+    ])("uses the generic fallback when %s", async (_name, token, user) => {
+      mocks.activationTokenFindUnique.mockResolvedValue(token);
+      mocks.activationUserFindUnique.mockResolvedValue(user);
+
+      await expect(
+        resolveSignupActivationFailure(activationCandidate),
+      ).resolves.toEqual({ status: "invalid_link", locale: "es" });
+    });
   });
 
   it("creates one pending account and link-bound candidate snapshot", async () => {

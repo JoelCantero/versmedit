@@ -5,34 +5,129 @@ name: CI
 # never competes with production for resources. Build/type errors are
 # platform-independent, so x64 is fine as a pre-merge gate.
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
-  # Seed a trusted default-branch browser cache that future PRs can restore.
   push:
     branches:
       - main
 
-# Cancel superseded runs when new commits are pushed to the same PR.
+# Cancel superseded PR runs, but never interrupt a main validation that may
+# already be deploying to production.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
+env:
+  PROJECT_NAME: ci-build
+  DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+  AUTH_SECRET: ci-build-secret-not-used-in-runtime-000000
+  NEXTAUTH_URL: http://localhost:3100
+  BRAND_COLOR: "#18181B"
+  SUPPORT_EMAIL: support@example.test
+
 jobs:
-  build:
-    name: Build
-    if: github.event_name == 'pull_request'
+  changes:
+    name: Detect relevant changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      email_preview: ${{ steps.filter.outputs.email_preview }}
+      images: ${{ steps.filter.outputs.images }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Classify changed files
+        id: filter
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          email_preview=false
+          images=false
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" || -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            email_preview=true
+            images=true
+          else
+            if [[ "$EVENT_NAME" == "pull_request" ]]; then
+              range="${BASE_SHA}...${HEAD_SHA}"
+            else
+              range="${BASE_SHA}..${HEAD_SHA}"
+            fi
+
+            while IFS= read -r file; do
+              case "$file" in
+                emails/*|src/lib/email/*|tests/e2e/email-preview-catalog.spec.ts|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|tsconfig.json|.github/workflows/ci.yml)
+                  email_preview=true
+                  ;;
+              esac
+
+              case "$file" in
+                .dockerignore|docker/*|emails/*|patches/*|prisma/*|public/*|src/*|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|next.config.ts|postcss.config.mjs|prisma.config.ts|tsconfig.json|.github/workflows/ci.yml)
+                  images=true
+                  ;;
+              esac
+            done < <(git diff --name-only "$range")
+          fi
+
+          echo "email_preview=$email_preview" >> "$GITHUB_OUTPUT"
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+  quality:
+    name: Static quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Audit production dependencies
+        run: pnpm audit:prod
+
+      - name: Validate SpecKit compliance
+        run: bash .specify/scripts/bash/compliance-check.sh --all
+
+  tests:
+    name: Tests and coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
-      PROJECT_NAME: ci-build
-      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
-      AUTH_SECRET: ci-build-secret-not-used-in-runtime-000000
-      NEXTAUTH_URL: http://localhost:3100
-      BRAND_COLOR: "#18181B"
-      SUPPORT_EMAIL: support@example.test
       RUN_INTEGRATION_TESTS: "true"
 
     services:
@@ -54,43 +149,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Install pnpm first so setup-node can compute the pnpm store cache.
-      # Version is read from the `packageManager` field in package.json.
       - name: Set up pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          # Matches the runtime image (node:24-slim) used in docker/Dockerfile.
           node-version: 24
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # src/generated is gitignored, so the Prisma client must be generated
-      # before the build (mirrors the builder stage in docker/Dockerfile).
       - name: Generate Prisma client
         run: pnpm exec prisma generate
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Audit production dependencies
-        run: pnpm audit:prod
 
       - name: Migrate test database
         run: pnpm db:deploy
 
-      - name: Validate SpecKit compliance
-        run: bash .specify/scripts/bash/compliance-check.sh --all
-
       - name: Test with coverage thresholds
         run: pnpm test:coverage
+
+  e2e:
+    name: Production end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
 
       - name: Resolve Playwright version
         id: playwright-version
@@ -105,8 +207,6 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright-version.outputs.version }}
 
-      # Hosted runners are ephemeral, so native libraries must still be
-      # installed even when the browser binaries are restored from cache.
       - name: Install Playwright system dependencies
         run: pnpm exec playwright install-deps chromium
         timeout-minutes: 10
@@ -126,19 +226,21 @@ jobs:
       - name: Build and end-to-end smoke test
         run: pnpm test:e2e
 
-      - name: Test isolated email preview catalogue
-        run: pnpm exec playwright test --config emails/playwright.config.ts
+      - name: Upload end-to-end diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
-      - name: Validate production Docker images
-        run: |
-          docker build --target runner --tag "${PROJECT_NAME}-ci:latest" --file docker/Dockerfile .
-          docker build --target migrator --tag "${PROJECT_NAME}-migrate-ci:latest" --file docker/Dockerfile .
-
-  warm-playwright-cache:
-    name: Warm Playwright cache
-    if: github.event_name == 'push'
+  email_preview:
+    name: Email preview catalogue
+    needs: changes
+    if: needs.changes.outputs.email_preview == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -169,14 +271,117 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright-version.outputs.version }}
 
+      - name: Install Playwright system dependencies
+        run: pnpm exec playwright install-deps chromium
+        timeout-minutes: 10
+
       - name: Install Playwright Chromium
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install chromium
         timeout-minutes: 10
 
-      - name: Save Playwright browser cache
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Test isolated email preview catalogue
+        run: pnpm exec playwright test --config emails/playwright.config.ts
+
+      - name: Upload email preview diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          path: ~/.cache/ms-playwright
-          key: ${{ steps.playwright-cache.outputs.cache-primary-key }}
+          name: email-preview-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            emails/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  images:
+    name: Production images
+    needs: changes
+    if: needs.changes.outputs.images == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build production runner image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: runner
+          tags: ${{ env.PROJECT_NAME }}-ci:latest
+          cache-from: |
+            type=gha,scope=production-runner
+            type=gha,scope=production-migrator
+          cache-to: type=gha,mode=max,scope=production-runner
+
+      - name: Build production migrator image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: migrator
+          tags: ${{ env.PROJECT_NAME }}-migrate-ci:latest
+          cache-from: |
+            type=gha,scope=production-runner
+            type=gha,scope=production-migrator
+          cache-to: type=gha,mode=max,scope=production-migrator
+
+  build:
+    name: Build
+    if: ${{ always() && !cancelled() }}
+    needs:
+      - changes
+      - quality
+      - tests
+      - e2e
+      - email_preview
+      - images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require every CI check
+        shell: bash
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+          EMAIL_PREVIEW_RESULT: ${{ needs.email_preview.result }}
+          IMAGES_RESULT: ${{ needs.images.result }}
+        run: |
+          set -Eeuo pipefail
+
+          for required_result in \
+            "$CHANGES_RESULT" \
+            "$QUALITY_RESULT" \
+            "$TESTS_RESULT" \
+            "$E2E_RESULT"; do
+            if [[ "$required_result" != "success" ]]; then
+              echo "A required CI job finished with status '$required_result'." >&2
+              exit 1
+            fi
+          done
+
+          for conditional_result in "$EMAIL_PREVIEW_RESULT" "$IMAGES_RESULT"; do
+            if [[ "$conditional_result" != "success" && "$conditional_result" != "skipped" ]]; then
+              echo "A conditional CI job finished with status '$conditional_result'." >&2
+              exit 1
+            fi
+          done
+
+  deploy:
+    name: Deploy validated main
+    needs: build
+    if: >-
+      needs.build.result == 'success' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

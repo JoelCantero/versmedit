@@ -1,10 +1,8 @@
 name: Deploy Main To Raspberry
 
+# CI invokes this workflow only after validating the exact main commit.
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: deploy-main
@@ -21,6 +19,7 @@ jobs:
       - self-hosted
       - Linux
       - ARM64
+    timeout-minutes: 45
     env:
       # Deploy target is built from GitHub repo Variables (Settings > Secrets and
       # variables > Actions > Variables). No fallback: the "Validate required
@@ -88,6 +87,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
 
       - name: Sync repository to deploy directory
         run: |

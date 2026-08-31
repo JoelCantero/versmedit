@@ -8,9 +8,12 @@ on:
     paths:
       - "scripts/db-backup.sh"
       - "scripts/db-restore.sh"
-      - "docker-compose.yml"
       - "docker-compose.prod.yml"
-      - "prisma/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "prisma.config.ts"
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
       - ".github/workflows/backup-restore-verify.yml"
   schedule:
     - cron: "17 4 * * 1"
@@ -26,10 +29,14 @@ jobs:
   verify:
     name: Restore Into Fresh Database
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       PROJECT_NAME: backupverify
+      APP_DOMAIN: backupverify.example.test
+      COMPOSE_FILE: docker-compose.prod.yml
+      POSTGRES_USER: backupverify
+      POSTGRES_DB: backupverify
       POSTGRES_PASSWORD: backup-verify-password
-      DATABASE_URL: postgresql://backupverify:backup-verify-password@127.0.0.1:5432/backupverify?schema=public
       AUTH_SECRET: backup-verify-secret-not-used-runtime-000
 
     steps:
@@ -49,44 +56,51 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Start source database
-        run: docker compose up -d --wait db
+        run: |
+          docker network inspect traefik_network >/dev/null 2>&1 || docker network create traefik_network
+          docker compose -f "$COMPOSE_FILE" up -d --wait db
+          db_container="$(docker compose -f "$COMPOSE_FILE" ps -q db)"
+          db_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$db_container")"
+          echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${db_ip}:5432/${POSTGRES_DB}?schema=public" >> "$GITHUB_ENV"
 
       - name: Migrate and add verification record
         run: |
           pnpm exec prisma migrate deploy
-          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+          docker compose -f "$COMPOSE_FILE" exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
             --set ON_ERROR_STOP=1 -c \
             "INSERT INTO \"VerificationToken\" (identifier, token, expires) VALUES ('backup-check', 'restore-me', NOW() + interval '1 hour');"
 
       - name: Create backup
-        run: pnpm db:backup:dev "$RUNNER_TEMP/backups"
+        run: pnpm db:backup "$RUNNER_TEMP/backups"
 
       - name: Recreate an empty database
         run: |
-          docker compose down --volumes
-          docker compose up -d --wait db
+          docker compose -f "$COMPOSE_FILE" down --volumes
+          docker compose -f "$COMPOSE_FILE" up -d --wait db
 
       - name: Refuse restore into a database with residual objects
         run: |
           backup_file="$(find "$RUNNER_TEMP/backups" -name '*.sql.gz' -print -quit)"
-          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+          docker compose -f "$COMPOSE_FILE" exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
             --set ON_ERROR_STOP=1 -c \
             "CREATE COLLATION public.residual_collation (provider = icu, locale = 'en-US');"
-          if pnpm db:restore:dev "$backup_file"; then
+          if pnpm db:restore "$backup_file"; then
             echo "Restore unexpectedly accepted a non-empty database." >&2
             exit 1
           fi
-          docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" \
+          docker compose -f "$COMPOSE_FILE" exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
             --set ON_ERROR_STOP=1 -c "DROP COLLATION public.residual_collation;"
 
       - name: Restore and verify record
         run: |
           backup_file="$(find "$RUNNER_TEMP/backups" -name '*.sql.gz' -print -quit)"
-          pnpm db:restore:dev "$backup_file"
-          restored="$(docker compose exec -T db psql -U "$PROJECT_NAME" -d "$PROJECT_NAME" -Atqc \
+          pnpm db:restore "$backup_file"
+          restored="$(docker compose -f "$COMPOSE_FILE" exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atqc \
             "SELECT token FROM \"VerificationToken\" WHERE identifier = 'backup-check';")"
           test "$restored" = "restore-me"
 
       - name: Clean up
         if: always()
-        run: docker compose down --volumes
+        run: |
+          docker compose -f "$COMPOSE_FILE" down --volumes
+          docker network rm traefik_network >/dev/null 2>&1 || true

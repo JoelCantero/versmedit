@@ -112,6 +112,10 @@ check succeeds for that exact revision, CI invokes
 named by the `RUNNER_NAME` Variable. For a manual verified deployment, dispatch the `CI` workflow
 from `main`; the deployment workflow cannot be dispatched directly.
 
+The pull-request run validates the merge result, and its `Build` job records that validated tree.
+When the squashed commit pushed to `main` has the same tree, CI reuses that result and only builds
+and deploys. Any revision whose tree has not been validated is checked in full.
+
 1. `rsync` the repository into the deploy directory (`DEPLOY_BASE_DIR`/`PROJECT_NAME`).
 2. Ensure the external `traefik_network` exists.
 3. Build the `app` and `migrate` images while the current application remains available.

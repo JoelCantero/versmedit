@@ -35,9 +35,14 @@ jobs:
     name: Detect relevant changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     outputs:
       email_preview: ${{ steps.filter.outputs.email_preview }}
       images: ${{ steps.filter.outputs.images }}
+      tree: ${{ steps.prior.outputs.tree }}
+      validate: ${{ steps.prior.outputs.validate }}
 
     steps:
       - name: Checkout
@@ -45,6 +50,39 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Reuse a previous validation of the same tree
+        id: prior
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -Eeuo pipefail
+
+          # A pull request run checks out the merge result, whose tree is what a
+          # squash merge writes to main, so the same content is never validated
+          # twice.
+          tree="$(git rev-parse 'HEAD^{tree}')"
+          validate=true
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            validated=$(
+              gh api \
+                --method GET \
+                "repos/${REPOSITORY}/actions/artifacts" \
+                -f name="validated-tree-${tree}" \
+                -f per_page=100 \
+                --jq '[.artifacts[] | select(.expired == false and .workflow_run != null and .workflow_run.repository_id == .workflow_run.head_repository_id)] | length'
+            )
+            if [[ "$validated" -gt 0 ]]; then
+              validate=false
+            fi
+          fi
+
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          echo "validate=$validate" >> "$GITHUB_OUTPUT"
 
       - name: Classify changed files
         id: filter
@@ -89,6 +127,8 @@ jobs:
 
   quality:
     name: Static quality
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -125,6 +165,8 @@ jobs:
 
   tests:
     name: Tests and coverage
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -172,6 +214,8 @@ jobs:
 
   e2e:
     name: Production end-to-end
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -238,7 +282,7 @@ jobs:
   email_preview:
     name: Email preview catalogue
     needs: changes
-    if: needs.changes.outputs.email_preview == 'true'
+    if: needs.changes.outputs.validate == 'true' && needs.changes.outputs.email_preview == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -297,7 +341,7 @@ jobs:
   images:
     name: Production images
     needs: changes
-    if: needs.changes.outputs.images == 'true'
+    if: needs.changes.outputs.validate == 'true' && needs.changes.outputs.images == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -349,6 +393,7 @@ jobs:
       - name: Require every CI check
         shell: bash
         env:
+          VALIDATE: ${{ needs.changes.outputs.validate }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           QUALITY_RESULT: ${{ needs.quality.result }}
           TESTS_RESULT: ${{ needs.tests.result }}
@@ -358,8 +403,30 @@ jobs:
         run: |
           set -Eeuo pipefail
 
+          if [[ "$CHANGES_RESULT" != "success" ]]; then
+            echo "A required CI job finished with status '$CHANGES_RESULT'." >&2
+            exit 1
+          fi
+
+          # A previous run already validated this exact tree, so main reuses
+          # that result instead of repeating every gate.
+          if [[ "$VALIDATE" != "true" ]]; then
+            for reused_result in \
+              "$QUALITY_RESULT" \
+              "$TESTS_RESULT" \
+              "$E2E_RESULT" \
+              "$EMAIL_PREVIEW_RESULT" \
+              "$IMAGES_RESULT"; do
+              if [[ "$reused_result" != "skipped" ]]; then
+                echo "A reused CI job unexpectedly ran with status '$reused_result'." >&2
+                exit 1
+              fi
+            done
+            echo "Reusing the successful validation already recorded for this tree."
+            exit 0
+          fi
+
           for required_result in \
-            "$CHANGES_RESULT" \
             "$QUALITY_RESULT" \
             "$TESTS_RESULT" \
             "$E2E_RESULT"; do
@@ -375,6 +442,25 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Record the validated tree
+        if: needs.changes.outputs.validate == 'true'
+        shell: bash
+        env:
+          TREE: ${{ needs.changes.outputs.tree }}
+        run: |
+          set -Eeuo pipefail
+
+          mkdir -p validated-tree
+          printf '%s\n' "$TREE" > validated-tree/tree
+
+      - name: Publish the validated tree
+        if: needs.changes.outputs.validate == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: validated-tree-${{ needs.changes.outputs.tree }}
+          path: validated-tree/tree
+          retention-days: 90
 
   deploy:
     name: Deploy validated main

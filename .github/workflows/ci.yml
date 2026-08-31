@@ -9,12 +9,15 @@ on:
   pull_request:
     branches:
       - main
+  merge_group:
+    branches:
+      - main
   push:
     branches:
       - main
 
-# Cancel superseded PR runs, but never interrupt a main validation that may
-# already be deploying to production.
+# Cancel superseded PR runs, but never interrupt a merge-queue entry or a main
+# validation that may already be deploying to production.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -35,9 +38,13 @@ jobs:
     name: Detect relevant changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     outputs:
       email_preview: ${{ steps.filter.outputs.email_preview }}
       images: ${{ steps.filter.outputs.images }}
+      validate: ${{ steps.prior.outputs.validate }}
 
     steps:
       - name: Checkout
@@ -46,13 +53,45 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Reuse a previous validation of the same commit
+        id: prior
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          validate=true
+          # The merge queue validates the exact commit that lands on main, so the
+          # push run only has to build and deploy it.
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            successful_runs=$(
+              gh api \
+                --method GET \
+                "repos/${REPOSITORY}/actions/workflows/ci.yml/runs" \
+                -f head_sha="$HEAD_SHA" \
+                -f status=completed \
+                -f per_page=100 \
+                --jq "[.workflow_runs[] | select(.conclusion == \"success\" and (.id | tostring) != \"${RUN_ID}\")] | length"
+            )
+            if [[ "$successful_runs" -gt 0 ]]; then
+              validate=false
+            fi
+          fi
+
+          echo "validate=$validate" >> "$GITHUB_OUTPUT"
+
       - name: Classify changed files
         id: filter
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
         run: |
           set -Eeuo pipefail
 
@@ -89,6 +128,8 @@ jobs:
 
   quality:
     name: Static quality
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -125,6 +166,8 @@ jobs:
 
   tests:
     name: Tests and coverage
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -172,6 +215,8 @@ jobs:
 
   e2e:
     name: Production end-to-end
+    needs: changes
+    if: needs.changes.outputs.validate == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -238,7 +283,7 @@ jobs:
   email_preview:
     name: Email preview catalogue
     needs: changes
-    if: needs.changes.outputs.email_preview == 'true'
+    if: needs.changes.outputs.validate == 'true' && needs.changes.outputs.email_preview == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -297,7 +342,7 @@ jobs:
   images:
     name: Production images
     needs: changes
-    if: needs.changes.outputs.images == 'true'
+    if: needs.changes.outputs.validate == 'true' && needs.changes.outputs.images == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -349,6 +394,7 @@ jobs:
       - name: Require every CI check
         shell: bash
         env:
+          VALIDATE: ${{ needs.changes.outputs.validate }}
           CHANGES_RESULT: ${{ needs.changes.result }}
           QUALITY_RESULT: ${{ needs.quality.result }}
           TESTS_RESULT: ${{ needs.tests.result }}
@@ -358,8 +404,30 @@ jobs:
         run: |
           set -Eeuo pipefail
 
+          if [[ "$CHANGES_RESULT" != "success" ]]; then
+            echo "A required CI job finished with status '$CHANGES_RESULT'." >&2
+            exit 1
+          fi
+
+          # The merge queue already validated this exact commit, so main only
+          # reuses that result instead of repeating every gate.
+          if [[ "$VALIDATE" != "true" ]]; then
+            for reused_result in \
+              "$QUALITY_RESULT" \
+              "$TESTS_RESULT" \
+              "$E2E_RESULT" \
+              "$EMAIL_PREVIEW_RESULT" \
+              "$IMAGES_RESULT"; do
+              if [[ "$reused_result" != "skipped" ]]; then
+                echo "A reused CI job unexpectedly ran with status '$reused_result'." >&2
+                exit 1
+              fi
+            done
+            echo "Reusing the successful validation already recorded for this commit."
+            exit 0
+          fi
+
           for required_result in \
-            "$CHANGES_RESULT" \
             "$QUALITY_RESULT" \
             "$TESTS_RESULT" \
             "$E2E_RESULT"; do

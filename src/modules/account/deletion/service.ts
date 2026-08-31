@@ -15,7 +15,10 @@ import {
   resolveAccountDeletionSession,
   resolveActiveAccountSession,
 } from "@/modules/account/deletion/session";
-import { createAccountDeletionCredential } from "@/modules/account/deletion/token";
+import {
+  createAccountDeletionCredential,
+  hashAccountDeletionToken,
+} from "@/modules/account/deletion/token";
 import type {
   AccountDeletionReauthenticationResult,
 } from "@/modules/account/deletion/types";
@@ -35,12 +38,87 @@ interface DeleteCurrentAccountOptions {
   now?: () => Date;
 }
 
+interface AccountDeletionVerificationPreflightOptions {
+  now?: () => Date;
+}
+
+export type AccountDeletionVerificationCandidate = {
+  userId: string;
+  identifier: string;
+  tokenHash: string;
+  locale: AccountLocale;
+};
+
+export type AccountDeletionVerificationPreflightResult =
+  | { status: "invalid_link"; locale: AccountLocale }
+  | {
+      status: "eligible_candidate";
+      candidate: AccountDeletionVerificationCandidate;
+    };
+
+export type AccountDeletionVerificationSessionResult =
+  | { status: "eligible"; candidate: AccountDeletionVerificationCandidate }
+  | { status: "session_conflict"; locale: AccountLocale };
+
 export type AccountDeletionServiceResult =
   | { status: "completed" }
   | { status: "concurrent_completed" }
   | { status: "reauthentication_required" }
   | { status: "unauthenticated" }
   | { status: "deletion_failed" };
+
+function isAccountLocale(value: unknown): value is AccountLocale {
+  return value === "en" || value === "es" || value === "ca";
+}
+
+export async function preflightAccountDeletionVerification(
+  rawToken: string,
+  { now = () => new Date() }: AccountDeletionVerificationPreflightOptions = {},
+): Promise<AccountDeletionVerificationPreflightResult> {
+  const tokenHash = hashAccountDeletionToken(rawToken, getEnv().AUTH_SECRET);
+  const storedToken = await db.verificationToken.findUnique({
+    where: { token: tokenHash },
+  });
+  const locale: AccountLocale = isAccountLocale(storedToken?.locale)
+    ? storedToken.locale
+    : "en";
+  if (
+    !storedToken ||
+    storedToken.purpose !== VerificationPurpose.ACCOUNT_DELETION ||
+    !storedToken.deliveredAt ||
+    storedToken.expires.getTime() <= now().getTime()
+  ) {
+    return { status: "invalid_link", locale };
+  }
+
+  const targetUser = await db.user.findUnique({
+    where: { normalizedEmail: storedToken.identifier },
+    select: { id: true, status: true },
+  });
+  if (!targetUser || targetUser.status !== UserStatus.ACTIVE) {
+    return { status: "invalid_link", locale };
+  }
+
+  return {
+    status: "eligible_candidate",
+    candidate: {
+      userId: targetUser.id,
+      identifier: storedToken.identifier,
+      tokenHash,
+      locale,
+    },
+  };
+}
+
+export function evaluateAccountDeletionVerificationSession(
+  candidate: AccountDeletionVerificationCandidate,
+  currentUserId: string | null,
+): AccountDeletionVerificationSessionResult {
+  if (currentUserId && currentUserId !== candidate.userId) {
+    return { status: "session_conflict", locale: candidate.locale };
+  }
+  return { status: "eligible", candidate };
+}
 
 async function compensateProvisionalToken(identifier: string, token: string) {
   await db.$transaction(async (transaction) => {

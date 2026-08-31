@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 
-import { UserStatus, VerificationPurpose } from "@/generated/prisma/client";
-
 import { GET as authGet } from "@/app/api/auth/[...nextauth]/route";
-import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { isCanonicalRequestOrigin } from "@/lib/request-context";
-import { hashSignupToken } from "@/modules/signup/token";
+import {
+  evaluateSignupActivationSession,
+  preflightSignupActivation,
+  resolveSignupActivationFailure,
+} from "@/modules/signup/service";
 import type { SignupLocale } from "@/modules/signup/types";
 import { runWithSignupActivation } from "@/modules/signup/verification-context";
 
@@ -15,10 +16,6 @@ const RAW_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 function localizedPath(path: string, locale: SignupLocale) {
   if (locale === "en") return path;
   return path === "/" ? `/${locale}` : `/${locale}${path}`;
-}
-
-function isSignupLocale(value: unknown): value is SignupLocale {
-  return value === "en" || value === "es" || value === "ca";
 }
 
 function stateRedirect(
@@ -58,41 +55,32 @@ export async function GET(request: NextRequest) {
     return stateRedirect(canonical.origin, "en", "invalid_link");
   }
 
-  const tokenHash = hashSignupToken(rawToken, env.AUTH_SECRET);
-  const storedToken = await db.verificationToken.findUnique({
-    where: { token: tokenHash },
-  });
-  const storedLocale = storedToken?.locale;
-  const locale: SignupLocale = isSignupLocale(storedLocale) ? storedLocale : "en";
-  if (
-    !storedToken ||
-    storedToken.purpose !== VerificationPurpose.SIGNUP ||
-    !storedToken.deliveredAt ||
-    storedToken.expires.getTime() <= Date.now()
-  ) {
-    return stateRedirect(canonical.origin, locale, "invalid_link");
-  }
-
-  const targetUser = await db.user.findUnique({
-    where: { normalizedEmail: storedToken.identifier },
-    select: { id: true, status: true },
-  });
-  if (!targetUser || targetUser.status !== UserStatus.PENDING) {
-    return stateRedirect(canonical.origin, locale, "invalid_link");
+  const preflight = await preflightSignupActivation(rawToken);
+  if (preflight.status === "invalid_link") {
+    return stateRedirect(canonical.origin, preflight.locale, "invalid_link");
   }
 
   const currentUserId = await getCurrentSessionUserId(
     request,
     canonical.origin,
   );
-  if (currentUserId && currentUserId !== targetUser.id) {
-    return stateRedirect(canonical.origin, locale, "session_conflict");
+  const sessionResult = evaluateSignupActivationSession(
+    preflight.candidate,
+    currentUserId,
+  );
+  if (sessionResult.status === "session_conflict") {
+    return stateRedirect(
+      canonical.origin,
+      sessionResult.locale,
+      "session_conflict",
+    );
   }
 
-  const callbackUrl = localizedPath("/", locale);
+  const { candidate } = sessionResult;
+  const callbackUrl = localizedPath("/", candidate.locale);
   const delegatedUrl = new URL("/api/auth/callback/signup", canonical.origin);
   delegatedUrl.searchParams.set("token", rawToken);
-  delegatedUrl.searchParams.set("email", storedToken.identifier);
+  delegatedUrl.searchParams.set("email", candidate.identifier);
   delegatedUrl.searchParams.set("callbackUrl", callbackUrl);
   const delegatedRequest = new NextRequest(delegatedUrl, {
     method: "GET",
@@ -105,7 +93,7 @@ export async function GET(request: NextRequest) {
   let authResponse: Response | null = null;
   try {
     authResponse = await runWithSignupActivation(
-      { identifier: storedToken.identifier, token: tokenHash },
+      { identifier: candidate.identifier, token: candidate.tokenHash },
       () => authGet(delegatedRequest, context),
     );
   } catch {
@@ -127,19 +115,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const [remainingToken, activatedUser] = await Promise.all([
-    db.verificationToken.findUnique({
-      where: { token: tokenHash },
-      select: { token: true },
-    }),
-    db.user.findUnique({
-      where: { id: targetUser.id },
-      select: { status: true },
-    }),
-  ]);
-  if (!remainingToken && activatedUser?.status === UserStatus.ACTIVE) {
-    return stateRedirect(canonical.origin, locale, "session_failed");
-  }
-
-  return stateRedirect(canonical.origin, locale, "invalid_link");
+  const failure = await resolveSignupActivationFailure(candidate);
+  return stateRedirect(canonical.origin, failure.locale, failure.status);
 }

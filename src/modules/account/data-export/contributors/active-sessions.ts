@@ -1,12 +1,12 @@
 import "server-only";
 
-import { canonicalJsonStringify } from "@/modules/account/data-export/serializer";
 import type {
   PersonalDataContribution,
   PersonalDataExportContributor,
   PersonalDataExportReadContext,
   PersonalDataModuleDeclaration,
-} from "@/modules/account/data-export/types";
+} from "@/modules/account/data-export/internal-types";
+import { canonicalJsonStringify } from "@/modules/account/data-export/serializer";
 import { RECENT_AUTHENTICATION_MS } from "@/modules/account/session";
 
 export const activeSessionsDataExportDeclaration = Object.freeze({

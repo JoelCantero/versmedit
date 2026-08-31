@@ -6,22 +6,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({
-  tokenFindUnique: vi.fn(),
-  userFindUnique: vi.fn(),
   authGet: vi.fn(),
   currentSession: null as null | { user: { id: string } },
-  hashSignupToken: vi.fn(() => "hashed-token"),
+  preflightSignupActivation: vi.fn(),
+  evaluateSignupActivationSession: vi.fn(),
+  resolveSignupActivationFailure: vi.fn(),
   runWithSignupActivation: vi.fn(
     (_authorization: unknown, callback: () => Promise<Response>) => callback(),
   ),
 }));
 
-vi.mock("@/lib/db", () => ({
-  db: {
-    verificationToken: { findUnique: mocks.tokenFindUnique },
-    user: { findUnique: mocks.userFindUnique },
-  },
-}));
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({
     AUTH_SECRET: "test-auth-secret",
@@ -29,8 +23,10 @@ vi.mock("@/lib/env", () => ({
   }),
 }));
 vi.mock("@/app/api/auth/[...nextauth]/route", () => ({ GET: mocks.authGet }));
-vi.mock("@/modules/signup/token", () => ({
-  hashSignupToken: mocks.hashSignupToken,
+vi.mock("@/modules/signup/service", () => ({
+  preflightSignupActivation: mocks.preflightSignupActivation,
+  evaluateSignupActivationSession: mocks.evaluateSignupActivationSession,
+  resolveSignupActivationFailure: mocks.resolveSignupActivationFailure,
 }));
 vi.mock("@/modules/signup/verification-context", () => ({
   runWithSignupActivation: mocks.runWithSignupActivation,
@@ -38,26 +34,37 @@ vi.mock("@/modules/signup/verification-context", () => ({
 
 import { GET } from "@/app/api/signup/activate/route";
 
-const currentToken = {
+const rawToken = "a".repeat(43);
+const candidate = {
+  userId: "pending-user",
   identifier: "pending@example.test",
-  token: "hashed-token",
-  expires: new Date(Date.now() + 60_000),
-  purpose: "SIGNUP",
-  locale: "es",
-  deliveredAt: new Date(),
+  tokenHash: "hashed-token",
+  locale: "es" as const,
 };
 
-function request(query = "token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678") {
-  return new NextRequest(`https://app.example.test/api/signup/activate?${query}`);
+function request(query = `token=${rawToken}`, headers?: HeadersInit) {
+  return new NextRequest(
+    `https://app.example.test/api/signup/activate?${query}`,
+    { headers },
+  );
 }
 
 describe("GET /api/signup/activate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("TRUST_PROXY_HEADERS", "false");
-    mocks.hashSignupToken.mockReturnValue("hashed-token");
-    mocks.tokenFindUnique.mockResolvedValue(currentToken);
-    mocks.userFindUnique.mockResolvedValue({ id: "pending-user", status: "PENDING" });
+    mocks.preflightSignupActivation.mockResolvedValue({
+      status: "eligible_candidate",
+      candidate,
+    });
+    mocks.evaluateSignupActivationSession.mockReturnValue({
+      status: "eligible",
+      candidate,
+    });
+    mocks.resolveSignupActivationFailure.mockResolvedValue({
+      status: "invalid_link",
+      locale: candidate.locale,
+    });
     mocks.currentSession = null;
     mocks.authGet.mockImplementation((delegatedRequest: NextRequest) => {
       if (delegatedRequest.nextUrl.pathname === "/api/auth/session") {
@@ -83,24 +90,24 @@ describe("GET /api/signup/activate", () => {
       expect(response.headers.get("location")).toBe(
         "https://app.example.test/signup?state=invalid_link",
       );
-      expect(mocks.tokenFindUnique).not.toHaveBeenCalled();
+      expect(mocks.preflightSignupActivation).not.toHaveBeenCalled();
     },
   );
 
   it("rejects a non-canonical request host", async () => {
     const response = await GET(
       new NextRequest(
-        "https://evil.example.test/api/signup/activate?token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
+        `https://evil.example.test/api/signup/activate?token=${rawToken}`,
       ),
     );
     expect(response.status).toBe(421);
-    expect(mocks.tokenFindUnique).not.toHaveBeenCalled();
+    expect(mocks.preflightSignupActivation).not.toHaveBeenCalled();
   });
 
   it("ignores spoofed forwarded origin headers when proxy trust is disabled", async () => {
     const response = await GET(
       new NextRequest(
-        "http://evil.example.test/api/signup/activate?token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
+        `http://evil.example.test/api/signup/activate?token=${rawToken}`,
         {
           headers: {
             "x-forwarded-host": "app.example.test",
@@ -111,7 +118,7 @@ describe("GET /api/signup/activate", () => {
     );
 
     expect(response.status).toBe(421);
-    expect(mocks.tokenFindUnique).not.toHaveBeenCalled();
+  expect(mocks.preflightSignupActivation).not.toHaveBeenCalled();
   });
 
   it("accepts canonical forwarded origin headers only from the trusted proxy", async () => {
@@ -119,7 +126,7 @@ describe("GET /api/signup/activate", () => {
 
     const response = await GET(
       new NextRequest(
-        "http://app:3000/api/signup/activate?token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678",
+        `http://app:3000/api/signup/activate?token=${rawToken}`,
         {
           headers: {
             "x-forwarded-host": "app.example.test",
@@ -133,34 +140,42 @@ describe("GET /api/signup/activate", () => {
     expect(response.headers.get("location")).toBe("https://app.example.test/es");
   });
 
-  it.each([
-    { token: null, case: "missing" },
-    {
-      token: { ...currentToken, expires: new Date(Date.now() - 1) },
-      case: "expired",
+  it.each(["en", "ca"] as const)(
+    "maps an invalid preflight to the %s localized result without Auth.js",
+    async (locale) => {
+      mocks.preflightSignupActivation.mockResolvedValue({
+        status: "invalid_link",
+        locale,
+      });
+
+      const response = await GET(request());
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe(
+        locale === "en"
+          ? "https://app.example.test/signup?state=invalid_link"
+          : "https://app.example.test/ca/signup?state=invalid_link",
+      );
+      expect(mocks.authGet).not.toHaveBeenCalled();
+      expect(mocks.evaluateSignupActivationSession).not.toHaveBeenCalled();
     },
-    {
-      token: { ...currentToken, purpose: "LOGIN" },
-      case: "wrong purpose",
-    },
-    {
-      token: { ...currentToken, deliveredAt: null },
-      case: "delivery unconfirmed",
-    },
-  ])("maps $case token state to one localized invalid result", async ({ token }) => {
-    mocks.tokenFindUnique.mockResolvedValue(token);
-    const response = await GET(request());
-    expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toContain("/signup?state=invalid_link");
-    expect(mocks.authGet).not.toHaveBeenCalled();
-  });
+  );
 
   it("preserves a different session without consuming or delegating", async () => {
     mocks.currentSession = { user: { id: "other-user" } };
+    mocks.evaluateSignupActivationSession.mockReturnValue({
+      status: "session_conflict",
+      locale: candidate.locale,
+    });
+
     const response = await GET(request());
 
     expect(response.headers.get("location")).toBe(
       "https://app.example.test/es/signup?state=session_conflict",
+    );
+    expect(mocks.evaluateSignupActivationSession).toHaveBeenCalledWith(
+      candidate,
+      "other-user",
     );
     expect(
       mocks.authGet.mock.calls.some(
@@ -173,7 +188,11 @@ describe("GET /api/signup/activate", () => {
   });
 
   it("delegates a server-built safe localized callback to Auth.js", async () => {
-    const response = await GET(request("token=abcdefghijklmnopqrstuvwxyzABCDEFGH012345678&callbackUrl=https://evil.example"));
+    const response = await GET(
+      request(`token=${rawToken}&callbackUrl=https://evil.example`, {
+        "x-request-id": "activation-request",
+      }),
+    );
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("https://app.example.test/es");
@@ -184,17 +203,31 @@ describe("GET /api/signup/activate", () => {
         "/api/auth/callback/signup",
     )?.[0] as NextRequest;
     expect(delegatedRequest.nextUrl.pathname).toBe("/api/auth/callback/signup");
+    expect(delegatedRequest.nextUrl.searchParams.get("token")).toBe(rawToken);
+    expect(delegatedRequest.nextUrl.searchParams.get("email")).toBe(
+      candidate.identifier,
+    );
     expect(delegatedRequest.nextUrl.searchParams.get("callbackUrl")).toBe("/es");
     expect(delegatedRequest.nextUrl.searchParams.get("callbackUrl")).not.toContain("evil");
+    expect(delegatedRequest.headers.get("x-request-id")).toBe(
+      "activation-request",
+    );
+    expect(mocks.preflightSignupActivation).toHaveBeenCalledWith(rawToken);
+    expect(mocks.evaluateSignupActivationSession).toHaveBeenCalledWith(
+      candidate,
+      null,
+    );
+    expect(mocks.runWithSignupActivation).toHaveBeenCalledWith(
+      { identifier: candidate.identifier, token: candidate.tokenHash },
+      expect.any(Function),
+    );
   });
 
   it("maps post-activation session failure to durable localized login recovery", async () => {
-    mocks.tokenFindUnique
-      .mockResolvedValueOnce(currentToken)
-      .mockResolvedValueOnce(null);
-    mocks.userFindUnique
-      .mockResolvedValueOnce({ id: "pending-user", status: "PENDING" })
-      .mockResolvedValueOnce({ id: "pending-user", status: "ACTIVE" });
+    mocks.resolveSignupActivationFailure.mockResolvedValue({
+      status: "session_failed",
+      locale: candidate.locale,
+    });
     mocks.authGet.mockImplementation((delegatedRequest: NextRequest) =>
       delegatedRequest.nextUrl.pathname === "/api/auth/session"
         ? Promise.resolve(Response.json(null))
@@ -212,5 +245,23 @@ describe("GET /api/signup/activate", () => {
       "https://app.example.test/es/signup?state=session_failed",
     );
     expect(response.headers.get("set-cookie")).toBeNull();
+    expect(mocks.resolveSignupActivationFailure).toHaveBeenCalledWith(candidate);
+  });
+
+  it("maps a thrown Auth.js callback to the generic localized fallback", async () => {
+    mocks.authGet.mockImplementation((delegatedRequest: NextRequest) =>
+      delegatedRequest.nextUrl.pathname === "/api/auth/session"
+        ? Promise.resolve(Response.json(null))
+        : Promise.reject(new Error("provider failure")),
+    );
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe(
+      "https://app.example.test/es/signup?state=invalid_link",
+    );
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(mocks.resolveSignupActivationFailure).toHaveBeenCalledWith(candidate);
   });
 });

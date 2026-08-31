@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   findExistingLoginEmail: vi.fn<() => Promise<string | null>>(() =>
     Promise.resolve("target@example.test"),
   ),
-  acceptedLoginResponse: vi.fn(() => Promise.resolve(Response.json({ status: "accepted" }))),
+  waitForAcceptedLogin: vi.fn(() => Promise.resolve()),
   hashLoginEmail: vi.fn((email: string) => email),
   getProviderAvailability: vi.fn(() =>
     Promise.resolve({ available: true, retryAfterSeconds: 0 }),
@@ -43,9 +43,9 @@ vi.mock("@/lib/auth-csrf", () => ({
   validateAuthCsrfToken: mocks.validateAuthCsrfToken,
 }));
 vi.mock("@/modules/login/service", () => ({
-  acceptedLoginResponse: mocks.acceptedLoginResponse,
   findExistingLoginEmail: mocks.findExistingLoginEmail,
   hashLoginEmail: mocks.hashLoginEmail,
+  waitForAcceptedLogin: mocks.waitForAcceptedLogin,
 }));
 vi.mock("@/lib/provider-availability", () => ({
   getProviderAvailability: mocks.getProviderAvailability,
@@ -80,6 +80,8 @@ describe("Auth.js route rate limiting", () => {
     mocks.validateAuthCsrfToken.mockReturnValue(true);
     mocks.findExistingLoginEmail.mockReset();
     mocks.findExistingLoginEmail.mockResolvedValue("target@example.test");
+    mocks.waitForAcceptedLogin.mockReset();
+    mocks.waitForAcceptedLogin.mockResolvedValue(undefined);
     mocks.getProviderAvailability.mockReset();
     mocks.getProviderAvailability.mockResolvedValue({
       available: true,
@@ -298,7 +300,22 @@ describe("Auth.js route rate limiting", () => {
     const response = await POST(request, routeContext);
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ status: "accepted" });
+    expect(mocks.waitForAcceptedLogin).toHaveBeenCalledOnce();
     expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("returns the canonical response after delegating a known email", async () => {
+    const request = new NextRequest("https://example.test/api/auth/signin/email", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "email=target%40example.test&csrfToken=csrf&callbackUrl=%2F&json=true",
+    });
+
+    const response = await POST(request, routeContext);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ status: "accepted" });
+    expect(mocks.post).toHaveBeenCalledOnce();
+    expect(mocks.waitForAcceptedLogin).toHaveBeenCalledOnce();
   });
 
   it("returns shared provider unavailability before account lookup", async () => {

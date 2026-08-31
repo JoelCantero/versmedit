@@ -1,24 +1,20 @@
 import { NextRequest } from "next/server";
 
-import { UserStatus, VerificationPurpose } from "@/generated/prisma/client";
-
 import { GET as authGet } from "@/app/api/auth/[...nextauth]/route";
-import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { isCanonicalRequestOrigin } from "@/lib/request-context";
 import {
   getAccountDataPath,
   getAccountDeletionIntentPath,
 } from "@/modules/account/deletion/schema";
-import { hashAccountDeletionToken } from "@/modules/account/deletion/token";
+import {
+  evaluateAccountDeletionVerificationSession,
+  preflightAccountDeletionVerification,
+} from "@/modules/account/deletion/service";
 import { runWithAccountDeletionVerification } from "@/modules/account/deletion/verification-context";
 import type { AccountLocale } from "@/modules/account/types";
 
 const RAW_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
-
-function isAccountLocale(value: unknown): value is AccountLocale {
-  return value === "en" || value === "es" || value === "ca";
-}
 
 function stateRedirect(
   origin: string,
@@ -57,42 +53,32 @@ export async function GET(request: NextRequest) {
     return stateRedirect(canonical.origin, "en", "invalid_link");
   }
 
-  const tokenHash = hashAccountDeletionToken(rawToken, env.AUTH_SECRET);
-  const storedToken = await db.verificationToken.findUnique({
-    where: { token: tokenHash },
-  });
-  const locale: AccountLocale = isAccountLocale(storedToken?.locale)
-    ? storedToken.locale
-    : "en";
-  if (
-    !storedToken ||
-    storedToken.purpose !== VerificationPurpose.ACCOUNT_DELETION ||
-    !storedToken.deliveredAt ||
-    storedToken.expires.getTime() <= Date.now()
-  ) {
-    return stateRedirect(canonical.origin, locale, "invalid_link");
-  }
-
-  const targetUser = await db.user.findUnique({
-    where: { normalizedEmail: storedToken.identifier },
-    select: { id: true, status: true },
-  });
-  if (!targetUser || targetUser.status !== UserStatus.ACTIVE) {
-    return stateRedirect(canonical.origin, locale, "invalid_link");
+  const preflight = await preflightAccountDeletionVerification(rawToken);
+  if (preflight.status === "invalid_link") {
+    return stateRedirect(canonical.origin, preflight.locale, "invalid_link");
   }
 
   const currentUserId = await getCurrentSessionUserId(request, canonical.origin);
-  if (currentUserId && currentUserId !== targetUser.id) {
-    return stateRedirect(canonical.origin, locale, "session_conflict");
+  const sessionResult = evaluateAccountDeletionVerificationSession(
+    preflight.candidate,
+    currentUserId,
+  );
+  if (sessionResult.status === "session_conflict") {
+    return stateRedirect(
+      canonical.origin,
+      sessionResult.locale,
+      "session_conflict",
+    );
   }
 
-  const callbackUrl = getAccountDeletionIntentPath(locale);
+  const { candidate } = sessionResult;
+  const callbackUrl = getAccountDeletionIntentPath(candidate.locale);
   const delegatedUrl = new URL(
     "/api/auth/callback/account-deletion",
     canonical.origin,
   );
   delegatedUrl.searchParams.set("token", rawToken);
-  delegatedUrl.searchParams.set("email", storedToken.identifier);
+  delegatedUrl.searchParams.set("email", candidate.identifier);
   delegatedUrl.searchParams.set("callbackUrl", callbackUrl);
   const delegatedRequest = new NextRequest(delegatedUrl, {
     method: "GET",
@@ -102,7 +88,7 @@ export async function GET(request: NextRequest) {
   let authResponse: Response | null = null;
   try {
     authResponse = await runWithAccountDeletionVerification(
-      { identifier: storedToken.identifier, token: tokenHash },
+      { identifier: candidate.identifier, token: candidate.tokenHash },
       () =>
         authGet(delegatedRequest, {
           params: Promise.resolve({
@@ -128,5 +114,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return stateRedirect(canonical.origin, locale, "invalid_link");
+  return stateRedirect(canonical.origin, candidate.locale, "invalid_link");
 }

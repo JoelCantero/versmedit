@@ -8,7 +8,7 @@ import type { LoginLocale } from "@/modules/login/types";
 const ACCEPTED_FLOOR_MS = 500;
 const ACCEPTED_JITTER_MS = 100;
 
-interface AcceptedLoginResponseOptions {
+interface WaitForAcceptedLoginOptions {
   startedAt: number;
   now?: () => number;
   random?: () => number;
@@ -34,13 +34,13 @@ export function getLoginErrorPath(locale: LoginLocale) {
   return locale === "en" ? "/login/error" : `/${locale}/login/error`;
 }
 
-export async function acceptedLoginResponse({
+export async function waitForAcceptedLogin({
   startedAt,
   now = Date.now,
   random = Math.random,
   sleep = (milliseconds) =>
     new Promise((resolve) => setTimeout(resolve, milliseconds)),
-}: AcceptedLoginResponseOptions) {
+}: WaitForAcceptedLoginOptions): Promise<void> {
   const jitter = Math.floor(random() * (ACCEPTED_JITTER_MS + 1));
   const targetAt = startedAt + ACCEPTED_FLOOR_MS + jitter;
   let remaining = targetAt - now();
@@ -48,5 +48,4 @@ export async function acceptedLoginResponse({
     await sleep(remaining);
     remaining = targetAt - now();
   }
-  return Response.json({ status: "accepted" });
 }

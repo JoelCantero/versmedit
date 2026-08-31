@@ -3,7 +3,7 @@ import type {
   PersonalDataExportContributor,
   PersonalDataExportReadContext,
   PersonalDataModuleDeclaration,
-} from "@/modules/account/data-export/types";
+} from "@/modules/account/data-export/internal-types";
 
 export interface FixtureJournalEntry {
   readonly id: string;

@@ -5,7 +5,7 @@ import type {
   PersonalDataExportContributor,
   PersonalDataExportReadContext,
   PersonalDataModuleDeclaration,
-} from "@/modules/account/data-export/types";
+} from "@/modules/account/data-export/internal-types";
 
 export const policyAcceptancesDataExportDeclaration: PersonalDataModuleDeclaration = Object.freeze({
   namespace: "policyAcceptances",

@@ -112,10 +112,9 @@ check succeeds for that exact revision, CI invokes
 named by the `RUNNER_NAME` Variable. For a manual verified deployment, dispatch the `CI` workflow
 from `main`; the deployment workflow cannot be dispatched directly.
 
-The same workflow also runs on GitHub's merge queue (`merge_group`), which validates the exact
-commit that will land on `main` and allows several pull requests to be validated in parallel. When a
-successful CI run already exists for the revision pushed to `main`, the push run reuses it and only
-builds and deploys. Any revision without such a run is validated in full.
+The pull-request run validates the merge result, and its `Build` job records that validated tree.
+When the squashed commit pushed to `main` has the same tree, CI reuses that result and only builds
+and deploys. Any revision whose tree has not been validated is checked in full.
 
 1. `rsync` the repository into the deploy directory (`DEPLOY_BASE_DIR`/`PROJECT_NAME`).
 2. Ensure the external `traefik_network` exists.

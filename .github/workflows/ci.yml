@@ -9,15 +9,12 @@ on:
   pull_request:
     branches:
       - main
-  merge_group:
-    branches:
-      - main
   push:
     branches:
       - main
 
-# Cancel superseded PR runs, but never interrupt a merge-queue entry or a main
-# validation that may already be deploying to production.
+# Cancel superseded PR runs, but never interrupt a main validation that may
+# already be deploying to production.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -44,6 +41,7 @@ jobs:
     outputs:
       email_preview: ${{ steps.filter.outputs.email_preview }}
       images: ${{ steps.filter.outputs.images }}
+      tree: ${{ steps.prior.outputs.tree }}
       validate: ${{ steps.prior.outputs.validate }}
 
     steps:
@@ -53,36 +51,37 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Reuse a previous validation of the same commit
+      - name: Reuse a previous validation of the same tree
         id: prior
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
-          HEAD_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
 
+          # A pull request run checks out the merge result, whose tree is what a
+          # squash merge writes to main, so the same content is never validated
+          # twice.
+          tree="$(git rev-parse 'HEAD^{tree}')"
           validate=true
-          # The merge queue validates the exact commit that lands on main, so the
-          # push run only has to build and deploy it.
+
           if [[ "$EVENT_NAME" == "push" ]]; then
-            successful_runs=$(
+            validated=$(
               gh api \
                 --method GET \
-                "repos/${REPOSITORY}/actions/workflows/ci.yml/runs" \
-                -f head_sha="$HEAD_SHA" \
-                -f status=completed \
+                "repos/${REPOSITORY}/actions/artifacts" \
+                -f name="validated-tree-${tree}" \
                 -f per_page=100 \
-                --jq "[.workflow_runs[] | select(.conclusion == \"success\" and (.id | tostring) != \"${RUN_ID}\")] | length"
+                --jq '[.artifacts[] | select(.expired == false and .workflow_run != null and .workflow_run.repository_id == .workflow_run.head_repository_id)] | length'
             )
-            if [[ "$successful_runs" -gt 0 ]]; then
+            if [[ "$validated" -gt 0 ]]; then
               validate=false
             fi
           fi
 
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
           echo "validate=$validate" >> "$GITHUB_OUTPUT"
 
       - name: Classify changed files
@@ -90,8 +89,8 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -Eeuo pipefail
 
@@ -409,8 +408,8 @@ jobs:
             exit 1
           fi
 
-          # The merge queue already validated this exact commit, so main only
-          # reuses that result instead of repeating every gate.
+          # A previous run already validated this exact tree, so main reuses
+          # that result instead of repeating every gate.
           if [[ "$VALIDATE" != "true" ]]; then
             for reused_result in \
               "$QUALITY_RESULT" \
@@ -423,7 +422,7 @@ jobs:
                 exit 1
               fi
             done
-            echo "Reusing the successful validation already recorded for this commit."
+            echo "Reusing the successful validation already recorded for this tree."
             exit 0
           fi
 
@@ -443,6 +442,25 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Record the validated tree
+        if: needs.changes.outputs.validate == 'true'
+        shell: bash
+        env:
+          TREE: ${{ needs.changes.outputs.tree }}
+        run: |
+          set -Eeuo pipefail
+
+          mkdir -p validated-tree
+          printf '%s\n' "$TREE" > validated-tree/tree
+
+      - name: Publish the validated tree
+        if: needs.changes.outputs.validate == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: validated-tree-${{ needs.changes.outputs.tree }}
+          path: validated-tree/tree
+          retention-days: 90
 
   deploy:
     name: Deploy validated main

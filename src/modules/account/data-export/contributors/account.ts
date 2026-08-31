@@ -5,7 +5,7 @@ import type {
   PersonalDataExportContributor,
   PersonalDataExportReadContext,
   PersonalDataModuleDeclaration,
-} from "@/modules/account/data-export/types";
+} from "@/modules/account/data-export/internal-types";
 
 export const accountDataExportDeclaration: PersonalDataModuleDeclaration = Object.freeze({
   namespace: "account",

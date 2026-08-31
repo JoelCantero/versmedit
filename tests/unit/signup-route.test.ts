@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   validateAuthCsrfToken: vi.fn(),
   getProviderAvailability: vi.fn(),
   processSignup: vi.fn(),
-  acceptedSignupResponse: vi.fn(),
+  waitForAcceptedSignup: vi.fn(),
   logWarn: vi.fn(),
   env: {
     NEXTAUTH_URL: "https://app.example.test",
@@ -35,7 +35,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 vi.mock("@/modules/signup/service", () => ({
   processSignup: mocks.processSignup,
-  acceptedSignupResponse: mocks.acceptedSignupResponse,
+  waitForAcceptedSignup: mocks.waitForAcceptedSignup,
 }));
 
 import { POST } from "@/app/api/signup/route";
@@ -90,9 +90,7 @@ describe("POST /api/signup", () => {
       retryAfterSeconds: 0,
     });
     mocks.processSignup.mockResolvedValue({ outcome: "onboarding_sent" });
-    mocks.acceptedSignupResponse.mockResolvedValue(
-      Response.json({ status: "accepted" }),
-    );
+    mocks.waitForAcceptedSignup.mockResolvedValue(undefined);
     mocks.env.MAIL.enabled = true;
   });
 
@@ -374,7 +372,7 @@ describe("POST /api/signup", () => {
 
       await POST(request());
 
-      expect(mocks.acceptedSignupResponse).toHaveBeenCalledWith({
+      expect(mocks.waitForAcceptedSignup).toHaveBeenCalledWith({
         startedAt: 23_456,
       });
       now.mockRestore();
@@ -384,7 +382,7 @@ describe("POST /api/signup", () => {
   it("passes the request-start timestamp to the response floor", async () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(12_345);
     await POST(request());
-    expect(mocks.acceptedSignupResponse).toHaveBeenCalledWith({
+    expect(mocks.waitForAcceptedSignup).toHaveBeenCalledWith({
       startedAt: 12_345,
     });
     now.mockRestore();

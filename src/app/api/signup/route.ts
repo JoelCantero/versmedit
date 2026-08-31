@@ -12,8 +12,8 @@ import {
 import { consumeSharedRateLimit } from "@/lib/shared-rate-limit";
 import { signupRequestSchema } from "@/modules/signup/schema";
 import {
-  acceptedSignupResponse,
   processSignup,
+  waitForAcceptedSignup,
 } from "@/modules/signup/service";
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60_000;
@@ -118,5 +118,6 @@ export async function POST(request: NextRequest) {
   } catch {
     // Valid isolated failures retain the same accepted public result.
   }
-  return acceptedSignupResponse({ startedAt });
+  await waitForAcceptedSignup({ startedAt });
+  return Response.json({ status: "accepted" });
 }

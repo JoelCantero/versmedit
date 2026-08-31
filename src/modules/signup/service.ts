@@ -36,7 +36,7 @@ interface ProcessSignupOptions {
   now?: () => Date;
 }
 
-interface AcceptedSignupResponseOptions {
+interface WaitForAcceptedSignupOptions {
   startedAt: number;
   now?: () => number;
   random?: () => number;
@@ -328,13 +328,13 @@ export async function processSignup(
   return { outcome };
 }
 
-export async function acceptedSignupResponse({
+export async function waitForAcceptedSignup({
   startedAt,
   now = Date.now,
   random = Math.random,
   sleep = (milliseconds) =>
     new Promise((resolve) => setTimeout(resolve, milliseconds)),
-}: AcceptedSignupResponseOptions) {
+}: WaitForAcceptedSignupOptions): Promise<void> {
   const jitter = Math.floor(random() * (ACCEPTED_JITTER_MS + 1));
   const targetAt = startedAt + ACCEPTED_FLOOR_MS + jitter;
   let remaining = targetAt - now();
@@ -342,5 +342,4 @@ export async function acceptedSignupResponse({
     await sleep(remaining);
     remaining = targetAt - now();
   }
-  return Response.json({ status: "accepted" });
 }

@@ -12,8 +12,8 @@ import { consumeSharedRateLimit } from "@/lib/shared-rate-limit";
 import { getAccountDeletionVerificationAuthorization } from "@/modules/account/deletion/verification-context";
 import { parseLoginEmail } from "@/modules/login/schema";
 import {
-	acceptedLoginResponse,
 	findExistingLoginEmail,
+	waitForAcceptedLogin,
 } from "@/modules/login/service";
 import { runWithVerificationContext } from "@/modules/login/verification-context";
 import { getSignupActivationAuthorization } from "@/modules/signup/verification-context";
@@ -131,7 +131,10 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 	}
 
 	const existingEmail = await findExistingLoginEmail(normalizedEmail);
-	if (!existingEmail) return acceptedLoginResponse({ startedAt });
+	if (!existingEmail) {
+		await waitForAcceptedLogin({ startedAt });
+		return Response.json({ status: "accepted" });
+	}
 
 	formData?.set("email", existingEmail);
 	const delegatedBody = new URLSearchParams();
@@ -154,7 +157,8 @@ export async function POST(request: NextRequest, context: AuthRouteContext) {
 			// Delivery failures are compensated inside the provider and remain private.
 		}
 	});
-	return acceptedLoginResponse({ startedAt });
+	await waitForAcceptedLogin({ startedAt });
+	return Response.json({ status: "accepted" });
 }
 
 function rateLimitResponse(

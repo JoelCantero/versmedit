@@ -4,7 +4,7 @@ import "dotenv/config";
 
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import type { PersonalDataExportContributor } from "@/modules/account/data-export/types";
+import type { PersonalDataExportContributor } from "@/modules/account/data-export/internal-types";
 
 import {
   createFixtureProductContributor,

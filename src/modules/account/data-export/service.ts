@@ -9,6 +9,11 @@ import {
 import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { sendPersonalDataExportEmail } from "@/modules/account/data-export/email";
+import type {
+  PersonalDataContribution,
+  PersonalDataExportRegistry,
+  PersonalDataModuleDeclaration,
+} from "@/modules/account/data-export/internal-types";
 import {
   consumePersonalDataExportGenerationSessionLimit,
   consumePersonalDataExportRequestAccountLimit,
@@ -25,14 +30,11 @@ import {
 import {
   PERSONAL_DATA_EXPORT_ENVELOPE_SCHEMA_VERSION,
   type PersonalDataExportAuthorizationState,
-  type PersonalDataContribution,
   type PersonalDataExportEnvelopeV1,
   type PersonalDataExportGenerationResult,
-  type PersonalDataExportRegistry,
   type PersonalDataExportRequestResult,
   type PersonalDataExportSection,
   type PersonalDataExportVerificationResult,
-  type PersonalDataModuleDeclaration,
 } from "@/modules/account/data-export/types";
 import { resolveActiveAccountSession } from "@/modules/account/session";
 import type { AccountLocale } from "@/modules/account/types";

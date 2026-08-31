@@ -14,9 +14,9 @@ vi.mock("@/lib/db", () => ({
 }));
 
 import {
-  acceptedLoginResponse,
   findExistingLoginEmail,
   getLoginCallbackPath,
+  waitForAcceptedLogin,
 } from "@/modules/login/service";
 
 describe("login service", () => {
@@ -69,21 +69,21 @@ describe("login service", () => {
     expect(getLoginCallbackPath(locale)).toBe(path);
   });
 
-  it("returns the canonical response only after the controlled floor", async () => {
+  it("resolves only after the controlled floor", async () => {
     const sleep = vi.fn().mockResolvedValue(undefined);
     const now = vi.fn()
       .mockReturnValueOnce(1_125)
       .mockReturnValueOnce(1_549)
       .mockReturnValue(1_550);
-    const response = await acceptedLoginResponse({
-      startedAt: 1_000,
-      now,
-      random: () => 0.5,
-      sleep,
-    });
+    await expect(
+      waitForAcceptedLogin({
+        startedAt: 1_000,
+        now,
+        random: () => 0.5,
+        sleep,
+      }),
+    ).resolves.toBeUndefined();
 
     expect(sleep.mock.calls).toEqual([[425], [1]]);
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ status: "accepted" });
   });
 });

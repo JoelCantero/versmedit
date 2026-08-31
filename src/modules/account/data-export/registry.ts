@@ -1,9 +1,11 @@
+import type {
+  PersonalDataExportContributor,
+  PersonalDataExportRegistry,
+  PersonalDataModuleDeclaration,
+} from "@/modules/account/data-export/internal-types";
 import {
   personalDataClassifications,
   type PersonalDataClassification,
-  type PersonalDataExportContributor,
-  type PersonalDataExportRegistry,
-  type PersonalDataModuleDeclaration,
 } from "@/modules/account/data-export/types";
 
 const NAMESPACE_PATTERN =

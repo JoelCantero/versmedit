@@ -48,11 +48,11 @@ vi.mock("@/modules/signup/email", () => ({
 }));
 
 import {
-  acceptedSignupResponse,
   evaluateSignupActivationSession,
   preflightSignupActivation,
   processSignup,
   resolveSignupActivationFailure,
+  waitForAcceptedSignup,
 } from "@/modules/signup/service";
 
 const request = {
@@ -439,15 +439,15 @@ describe("signup service", () => {
       .mockReturnValueOnce(1_125)
       .mockReturnValueOnce(1_549)
       .mockReturnValue(1_550);
-    const response = await acceptedSignupResponse({
-      startedAt: 1_000,
-      now,
-      random: () => 0.5,
-      sleep,
-    });
+    await expect(
+      waitForAcceptedSignup({
+        startedAt: 1_000,
+        now,
+        random: () => 0.5,
+        sleep,
+      }),
+    ).resolves.toBeUndefined();
 
     expect(sleep.mock.calls).toEqual([[425], [1]]);
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ status: "accepted" });
   });
 });

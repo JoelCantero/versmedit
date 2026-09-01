@@ -465,7 +465,10 @@ jobs:
   deploy:
     name: Deploy validated main
     needs: build
+    # Without a status function GitHub wraps this in success(), which the
+    # skipped validation jobs of a reused tree turn false.
     if: >-
+      always() && !cancelled() &&
       needs.build.result == 'success' &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch')

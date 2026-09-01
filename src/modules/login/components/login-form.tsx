@@ -18,8 +18,21 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  LoginCheckEmail,
+  type LoginCheckEmailMessages,
+} from "@/modules/login/components/login-check-email";
+import {
+  LoginCodeForm,
+  type LoginCodeFormMessages,
+} from "@/modules/login/components/login-code-form";
 import { parseLoginEmail } from "@/modules/login/schema";
-import type { LoginLocale, LoginResult, LoginUiState } from "@/modules/login/types";
+import type {
+  LoginLocale,
+  LoginResult,
+  LoginStep,
+  LoginUiState,
+} from "@/modules/login/types";
 
 export interface LoginFormMessages {
   ariaLabel: string;
@@ -34,6 +47,8 @@ export interface LoginFormMessages {
   invalidRequest: string;
   unavailable: string;
   rateLimited: string;
+  checkEmail: LoginCheckEmailMessages;
+  code: LoginCodeFormMessages;
 }
 
 interface LoginFormProps {
@@ -57,6 +72,16 @@ export function LoginForm({
 }: LoginFormProps) {
   const [state, setState] = useState<LoginUiState>("initial");
   const [statusMessage, setStatusMessage] = useState("");
+  const [step, setStep] = useState<LoginStep>("email");
+  const [pendingEmail, setPendingEmail] = useState("");
+
+  const trustedCallback = callbackUrl || (locale === "en" ? "/" : `/${locale}`);
+
+  function returnToEmailStep() {
+    setStep("email");
+    setState("initial");
+    setStatusMessage("");
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,7 +109,6 @@ export function LoginForm({
       }
       if (!token) throw new Error("missing CSRF token");
 
-      const trustedCallback = callbackUrl || (locale === "en" ? "/" : `/${locale}`);
       const body = new URLSearchParams({
         email,
         csrfToken: token,
@@ -101,6 +125,8 @@ export function LoginForm({
       if (result.status === "accepted") {
         setState("accepted");
         setStatusMessage(messages.accepted);
+        setPendingEmail(email);
+        setStep("checkEmail");
       } else if (result.status === "invalid_request") {
         setState("invalidRequest");
         setStatusMessage(messages.invalidRequest);
@@ -123,6 +149,32 @@ export function LoginForm({
   }
 
   const invalid = state === "invalidEmail";
+
+  if (step === "checkEmail") {
+    return (
+      <LoginCheckEmail
+        email={pendingEmail}
+        messages={messages.checkEmail}
+        onEnterCode={() => setStep("code")}
+        onBack={returnToEmailStep}
+      />
+    );
+  }
+
+  if (step === "code") {
+    return (
+      <LoginCodeForm
+        email={pendingEmail}
+        locale={locale}
+        callbackUrl={trustedCallback}
+        messages={messages.code}
+        onBack={returnToEmailStep}
+        csrfToken={csrfToken}
+        fetcher={fetcher}
+      />
+    );
+  }
+
   return (
     <Card>
       {title && (

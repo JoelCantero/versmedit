@@ -84,17 +84,19 @@ model DataExportAuthorization {
 }
 
 model VerificationToken {
-  identifier     String
-  token          String              @unique
-  expires        DateTime
-  purpose        VerificationPurpose @default(LOGIN)
-  proposedName   String?
-  locale         String?
-  termsVersion   String?
-  privacyVersion String?
-  acceptedAt     DateTime?
-  deliveredAt    DateTime?
-  createdAt      DateTime            @default(now())
+  identifier        String
+  token             String              @unique
+  expires           DateTime
+  purpose           VerificationPurpose @default(LOGIN)
+  loginCodeHash     String?
+  loginCodeAttempts Int                 @default(0)
+  proposedName      String?
+  locale            String?
+  termsVersion      String?
+  privacyVersion    String?
+  acceptedAt        DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime            @default(now())
 
   @@unique([identifier, token])
   @@index([identifier, purpose, expires])

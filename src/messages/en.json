@@ -1,15 +1,15 @@
 {
   "Email": {
     "loginMagicLink": {
-      "subject": "Your {productName} sign-in link",
-      "previewText": "Use this secure link to sign in to {productName}.",
-      "heading": "Sign in to {productName}",
+      "subject": "Your login code for {productName}",
+      "previewText": "Use the link or the code to sign in to {productName}.",
+      "heading": "Your login code for {productName}",
       "paragraphs": [
-        "Use this link to sign in. It can be used once and expires in 15 minutes.",
-        "If you did not request this link, you can ignore this email."
+        "Use the button below to sign in. It can be used once.",
+        "If you did not request this email, you can ignore it."
       ],
-      "actionLabel": "Sign in",
-      "fallbackInstruction": "Or copy and paste this address into your browser:",
+      "actionLabel": "Log in to {productName}",
+      "fallbackInstruction": "This link and code will only be valid for the next 5 minutes. If the link does not work, you can use the login verification code directly:",
       "supportLabel": "Questions? Contact",
       "termsLabel": "Terms of Use",
       "privacyLabel": "Privacy Notice",
@@ -438,7 +438,30 @@
       "submitIdle": "Send sign-in link",
       "submitPending": "Sending…",
       "retry": "Try again",
-      "goHome": "Go to home"
+      "goHome": "Go to home",
+      "backToLogin": "Back to login"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "description": "We've sent you a temporary login link. Please check your inbox at {email}.",
+      "actions": {
+        "enterCode": "Enter code manually"
+      }
+    },
+    "code": {
+      "title": "Enter your login code",
+      "description": "Type or paste the 10-character code from the email we sent you.",
+      "field": {
+        "label": "Login code",
+        "description": "Letters and numbers, exactly as they appear in the email."
+      },
+      "actions": {
+        "submitIdle": "Sign in",
+        "submitPending": "Checking…"
+      },
+      "states": {
+        "invalid": "That code is not valid. Request a new email and try again."
+      }
     },
     "states": {
       "sending": "Sending your sign-in link…",

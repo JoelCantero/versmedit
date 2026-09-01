@@ -54,6 +54,25 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
             invalidRequest: t("states.invalidRequest"),
             unavailable: t("states.unavailable"),
             rateLimited: t("states.rateLimited", { seconds: "{seconds}" }),
+            checkEmail: {
+              title: t("checkEmail.title"),
+              description: t("checkEmail.description", { email: "{email}" }),
+              enterCode: t("checkEmail.actions.enterCode"),
+              backToLogin: t("actions.backToLogin"),
+            },
+            code: {
+              title: t("code.title"),
+              description: t("code.description"),
+              fieldLabel: t("code.field.label"),
+              fieldDescription: t("code.field.description"),
+              submitIdle: t("code.actions.submitIdle"),
+              submitPending: t("code.actions.submitPending"),
+              invalidCode: t("code.states.invalid"),
+              invalidRequest: t("states.invalidRequest"),
+              unavailable: t("states.unavailable"),
+              rateLimited: t("states.rateLimited", { seconds: "{seconds}" }),
+              backToLogin: t("actions.backToLogin"),
+            },
           }}
         />
       </div>

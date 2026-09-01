@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { isLoginCode, normalizeLoginCode } from "@/modules/login/code";
 import { loginLocales } from "@/modules/login/types";
 
 const CALLBACK_PARSE_BASE = "https://app.local.test";
@@ -11,10 +12,20 @@ export const loginEmailSchema = z
   .max(254)
   .email();
 
+export const loginCodeSchema = z
+  .string()
+  .max(64)
+  .transform(normalizeLoginCode)
+  .refine(isLoginCode);
+
 export const loginLocaleSchema = z.enum(loginLocales);
 
 export function parseLoginEmail(value: unknown) {
   return loginEmailSchema.parse(value);
+}
+
+export function parseLoginCode(value: unknown) {
+  return loginCodeSchema.parse(value);
 }
 
 export function parseLoginLocale(value: unknown) {

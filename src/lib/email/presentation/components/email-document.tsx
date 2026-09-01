@@ -28,7 +28,7 @@ export type EmailDocumentProps = {
   readonly legalLabel: string;
   readonly action?: Pick<
     EmailActionProps,
-    "actionUrl" | "label" | "fallbackInstruction"
+    "actionUrl" | "label" | "fallbackInstruction" | "code"
   >;
 };
 

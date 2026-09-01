@@ -18,6 +18,25 @@ const messages = {
   invalidRequest: "Refresh and try again.",
   unavailable: "Email sign-in is temporarily unavailable.",
   rateLimited: "Try again in {seconds} seconds.",
+  checkEmail: {
+    title: "Check your email",
+    description: "We've sent you a temporary login link. Check your inbox at {email}.",
+    enterCode: "Enter code manually",
+    backToLogin: "Back to login",
+  },
+  code: {
+    title: "Enter your login code",
+    description: "Type or paste the 10-character code from the email.",
+    fieldLabel: "Login code",
+    fieldDescription: "Letters and numbers, exactly as in the email.",
+    submitIdle: "Sign in",
+    submitPending: "Checking...",
+    invalidCode: "That code is not valid.",
+    invalidRequest: "Refresh the page and try again.",
+    unavailable: "Email sign-in is temporarily unavailable.",
+    rateLimited: "Try again in {seconds} seconds.",
+    backToLogin: "Back to login",
+  },
 };
 
 async function expectNoAxeViolations(container: HTMLElement) {
@@ -84,6 +103,73 @@ describe("LoginForm accessibility", () => {
     expect(screen.getByText(messages.sending)).toHaveAttribute("role", "status");
 
     resolveRequest?.(Response.json({ status: "accepted" }));
-    await waitFor(() => expect(screen.getByText(messages.accepted)).toBeVisible());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: messages.checkEmail.title }),
+      ).toBeVisible(),
+    );
+  });
+
+  it("moves focus to each step heading and stays free of axe violations", async () => {
+    const { container } = render(
+      <LoginForm
+        locale="en"
+        callbackUrl="/"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={vi.fn(async () => Response.json({ status: "accepted" }))}
+      />,
+    );
+
+    await userEvent.type(screen.getByRole("textbox"), "person@example.test");
+    await userEvent.keyboard("{Enter}");
+
+    const confirmation = await screen.findByRole("heading", {
+      name: messages.checkEmail.title,
+    });
+    expect(confirmation).toHaveFocus();
+    await expectNoAxeViolations(container);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: messages.checkEmail.enterCode }),
+    );
+    const codeHeading = await screen.findByRole("heading", {
+      name: messages.code.title,
+    });
+    expect(codeHeading).toHaveFocus();
+    expect(screen.getByRole("textbox", { name: messages.code.fieldLabel }))
+      .toHaveAccessibleDescription(messages.code.fieldDescription);
+    await expectNoAxeViolations(container);
+  });
+
+  it("returns to a usable email form from every later step", async () => {
+    render(
+      <LoginForm
+        locale="en"
+        callbackUrl="/"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={vi.fn(async () => Response.json({ status: "accepted" }))}
+      />,
+    );
+
+    await userEvent.type(screen.getByRole("textbox"), "person@example.test");
+    await userEvent.keyboard("{Enter}");
+    await screen.findByRole("heading", { name: messages.checkEmail.title });
+    await userEvent.click(
+      screen.getByRole("button", { name: messages.checkEmail.backToLogin }),
+    );
+    expect(screen.getByLabelText(messages.emailLabel)).toBeEnabled();
+
+    await userEvent.type(screen.getByRole("textbox"), "person@example.test");
+    await userEvent.keyboard("{Enter}");
+    await userEvent.click(
+      await screen.findByRole("button", { name: messages.checkEmail.enterCode }),
+    );
+    await screen.findByRole("heading", { name: messages.code.title });
+    await userEvent.click(
+      screen.getByRole("button", { name: messages.code.backToLogin }),
+    );
+    expect(screen.getByLabelText(messages.emailLabel)).toBeEnabled();
   });
 });

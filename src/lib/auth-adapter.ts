@@ -9,8 +9,13 @@ import {
 } from "@/generated/prisma/client";
 
 import { db } from "@/lib/db";
+import { getEnv } from "@/lib/env";
 import { getAccountDeletionVerificationAuthorization } from "@/modules/account/deletion/verification-context";
-import { publishVerificationToken } from "@/modules/login/verification-context";
+import { generateLoginCode, hashLoginCode } from "@/modules/login/code-token";
+import {
+  getLoginCodeAuthorization,
+  publishVerificationToken,
+} from "@/modules/login/verification-context";
 import { getSignupActivationAuthorization } from "@/modules/signup/verification-context";
 
 function isPrismaRecordNotFound(error: unknown): boolean {
@@ -86,6 +91,12 @@ export function hardenAdapter(adapter: Adapter): Adapter {
 
   const createVerificationToken = (async (token) => {
     const normalizedIdentifier = token.identifier.trim().toLowerCase();
+    const code = generateLoginCode();
+    const codeHash = hashLoginCode({
+      identifier: normalizedIdentifier,
+      code,
+      secret: getEnv().AUTH_SECRET,
+    });
     await db.$transaction(async (transaction) => {
       await transaction.$executeRaw(Prisma.sql`
         SELECT pg_advisory_xact_lock(hashtextextended(${normalizedIdentifier}, 0))
@@ -107,18 +118,37 @@ export function hardenAdapter(adapter: Adapter): Adapter {
         },
       });
       await transaction.$executeRaw(Prisma.sql`
-        INSERT INTO "VerificationToken" ("identifier", "token", "expires", "purpose")
-        VALUES (${token.identifier}, ${token.token}, ${token.expires}, ${VerificationPurpose.LOGIN}::"VerificationPurpose")
+        INSERT INTO "VerificationToken" ("identifier", "token", "expires", "purpose", "loginCodeHash")
+        VALUES (${token.identifier}, ${token.token}, ${token.expires}, ${VerificationPurpose.LOGIN}::"VerificationPurpose", ${codeHash})
       `);
     });
     publishVerificationToken({
       identifier: token.identifier,
       token: token.token,
+      code,
     });
     return token;
   }) as Adapter["createVerificationToken"];
 
   const useVerificationToken = (async ({ identifier, token }) => {
+    const loginCodeAuthorization = getLoginCodeAuthorization();
+    if (
+      loginCodeAuthorization?.identifier === identifier &&
+      loginCodeAuthorization.token === token
+    ) {
+      const [consumedByCode] = await db.$queryRaw<
+        Array<{ identifier: string; token: string; expires: Date }>
+      >(Prisma.sql`
+        DELETE FROM "VerificationToken"
+        WHERE "identifier" = ${identifier}
+          AND "purpose" = ${VerificationPurpose.LOGIN}::"VerificationPurpose"
+          AND "loginCodeHash" = ${loginCodeAuthorization.codeHash}
+          AND "expires" > NOW()
+        RETURNING "identifier", "token", "expires"
+      `);
+      return consumedByCode ?? null;
+    }
+
     const deletionAuthorization =
       getAccountDeletionVerificationAuthorization();
     if (

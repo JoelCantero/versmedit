@@ -70,7 +70,7 @@ type OperationalVariant = (typeof operationalVariants)[number];
 
 const operationalHeadings = {
   en: {
-    loginMagicLink: "Sign in to",
+    loginMagicLink: "Your login code for",
     signupActivation: "Complete your signup",
     existingAccountSignupNotice: "An account already exists",
     accountDeletionReauthentication: "Continue account deletion",
@@ -78,7 +78,7 @@ const operationalHeadings = {
     personalDataExportConfirmation: "Confirm your data export",
   },
   es: {
-    loginMagicLink: "Inicia sesión en",
+    loginMagicLink: "Tu código de acceso a",
     signupActivation: "Completa tu registro",
     existingAccountSignupNotice: "Ya existe una cuenta",
     accountDeletionReauthentication: "Continúa con la eliminación de la cuenta",
@@ -86,7 +86,7 @@ const operationalHeadings = {
     personalDataExportConfirmation: "Confirma tu exportación de datos",
   },
   ca: {
-    loginMagicLink: "Inicia sessió a",
+    loginMagicLink: "El teu codi d'accés a",
     signupActivation: "Completa el teu registre",
     existingAccountSignupNotice: "Ja existeix un compte",
     accountDeletionReauthentication: "Continua amb l'eliminació del compte",
@@ -166,6 +166,10 @@ const operationalCases = EMAIL_LOCALES.flatMap((locale, localeIndex) =>
       actionUrl: operationalActionUrl(variant, locale),
       heading: operationalHeadings[locale][variant],
       copy: operationalLocaleCopy[locale],
+      extraValues:
+        variant === "loginMagicLink"
+          ? ({ verificationCode: "7K2QM9XPTR" } as const)
+          : ({} as const),
     };
   }),
 );
@@ -531,12 +535,13 @@ describe("email presentation shared contract", () => {
 
   it.each(operationalCases)(
     "renders complete branded $locale/$variant content with one business destination",
-    async ({ locale, variant, brand: caseBrand, actionUrl, heading, copy: localeCopy }) => {
+    async ({ locale, variant, brand: caseBrand, actionUrl, heading, copy: localeCopy, extraValues }) => {
       const rendered = await renderEmailPresentation({
         variant,
         locale,
         brand: caseBrand,
         actionUrl,
+        ...extraValues,
       });
       const normalizedHtml = rendered.html.replaceAll("&amp;", "&");
       const combined = `${rendered.subject}\n${normalizedHtml}\n${rendered.text}`;

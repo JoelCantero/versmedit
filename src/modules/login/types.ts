@@ -12,6 +12,16 @@ export type LoginUiState =
   | "unavailable"
   | "invalidLink";
 
+export type LoginStep = "email" | "checkEmail" | "code";
+
+export type LoginCodeUiState =
+  | "initial"
+  | "pending"
+  | "invalidCode"
+  | "invalidRequest"
+  | "rateLimited"
+  | "unavailable";
+
 export interface LoginRequest {
   email: string;
   csrfToken: string;
@@ -23,5 +33,13 @@ export type LoginResult =
   | { status: "accepted" }
   | { status: "invalid"; field: "email" }
   | { status: "invalid_request" }
+  | { status: "rate_limited"; retryAfter: number }
+  | { status: "unavailable" };
+
+export type LoginCodeResult =
+  | { status: "accepted"; redirectTo: string }
+  | { status: "invalid_code" }
+  | { status: "invalid_request" }
+  | { status: "misdirected_request" }
   | { status: "rate_limited"; retryAfter: number }
   | { status: "unavailable" };

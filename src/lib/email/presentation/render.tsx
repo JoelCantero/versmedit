@@ -12,6 +12,7 @@ import {
   EMAIL_VARIANT_DEFINITIONS,
   EMAIL_VARIANTS,
 } from "./constants";
+import { isLoginCode } from "@/modules/login/code";
 import { EmailDocument } from "./components/email-document";
 import { composeAccountDeletionReauthenticationBody } from "./templates/account-deletion-reauthentication";
 import { composeAccountDeletedBody } from "./templates/account-deleted";
@@ -213,6 +214,14 @@ function validateReference(value: unknown): string {
   return value;
 }
 
+function validateVerificationCode(value: unknown): string {
+  if (typeof value !== "string" || !isLoginCode(value)) {
+    presentationError("INVALID_INPUT", "verificationCode");
+  }
+
+  return value;
+}
+
 function validateNormalizedBrand(value: unknown): EmailBrand {
   if (!isRecord(value)) {
     presentationError("INVALID_BRAND", "brand");
@@ -298,6 +307,10 @@ export function validateEmailPresentationRequest(
       result.occurredAt = validateOccurredAt(input.occurredAt);
     } else if (key === "reference") {
       result.reference = validateReference(input.reference);
+    } else if (key === "verificationCode") {
+      result.verificationCode = validateVerificationCode(
+        input.verificationCode,
+      );
     }
   }
 
@@ -506,6 +519,10 @@ export async function renderResolvedEmailContent(
               actionUrl: requestValues.actionUrl as string,
               label: copy.actionLabel,
               fallbackInstruction: copy.fallbackInstruction,
+              code:
+                typeof requestValues.verificationCode === "string"
+                  ? requestValues.verificationCode
+                  : undefined,
             }
           : undefined
       }

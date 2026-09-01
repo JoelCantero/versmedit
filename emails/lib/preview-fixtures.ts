@@ -68,6 +68,7 @@ export function createPreviewRequest(
         locale,
         brand: PREVIEW_BRAND,
         actionUrl: actionUrl("/actions/login-magic-link"),
+        verificationCode: "7K2QM9XPTR",
       });
     case "signupActivation":
       return Object.freeze({

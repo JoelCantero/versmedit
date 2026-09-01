@@ -39,7 +39,10 @@ export type LocalizedEmailCopy =
   | InformationalLocalizedEmailCopy;
 
 export type EmailVariantValues = {
-  readonly loginMagicLink: { readonly actionUrl: string };
+  readonly loginMagicLink: {
+    readonly actionUrl: string;
+    readonly verificationCode: string;
+  };
   readonly signupActivation: { readonly actionUrl: string };
   readonly existingAccountSignupNotice: { readonly actionUrl: string };
   readonly accountDeletionReauthentication: { readonly actionUrl: string };

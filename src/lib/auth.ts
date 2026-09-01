@@ -16,6 +16,10 @@ const env = getEnv();
 
 type SignupLocale = "en" | "es" | "ca";
 
+export const LOGIN_CHALLENGE_MAX_AGE_SECONDS = 5 * 60;
+
+const INTERNAL_TOKEN_MAX_AGE_SECONDS = 15 * 60;
+
 interface VerificationRequest {
   identifier: string;
   url: string;
@@ -25,15 +29,17 @@ function createInternalEmailProvider({
   id,
   name,
   from,
+  maxAge,
   sendVerificationRequest,
 }: {
   id: "email" | "signup" | "account-deletion";
   name: "Email" | "Signup" | "Account deletion";
   from: string;
+  maxAge: number;
   sendVerificationRequest: (request: VerificationRequest) => Promise<void>;
 }) {
   const options = {
-    maxAge: 15 * 60,
+    maxAge,
     from,
     generateVerificationToken: () => createSignupToken().raw,
     sendVerificationRequest,
@@ -73,6 +79,7 @@ function createLoginProvider(from: string, brand: EmailBrand) {
     id: "email",
     name: "Email",
     from,
+    maxAge: LOGIN_CHALLENGE_MAX_AGE_SECONDS,
     sendVerificationRequest: async ({ identifier, url }) => {
       const verificationUrl = new URL(url);
       const locale = parseLocaleFromCallbackUrl(
@@ -81,11 +88,14 @@ function createLoginProvider(from: string, brand: EmailBrand) {
       );
 
       try {
+        const published = await getPublishedVerificationToken();
+        if (!published) throw new Error("Verification code was not published");
         const content = await renderEmailPresentation({
           variant: "loginMagicLink",
           locale,
           brand,
           actionUrl: url,
+          verificationCode: published.code,
         });
         const result = await sendTransactionalEmail({
           recipient: identifier,
@@ -116,6 +126,7 @@ function createSignupProvider(from: string) {
     id: "signup",
     name: "Signup",
     from,
+    maxAge: INTERNAL_TOKEN_MAX_AGE_SECONDS,
     sendVerificationRequest: async () => {
       throw new Error("Signup provider cannot initiate delivery");
     },
@@ -127,6 +138,7 @@ function createAccountDeletionProvider(from: string) {
     id: "account-deletion",
     name: "Account deletion",
     from,
+    maxAge: INTERNAL_TOKEN_MAX_AGE_SECONDS,
     sendVerificationRequest: async () => {
       throw new Error("Account deletion provider cannot initiate delivery");
     },

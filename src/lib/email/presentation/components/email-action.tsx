@@ -8,6 +8,7 @@ export type EmailActionProps = {
   readonly actionUrl: string;
   readonly label: string;
   readonly fallbackInstruction: string;
+  readonly code?: string;
   readonly primaryColor: EmailBrand["primaryColor"];
   readonly foreground: EmailBrand["actionForeground"];
 };
@@ -16,6 +17,7 @@ export function EmailAction({
   actionUrl,
   label,
   fallbackInstruction,
+  code,
   primaryColor,
   foreground,
 }: EmailActionProps) {
@@ -33,6 +35,7 @@ export function EmailAction({
         {label}
       </Button>
       <Text style={fallbackInstructionStyle}>{fallbackInstruction}</Text>
+      {code ? <Text style={codeStyle}>{code}</Text> : null}
       <Link href={actionUrl} style={fallbackUrlStyle}>
         {actionUrl}
       </Link>
@@ -67,4 +70,21 @@ const fallbackUrlStyle = {
   overflowWrap: "anywhere" as const,
   textDecoration: "underline",
   wordBreak: "break-all" as const,
+};
+
+const codeStyle = {
+  backgroundColor: "#F3F4F6",
+  border: "1px solid #E5E7EB",
+  borderRadius: "6px",
+  color: "#111827",
+  display: "inline-block",
+  fontFamily:
+    "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+  fontSize: "26px",
+  fontWeight: "700",
+  letterSpacing: "4px",
+  lineHeight: "34px",
+  margin: "6px 0 0",
+  padding: "12px 18px",
+  userSelect: "all" as const,
 };

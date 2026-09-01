@@ -27,7 +27,7 @@ export const EMAIL_VARIANT_DEFINITIONS = {
   loginMagicLink: {
     classification: "operational",
     actionMode: "credential",
-    valueKeys: ["actionUrl"],
+    valueKeys: ["actionUrl", "verificationCode"],
   },
   signupActivation: {
     classification: "operational",

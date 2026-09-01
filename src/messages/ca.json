@@ -1,15 +1,15 @@
 {
   "Email": {
     "loginMagicLink": {
-      "subject": "El teu enllaç d'accés a {productName}",
-      "previewText": "Utilitza aquest enllaç segur per iniciar sessió a {productName}.",
-      "heading": "Inicia sessió a {productName}",
+      "subject": "El teu codi d'accés a {productName}",
+      "previewText": "Utilitza l'enllaç o el codi per iniciar sessió a {productName}.",
+      "heading": "El teu codi d'accés a {productName}",
       "paragraphs": [
-        "Utilitza aquest enllaç per iniciar sessió. Només es pot utilitzar una vegada i caduca en 15 minuts.",
-        "Si no has sol·licitat aquest enllaç, pots ignorar aquest correu."
+        "Utilitza el botó de sota per iniciar sessió. Només es pot utilitzar una vegada.",
+        "Si no has sol·licitat aquest correu, pots ignorar-lo."
       ],
-      "actionLabel": "Inicia sessió",
-      "fallbackInstruction": "O copia i enganxa aquesta adreça al navegador:",
+      "actionLabel": "Inicia sessió a {productName}",
+      "fallbackInstruction": "Aquest enllaç i codi només seran vàlids durant els pròxims 5 minuts. Si l'enllaç no funciona, pots utilitzar directament aquest codi de verificació:",
       "supportLabel": "Tens preguntes? Contacta amb",
       "termsLabel": "Condicions d'ús",
       "privacyLabel": "Avís de privacitat",
@@ -438,7 +438,30 @@
       "submitIdle": "Envia l'enllaç d'accés",
       "submitPending": "Enviant…",
       "retry": "Torna-ho a provar",
-      "goHome": "Ves a l'inici"
+      "goHome": "Ves a l'inici",
+      "backToLogin": "Torna a l'inici de sessió"
+    },
+    "checkEmail": {
+      "title": "Revisa el teu correu",
+      "description": "T'hem enviat un enllaç temporal d'accés. Revisa la safata d'entrada de {email}.",
+      "actions": {
+        "enterCode": "Introdueix el codi manualment"
+      }
+    },
+    "code": {
+      "title": "Introdueix el teu codi d'accés",
+      "description": "Escriu o enganxa el codi de 10 caràcters del correu que t'hem enviat.",
+      "field": {
+        "label": "Codi d'accés",
+        "description": "Lletres i números, tal com apareixen al correu."
+      },
+      "actions": {
+        "submitIdle": "Inicia sessió",
+        "submitPending": "Comprovant…"
+      },
+      "states": {
+        "invalid": "Aquest codi no és vàlid. Sol·licita un correu nou i torna-ho a provar."
+      }
     },
     "states": {
       "sending": "Enviant el teu enllaç d'accés…",

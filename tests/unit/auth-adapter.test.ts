@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   deleteMany: vi.fn(),
   transaction: vi.fn(),
   publishVerificationToken: vi.fn(),
+  getLoginCodeAuthorization: vi.fn(),
   userFindFirst: vi.fn(),
   getSignupActivationAuthorization: vi.fn(),
   tokenFindUnique: vi.fn(),
@@ -37,6 +38,7 @@ vi.mock("@/lib/db", () => ({
 }));
 vi.mock("@/modules/login/verification-context", () => ({
   publishVerificationToken: mocks.publishVerificationToken,
+  getLoginCodeAuthorization: mocks.getLoginCodeAuthorization,
 }));
 vi.mock("@/modules/signup/verification-context", () => ({
   getSignupActivationAuthorization: mocks.getSignupActivationAuthorization,
@@ -44,6 +46,9 @@ vi.mock("@/modules/signup/verification-context", () => ({
 vi.mock("@/modules/account/deletion/verification-context", () => ({
   getAccountDeletionVerificationAuthorization:
     mocks.getAccountDeletionVerificationAuthorization,
+}));
+vi.mock("@/lib/env", () => ({
+  getEnv: () => ({ AUTH_SECRET: "test-auth-secret-value-0000000000" }),
 }));
 
 import { hardenAdapter } from "@/lib/auth-adapter";
@@ -53,6 +58,7 @@ describe("hardenAdapter", () => {
     vi.clearAllMocks();
     mocks.getSignupActivationAuthorization.mockReturnValue(null);
     mocks.getAccountDeletionVerificationAuthorization.mockReturnValue(null);
+    mocks.getLoginCodeAuthorization.mockReturnValue(null);
     mocks.sessionFindMany.mockResolvedValue([]);
     mocks.sessionDeleteMany.mockResolvedValue({ count: 0 });
     mocks.transaction.mockImplementation((callback) =>
@@ -326,6 +332,7 @@ describe("hardenAdapter", () => {
     expect(mocks.publishVerificationToken).toHaveBeenCalledWith({
       identifier: created.identifier,
       token: created.token,
+      code: expect.stringMatching(/^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{10}$/),
     });
     expect(
       mocks.executeRaw.mock.invocationCallOrder[0],

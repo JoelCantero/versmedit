@@ -1,15 +1,15 @@
 {
   "Email": {
     "loginMagicLink": {
-      "subject": "Tu enlace de acceso a {productName}",
-      "previewText": "Usa este enlace seguro para iniciar sesión en {productName}.",
-      "heading": "Inicia sesión en {productName}",
+      "subject": "Tu código de acceso a {productName}",
+      "previewText": "Usa el enlace o el código para iniciar sesión en {productName}.",
+      "heading": "Tu código de acceso a {productName}",
       "paragraphs": [
-        "Usa este enlace para iniciar sesión. Solo se puede usar una vez y caduca en 15 minutos.",
-        "Si no has solicitado este enlace, puedes ignorar este correo."
+        "Usa el botón de abajo para iniciar sesión. Solo se puede usar una vez.",
+        "Si no has solicitado este correo, puedes ignorarlo."
       ],
-      "actionLabel": "Iniciar sesión",
-      "fallbackInstruction": "O copia y pega esta dirección en el navegador:",
+      "actionLabel": "Iniciar sesión en {productName}",
+      "fallbackInstruction": "Este enlace y código solo serán válidos durante los próximos 5 minutos. Si el enlace no funciona, puedes usar directamente este código de verificación:",
       "supportLabel": "¿Tienes preguntas? Contacta con",
       "termsLabel": "Términos de uso",
       "privacyLabel": "Aviso de privacidad",
@@ -438,7 +438,30 @@
       "submitIdle": "Enviar enlace de acceso",
       "submitPending": "Enviando…",
       "retry": "Volver a intentarlo",
-      "goHome": "Ir al inicio"
+      "goHome": "Ir al inicio",
+      "backToLogin": "Volver al inicio de sesión"
+    },
+    "checkEmail": {
+      "title": "Revisa tu correo",
+      "description": "Te hemos enviado un enlace temporal de acceso. Revisa la bandeja de entrada de {email}.",
+      "actions": {
+        "enterCode": "Introducir código manualmente"
+      }
+    },
+    "code": {
+      "title": "Introduce tu código de acceso",
+      "description": "Escribe o pega el código de 10 caracteres del correo que te hemos enviado.",
+      "field": {
+        "label": "Código de acceso",
+        "description": "Letras y números, tal como aparecen en el correo."
+      },
+      "actions": {
+        "submitIdle": "Iniciar sesión",
+        "submitPending": "Comprobando…"
+      },
+      "states": {
+        "invalid": "Ese código no es válido. Solicita un correo nuevo e inténtalo otra vez."
+      }
     },
     "states": {
       "sending": "Enviando tu enlace de acceso…",

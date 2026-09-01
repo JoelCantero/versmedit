@@ -17,6 +17,25 @@ const messages = {
   invalidRequest: "Refresh the page and try again.",
   unavailable: "Email sign-in is temporarily unavailable.",
   rateLimited: "Try again in {seconds} seconds.",
+  checkEmail: {
+    title: "Check your email",
+    description: "We've sent you a temporary login link. Check your inbox at {email}.",
+    enterCode: "Enter code manually",
+    backToLogin: "Back to login",
+  },
+  code: {
+    title: "Enter your login code",
+    description: "Type or paste the 10-character code from the email.",
+    fieldLabel: "Login code",
+    fieldDescription: "Letters and numbers, exactly as in the email.",
+    submitIdle: "Sign in",
+    submitPending: "Checking...",
+    invalidCode: "That code is not valid.",
+    invalidRequest: "Refresh the page and try again.",
+    unavailable: "Email sign-in is temporarily unavailable.",
+    rateLimited: "Try again in {seconds} seconds.",
+    backToLogin: "Back to login",
+  },
 };
 
 describe("LoginForm", () => {
@@ -93,7 +112,11 @@ describe("LoginForm", () => {
     expect(fetcher).toHaveBeenCalledOnce();
 
     resolveRequest?.(Response.json({ status: "accepted" }));
-    await waitFor(() => expect(screen.getByText(messages.accepted)).toBeVisible());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: messages.checkEmail.title }),
+      ).toBeVisible(),
+    );
   });
 
   it.each([
@@ -114,6 +137,32 @@ describe("LoginForm", () => {
     await userEvent.type(screen.getByRole("textbox"), "person@example.com");
     await userEvent.click(screen.getByRole("button"));
     expect(await screen.findByText(expectedMessage)).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: messages.checkEmail.title }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText(messages.emailLabel)).toBeEnabled();
+  });
+
+  it("keeps the email step for an address that fails client validation", async () => {
+    const fetcher = vi.fn();
+    render(
+      <LoginForm
+        locale="en"
+        callbackUrl="/account"
+        csrfToken="csrf"
+        messages={messages}
+        fetcher={fetcher}
+      />,
+    );
+
+    await userEvent.type(screen.getByRole("textbox"), "not-an-email");
+    await userEvent.click(screen.getByRole("button"));
+
+    expect(await screen.findByText(messages.invalidEmail)).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: messages.checkEmail.title }),
+    ).not.toBeInTheDocument();
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it("submits the validated callback path unchanged", async () => {

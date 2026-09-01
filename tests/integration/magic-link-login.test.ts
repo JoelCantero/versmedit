@@ -503,7 +503,7 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
     10_000,
   );
 
-  it("keeps only the newest 15-minute link and consumes it once", async () => {
+  it("keeps only the newest 5-minute link and consumes it once", async () => {
     const email = `${integrationPrefix}-lifecycle-${crypto.randomUUID()}@example.test`;
     const user = await createActiveUser(email);
     const issuedAt = Date.now();
@@ -522,7 +522,7 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
       textContent?: string;
       htmlContent?: string;
     };
-    expect(firstPayload.subject).toBe(`Tu enlace de acceso a ${projectName}`);
+    expect(firstPayload.subject).toBe(`Tu código de acceso a ${projectName}`);
     expect(firstPayload.htmlContent).toMatch(/<!doctype html/i);
     expect(firstPayload.htmlContent).toContain(projectName);
     expect(firstPayload.htmlContent).toContain("support@example.test");
@@ -540,10 +540,10 @@ describe.skipIf(!runIntegrationTests)("magic-link route failure privacy", () => 
       where: { identifier: email },
     });
     expect(firstPersisted.expires.getTime()).toBeGreaterThanOrEqual(
-      issuedAt + 15 * 60_000 - 5_000,
+      issuedAt + 5 * 60_000 - 5_000,
     );
     expect(firstPersisted.expires.getTime()).toBeLessThanOrEqual(
-      issuedAt + 15 * 60_000 + 5_000,
+      issuedAt + 5 * 60_000 + 5_000,
     );
 
     const second = await submitLogin(email, "/es");

@@ -1,12 +1,14 @@
 import "server-only";
 
-import { UserStatus } from "@/generated/prisma/client";
+import { Prisma, UserStatus, VerificationPurpose } from "@/generated/prisma/client";
 
 import { db } from "@/lib/db";
 import type { LoginLocale } from "@/modules/login/types";
 
 const ACCEPTED_FLOOR_MS = 500;
 const ACCEPTED_JITTER_MS = 100;
+
+export const LOGIN_CODE_ATTEMPT_BUDGET = 5;
 
 interface WaitForAcceptedLoginOptions {
   startedAt: number;
@@ -48,4 +50,42 @@ export async function waitForAcceptedLogin({
     await sleep(remaining);
     remaining = targetAt - now();
   }
+}
+
+export async function findLoginChallengeCodeHash(normalizedEmail: string) {
+  const challenge = await db.verificationToken.findFirst({
+    where: {
+      identifier: normalizedEmail,
+      purpose: VerificationPurpose.LOGIN,
+      expires: { gt: new Date() },
+      loginCodeHash: { not: null },
+    },
+    select: { loginCodeHash: true },
+  });
+  return challenge?.loginCodeHash ?? null;
+}
+
+// Charges one guess against the challenge and discards it once the budget is
+// spent, so a wrong code can never be retried indefinitely.
+export async function registerFailedLoginCodeAttempt(normalizedEmail: string) {
+  await db.$transaction(async (transaction) => {
+    const [updated] = await transaction.$queryRaw<
+      Array<{ loginCodeAttempts: number }>
+    >(Prisma.sql`
+      UPDATE "VerificationToken"
+      SET "loginCodeAttempts" = "loginCodeAttempts" + 1
+      WHERE "identifier" = ${normalizedEmail}
+        AND "purpose" = ${VerificationPurpose.LOGIN}::"VerificationPurpose"
+        AND "loginCodeHash" IS NOT NULL
+      RETURNING "loginCodeAttempts"
+    `);
+    if (!updated || updated.loginCodeAttempts < LOGIN_CODE_ATTEMPT_BUDGET) {
+      return;
+    }
+    await transaction.$executeRaw(Prisma.sql`
+      DELETE FROM "VerificationToken"
+      WHERE "identifier" = ${normalizedEmail}
+        AND "purpose" = ${VerificationPurpose.LOGIN}::"VerificationPurpose"
+    `);
+  });
 }

@@ -15,10 +15,15 @@ describe("verification context", () => {
     await expect(getPublishedVerificationToken()).resolves.toBeNull();
 
     await runWithVerificationContext(async () => {
-      publishVerificationToken({ identifier: "member@example.test", token: "hash" });
+      publishVerificationToken({
+        identifier: "member@example.test",
+        token: "hash",
+        code: "7K2QM9XPTR",
+      });
       await expect(getPublishedVerificationToken()).resolves.toEqual({
         identifier: "member@example.test",
         token: "hash",
+        code: "7K2QM9XPTR",
       });
     });
 

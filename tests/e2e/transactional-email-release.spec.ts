@@ -207,9 +207,9 @@ test("submits all six operational events from the standalone artifact with exact
   await page.goto("/login");
   await page.getByRole("textbox", { name: "Email" }).fill(loginUser.email);
   await page.getByRole("button", { name: "Send sign-in link" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "you will receive a link to sign in",
-  );
+  await expect(
+    page.getByRole("heading", { name: "Check your email" }),
+  ).toBeVisible();
   await expectOneProviderRequest(loginUser.email);
 
   async function submitSignup(name: string, email: string) {

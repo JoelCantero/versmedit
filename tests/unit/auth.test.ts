@@ -84,6 +84,7 @@ describe("authOptions", () => {
     mocks.getPublishedVerificationToken.mockResolvedValue({
       identifier: "member@example.test",
       token: "hashed-token",
+      code: "7K2QM9XPTR",
     });
     mocks.deleteMany.mockReset();
     mocks.deleteMany.mockResolvedValue({ count: 1 });
@@ -121,7 +122,7 @@ describe("authOptions", () => {
           id: "email",
           type: "email",
           from: "no-reply@example.test",
-          maxAge: 15 * 60,
+          maxAge: 5 * 60,
         },
         {
           id: "signup",
@@ -156,20 +157,20 @@ describe("authOptions", () => {
     [
       "en",
       "/",
-      `Your ${projectName} sign-in link`,
-      "Use this link to sign in",
+      `Your login code for ${projectName}`,
+      "Use the button below to sign in",
     ],
     [
       "es",
       "/es",
-      `Tu enlace de acceso a ${projectName}`,
-      "Usa este enlace para iniciar sesión",
+      `Tu código de acceso a ${projectName}`,
+      "Usa el botón de abajo para iniciar sesión",
     ],
     [
       "ca",
       "/ca",
-      `El teu enllaç d'accés a ${projectName}`,
-      "Utilitza aquest enllaç per iniciar sessió",
+      `El teu codi d'accés a ${projectName}`,
+      "Utilitza el botó de sota per iniciar sessió",
     ],
   ] as const)(
     "sends localized %s subject, text, HTML, and link through the common boundary",

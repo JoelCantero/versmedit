@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: GitHub issue [#39](https://github.com/JoelCantero/versmedit/issues/39) — "feat(auth): añadir código de acceso como alternativa al magic link"
+**Input**: GitHub issue #39 — "feat(auth): añadir código de acceso como alternativa al magic link"
 
 ## Overview
 

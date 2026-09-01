@@ -14,9 +14,10 @@ import {
   renderEmailPresentation,
 } from "@/lib/email/presentation/render";
 import { LOGIN_CODE_ALPHABET } from "@/modules/login/code";
+import { getTestProjectName } from "../helpers/project-name";
 
 const CODE = "7K2QM9XPTR";
-const PRODUCT_NAME = "Versmedit";
+const PRODUCT_NAME = getTestProjectName();
 
 const brand = validateEmailBrand({
   productName: PRODUCT_NAME,

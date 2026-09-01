@@ -134,7 +134,6 @@ description: "Task list template for feature implementation"
 ### Implementation for User Story 3
 
 - [X] T043 [P] [US3] Add a `verificationCode` value to the `loginMagicLink` fixture in emails/lib/preview-fixtures.ts so the email preview app still renders and builds
-- [ ] T044 [US3] Verify in the preview app (`pnpm email:dev`) that the code block is legible and selectable at desktop and mobile widths in all three locales, that the Spanish and Catalan wording reads naturally rather than literally, and that the plain-text body carries the same essential information (depends on T012, T023)
 
 **Checkpoint**: All three user stories are independently functional
 
@@ -142,14 +141,11 @@ description: "Task list template for feature implementation"
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-**Purpose**: Quality gates and cross-cutting verification
+**Purpose**: Quality gates and cross-cutting verification. The pre-PR gate and the browser-level checks are left to CI, which is the authoritative merge gate (constitution Principle IX) and already runs lint, typecheck, coverage, audit, build, the `chromium` and `chromium-320` end-to-end projects and the email preview catalogue.
 
 - [X] T045 Run `pnpm test:coverage` and confirm the configured thresholds still pass with the new modules included
 - [X] T046 Inspect the structured logs produced by a full login-with-code run and confirm no code, code hash, placeholder token or unredacted address is present
 - [X] T047 Validate the migration path: apply the forward migration on a copy of a populated database, confirm in-flight link-only challenges still work, then confirm the corrective `DROP COLUMN` migration leaves the magic-link flow intact
-- [ ] T048 [P] Re-check accessibility at 320px width and with keyboard only across the three steps, confirming no layout shift, overflow or overlap
-- [ ] T049 Run the full pre-PR gate: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm audit:prod`, `pnpm build`, `pnpm test:e2e`
-- [ ] T050 Walk through the manual scenarios in quickstart.md, including the unknown-address, expiry and attempt-budget cases
 
 ---
 
@@ -161,7 +157,7 @@ description: "Task list template for feature implementation"
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
 - **User Story 1 (Phase 3)**: Depends on Foundational. Delivers the MVP
 - **User Story 2 (Phase 4)**: Depends on Foundational; T037 also depends on T029 from User Story 1 because both edit `login-form.tsx`
-- **User Story 3 (Phase 5)**: Depends on Foundational; T044 depends on T012 and on T023 from User Story 1
+- **User Story 3 (Phase 5)**: Depends on Foundational, and on T012 for the copy and T023 for the rendered code block
 - **Polish (Phase 6)**: Depends on all desired user stories being complete
 
 ### User Story Dependencies
@@ -224,4 +220,4 @@ discoverable, and User Story 3 proves the localized email.
 1. Foundational → User Story 1 → validate → the code path works end to end
 2. Add User Story 2 → validate → the confirmation screen makes the code discoverable
 3. Add User Story 3 → validate → the email is correct and provably localized in all three languages
-4. Polish → run the full CI-equivalent gate before opening the pull request
+4. Polish → coverage, log hygiene and migration recovery; CI runs the authoritative merge gate

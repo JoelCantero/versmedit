@@ -134,7 +134,7 @@ test.describe("login access code", () => {
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
     await page.waitForURL("**/account");
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
   });
 
   test("keeps every step on one URL and recovers through back to login", async ({
